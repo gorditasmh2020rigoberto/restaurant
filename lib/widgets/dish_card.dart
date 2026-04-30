@@ -46,52 +46,88 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   if (!context.mounted) return;
 
   List<String> selected = [];
+  bool conQueso = false;
+  const double precioQueso = 5.0;
+  final bool esGordita = dish.category == 'gorditas';
 
   await showDialog(
     context: context,
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setDialogState) {
+          final precioFinal = dish.price + (esGordita && conQueso ? precioQueso : 0);
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             title: Text(
               '¿Qué guisado lleva el ${dish.name}?',
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
-            content: guisados.isEmpty
-                ? const Text(
-                    'No hay guisados disponibles.',
-                    style: TextStyle(color: Colors.white70),
-                  )
-                : SizedBox(
-                    width: 320,
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: guisados.map((g) {
-                        final name = g['name'] as String;
-                        final isChecked = selected.contains(name);
-                        return CheckboxListTile(
-                          value: isChecked,
-                          onChanged: (val) {
-                            setDialogState(() {
-                              if (val == true) {
-                                selected = [...selected, name];
-                              } else {
-                                selected =
-                                    selected.where((s) => s != name).toList();
-                              }
-                            });
-                          },
-                          title: Text(name,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 14)),
-                          checkColor: Colors.white,
-                          activeColor: const Color(0xFFFF6D00),
-                          side: const BorderSide(color: Color(0xFF94A3B8)),
-                        );
-                      }).toList(),
+            content: SizedBox(
+              width: 320,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Toggle queso (solo gorditas)
+                  if (esGordita) ...[
+                    Row(
+                      children: [
+                        const Text('¿Con queso?',
+                            style: TextStyle(color: Colors.white70, fontSize: 14)),
+                        const Spacer(),
+                        ToggleButtons(
+                          isSelected: [!conQueso, conQueso],
+                          onPressed: (i) => setDialogState(() => conQueso = i == 1),
+                          borderRadius: BorderRadius.circular(8),
+                          selectedColor: Colors.white,
+                          fillColor: const Color(0xFFFF6D00),
+                          color: Colors.white60,
+                          borderColor: const Color(0xFF334155),
+                          selectedBorderColor: const Color(0xFFFF6D00),
+                          constraints: const BoxConstraints(minWidth: 72, minHeight: 36),
+                          children: const [
+                            Text('Sin queso', style: TextStyle(fontSize: 12)),
+                            Text('Con queso  +\$5', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
+                    const Divider(color: Color(0xFF334155), height: 20),
+                  ],
+                  // Lista de guisados
+                  if (guisados.isEmpty)
+                    const Text('No hay guisados disponibles.',
+                        style: TextStyle(color: Colors.white70))
+                  else
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 320),
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: guisados.map((g) {
+                          final name = g['name'] as String;
+                          final isChecked = selected.contains(name);
+                          return CheckboxListTile(
+                            value: isChecked,
+                            onChanged: (val) {
+                              setDialogState(() {
+                                if (val == true) {
+                                  selected = [...selected, name];
+                                } else {
+                                  selected = selected.where((s) => s != name).toList();
+                                }
+                              });
+                            },
+                            title: Text(name,
+                                style: const TextStyle(color: Colors.white, fontSize: 14)),
+                            checkColor: Colors.white,
+                            activeColor: const Color(0xFFFF6D00),
+                            side: const BorderSide(color: Color(0xFF94A3B8)),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
@@ -101,15 +137,32 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  cart.addItemWithGuisados(dish, selected);
+                  // Si hay queso, ajustar precio y anotarlo en guisados
+                  final notasGuisados = [
+                    if (esGordita && conQueso) 'Con queso',
+                    ...selected,
+                  ];
+                  final dishFinal = (esGordita && conQueso)
+                      ? Dish(
+                          id: dish.id,
+                          name: dish.name,
+                          description: dish.description,
+                          price: precioFinal,
+                          imageUrl: dish.imageUrl,
+                          category: dish.category,
+                          cost: dish.cost,
+                          requiresGuisado: dish.requiresGuisado,
+                        )
+                      : dish;
+                  cart.addItemWithGuisados(dishFinal, notasGuisados);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${dish.name} agregado'),
-                        duration: const Duration(milliseconds: 500),
+                        content: Text('${dish.name} agregado — \$${precioFinal.toStringAsFixed(0)}'),
+                        duration: const Duration(milliseconds: 600),
                         behavior: SnackBarBehavior.floating,
-                        width: 200,
+                        width: 240,
                       ),
                     );
                   }
@@ -117,8 +170,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 style: TextButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15),
                 ),
-                child: const Text('Agregar a la orden',
-                    style: TextStyle(color: Color(0xFFFF6D00))),
+                child: Text(
+                  'Agregar — \$${precioFinal.toStringAsFixed(0)}',
+                  style: const TextStyle(color: Color(0xFFFF6D00)),
+                ),
               ),
             ],
           );
