@@ -79,6 +79,25 @@ class Globals {
 
   static String translateCategory(String category) {
     final Map<String, String> translations = {
+      // Categorías del menú físico
+      'huevos': 'Huevos',
+      'molletes': 'Molletes',
+      'sopes': 'Sopes',
+      'enchiladas': 'Enchiladas',
+      'enmoladas': 'Enmoladas',
+      'gorditas': 'Gorditas',
+      'quesadillas': 'Quesadillas y más',
+      'arrachera': 'Arrachera',
+      'chile_relleno': 'Chile Relleno',
+      'chilaquiles': 'Chilaquiles',
+      'huaraches': 'Huaraches',
+      'tapas': 'Tapas de guisado',
+      'menudo': 'Menudo',
+      'lo_dulce': 'Lo dulce',
+      'para_llevar': 'Para llevar',
+      'extras': 'Órdenes extras',
+      'bebidas': 'Bebidas',
+      // Genéricas (compatibilidad)
       'appetizer': 'Entradas',
       'mainCourse': 'Platillos',
       'drink': 'Bebidas',

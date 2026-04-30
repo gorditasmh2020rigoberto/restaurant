@@ -18,7 +18,7 @@ class _DishManagementViewState extends State<DishManagementView> {
     final descController = TextEditingController(text: isEditing ? dish['description'] : '');
     final priceController = TextEditingController(text: isEditing ? dish['price'].toString() : '');
     final costController = TextEditingController(text: isEditing ? (dish['cost'] ?? 0.0).toString() : '');
-    String category = isEditing ? dish['category'] : 'mainCourse';
+    String category = isEditing ? dish['category'] : 'huevos';
     String? currentImageUrl = isEditing ? dish['image_url'] : null;
     XFile? selectedImage;
     bool isUploading = false;
@@ -104,25 +104,33 @@ class _DishManagementViewState extends State<DishManagementView> {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     value: [
+                      'huevos','molletes','sopes','enchiladas','enmoladas',
+                      'gorditas','quesadillas','arrachera','chile_relleno',
+                      'chilaquiles','huaraches','tapas','menudo','lo_dulce',
+                      'para_llevar','extras','bebidas',
                       'tacos','tostadas','tortas','especialidades',
                       'mainCourse','breakfast','soup','salad','appetizer',
                       'side','drink','alcohol','dessert',
-                    ].contains(category) ? category : 'mainCourse',
+                    ].contains(category) ? category : 'huevos',
                     decoration: const InputDecoration(labelText: 'Categoría'),
                     items: const [
-                      DropdownMenuItem(value: 'tacos',          child: Text('Tacos')),
-                      DropdownMenuItem(value: 'tostadas',       child: Text('Tostadas')),
-                      DropdownMenuItem(value: 'tortas',         child: Text('Tortas')),
-                      DropdownMenuItem(value: 'especialidades', child: Text('Especialidades')),
-                      DropdownMenuItem(value: 'mainCourse',     child: Text('Platillos')),
-                      DropdownMenuItem(value: 'breakfast',      child: Text('Desayunos')),
-                      DropdownMenuItem(value: 'soup',           child: Text('Sopas')),
-                      DropdownMenuItem(value: 'salad',          child: Text('Ensaladas')),
-                      DropdownMenuItem(value: 'appetizer',      child: Text('Entradas')),
-                      DropdownMenuItem(value: 'side',           child: Text('Complementos')),
-                      DropdownMenuItem(value: 'drink',          child: Text('Bebidas')),
-                      DropdownMenuItem(value: 'alcohol',        child: Text('Alcohol')),
-                      DropdownMenuItem(value: 'dessert',        child: Text('Postres')),
+                      DropdownMenuItem(value: 'huevos',         child: Text('Huevos')),
+                      DropdownMenuItem(value: 'molletes',       child: Text('Molletes')),
+                      DropdownMenuItem(value: 'sopes',          child: Text('Sopes')),
+                      DropdownMenuItem(value: 'enchiladas',     child: Text('Enchiladas')),
+                      DropdownMenuItem(value: 'enmoladas',      child: Text('Enmoladas')),
+                      DropdownMenuItem(value: 'gorditas',       child: Text('Gorditas')),
+                      DropdownMenuItem(value: 'quesadillas',    child: Text('Quesadillas y más')),
+                      DropdownMenuItem(value: 'arrachera',      child: Text('Arrachera')),
+                      DropdownMenuItem(value: 'chile_relleno',  child: Text('Chile Relleno')),
+                      DropdownMenuItem(value: 'chilaquiles',    child: Text('Chilaquiles')),
+                      DropdownMenuItem(value: 'huaraches',      child: Text('Huaraches')),
+                      DropdownMenuItem(value: 'tapas',          child: Text('Tapas de guisado')),
+                      DropdownMenuItem(value: 'menudo',         child: Text('Menudo')),
+                      DropdownMenuItem(value: 'lo_dulce',       child: Text('Lo dulce')),
+                      DropdownMenuItem(value: 'para_llevar',    child: Text('Para llevar')),
+                      DropdownMenuItem(value: 'extras',         child: Text('Órdenes extras')),
+                      DropdownMenuItem(value: 'bebidas',        child: Text('Bebidas')),
                     ],
                     onChanged: (v) { if (v != null) category = v; },
                     validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
