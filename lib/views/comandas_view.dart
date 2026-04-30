@@ -630,7 +630,7 @@ class _ComandasViewState extends State<ComandasView> {
     final isMobile = screenWidth < 800;
     final availableWidth = isMobile ? screenWidth : (screenWidth - 380);
     int crossAxisCount = isMobile
-        ? (availableWidth / 160).floor().clamp(2, 4)
+        ? (availableWidth / 110).floor().clamp(3, 5)
         : (availableWidth / 250).floor().clamp(1, 6);
 
     return CustomScrollView(
@@ -733,7 +733,7 @@ class _ComandasViewState extends State<ComandasView> {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: isMobile ? 0.65 : 0.75,
+              childAspectRatio: isMobile ? 0.85 : 0.75,
               crossAxisSpacing: isMobile ? 8 : 16,
               mainAxisSpacing: isMobile ? 8 : 16,
             ),

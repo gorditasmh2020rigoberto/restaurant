@@ -118532,7 +118532,7 @@ if(s.length===0&&l.f.length===0)return B.wM
 r=A.bt(a,k,t.w).w.a.a
 q=r<800
 p=q?r:r-380
-o=q?B.t.bO(B.o.fA(p/160),2,4):B.t.bO(B.o.fA(p/250),1,6)
+o=q?B.t.bO(B.o.fA(p/110),3,5):B.t.bO(B.o.fA(p/250),1,6)
 n=l.gaji()
 m=A.a1(n).i("a7<1,e>")
 n=A.Z(new A.a7(n,l.gajB(),m),m.i("ao.E"))
@@ -118556,7 +118556,7 @@ k=new A.aW(2,2)
 j=J.a3(l)
 o.push(new A.rA(new A.aD(B.a_m,A.aX(A.b([A.b0(f,f,B.M,f,f,new A.b4(B.N,f,f,new A.cF(k,k,k,k),f,f,B.a2),f,24,f,f,f,f,4),B.dj,A.Q(A.b7i(m).toUpperCase(),f,f,f,B.b1K,f,f,f),B.c5,A.Q("("+j.gu(l)+")",f,f,f,B.oz,f,f,f)],e),B.I,B.E,B.G,0,f),f),f))
 k=c?8:16
-i=c?0.65:0.75
+i=c?0.85:0.75
 h=c?8:16
 g=c?8:16
 o.push(new A.Js(new A.ak(k,0,k,0),new A.Jr(new A.Zf(b,g,h,i),new A.we(new A.aHL(l),j.gu(l),!0,!0,!0,A.b09(),f),f),f))}return o}}
