@@ -191,6 +191,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool showOptions = isGordita || isTapa || isChilaquil;
   final bool canBeFrita = isGordita && !dish.name.toLowerCase().contains('harina');
   bool conQueso = false;
+  bool conHuevo = false; // solo para chilaquiles
   bool frita = false;
   String? selectedSalsa; // solo para chilaquiles
 
@@ -228,12 +229,20 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _ToggleOption(
-                          icon: Icons.egg_alt,
-                          label: 'Con Queso',
-                          value: conQueso,
-                          onChanged: (v) => setDialogState(() => conQueso = v),
-                        ),
+                        if (isChilaquil)
+                          _ToggleOption(
+                            icon: Icons.egg,
+                            label: 'Con Huevo',
+                            value: conHuevo,
+                            onChanged: (v) => setDialogState(() => conHuevo = v),
+                          )
+                        else
+                          _ToggleOption(
+                            icon: Icons.egg_alt,
+                            label: 'Con Queso',
+                            value: conQueso,
+                            onChanged: (v) => setDialogState(() => conQueso = v),
+                          ),
                         if (isGordita) ...[
                           const SizedBox(width: 10),
                           _ToggleOption(
@@ -446,11 +455,12 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   Navigator.pop(ctx);
                   final extras = [
                     if (isChilaquil && selectedSalsa != null) 'Salsa $selectedSalsa',
-                    if (conQueso) 'Con queso',
+                    if (isChilaquil && conHuevo) 'Con huevo',
+                    if (!isChilaquil && conQueso) 'Con queso',
                     if (frita) 'Frita',
                     if (!isChilaquil) ...selected,
                   ];
-                  final finalDish = ((isTapa || isChilaquil) && conQueso)
+                  final finalDish = (isTapa && conQueso)
                       ? dish.copyWith(price: dish.price + 25)
                       : dish;
                   cart.addItemWithGuisados(finalDish, extras);
