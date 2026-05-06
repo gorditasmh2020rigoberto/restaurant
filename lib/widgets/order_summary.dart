@@ -30,6 +30,7 @@ class OrderSummaryWidget extends StatefulWidget {
 
 class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
   bool _isSubmitting = false;
+  bool _showEnviarProduccion = false;
   List<Map<String, dynamic>> _existingItems = [];
 
   @override
@@ -218,6 +219,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
 
       if (mounted) {
         cart.clearCart();
+        setState(() => _showEnviarProduccion = false);
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -734,9 +736,9 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 ),
         ),
 
-        // ── TOTAL GENERAL + BOTÓN ──────────────────────────────
+        // ── TOTAL GENERAL + BOTONES ────────────────────────────
         Container(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             boxShadow: const [
@@ -763,31 +765,59 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: (_isSubmitting || widget.waiterId == null)
+              const SizedBox(height: 12),
+
+              // Botón CUENTA — siempre visible, revela "Enviar a Producción"
+              ElevatedButton.icon(
+                onPressed: cart.items.isEmpty
                     ? null
-                    : () => _submitOrder(cart),
+                    : () => setState(() => _showEnviarProduccion = !_showEnviarProduccion),
+                icon: Icon(
+                  _showEnviarProduccion ? Icons.expand_less : Icons.receipt_long,
+                  size: 22,
+                ),
+                label: Text(
+                  _showEnviarProduccion ? 'Ocultar' : 'CUENTA',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(56),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  minimumSize: const Size.fromHeight(52),
+                  backgroundColor: const Color(0xFF1E40AF),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(14)),
                 ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
-                    : Text(
-                        widget.waiterId == null
-                            ? 'Selecciona Mesero'
-                            : 'Enviar a Producción',
-                        style: const TextStyle(fontSize: 18),
-                      ),
               ),
+
+              // Botón ENVIAR A PRODUCCIÓN — solo aparece tras presionar CUENTA
+              if (_showEnviarProduccion) ...[
+                const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed: (_isSubmitting || widget.waiterId == null)
+                      ? null
+                      : () => _submitOrder(cart),
+                  icon: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.send, size: 22),
+                  label: Text(
+                    widget.waiterId == null
+                        ? 'Selecciona Mesero'
+                        : 'Enviar a Producción',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

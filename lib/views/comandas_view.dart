@@ -651,11 +651,11 @@ class _ComandasViewState extends State<ComandasView> {
           ),
         ),
         SliverToBoxAdapter(
-          child: SizedBox(
-            height: 48,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 4,
               children: _availableCategories.map(_buildCategoryChip).toList(),
             ),
           ),
