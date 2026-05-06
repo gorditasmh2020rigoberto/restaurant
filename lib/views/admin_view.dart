@@ -57,6 +57,22 @@ class _AdminViewState extends State<AdminView> {
     }
   }
 
+  Widget _buildSubItem(int index, IconData icon, String label, bool isDrawer) {
+    final selected = _selectedIndex == index;
+    return ListTile(
+      dense: true,
+      contentPadding: const EdgeInsets.only(left: 32),
+      leading: Icon(icon, size: 20, color: selected ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
+      title: Text(label, style: TextStyle(fontSize: 13, color: selected ? Colors.white : const Color(0xFF94A3B8), fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+      selected: selected,
+      selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
+      onTap: () {
+        setState(() => _selectedIndex = index);
+        if (isDrawer) Navigator.pop(context);
+      },
+    );
+  }
+
   Widget _buildSidebar(bool isDrawer) {
     return Container(
       width: isDrawer ? null : 250,
@@ -139,16 +155,10 @@ class _AdminViewState extends State<AdminView> {
                       if (isDrawer) Navigator.pop(context);
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.menu_book, color: _selectedIndex == 12 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Bebidas', style: TextStyle(color: _selectedIndex == 12 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 12 ? FontWeight.bold : FontWeight.normal)),
-                    selected: _selectedIndex == 12,
-                    selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
-                    onTap: () {
-                      setState(() => _selectedIndex = 12);
-                      if (isDrawer) Navigator.pop(context);
-                    },
-                  ),
+                  _buildSubItem(12, Icons.local_drink,  'Jugos',      isDrawer),
+                  _buildSubItem(13, Icons.coffee,        'Cafés',      isDrawer),
+                  _buildSubItem(14, Icons.sports_bar,    'Refrescos',  isDrawer),
+                  _buildSubItem(15, Icons.water_drop,    'Aguas',      isDrawer),
                   ListTile(
                     leading: Icon(Icons.people, color: _selectedIndex == 2 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
                     title: Text('Gestión de Meseros', style: TextStyle(color: _selectedIndex == 2 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.normal)),
@@ -305,7 +315,10 @@ class _AdminViewState extends State<AdminView> {
       9: 'Nómina',
       10: 'Guisados',
       11: 'Sabores de Bebidas',
-      12: 'Bebidas',
+      12: 'Jugos',
+      13: 'Cafés',
+      14: 'Refrescos',
+      15: 'Aguas',
     };
     return titles[_selectedIndex] ?? 'Administrador';
   }
@@ -412,7 +425,10 @@ class _AdminViewState extends State<AdminView> {
       case 9: return const PayrollView();
       case 10: return const GuisadosManagementView();
       case 11: return const DrinkFlavorsManagementView();
-      case 12: return const DrinksManagementView();
+      case 12: return const DrinksManagementView(categories: ['jugos'],     title: 'Jugos');
+      case 13: return const DrinksManagementView(categories: ['cafes'],     title: 'Cafés');
+      case 14: return const DrinksManagementView(categories: ['refrescos'], title: 'Refrescos');
+      case 15: return const DrinksManagementView(categories: ['aguas'],     title: 'Aguas');
       default: return _buildTablesDashboard();
     }
   }

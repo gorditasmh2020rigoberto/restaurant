@@ -3,7 +3,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class DrinksManagementView extends StatefulWidget {
-  const DrinksManagementView({super.key});
+  final List<String> categories;
+  final String title;
+
+  const DrinksManagementView({
+    super.key,
+    this.categories = const ['drink', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'],
+    this.title = 'Bebidas',
+  });
 
   @override
   State<DrinksManagementView> createState() => _DrinksManagementViewState();
@@ -18,7 +25,7 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
     final descController = TextEditingController(text: isEditing ? drink['description'] : '');
     final priceController = TextEditingController(text: isEditing ? drink['price'].toString() : '');
     final costController = TextEditingController(text: isEditing ? (drink['cost'] ?? 0.0).toString() : '');
-    String category = isEditing ? drink['category'] : 'drink';
+    String category = isEditing ? drink['category'] : widget.categories.first;
     String? currentImageUrl = isEditing ? drink['image_url'] : null;
     XFile? selectedImage;
     bool isUploading = false;
@@ -101,19 +108,20 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        value: ['jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'drink'].contains(category) ? category : 'jugos',
-                        decoration: const InputDecoration(labelText: 'Subcategoría'),
-                        items: const [
-                          DropdownMenuItem(value: 'jugos',     child: Text('Jugos')),
-                          DropdownMenuItem(value: 'cafes',     child: Text('Cafés')),
-                          DropdownMenuItem(value: 'refrescos', child: Text('Refrescos')),
-                          DropdownMenuItem(value: 'aguas',     child: Text('Aguas')),
-                          DropdownMenuItem(value: 'alcohol',   child: Text('Alcohol')),
-                        ],
-                        onChanged: (v) { if (v != null) category = v; },
-                        validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
-                      ),
+                      if (widget.categories.length > 1)
+                        DropdownButtonFormField<String>(
+                          value: widget.categories.contains(category) ? category : widget.categories.first,
+                          decoration: const InputDecoration(labelText: 'Subcategoría'),
+                          items: widget.categories.map((cat) {
+                            const labels = {
+                              'jugos': 'Jugos', 'cafes': 'Cafés', 'refrescos': 'Refrescos',
+                              'aguas': 'Aguas', 'alcohol': 'Alcohol', 'drink': 'Bebidas',
+                            };
+                            return DropdownMenuItem(value: cat, child: Text(labels[cat] ?? cat));
+                          }).toList(),
+                          onChanged: (v) { if (v != null) category = v; },
+                          validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                        ),
                     ],
                   ),
                 ),
@@ -245,14 +253,14 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Gestión de Bebidas',
+                widget.title,
                 style: TextStyle(fontSize: isMobile ? 24 : 28, fontWeight: FontWeight.bold),
               ),
               if (isMobile) const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () => _showDrinkDialog(),
                 icon: const Icon(Icons.add),
-                label: const Text('Nueva Bebida'),
+                label: Text('Nuevo en ${widget.title}'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
                   foregroundColor: Colors.white,
@@ -267,7 +275,7 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
             stream: _supabase
                 .from('dishes')
                 .stream(primaryKey: ['id'])
-                .inFilter('category', ['drink', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'])
+                .inFilter('category', widget.categories)
                 .order('category')
                 .order('name'),
             builder: (context, snapshot) {
