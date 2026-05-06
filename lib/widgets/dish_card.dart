@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -6,226 +5,125 @@ import '../models/dish.dart';
 import '../providers/cart_provider.dart';
 import '../globals.dart';
 
+const _refrescoSabores = [
+  'Coca-Cola', 'Pepsi', 'Sprite', 'Fanta Naranja', 'Fanta Uva',
+  '7-Up', 'Manzanita Sol', 'Squirt', 'Mirinda', 'Del Valle',
+  'Sidral Mundet', 'Sangría Señorial', 'Agua Mineral', 'Otro',
+];
+
+const _aguaSabores = [
+  'Jamaica', 'Horchata', 'Tamarindo', 'Limón', 'Naranja',
+  'Pepino', 'Melón', 'Sandía', 'Guayaba', 'Fresa', 'Maracuyá', 'Otro',
+];
+
 Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final cart = context.read<CartProvider>();
+  final nameLower = dish.name.toLowerCase();
+  final bool isRefresco = nameLower.contains('refresco');
+  final bool isAguaFresca = nameLower.contains('agua fresca') || nameLower.contains('agua ') || nameLower.startsWith('agua');
 
-  final bool esChilaquil = dish.category == 'chilaquiles';
-
-  if (esChilaquil) {
-    String salsa = 'Roja';
-    String huevo = 'Sin huevo';
-    const double precioHuevo = 20.0;
-
+  if (isRefresco || isAguaFresca) {
+    final sabores = isRefresco ? _refrescoSabores : _aguaSabores;
+    String? selectedSabor;
     await showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
-            final conHuevo = huevo == 'Con huevo';
-            final precioFinal = dish.price + (conHuevo ? precioHuevo : 0);
             return AlertDialog(
               backgroundColor: const Color(0xFF1E293B),
               title: Text(
-                '¿Cómo los quieres?',
+                isRefresco ? '¿De qué sabor/marca?' : '¿De qué sabor?',
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
               content: SizedBox(
-                width: 320,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Salsa toggle
-                    Row(
-                      children: [
-                        const Text('Salsa:',
-                            style: TextStyle(color: Colors.white70, fontSize: 14)),
-                        const Spacer(),
-                        ToggleButtons(
-                          isSelected: [salsa == 'Roja', salsa == 'Verde'],
-                          onPressed: (i) => setDialogState(
-                              () => salsa = i == 0 ? 'Roja' : 'Verde'),
+                width: 400,
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 6,
+                    childAspectRatio: 2.4,
+                  ),
+                  itemCount: sabores.length,
+                  itemBuilder: (ctx2, i) {
+                    final sabor = sabores[i];
+                    final isSelected = selectedSabor == sabor;
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () => setDialogState(() => selectedSabor = sabor),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                              : const Color(0xFF1E293B),
                           borderRadius: BorderRadius.circular(8),
-                          selectedColor: Colors.white,
-                          fillColor: const Color(0xFFFF6D00),
-                          color: Colors.white60,
-                          borderColor: const Color(0xFF334155),
-                          selectedBorderColor: const Color(0xFFFF6D00),
-                          constraints: const BoxConstraints(minWidth: 72, minHeight: 36),
-                          children: const [
-                            Text('Roja', style: TextStyle(fontSize: 12)),
-                            Text('Verde', style: TextStyle(fontSize: 12)),
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                              size: 14,
+                              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                sabor,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         ),
-                      ],
-                    ),
-                    const Divider(color: Color(0xFF334155), height: 20),
-                    // Huevo toggle
-                    Row(
-                      children: [
-                        const Text('¿Con huevo?',
-                            style: TextStyle(color: Colors.white70, fontSize: 14)),
-                        const Spacer(),
-                        ToggleButtons(
-                          isSelected: [!conHuevo, conHuevo],
-                          onPressed: (i) => setDialogState(
-                              () => huevo = i == 0 ? 'Sin huevo' : 'Con huevo'),
-                          borderRadius: BorderRadius.circular(8),
-                          selectedColor: Colors.white,
-                          fillColor: const Color(0xFFFF6D00),
-                          color: Colors.white60,
-                          borderColor: const Color(0xFF334155),
-                          selectedBorderColor: const Color(0xFFFF6D00),
-                          constraints: const BoxConstraints(minWidth: 72, minHeight: 36),
-                          children: const [
-                            Text('Sin huevo', style: TextStyle(fontSize: 12)),
-                            Text('Con huevo  +\$20', style: TextStyle(fontSize: 12)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    );
+                  },
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar',
-                      style: TextStyle(color: Colors.white54)),
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: selectedSabor == null ? null : () {
                     Navigator.pop(ctx);
-                    final notas = ['Salsa $salsa', huevo];
-                    final dishFinal = conHuevo
-                        ? Dish(
-                            id: dish.id,
-                            name: dish.name,
-                            description: dish.description,
-                            price: precioFinal,
-                            imageUrl: dish.imageUrl,
-                            category: dish.category,
-                            cost: dish.cost,
-                            requiresGuisado: dish.requiresGuisado,
-                          )
-                        : dish;
-                    cart.addItemWithGuisados(dishFinal, notas);
+                    cart.addItemWithGuisados(dish, [selectedSabor!]);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(
-                              '${dish.name} — $salsa, $huevo — \$${precioFinal.toStringAsFixed(0)}'),
-                          duration: const Duration(milliseconds: 700),
+                          content: Text('${dish.name} ($selectedSabor) agregado'),
+                          duration: const Duration(milliseconds: 500),
                           behavior: SnackBarBehavior.floating,
-                          width: 300,
+                          width: 260,
                         ),
                       );
                     }
                   },
                   style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15),
+                    backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15),
                   ),
-                  child: Text(
-                    'Agregar — \$${precioFinal.toStringAsFixed(0)}',
-                    style: const TextStyle(color: Color(0xFFFF6D00)),
-                  ),
+                  child: const Text('Agregar a la orden', style: TextStyle(color: Color(0xFFFF6D00))),
                 ),
               ],
             );
           },
         );
       },
-    );
-    return;
-  }
-
-  // Arrachera sin guisado: solo toggle de queso
-  if (!dish.requiresGuisado && dish.category == 'arrachera') {
-    final double pQueso =
-        dish.name.toLowerCase().contains('bolillo') ? 10.0 : 5.0;
-    bool cQ = false;
-
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDs) {
-          final pFinal = dish.price + (cQ ? pQueso : 0);
-          return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
-            title: Text('¿Cómo lo quieres?',
-                style: const TextStyle(color: Colors.white, fontSize: 16)),
-            content: Row(
-              children: [
-                const Text('¿Con queso?',
-                    style: TextStyle(color: Colors.white70, fontSize: 14)),
-                const Spacer(),
-                ToggleButtons(
-                  isSelected: [!cQ, cQ],
-                  onPressed: (i) => setDs(() => cQ = i == 1),
-                  borderRadius: BorderRadius.circular(8),
-                  selectedColor: Colors.white,
-                  fillColor: const Color(0xFFFF6D00),
-                  color: Colors.white60,
-                  borderColor: const Color(0xFF334155),
-                  selectedBorderColor: const Color(0xFFFF6D00),
-                  constraints:
-                      const BoxConstraints(minWidth: 72, minHeight: 36),
-                  children: [
-                    const Text('Sin queso', style: TextStyle(fontSize: 12)),
-                    Text('Con queso  +\$${pQueso.toStringAsFixed(0)}',
-                        style: const TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar',
-                    style: TextStyle(color: Colors.white54)),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  final dishFinal = cQ
-                      ? Dish(
-                          id: dish.id,
-                          name: dish.name,
-                          description: dish.description,
-                          price: pFinal,
-                          imageUrl: dish.imageUrl,
-                          category: dish.category,
-                          cost: dish.cost,
-                          requiresGuisado: dish.requiresGuisado,
-                        )
-                      : dish;
-                  if (cQ) {
-                    cart.addItemWithGuisados(dishFinal, ['Con queso']);
-                  } else {
-                    cart.addItem(dishFinal);
-                  }
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(
-                          '${dish.name}${cQ ? ' con queso' : ''} — \$${pFinal.toStringAsFixed(0)}'),
-                      duration: const Duration(milliseconds: 600),
-                      behavior: SnackBarBehavior.floating,
-                      width: 260,
-                    ));
-                  }
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFFFF6D00).withOpacity(0.15),
-                ),
-                child: Text('Agregar — \$${pFinal.toStringAsFixed(0)}',
-                    style: const TextStyle(color: Color(0xFFFF6D00))),
-              ),
-            ],
-          );
-        },
-      ),
     );
     return;
   }
@@ -267,18 +165,20 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   if (!context.mounted) return;
 
   List<String> selected = [];
+  final bool isGordita = dish.category == 'gorditas' ||
+      dish.name.toLowerCase().contains('gordita');
+  final bool isTapa = dish.category == 'tapas' ||
+      dish.name.toLowerCase().contains('tapa');
+  final bool showOptions = isGordita || isTapa;
+  final bool canBeFrita = isGordita && !dish.name.toLowerCase().contains('harina');
   bool conQueso = false;
-  final bool tieneOpcionQueso =
-      dish.category == 'gorditas' || dish.category == 'arrachera';
-  final double precioQueso =
-      dish.name.toLowerCase().contains('bolillo') ? 10.0 : 5.0;
+  bool frita = false;
 
   await showDialog(
     context: context,
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setDialogState) {
-          final precioFinal = dish.price + (tieneOpcionQueso && conQueso ? precioQueso : 0);
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             title: Text(
@@ -286,68 +186,159 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
             content: SizedBox(
-              width: 320,
+              width: 520,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Toggle queso (gorditas y arrachera)
-                  if (tieneOpcionQueso) ...[
+                  // Toggles de queso y frita
+                  if (showOptions) ...[
+                    const Text(
+                      'Opciones',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Text('¿Con queso?',
-                            style: TextStyle(color: Colors.white70, fontSize: 14)),
-                        const Spacer(),
-                        ToggleButtons(
-                          isSelected: [!conQueso, conQueso],
-                          onPressed: (i) => setDialogState(() => conQueso = i == 1),
-                          borderRadius: BorderRadius.circular(8),
-                          selectedColor: Colors.white,
-                          fillColor: const Color(0xFFFF6D00),
-                          color: Colors.white60,
-                          borderColor: const Color(0xFF334155),
-                          selectedBorderColor: const Color(0xFFFF6D00),
-                          constraints: const BoxConstraints(minWidth: 72, minHeight: 36),
-                          children: const [
-                            Text('Sin queso', style: TextStyle(fontSize: 12)),
-                            Text('Con queso  +\$5', style: TextStyle(fontSize: 12)),
-                          ],
+                        _ToggleOption(
+                          icon: Icons.egg_alt,
+                          label: 'Con Queso',
+                          value: conQueso,
+                          onChanged: (v) => setDialogState(() => conQueso = v),
                         ),
+                        if (isGordita) ...[
+                          const SizedBox(width: 10),
+                          _ToggleOption(
+                            icon: Icons.local_fire_department,
+                            label: 'Frita',
+                            value: frita,
+                            enabled: canBeFrita,
+                            onChanged: canBeFrita
+                                ? (v) => setDialogState(() => frita = v)
+                                : (_) {},
+                          ),
+                        ],
                       ],
                     ),
-                    const Divider(color: Color(0xFF334155), height: 20),
+                    const SizedBox(height: 16),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
                   ],
                   // Lista de guisados
                   if (guisados.isEmpty)
-                    const Text('No hay guisados disponibles.',
-                        style: TextStyle(color: Colors.white70))
-                  else
+                    const Text(
+                      'No hay guisados disponibles.',
+                      style: TextStyle(color: Colors.white70),
+                    )
+                  else ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'GUISADO',
+                          style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1),
+                        ),
+                        Text(
+                          '${selected.length}/5',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: selected.length >= 5
+                                ? const Color(0xFFFF6D00)
+                                : Colors.white38,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                     ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 320),
-                      child: ListView(
+                      constraints: const BoxConstraints(maxHeight: 420),
+                      child: GridView.builder(
                         shrinkWrap: true,
-                        children: guisados.map((g) {
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 6,
+                          childAspectRatio: 2.8,
+                        ),
+                        itemCount: guisados.length,
+                        itemBuilder: (ctx2, gi) {
+                          final g = guisados[gi];
                           final name = g['name'] as String;
                           final isChecked = selected.contains(name);
-                          return CheckboxListTile(
-                            value: isChecked,
-                            onChanged: (val) {
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
                               setDialogState(() {
-                                if (val == true) {
-                                  selected = [...selected, name];
-                                } else {
+                                if (isChecked) {
                                   selected = selected.where((s) => s != name).toList();
+                                } else if (selected.length < 5) {
+                                  selected = [...selected, name];
                                 }
                               });
                             },
-                            title: Text(name,
-                                style: const TextStyle(color: Colors.white, fontSize: 14)),
-                            checkColor: Colors.white,
-                            activeColor: const Color(0xFFFF6D00),
-                            side: const BorderSide(color: Color(0xFF94A3B8)),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isChecked
+                                    ? const Color(0xFFFF6D00)
+                                        .withValues(alpha: 0.15)
+                                    : const Color(0xFF1E293B),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isChecked
+                                      ? const Color(0xFFFF6D00)
+                                      : const Color(0xFF334155),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isChecked
+                                        ? Icons.check_circle
+                                        : Icons.radio_button_unchecked,
+                                    size: 14,
+                                    color: isChecked
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
+                                      name,
+                                      style: TextStyle(
+                                        color: isChecked
+                                            ? Colors.white
+                                            : Colors.white70,
+                                        fontSize: 11,
+                                        fontWeight: isChecked
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
-                        }).toList(),
+                        },
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -360,43 +351,33 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               TextButton(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  // Si hay queso, ajustar precio y anotarlo en guisados
-                  final notasGuisados = [
-                    if (tieneOpcionQueso && conQueso) 'Con queso',
+                  final extras = [
+                    if (conQueso) 'Con queso',
+                    if (frita) 'Frita',
                     ...selected,
                   ];
-                  final dishFinal = (tieneOpcionQueso && conQueso)
-                      ? Dish(
-                          id: dish.id,
-                          name: dish.name,
-                          description: dish.description,
-                          price: precioFinal,
-                          imageUrl: dish.imageUrl,
-                          category: dish.category,
-                          cost: dish.cost,
-                          requiresGuisado: dish.requiresGuisado,
-                        )
+                  final finalDish = (isTapa && conQueso)
+                      ? dish.copyWith(price: dish.price + 25)
                       : dish;
-                  cart.addItemWithGuisados(dishFinal, notasGuisados);
+                  cart.addItemWithGuisados(finalDish, extras);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${dish.name} agregado — \$${precioFinal.toStringAsFixed(0)}'),
-                        duration: const Duration(milliseconds: 600),
+                        content: Text('${dish.name} agregado'),
+                        duration: const Duration(milliseconds: 500),
                         behavior: SnackBarBehavior.floating,
-                        width: 240,
+                        width: 200,
                       ),
                     );
                   }
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15),
+                  backgroundColor:
+                      const Color(0xFFFF6D00).withValues(alpha: 0.15),
                 ),
-                child: Text(
-                  'Agregar — \$${precioFinal.toStringAsFixed(0)}',
-                  style: const TextStyle(color: Color(0xFFFF6D00)),
-                ),
+                child: const Text('Agregar a la orden',
+                    style: TextStyle(color: Color(0xFFFF6D00))),
               ),
             ],
           );
@@ -517,6 +498,68 @@ class DishCard extends StatelessWidget {
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ToggleOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool value;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  const _ToggleOption({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const activeColor = Color(0xFFFF6D00);
+    final effectiveColor = enabled
+        ? (value ? activeColor : const Color(0xFF334155))
+        : const Color(0xFF1E293B);
+    final borderColor = enabled
+        ? (value ? activeColor : const Color(0xFF475569))
+        : const Color(0xFF2D3748);
+    final contentColor = enabled
+        ? (value ? Colors.white : Colors.white54)
+        : Colors.white24;
+
+    return GestureDetector(
+      onTap: enabled ? () => onChanged(!value) : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: effectiveColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor, width: 1.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: contentColor),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: value ? FontWeight.w700 : FontWeight.w400,
+                color: contentColor,
+              ),
+            ),
+            if (!enabled) ...[
+              const SizedBox(width: 6),
+              Icon(Icons.block, size: 14, color: Colors.white24),
+            ],
           ],
         ),
       ),
