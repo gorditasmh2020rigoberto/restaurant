@@ -63,16 +63,18 @@ class _ComandasViewState extends State<ComandasView> {
       setState(() {
         _categoryClickCounts[label] = newCount;
         _selectedCategory = label;
+        if (label != 'drink') _selectedDrinkSubcat = null;
       });
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('cat_clicks_$label', newCount);
     } else {
-      setState(() => _selectedCategory = label);
+      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; });
     }
   }
 
   bool _isInitialLoad = true;
   String _selectedCategory = 'Todos';
+  String? _selectedDrinkSubcat; // submenu de bebidas
   String _searchQuery = '';
   bool _carritoVisible = true;
   Map<String, int> _categoryClickCounts = {};
@@ -87,7 +89,17 @@ class _ComandasViewState extends State<ComandasView> {
 
     final result = <Dish>[];
     for (final dish in _dishes) {
-      if (_selectedCategory != 'Todos' && _effectiveCat(dish) != _selectedCategory) continue;
+      if (_selectedCategory != 'Todos') {
+        if (_selectedCategory == 'drink') {
+          // Filtrar solo bebidas
+          final isDrink = dish.category == 'drink' || _drinkSubcats.contains(dish.category);
+          if (!isDrink) continue;
+          // Si hay subcategoría seleccionada en el submenu, filtrar por ella
+          if (_selectedDrinkSubcat != null && _effectiveCat(dish) != _selectedDrinkSubcat) continue;
+        } else {
+          if (_effectiveCat(dish) != _selectedCategory) continue;
+        }
+      }
 
       // Gorditas: solo Maíz y Harina (nombre exacto), sin duplicados por nombre
       if (dish.category == 'gorditas') {
@@ -142,11 +154,10 @@ class _ComandasViewState extends State<ComandasView> {
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
 
-    // Si hay alguna bebida (de cualquier tipo), siempre mostrar las subcategorías
-    final hasDrinks = rawCats.any((c) => c == 'drink' || _drinkSubcats.contains(c));
-    if (hasDrinks) {
-      rawCats.remove('drink'); // no mostrar "Bebidas" genérico, usar subcategorías
-      rawCats.addAll(_drinkSubcats);
+    // Consolidar subcategorías de bebidas en un solo chip "drink"
+    if (rawCats.any((c) => c == 'drink' || _drinkSubcats.contains(c))) {
+      rawCats.removeAll(_drinkSubcats);
+      rawCats.add('drink');
     }
 
     final categories = rawCats.toList();
@@ -917,6 +928,8 @@ class _ComandasViewState extends State<ComandasView> {
             ),
           ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
+        // ── Submenu de bebidas ──
+        if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
         // ── Grid de platillos (scrollable) ──
         Expanded(
           child: CustomScrollView(
@@ -927,6 +940,66 @@ class _ComandasViewState extends State<ComandasView> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDrinkSubmenu() {
+    const subcats = [
+      (null,      'Todas',     Icons.local_bar),
+      ('jugos',   'Jugos',     Icons.local_drink),
+      ('cafes',   'Cafés',     Icons.coffee),
+      ('refrescos','Refrescos',Icons.sports_bar),
+      ('aguas',   'Aguas',     Icons.water_drop),
+      ('alcohol', 'Alcohol',   Icons.liquor),
+    ];
+    const active = Color(0xFFE07A30);
+    return Container(
+      color: const Color(0xFF0F172A),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: subcats.map((s) {
+            final key = s.$1;
+            final label = s.$2;
+            final icon = s.$3;
+            final selected = _selectedDrinkSubcat == key;
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedDrinkSubcat = key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: selected ? active : const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected ? active : const Color(0xFF334155),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 16, color: selected ? Colors.white : Colors.white60),
+                      const SizedBox(width: 6),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: selected ? Colors.white : Colors.white70,
+                          fontSize: 13,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 
