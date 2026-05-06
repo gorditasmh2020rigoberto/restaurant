@@ -192,6 +192,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool canBeFrita = isGordita && !dish.name.toLowerCase().contains('harina');
   bool conQueso = false;
   bool frita = false;
+  String? selectedSalsa; // solo para chilaquiles
+
+  const salsasChilaquil = ['Roja', 'Verde', 'Ranchera'];
 
   await showDialog(
     context: context,
@@ -201,7 +204,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             title: Text(
-              isChilaquil && !dish.requiresGuisado
+              isChilaquil
                   ? '¿Cómo quieres los ${dish.name}?'
                   : '¿Qué guisado lleva el ${dish.name}?',
               style: const TextStyle(color: Colors.white, fontSize: 16),
@@ -249,8 +252,67 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                   ],
-                  // Lista de guisados
-                  if (guisados.isEmpty)
+
+                  // Selector de salsa para chilaquiles
+                  if (isChilaquil) ...[
+                    const Text(
+                      'SALSA',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: salsasChilaquil.map((salsa) {
+                        final isSelected = selectedSalsa == salsa;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => setDialogState(() => selectedSalsa = salsa),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                    : const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                                    size: 16,
+                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    salsa,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.white60,
+                                      fontSize: 14,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ]
+
+                  // Lista de guisados (no para chilaquiles)
+                  else if (guisados.isEmpty)
                     const Text(
                       'No hay guisados disponibles.',
                       style: TextStyle(color: Colors.white70),
@@ -371,11 +433,22 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               ),
               TextButton(
                 onPressed: () {
+                  // Chilaquiles requieren salsa seleccionada
+                  if (isChilaquil && selectedSalsa == null) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text('Selecciona la salsa (Roja, Verde o Ranchera)'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.pop(ctx);
                   final extras = [
+                    if (isChilaquil && selectedSalsa != null) 'Salsa $selectedSalsa',
                     if (conQueso) 'Con queso',
                     if (frita) 'Frita',
-                    ...selected,
+                    if (!isChilaquil) ...selected,
                   ];
                   final finalDish = ((isTapa || isChilaquil) && conQueso)
                       ? dish.copyWith(price: dish.price + 25)
