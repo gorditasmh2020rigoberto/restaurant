@@ -91,9 +91,9 @@ class _ComandasViewState extends State<ComandasView> {
     for (final dish in _dishes) {
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
-          // Filtrar solo bebidas
-          final isDrink = dish.category == 'drink' || _drinkSubcats.contains(dish.category);
-          if (!isDrink) continue;
+          // Filtrar solo bebidas (cualquier categoría de bebida)
+          const allDrinkCats = {'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'};
+          if (!allDrinkCats.contains(dish.category)) continue;
           // Si hay subcategoría seleccionada en el submenu, filtrar por ella
           if (_selectedDrinkSubcat != null && _effectiveCat(dish) != _selectedDrinkSubcat) continue;
         } else {
@@ -147,16 +147,19 @@ class _ComandasViewState extends State<ComandasView> {
     return 'drink';
   }
 
-  // Categoría efectiva: si es 'drink', intenta detectar subcategoría por nombre
-  static String _effectiveCat(Dish d) =>
-      d.category == 'drink' ? _drinkSubcat(d.name) : d.category;
+  // Categoría efectiva: si es bebida genérica, detecta subcategoría por nombre
+  static String _effectiveCat(Dish d) {
+    const genericDrink = {'drink', 'bebidas'};
+    return genericDrink.contains(d.category) ? _drinkSubcat(d.name) : d.category;
+  }
 
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
 
-    // Consolidar subcategorías de bebidas en un solo chip "drink"
-    if (rawCats.any((c) => c == 'drink' || _drinkSubcats.contains(c))) {
-      rawCats.removeAll(_drinkSubcats);
+    // Consolidar todas las categorías de bebidas en un solo chip 'drink'
+    const allDrinkCats = {'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'};
+    if (rawCats.any(allDrinkCats.contains)) {
+      rawCats.removeAll(allDrinkCats);
       rawCats.add('drink');
     }
 
