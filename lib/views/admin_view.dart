@@ -155,10 +155,6 @@ class _AdminViewState extends State<AdminView> {
                       if (isDrawer) Navigator.pop(context);
                     },
                   ),
-                  _buildSubItem(12, Icons.local_drink,  'Jugos',      isDrawer),
-                  _buildSubItem(13, Icons.coffee,        'Cafés',      isDrawer),
-                  _buildSubItem(14, Icons.sports_bar,    'Refrescos',  isDrawer),
-                  _buildSubItem(15, Icons.water_drop,    'Aguas',      isDrawer),
                   ListTile(
                     leading: Icon(Icons.people, color: _selectedIndex == 2 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
                     title: Text('Gestión de Meseros', style: TextStyle(color: _selectedIndex == 2 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.normal)),
@@ -315,10 +311,6 @@ class _AdminViewState extends State<AdminView> {
       9: 'Nómina',
       10: 'Guisados',
       11: 'Sabores de Bebidas',
-      12: 'Jugos',
-      13: 'Cafés',
-      14: 'Refrescos',
-      15: 'Aguas',
     };
     return titles[_selectedIndex] ?? 'Administrador';
   }
@@ -425,10 +417,6 @@ class _AdminViewState extends State<AdminView> {
       case 9: return const PayrollView();
       case 10: return const GuisadosManagementView();
       case 11: return const DrinkFlavorsManagementView();
-      case 12: return const DrinksManagementView(categories: ['jugos'],     title: 'Jugos');
-      case 13: return const DrinksManagementView(categories: ['cafes'],     title: 'Cafés');
-      case 14: return const DrinksManagementView(categories: ['refrescos'], title: 'Refrescos');
-      case 15: return const DrinksManagementView(categories: ['aguas'],     title: 'Aguas');
       default: return _buildTablesDashboard();
     }
   }
