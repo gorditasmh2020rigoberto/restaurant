@@ -105,8 +105,19 @@ class _ComandasViewState extends State<ComandasView> {
   }
 
 
+  static const _drinkSubcats = ['jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'];
+
   List<String> get _availableCategories {
-    final categories = _dishes.map((d) => d.category).toSet().toList();
+    final rawCats = _dishes.map((d) => d.category).toSet();
+
+    // Si hay alguna bebida (de cualquier tipo), siempre mostrar las subcategorías
+    final hasDrinks = rawCats.any((c) => c == 'drink' || _drinkSubcats.contains(c));
+    if (hasDrinks) {
+      rawCats.remove('drink'); // no mostrar "Bebidas" genérico, usar subcategorías
+      rawCats.addAll(_drinkSubcats);
+    }
+
+    final categories = rawCats.toList();
     categories.sort((a, b) {
       final countA = _categoryClickCounts[a] ?? 0;
       final countB = _categoryClickCounts[b] ?? 0;
