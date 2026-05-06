@@ -948,12 +948,11 @@ class _ComandasViewState extends State<ComandasView> {
 
   Widget _buildDrinkSubmenu() {
     const subcats = [
-      (null,      'Todas',     Icons.local_bar),
       ('jugos',   'Jugos',     Icons.local_drink),
       ('cafes',   'Cafés',     Icons.coffee),
       ('refrescos','Refrescos',Icons.sports_bar),
       ('aguas',   'Aguas',     Icons.water_drop),
-      ('alcohol', 'Alcohol',   Icons.liquor),
+      (null,      'Todas',     Icons.grid_view),
     ];
     const active = Color(0xFFE07A30);
     return Container(
