@@ -799,9 +799,9 @@ class _ComandasViewState extends State<ComandasView> {
     if (isPhone) {
       crossAxisCount = (availableWidth / 160).floor().clamp(2, 3);
     } else if (isTablet) {
-      crossAxisCount = (availableWidth / 200).floor().clamp(2, 4);
+      crossAxisCount = (availableWidth / 130).floor().clamp(3, 6);
     } else {
-      crossAxisCount = (availableWidth / 250).floor().clamp(2, 6);
+      crossAxisCount = (availableWidth / 200).floor().clamp(3, 7);
     }
 
     return Column(
@@ -845,7 +845,7 @@ class _ComandasViewState extends State<ComandasView> {
         Expanded(
           child: CustomScrollView(
             slivers: [
-              ..._buildGroupedMenu(filteredDishes, crossAxisCount, isPhone),
+              ..._buildGroupedMenu(filteredDishes, crossAxisCount, isPhone, isTablet: isTablet),
               const SliverToBoxAdapter(child: SizedBox(height: 40)),
             ],
           ),
@@ -854,7 +854,7 @@ class _ComandasViewState extends State<ComandasView> {
     );
   }
 
-  List<Widget> _buildGroupedMenu(List<Dish> items, int crossAxisCount, bool isPhone) {
+  List<Widget> _buildGroupedMenu(List<Dish> items, int crossAxisCount, bool isPhone, {bool isTablet = false}) {
     final isMobile = isPhone;
     if (items.isEmpty) {
       return [
@@ -922,9 +922,9 @@ class _ComandasViewState extends State<ComandasView> {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: isMobile ? 0.85 : 0.75,
-              crossAxisSpacing: isMobile ? 8 : 16,
-              mainAxisSpacing: isMobile ? 8 : 16,
+              childAspectRatio: isMobile ? 0.85 : (isTablet ? 0.95 : 0.75),
+              crossAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
+              mainAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => DishCard(dish: categoryItems[index]),
