@@ -144,7 +144,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     return;
   }
 
-  if (!dish.requiresGuisado) {
+  final bool isChilaquil = dish.category == 'chilaquiles' ||
+      dish.name.toLowerCase().contains('chilaquil');
+
+  if (!dish.requiresGuisado && !isChilaquil) {
     cart.addItem(dish);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -185,7 +188,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
       dish.name.toLowerCase().contains('gordita');
   final bool isTapa = dish.category == 'tapas' ||
       dish.name.toLowerCase().contains('tapa');
-  final bool showOptions = isGordita || isTapa;
+  final bool showOptions = isGordita || isTapa || isChilaquil;
   final bool canBeFrita = isGordita && !dish.name.toLowerCase().contains('harina');
   bool conQueso = false;
   bool frita = false;
@@ -198,7 +201,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             title: Text(
-              '¿Qué guisado lleva el ${dish.name}?',
+              isChilaquil && !dish.requiresGuisado
+                  ? '¿Cómo quieres los ${dish.name}?'
+                  : '¿Qué guisado lleva el ${dish.name}?',
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
             content: SizedBox(
@@ -372,7 +377,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     if (frita) 'Frita',
                     ...selected,
                   ];
-                  final finalDish = (isTapa && conQueso)
+                  final finalDish = ((isTapa || isChilaquil) && conQueso)
                       ? dish.copyWith(price: dish.price + 25)
                       : dish;
                   cart.addItemWithGuisados(finalDish, extras);
