@@ -87,7 +87,7 @@ class _ComandasViewState extends State<ComandasView> {
 
     final result = <Dish>[];
     for (final dish in _dishes) {
-      if (_selectedCategory != 'Todos' && dish.category != _selectedCategory) continue;
+      if (_selectedCategory != 'Todos' && _effectiveCat(dish) != _selectedCategory) continue;
 
       // Gorditas: solo Maíz y Harina (nombre exacto), sin duplicados por nombre
       if (dish.category == 'gorditas') {
@@ -106,6 +106,38 @@ class _ComandasViewState extends State<ComandasView> {
 
 
   static const _drinkSubcats = ['jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'];
+
+  // Detecta subcategoría de bebida por nombre cuando la categoría es 'drink'
+  static String _drinkSubcat(String name) {
+    final n = name.toLowerCase();
+    if (n.contains('jugo') || n.contains('naranja') || n.contains('zanahoria') ||
+        n.contains('betabel') || n.contains('verde') || n.contains('piña') ||
+        n.contains('mango') || n.contains('fresa') || n.contains('apio'))
+      return 'jugos';
+    if (n.contains('café') || n.contains('cafe') || n.contains('capuchino') ||
+        n.contains('americano') || n.contains('latte') || n.contains('espresso') ||
+        n.contains('olla') || n.contains('instantáneo') || n.contains('instantaneo') ||
+        n.contains('nescafé') || n.contains('nescafe'))
+      return 'cafes';
+    if (n.contains('agua') || n.contains('horchata') || n.contains('jamaica') ||
+        n.contains('tamarindo') || n.contains('limonada') || n.contains('fresca'))
+      return 'aguas';
+    if (n.contains('refresco') || n.contains('coca') || n.contains('pepsi') ||
+        n.contains('sprite') || n.contains('fanta') || n.contains('sidral') ||
+        n.contains('squirt') || n.contains('7up') || n.contains('manzanita') ||
+        n.contains('sangría') || n.contains('sangria'))
+      return 'refrescos';
+    if (n.contains('cerveza') || n.contains('caguama') || n.contains('tequila') ||
+        n.contains('mezcal') || n.contains('michelada') || n.contains('clamato') ||
+        n.contains('corona') || n.contains('modelo') || n.contains('pacifico') ||
+        n.contains('victoria') || n.contains('alcohol'))
+      return 'alcohol';
+    return 'drink';
+  }
+
+  // Categoría efectiva: si es 'drink', intenta detectar subcategoría por nombre
+  static String _effectiveCat(Dish d) =>
+      d.category == 'drink' ? _drinkSubcat(d.name) : d.category;
 
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
@@ -911,10 +943,10 @@ class _ComandasViewState extends State<ComandasView> {
       ];
     }
 
-    // Group items by category
+    // Group items by effective category (auto-detects drink subcategory from name)
     final Map<String, List<Dish>> groups = {};
     for (var item in items) {
-      groups.putIfAbsent(item.category, () => []).add(item);
+      groups.putIfAbsent(_effectiveCat(item), () => []).add(item);
     }
 
     final sortedCategories = groups.keys.toList()..sort();
