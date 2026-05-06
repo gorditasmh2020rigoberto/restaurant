@@ -486,15 +486,15 @@ class _ComandasViewState extends State<ComandasView> {
                 ],
               ),
               content: SizedBox(
-                width: 900,
-                height: MediaQuery.of(context).size.height * 0.75,
+                width: double.maxFinite,
+                height: MediaQuery.of(context).size.height * 0.80,
                 child: Column(
                   children: [
                     // Order Type Selector
                     SegmentedButton<String>(
                       segments: const [
-                        ButtonSegment(value: 'dine_in', label: Text('En Mesa'), icon: Icon(Icons.table_restaurant)),
-                        ButtonSegment(value: 'takeout', label: Text('Para Llevar'), icon: Icon(Icons.takeout_dining)),
+                        ButtonSegment(value: 'dine_in', label: Text('Mesa'), icon: Icon(Icons.table_restaurant)),
+                        ButtonSegment(value: 'takeout', label: Text('Llevar'), icon: Icon(Icons.takeout_dining)),
                         ButtonSegment(value: 'delivery', label: Text('Delivery'), icon: Icon(Icons.delivery_dining)),
                       ],
                       selected: {tempOrderType},
@@ -536,12 +536,15 @@ class _ComandasViewState extends State<ComandasView> {
                                   final occupiedTableIds = (ordersSnapshot.data ?? []).map((o) => o['table_id']).toSet();
 
                                   final items = [...tables, if (editando) null];
+                                    final sw = MediaQuery.of(context).size.width;
+                                    final cols = sw < 500 ? 3 : sw < 800 ? 4 : 5;
+                                    final ratio = sw < 500 ? 1.3 : 1.6;
                                     return GridView.builder(
-                                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 5,
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: cols,
                                         crossAxisSpacing: 8,
                                         mainAxisSpacing: 8,
-                                        childAspectRatio: 1.6,
+                                        childAspectRatio: ratio,
                                       ),
                                       padding: const EdgeInsets.all(6),
                                       shrinkWrap: true,
