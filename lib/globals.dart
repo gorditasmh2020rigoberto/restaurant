@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
@@ -114,6 +115,44 @@ class Globals {
       'guisados': 'Guisados',
     };
     return translations[category] ?? category;
+  }
+
+  static IconData categoryIcon(String category) {
+    const Map<String, IconData> icons = {
+      'Todos': Icons.grid_view,
+      'huevos': Icons.egg,
+      'molletes': Icons.breakfast_dining,
+      'sopes': Icons.circle,
+      'enchiladas': Icons.local_dining,
+      'enmoladas': Icons.local_dining,
+      'gorditas': Icons.breakfast_dining,
+      'quesadillas': Icons.local_pizza,
+      'arrachera': Icons.set_meal,
+      'chile_relleno': Icons.outdoor_grill,
+      'chilaquiles': Icons.brunch_dining,
+      'huaraches': Icons.local_dining,
+      'tapas': Icons.tapas,
+      'menudo': Icons.soup_kitchen,
+      'lo_dulce': Icons.cake,
+      'para_llevar': Icons.takeout_dining,
+      'extras': Icons.add_circle_outline,
+      'bebidas': Icons.local_drink,
+      'appetizer': Icons.tapas,
+      'mainCourse': Icons.restaurant,
+      'drink': Icons.local_bar,
+      'dessert': Icons.icecream,
+      'alcohol': Icons.local_bar,
+      'side': Icons.add_box,
+      'breakfast': Icons.free_breakfast,
+      'salad': Icons.eco,
+      'soup': Icons.soup_kitchen,
+      'tacos': Icons.local_dining,
+      'tostadas': Icons.local_dining,
+      'tortas': Icons.lunch_dining,
+      'especialidades': Icons.star,
+      'guisados': Icons.set_meal,
+    };
+    return icons[category] ?? Icons.restaurant_menu;
   }
 }
 
