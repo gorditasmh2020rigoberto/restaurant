@@ -16,6 +16,13 @@ const _aguaFallback = [
   'Pepino', 'Melón', 'Sandía', 'Guayaba', 'Fresa', 'Maracuyá', 'Otro',
 ];
 
+// Detecta el tamaño del refresco por el nombre del platillo
+String _refrescoType(String nameLower) {
+  if (nameLower.contains('600')) return 'refresco_600';
+  if (nameLower.contains('255') || nameLower.contains('355')) return 'refresco_255';
+  return 'refresco'; // genérico si no especifica tamaño
+}
+
 Future<List<String>> _loadDrinkFlavors(String type) async {
   try {
     final supabase = Supabase.instance.client;
@@ -26,9 +33,14 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
         .eq('available', true)
         .order('name');
     final list = (rows as List).map((r) => r['name'] as String).toList();
-    return list.isNotEmpty ? list : (type == 'refresco' ? _refrescoFallback : _aguaFallback);
+    if (list.isNotEmpty) return list;
+    // Fallback: si no hay sabores específicos para ese tamaño, usar los genéricos
+    if (type == 'refresco_255' || type == 'refresco_600') {
+      return await _loadDrinkFlavors('refresco');
+    }
+    return type.startsWith('refresco') ? _refrescoFallback : _aguaFallback;
   } catch (_) {
-    return type == 'refresco' ? _refrescoFallback : _aguaFallback;
+    return type.startsWith('refresco') ? _refrescoFallback : _aguaFallback;
   }
 }
 
@@ -39,7 +51,8 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool isAguaFresca = nameLower.contains('agua fresca') || nameLower.contains('agua ') || nameLower.startsWith('agua');
 
   if (isRefresco || isAguaFresca) {
-    final sabores = await _loadDrinkFlavors(isRefresco ? 'refresco' : 'agua_fresca');
+    final drinkType = isRefresco ? _refrescoType(nameLower) : 'agua_fresca';
+    final sabores = await _loadDrinkFlavors(drinkType);
     String? selectedSabor;
     await showDialog(
       context: context,
