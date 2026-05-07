@@ -54,6 +54,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     final drinkType = isRefresco ? _refrescoType(nameLower) : 'agua_fresca';
     final sabores = await _loadDrinkFlavors(drinkType);
     String? selectedSabor;
+    String? aguaSize;
     await showDialog(
       context: context,
       builder: (ctx) {
@@ -67,59 +68,108 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               ),
               content: SizedBox(
                 width: 400,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 6,
-                    childAspectRatio: 2.4,
-                  ),
-                  itemCount: sabores.length,
-                  itemBuilder: (ctx2, i) {
-                    final sabor = sabores[i];
-                    final isSelected = selectedSabor == sabor;
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: () => setDialogState(() => selectedSabor = sabor),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                              : const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-                            width: 1.5,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Selector de tamaño solo para aguas frescas
+                    if (isAguaFresca) ...[
+                      const Text(
+                        'TAMAÑO',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          _ToggleOption(
+                            icon: Icons.local_drink,
+                            label: '600 ml',
+                            value: aguaSize == '600 ml',
+                            onChanged: (v) => setDialogState(
+                                () => aguaSize = v ? '600 ml' : null),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                              size: 14,
-                              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
-                            ),
-                            const SizedBox(width: 5),
-                            Expanded(
-                              child: Text(
-                                sabor,
-                                style: TextStyle(
-                                  color: isSelected ? Colors.white : Colors.white70,
-                                  fontSize: 11,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 10),
+                          _ToggleOption(
+                            icon: Icons.local_drink,
+                            label: '1 litro',
+                            value: aguaSize == '1 litro',
+                            onChanged: (v) => setDialogState(
+                                () => aguaSize = v ? '1 litro' : null),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(color: Color(0xFF334155)),
+                      const SizedBox(height: 8),
+                    ],
+                    const Text(
+                      'SABOR',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 8),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 6,
+                        childAspectRatio: 2.4,
+                      ),
+                      itemCount: sabores.length,
+                      itemBuilder: (ctx2, i) {
+                        final sabor = sabores[i];
+                        final isSelected = selectedSabor == sabor;
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(8),
+                          onTap: () => setDialogState(() => selectedSabor = sabor),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                  : const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                                width: 1.5,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                                  size: 14,
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    sabor,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.white70,
+                                      fontSize: 11,
+                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
               actions: [
@@ -130,7 +180,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 TextButton(
                   onPressed: selectedSabor == null ? null : () {
                     Navigator.pop(ctx);
-                    cart.addItemWithGuisados(dish, [selectedSabor!]);
+                    final extras = [
+                      if (aguaSize != null) aguaSize!,
+                      selectedSabor!,
+                    ];
+                    cart.addItemWithGuisados(dish, extras);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
