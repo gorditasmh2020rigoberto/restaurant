@@ -464,8 +464,6 @@ class _ComandasViewState extends State<ComandasView> {
     String tempOrderType = _selectedOrderType;
     String? tempCustomerName = _customerName;
     final nameController = TextEditingController(text: _customerName);
-    bool editando = false;
-
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -473,18 +471,7 @@ class _ComandasViewState extends State<ComandasView> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: Row(
-                children: [
-                  const Expanded(child: Text('Tipo de Orden')),
-                  if (tempOrderType == 'dine_in')
-                    IconButton(
-                      icon: Icon(editando ? Icons.check : Icons.edit,
-                          color: editando ? Colors.green : Colors.white70),
-                      tooltip: editando ? 'Listo' : 'Editar mesas',
-                      onPressed: () => setStateDialog(() => editando = !editando),
-                    ),
-                ],
-              ),
+              title: const Text('Tipo de Orden'),
               content: SizedBox(
                 width: double.maxFinite,
                 height: MediaQuery.of(context).size.height * 0.80,
@@ -535,138 +522,77 @@ class _ComandasViewState extends State<ComandasView> {
                                 builder: (context, ordersSnapshot) {
                                   final occupiedTableIds = (ordersSnapshot.data ?? []).map((o) => o['table_id']).toSet();
 
-                                  final items = [...tables, if (editando) null];
-                                    final sw = MediaQuery.of(context).size.width;
-                                    final cols = sw < 500 ? 4 : sw < 800 ? 6 : 8;
-                                    final ratio = sw < 500 ? 1.2 : 1.4;
-                                    return GridView.builder(
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: cols,
-                                        crossAxisSpacing: 8,
-                                        mainAxisSpacing: 8,
-                                        childAspectRatio: ratio,
-                                      ),
-                                      padding: const EdgeInsets.all(6),
-                                      shrinkWrap: true,
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      itemCount: items.length,
-                                      itemBuilder: (context, index) {
-                                        // Botón "Agregar mesa"
-                                        if (items[index] == null) {
-                                          return InkWell(
-                                            onTap: () async {
-                                              final nextNum = (tables.map((t) => (t['table_number'] as num?)?.toInt() ?? 0).fold(0, (a, b) => a > b ? a : b)) + 1;
-                                              await _supabase.from('restaurant_tables').insert({
-                                                'table_number': nextNum,
-                                                'branch_name': Globals.currentBranch,
-                                                'pos_x': 50.0,
-                                                'pos_y': 50.0,
-                                              });
-                                            },
-                                            borderRadius: BorderRadius.circular(16),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFF0F172A),
-                                                borderRadius: BorderRadius.circular(16),
-                                                border: Border.all(color: const Color(0xFFFF6D00), width: 1.5),
-                                              ),
-                                              child: const Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  Icon(Icons.add_circle_outline, size: 22, color: Color(0xFFFF6D00)),
-                                                  SizedBox(height: 2),
-                                                  Text('+ Mesa', textAlign: TextAlign.center,
-                                                      style: TextStyle(fontSize: 10, color: Color(0xFFFF6D00))),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }
-
-                                        final table = items[index]!;
-                                        final isOccupied = occupiedTableIds.contains(table['id']);
-                                        return Stack(
-                                          children: [
-                                            Positioned.fill(
-                                              child: Material(
-                                                color: isOccupied ? const Color(0xFF331515) : const Color(0xFF1E293B),
-                                                borderRadius: BorderRadius.circular(16),
-                                                child: InkWell(
-                                                  onTap: editando ? null : () {
-                                                    setState(() {
-                                                      _selectedOrderType = 'dine_in';
-                                                      _selectedTableId = table['id'];
-                                                      _selectedTableNumber = table['table_number'].toString();
-                                                      _customerName = null;
-                                                    });
-                                                    Navigator.pop(context);
-                                                  },
-                                                  borderRadius: BorderRadius.circular(16),
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(16),
-                                                      border: Border.all(
-                                                        color: isOccupied ? Colors.red[800]! : const Color(0xFF334155),
-                                                        width: 1.5,
-                                                      ),
-                                                    ),
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Icon(Icons.table_restaurant, size: 20,
-                                                            color: isOccupied ? Colors.red[300] : const Color(0xFF94A3B8)),
-                                                        const SizedBox(height: 2),
-                                                        Text('Mesa ${table['table_number']}',
-                                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold,
-                                                                color: isOccupied ? Colors.red[100] : Colors.white)),
-                                                        const SizedBox(height: 2),
-                                                        Container(
-                                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                                          decoration: BoxDecoration(
-                                                            color: isOccupied
-                                                                ? Colors.red.withValues(alpha: 0.25)
-                                                                : Colors.green.withValues(alpha: 0.2),
-                                                            borderRadius: BorderRadius.circular(6),
-                                                          ),
-                                                          child: Text(isOccupied ? 'Ocupada' : 'Libre',
-                                                              style: TextStyle(fontSize: 9,
-                                                                  color: isOccupied ? Colors.red[300] : Colors.green[400])),
-                                                        ),
-                                                      ],
-                                                    ),
-                                            ),
-                                            if (editando)
-                                              Positioned(
-                                                top: 6, right: 6,
-                                                  child: GestureDetector(
-                                                    onTap: () async {
-                                                      final confirm = await showDialog<bool>(
-                                                        context: context,
-                                                        builder: (ctx) => AlertDialog(
-                                                          backgroundColor: const Color(0xFF1E293B),
-                                                          title: const Text('¿Eliminar mesa?', style: TextStyle(color: Colors.white)),
-                                                          content: Text('Mesa ${table['table_number']}',
-                                                              style: const TextStyle(color: Colors.white70)),
-                                                          actions: [
-                                                            TextButton(onPressed: () => Navigator.pop(ctx, false),
-                                                                child: const Text('Cancelar')),
-                                                            TextButton(onPressed: () => Navigator.pop(ctx, true),
-                                                                child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
-                                                          ],
-                                                        ),
-                                                      );
-                                                      if (confirm == true) {
-                                                        await _supabase.from('restaurant_tables').delete().eq('id', table['id']);
-                                                      }
-                                                    },
-                                                    child: Container(
-                                                      width: 22, height: 22,
-                                                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                                                      child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                  return LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final availW = constraints.maxWidth;
+                                        final availH = constraints.maxHeight;
+                                        final cols = availW < 380 ? 4 : availW < 600 ? 5 : 7;
+                                        final rows = (tables.length / cols).ceil();
+                                        const spacing = 8.0;
+                                        final ext = ((availH - (rows - 1) * spacing - 8) / rows).clamp(52.0, 120.0);
+                                        return GridView.builder(
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          padding: const EdgeInsets.all(4),
+                                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: cols,
+                                            crossAxisSpacing: spacing,
+                                            mainAxisSpacing: spacing,
+                                            mainAxisExtent: ext,
+                                          ),
+                                          itemCount: tables.length,
+                                          itemBuilder: (context, index) {
+                                            final table = tables[index];
+                                            final isOccupied = occupiedTableIds.contains(table['id']);
+                                            return Material(
+                                              color: isOccupied ? const Color(0xFF331515) : const Color(0xFF1E293B),
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  setState(() {
+                                                    _selectedOrderType = 'dine_in';
+                                                    _selectedTableId = table['id'];
+                                                    _selectedTableNumber = table['table_number'].toString();
+                                                    _customerName = null;
+                                                  });
+                                                  Navigator.pop(context);
+                                                },
+                                                borderRadius: BorderRadius.circular(12),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(
+                                                      color: isOccupied ? Colors.red[800]! : const Color(0xFF334155),
+                                                      width: 1.5,
                                                     ),
                                                   ),
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Icon(Icons.table_restaurant, size: 20,
+                                                          color: isOccupied ? Colors.red[300] : const Color(0xFF94A3B8)),
+                                                      const SizedBox(height: 2),
+                                                      Text('Mesa ${table['table_number']}',
+                                                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold,
+                                                              color: isOccupied ? Colors.red[100] : Colors.white)),
+                                                      const SizedBox(height: 2),
+                                                      Container(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                                        decoration: BoxDecoration(
+                                                          color: isOccupied
+                                                              ? Colors.red.withValues(alpha: 0.25)
+                                                              : Colors.green.withValues(alpha: 0.2),
+                                                          borderRadius: BorderRadius.circular(6),
+                                                        ),
+                                                        child: Text(isOccupied ? 'Ocupada' : 'Libre',
+                                                            style: TextStyle(fontSize: 9,
+                                                                color: isOccupied ? Colors.red[300] : Colors.green[400])),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                          ],
+                                              ),
+                                            );
+                                          },
                                         );
                                       },
                                     );
