@@ -163,14 +163,16 @@ class _ComandasViewState extends State<ComandasView> {
       rawCats.add('drink');
     }
 
-    final categories = rawCats.toList();
-    categories.sort((a, b) {
+    const pinned = ['gorditas', 'drink'];
+    final rest = rawCats.where((c) => !pinned.contains(c)).toList();
+    rest.sort((a, b) {
       final countA = _categoryClickCounts[a] ?? 0;
       final countB = _categoryClickCounts[b] ?? 0;
       if (countB != countA) return countB.compareTo(countA);
       return a.compareTo(b);
     });
-    return ['Todos', ...categories];
+    final ordered = [...pinned.where(rawCats.contains), ...rest];
+    return ['Todos', ...ordered];
   }
 
   Widget _buildCategoryChip(String label, {bool isMobile = false}) {
