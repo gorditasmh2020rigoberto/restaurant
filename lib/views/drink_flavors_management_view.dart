@@ -14,13 +14,15 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   late TabController _tabController;
 
   List<Map<String, dynamic>> _refrescos = [];
+  List<Map<String, dynamic>> _refrescos255 = [];
+  List<Map<String, dynamic>> _refrescos600 = [];
   List<Map<String, dynamic>> _aguas = [];
   bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _fetchFlavors();
   }
 
@@ -40,8 +42,10 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       final list = (data as List<dynamic>).cast<Map<String, dynamic>>();
       if (mounted) {
         setState(() {
-          _refrescos = list.where((f) => f['type'] == 'refresco').toList();
-          _aguas = list.where((f) => f['type'] == 'agua_fresca').toList();
+          _refrescos    = list.where((f) => f['type'] == 'refresco').toList();
+          _refrescos255 = list.where((f) => f['type'] == 'refresco_255').toList();
+          _refrescos600 = list.where((f) => f['type'] == 'refresco_600').toList();
+          _aguas        = list.where((f) => f['type'] == 'agua_fresca').toList();
           _loading = false;
         });
       }
@@ -76,10 +80,19 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
 
   void _updateLocal(String type, dynamic id, Map<String, dynamic> changes) {
     setState(() {
-      final list = type == 'refresco' ? _refrescos : _aguas;
+      final list = _listForType(type);
       final index = list.indexWhere((f) => f['id'] == id);
       if (index != -1) list[index] = {...list[index], ...changes};
     });
+  }
+
+  List<Map<String, dynamic>> _listForType(String type) {
+    switch (type) {
+      case 'refresco_255': return _refrescos255;
+      case 'refresco_600': return _refrescos600;
+      case 'agua_fresca':  return _aguas;
+      default:             return _refrescos;
+    }
   }
 
   Future<void> _deleteFlavor(Map<String, dynamic> flavor) async {
@@ -107,11 +120,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     final type = flavor['type'] as String;
     final id = flavor['id'];
     setState(() {
-      if (type == 'refresco') {
-        _refrescos.removeWhere((f) => f['id'] == id);
-      } else {
-        _aguas.removeWhere((f) => f['id'] == id);
-      }
+      _listForType(type).removeWhere((f) => f['id'] == id);
     });
     try {
       await _supabase.from('drink_flavors').delete().eq('id', id);
@@ -128,14 +137,14 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   Future<void> _showFlavorDialog({Map<String, dynamic>? flavor, required String type}) async {
     final isEditing = flavor != null;
     final nameController = TextEditingController(text: isEditing ? flavor['name'] as String : '');
-    final hint = type == 'refresco' ? 'Ej. Coca-Cola, Sprite...' : 'Ej. Jamaica, Horchata...';
+    final hint = type == 'agua_fresca' ? 'Ej. Jamaica, Horchata...' : 'Ej. Coca-Cola, Sprite...';
 
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E293B),
         title: Text(
-          isEditing ? 'Editar sabor' : (type == 'refresco' ? 'Nuevo refresco' : 'Nuevo sabor de agua'),
+          isEditing ? 'Editar sabor' : (type == 'agua_fresca' ? 'Nuevo sabor de agua' : type == 'refresco_255' ? 'Nuevo sabor 255ml' : type == 'refresco_600' ? 'Nuevo sabor 600ml' : 'Nuevo refresco'),
           style: const TextStyle(color: Colors.white),
         ),
         content: TextField(
@@ -175,7 +184,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     'available': true,
                   }).select().single();
                   setState(() {
-                    final list = type == 'refresco' ? _refrescos : _aguas;
+                    final list = _listForType(type);
                     list.add(result);
                     list.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
                   });
@@ -285,7 +294,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
 
   @override
   Widget build(BuildContext context) {
-    final currentType = _tabController.index == 0 ? 'refresco' : 'agua_fresca';
+    const tabTypes = ['refresco', 'refresco_255', 'refresco_600', 'agua_fresca'];
+    final currentType = tabTypes[_tabController.index];
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       floatingActionButton: FloatingActionButton(
@@ -326,24 +336,23 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
             indicatorColor: const Color(0xFFFF6D00),
             labelColor: Colors.white,
             unselectedLabelColor: const Color(0xFF94A3B8),
+            isScrollable: true,
             onTap: (_) => setState(() {}),
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.local_drink, size: 18),
-                child: const Text('Refrescos'),
-              ),
-              Tab(
-                icon: const Icon(Icons.water_drop, size: 18),
-                child: const Text('Aguas Frescas'),
-              ),
+            tabs: const [
+              Tab(icon: Icon(Icons.local_drink, size: 18), child: Text('Refrescos')),
+              Tab(icon: Icon(Icons.local_drink, size: 18), child: Text('255 ml')),
+              Tab(icon: Icon(Icons.local_drink, size: 18), child: Text('600 ml')),
+              Tab(icon: Icon(Icons.water_drop, size: 18), child: Text('Aguas Frescas')),
             ],
           ),
           Expanded(
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildList(_refrescos, 'refresco'),
-                _buildList(_aguas, 'agua_fresca'),
+                _buildList(_refrescos,    'refresco'),
+                _buildList(_refrescos255, 'refresco_255'),
+                _buildList(_refrescos600, 'refresco_600'),
+                _buildList(_aguas,        'agua_fresca'),
               ],
             ),
           ),
