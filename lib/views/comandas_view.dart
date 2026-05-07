@@ -537,8 +537,8 @@ class _ComandasViewState extends State<ComandasView> {
 
                                   final items = [...tables, if (editando) null];
                                     final sw = MediaQuery.of(context).size.width;
-                                    final cols = sw < 500 ? 3 : sw < 800 ? 4 : 5;
-                                    final ratio = sw < 500 ? 1.3 : 1.6;
+                                    final cols = sw < 500 ? 4 : sw < 800 ? 6 : 8;
+                                    final ratio = sw < 500 ? 1.2 : 1.4;
                                     return GridView.builder(
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: cols,
@@ -634,9 +634,6 @@ class _ComandasViewState extends State<ComandasView> {
                                                         ),
                                                       ],
                                                     ),
-                                                  ),
-                                                ),
-                                              ),
                                             ),
                                             if (editando)
                                               Positioned(
