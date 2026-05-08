@@ -350,6 +350,183 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     );
   }
 
+  String _sizeLabel(String type) {
+    const labels = {
+      'refresco_355': '355 ml', 'refresco_600': '600 ml',
+      'agua_600': '600 ml',    'agua_1litro': '1 litro',
+      'jugo_330': '330 ml',    'jugo_1litro': '1 litro',
+    };
+    return labels[type] ?? type;
+  }
+
+  Color _colorForType(String type) {
+    const colors = {
+      'refresco_355': Color(0xFF38BDF8), 'refresco_600': Color(0xFFA78BFA),
+      'agua_600': Color(0xFF67E8F9),     'agua_1litro': Color(0xFF6EE7B7),
+      'jugo_330': Color(0xFF4ADE80),     'jugo_1litro': Color(0xFFFBBF24),
+    };
+    if (type.startsWith('refresco')) return colors[type] ?? const Color(0xFF38BDF8);
+    if (type.startsWith('agua'))    return colors[type] ?? const Color(0xFF67E8F9);
+    return colors[type] ?? const Color(0xFF4ADE80);
+  }
+
+  Future<void> _deletePriceEntry(String type, Map<String, double> prices) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('¿Eliminar tamaño?', style: TextStyle(color: Colors.white)),
+        content: Text('Se eliminará el precio para "$type".', style: const TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(backgroundColor: Colors.red.withValues(alpha: 0.2)),
+            child: const Text('Eliminar', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    try {
+      await _supabase.from('drink_type_prices').delete().eq('type', type);
+      setState(() => prices.remove(type));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
+  Future<void> _showAddSizeDialog() async {
+    String category = 'refresco';
+    final labelCtrl = TextEditingController();
+    final priceCtrl = TextEditingController();
+
+    const categoryOptions = [
+      ('refresco',    'Refresco',    Icons.local_drink),
+      ('agua',        'Agua Fresca', Icons.water_drop),
+      ('jugo',        'Jugo',        Icons.blender),
+    ];
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text('Nuevo tamaño', style: TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Categoría', style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 1)),
+              const SizedBox(height: 8),
+              ...categoryOptions.map((opt) {
+                final isSelected = category == opt.$1;
+                return GestureDetector(
+                  onTap: () => setDlgState(() => category = opt.$1),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                            size: 18, color: isSelected ? const Color(0xFFFF6D00) : Colors.white38),
+                        const SizedBox(width: 10),
+                        Icon(opt.$3, size: 16, color: isSelected ? const Color(0xFFFF6D00) : Colors.white38),
+                        const SizedBox(width: 8),
+                        Text(opt.$2, style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.white60,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        )),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: labelCtrl,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Tamaño',
+                        labelStyle: TextStyle(color: Colors.white54),
+                        hintText: 'Ej. 500 ml',
+                        hintStyle: TextStyle(color: Colors.white38),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 90,
+                    child: TextField(
+                      controller: priceCtrl,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Precio',
+                        labelStyle: TextStyle(color: Colors.white54),
+                        prefixText: '\$',
+                        prefixStyle: TextStyle(color: Color(0xFFFF6D00)),
+                        hintText: '0',
+                        hintStyle: TextStyle(color: Colors.white38),
+                        enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: () async {
+                final label = labelCtrl.text.trim();
+                final price = double.tryParse(priceCtrl.text);
+                if (label.isEmpty || price == null) return;
+                final sanitized = label.toLowerCase().replaceAll(' ', '').replaceAll('.', '');
+                final type = '${category}_$sanitized';
+                Navigator.pop(ctx);
+                try {
+                  await _supabase.from('drink_type_prices').upsert(
+                    {'type': type, 'price': price}, onConflict: 'type');
+                  final map = category == 'refresco' ? _refrescoPrices
+                      : category == 'agua' ? _aguaPrices
+                      : _jugoPrices;
+                  setState(() => map[type] = price);
+                } catch (e) {
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                }
+              },
+              style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15)),
+              child: const Text('Agregar', style: TextStyle(color: Color(0xFFFF6D00))),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _showPriceDialog({
     required String type,
     required String label,
@@ -411,12 +588,12 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   }
 
   Widget _buildPriceRow({
-    required String label,
     required String type,
-    required Color color,
     required Map<String, double> prices,
   }) {
     final price = prices[type];
+    final label = _sizeLabel(type);
+    final color = _colorForType(type);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -434,8 +611,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               border: Border.all(color: color.withValues(alpha: 0.4)),
             ),
             child: Text(label,
-                style: TextStyle(
-                    color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
           ),
           const SizedBox(width: 16),
           Text(
@@ -452,8 +628,32 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
             onPressed: () =>
                 _showPriceDialog(type: type, label: label, color: color, prices: prices),
           ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+            onPressed: () => _deletePriceEntry(type, prices),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPricesSection(String title, Map<String, double> prices) {
+    if (prices.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1)),
+        const SizedBox(height: 8),
+        ...prices.keys.map((type) => _buildPriceRow(type: type, prices: prices)),
+        const SizedBox(height: 16),
+        const Divider(color: Color(0xFF334155)),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -461,63 +661,15 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     return ListView(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 80),
       children: [
-        const Text('Refrescos',
-            style: TextStyle(
-                color: Colors.white70,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1)),
-        const SizedBox(height: 8),
-        _buildPriceRow(
-            label: '355 ml',
-            type: 'refresco_355',
-            color: const Color(0xFF38BDF8),
-            prices: _refrescoPrices),
-        _buildPriceRow(
-            label: '600 ml',
-            type: 'refresco_600',
-            color: const Color(0xFFA78BFA),
-            prices: _refrescoPrices),
-        const SizedBox(height: 16),
-        const Divider(color: Color(0xFF334155)),
-        const SizedBox(height: 16),
-        const Text('Aguas Frescas',
-            style: TextStyle(
-                color: Colors.white70,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1)),
-        const SizedBox(height: 8),
-        _buildPriceRow(
-            label: '600 ml',
-            type: 'agua_600',
-            color: const Color(0xFF67E8F9),
-            prices: _aguaPrices),
-        _buildPriceRow(
-            label: '1 litro',
-            type: 'agua_1litro',
-            color: const Color(0xFF6EE7B7),
-            prices: _aguaPrices),
-        const SizedBox(height: 16),
-        const Divider(color: Color(0xFF334155)),
-        const SizedBox(height: 16),
-        const Text('Jugos',
-            style: TextStyle(
-                color: Colors.white70,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1)),
-        const SizedBox(height: 8),
-        _buildPriceRow(
-            label: '330 ml',
-            type: 'jugo_330',
-            color: const Color(0xFF4ADE80),
-            prices: _jugoPrices),
-        _buildPriceRow(
-            label: '1 litro',
-            type: 'jugo_1litro',
-            color: const Color(0xFFFBBF24),
-            prices: _jugoPrices),
+        _buildPricesSection('Refrescos', _refrescoPrices),
+        _buildPricesSection('Aguas Frescas', _aguaPrices),
+        _buildPricesSection('Jugos', _jugoPrices),
+        if (_refrescoPrices.isEmpty && _aguaPrices.isEmpty && _jugoPrices.isEmpty)
+          const Center(
+            child: Text('Sin precios configurados.\nPresiona + para agregar un tamaño.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 15)),
+          ),
       ],
     );
   }
@@ -638,16 +790,15 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   Widget build(BuildContext context) {
     const tabTypes = ['refresco', 'agua_fresca', 'jugo', 'precios'];
     final currentType = tabTypes[_tabController.index];
-    final showFab = _tabController.index < 3;
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
-      floatingActionButton: showFab
-          ? FloatingActionButton(
-              onPressed: () => _showFlavorDialog(type: currentType),
-              backgroundColor: const Color(0xFFFF6D00),
-              child: const Icon(Icons.add, color: Colors.white),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _tabController.index == 3
+            ? _showAddSizeDialog
+            : () => _showFlavorDialog(type: currentType),
+        backgroundColor: const Color(0xFFFF6D00),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
