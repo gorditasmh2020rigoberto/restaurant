@@ -834,7 +834,12 @@ class _ComandasViewState extends State<ComandasView> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               ),
-              onPressed: () => _showAddClientDialog(context, cart),
+              onPressed: () {
+                final name = 'Cliente ${cart.clients.length + 1}';
+                cart.addClient(name);
+                cart.setCurrentClient(name);
+                if (!_carritoVisible) setState(() => _carritoVisible = true);
+              },
             ),
           ),
           const SizedBox(width: 4),
