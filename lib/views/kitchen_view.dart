@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
@@ -467,7 +468,7 @@ class _OrderTicketState extends State<_OrderTicket> {
     // Load items
     try {
       final response = await supabase.from('order_items').select('''
-        id, quantity, status, price_at_time,
+        id, quantity, status, price_at_time, guisados_selected,
         dishes (name, category, max_time)
       ''').eq('order_id', orderId).order('id');
       
@@ -683,8 +684,22 @@ class _OrderTicketState extends State<_OrderTicket> {
                       separatorBuilder: (context, index) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final item = _items![index];
-                        final dishName = item['dishes']['name'];
+                        final dishName = item['dishes']['name'] as String;
                         final isReady = item['status'] == 'ready';
+
+                        // Parse guisados_selected JSON
+                        List<String> extras = [];
+                        final raw = item['guisados_selected'];
+                        if (raw != null && raw.toString().isNotEmpty) {
+                          try {
+                            extras = (jsonDecode(raw.toString()) as List).cast<String>();
+                          } catch (_) {}
+                        }
+
+                        // Subtitle: for bar show customer name; for kitchen show extras
+                        final String? subtitle = widget.isDrinksOnly
+                            ? (_customerName != null && _customerName!.isNotEmpty ? _customerName : null)
+                            : (extras.isNotEmpty ? extras.join(' • ') : null);
 
                         return InkWell(
                           onTap: () => _toggleItemStatus(index, isReady),
@@ -703,14 +718,32 @@ class _OrderTicketState extends State<_OrderTicket> {
                                   ),
                                 ),
                                 Expanded(
-                                  child: Text(
-                                    dishName,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: isReady ? Colors.grey : Colors.white,
-                                      decoration: isReady ? TextDecoration.lineThrough : null,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        dishName,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          color: isReady ? Colors.grey : Colors.white,
+                                          decoration: isReady ? TextDecoration.lineThrough : null,
+                                        ),
+                                      ),
+                                      if (subtitle != null)
+                                        Text(
+                                          subtitle,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: isReady
+                                                ? Colors.grey
+                                                : (widget.isDrinksOnly
+                                                    ? const Color(0xFF38BDF8)
+                                                    : const Color(0xFFFF6D00)),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                                 Checkbox(
