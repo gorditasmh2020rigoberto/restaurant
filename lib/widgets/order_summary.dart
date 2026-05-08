@@ -453,62 +453,6 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── YA PEDIDO ──────────────────────────────────────────
-        if (_existingItems.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              'YA PEDIDO (En cuenta)',
-              style: TextStyle(
-                color: Color(0xFFFF6D00),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          ..._existingItems.map((item) {
-            final rawGuisados = item['guisados_selected'] as String?;
-            List<String> guisadosList = [];
-            if (rawGuisados != null && rawGuisados.isNotEmpty) {
-              try {
-                guisadosList = (jsonDecode(rawGuisados) as List).cast<String>();
-              } catch (_) {}
-            }
-            return ListTile(
-                dense: true,
-                title: Text(item['name'], style: const TextStyle(color: Colors.white70)),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '\$${item['price']} x ${item['quantity']}',
-                      style: const TextStyle(color: Colors.white38, fontSize: 10),
-                    ),
-                    if (guisadosList.isNotEmpty)
-                      Text(
-                        guisadosList.join(', '),
-                        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
-                      ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('x${item['quantity']}',
-                        style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
-                      onPressed: () => _deleteExistingItem(item),
-                    ),
-                  ],
-                ),
-              );
-          }),
-          const Divider(color: Color(0xFF334155), indent: 16, endIndent: 16),
-        ],
-
         // ── ENCABEZADO NUEVOS ARTÍCULOS ────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 8, 4),
@@ -551,188 +495,236 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
 
         const SizedBox(height: 8),
 
-        // ── LISTA AGRUPADA POR CLIENTE ─────────────────────────
+        // ── LISTA COMPLETA (ya pedido + nuevos artículos) ──────
         Expanded(
-          child: cart.items.isEmpty
-              ? Center(
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 8),
+            children: [
+              // YA PEDIDO
+              if (_existingItems.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: Text(
-                    'Agrega platillos del menú',
-                    style: TextStyle(color: Colors.grey[600]),
+                    'YA PEDIDO (En cuenta)',
+                    style: TextStyle(
+                      color: Color(0xFFFF6D00),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+                ..._existingItems.map((item) {
+                  final rawGuisados = item['guisados_selected'] as String?;
+                  List<String> guisadosList = [];
+                  if (rawGuisados != null && rawGuisados.isNotEmpty) {
+                    try {
+                      guisadosList = (jsonDecode(rawGuisados) as List).cast<String>();
+                    } catch (_) {}
+                  }
+                  return ListTile(
+                    dense: true,
+                    title: Text(item['name'], style: const TextStyle(color: Colors.white70)),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '\$${item['price']} x ${item['quantity']}',
+                          style: const TextStyle(color: Colors.white38, fontSize: 10),
+                        ),
+                        if (guisadosList.isNotEmpty)
+                          Text(
+                            guisadosList.join(', '),
+                            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                          ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('x${item['quantity']}',
+                            style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
+                          onPressed: () => _deleteExistingItem(item),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                const Divider(color: Color(0xFF334155), indent: 16, endIndent: 16),
+              ],
+
+              // NUEVOS ARTÍCULOS agrupados por cliente
+              if (cart.items.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: Text(
+                      'Agrega platillos del menú',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
                   ),
                 )
-              : ListView(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  children: [
-                    for (final client in cart.clients) ...[
-                      if (grouped[client] != null && grouped[client]!.isNotEmpty) ...[
-                        // Client header — tap to select, X to remove
-                        GestureDetector(
-                          onTap: () => cart.setCurrentClient(client),
-                          onDoubleTap: () {
-                            final controller = TextEditingController(text: client);
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                backgroundColor: const Color(0xFF1E293B),
-                                title: const Text('Editar nombre', style: TextStyle(color: Colors.white)),
-                                content: TextField(
-                                  controller: controller,
-                                  autofocus: true,
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    hintText: 'Nombre del cliente',
-                                    hintStyle: TextStyle(color: Colors.white38),
-                                    enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
-                                    focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
-                                  ),
-                                  onSubmitted: (v) {
-                                    cart.renameClient(client, v);
-                                    Navigator.pop(ctx);
-                                  },
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(ctx),
-                                    child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      cart.renameClient(client, controller.text);
-                                      Navigator.pop(ctx);
-                                    },
-                                    style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15)),
-                                    child: const Text('Guardar', style: TextStyle(color: Color(0xFFFF6D00))),
-                                  ),
-                                ],
+              else
+                for (final client in cart.clients) ...[
+                  if (grouped[client] != null && grouped[client]!.isNotEmpty) ...[
+                    // Client header — tap to select, double-tap to rename
+                    GestureDetector(
+                      onTap: () => cart.setCurrentClient(client),
+                      onDoubleTap: () {
+                        final controller = TextEditingController(text: client);
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            backgroundColor: const Color(0xFF1E293B),
+                            title: const Text('Editar nombre', style: TextStyle(color: Colors.white)),
+                            content: TextField(
+                              controller: controller,
+                              autofocus: true,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: 'Nombre del cliente',
+                                hintStyle: TextStyle(color: Colors.white38),
+                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
+                                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
                               ),
-                            );
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: cart.currentClient == client
-                                  ? const Color(0xFFFF6D00).withOpacity(0.15)
-                                  : const Color(0xFF1E293B),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: cart.currentClient == client
-                                    ? const Color(0xFFFF6D00)
-                                    : const Color(0xFF334155),
-                                width: cart.currentClient == client ? 1.5 : 1,
+                              onSubmitted: (v) {
+                                cart.renameClient(client, v);
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  cart.renameClient(client, controller.text);
+                                  Navigator.pop(ctx);
+                                },
+                                style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15)),
+                                child: const Text('Guardar', style: TextStyle(color: Color(0xFFFF6D00))),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: cart.currentClient == client
+                              ? const Color(0xFFFF6D00).withOpacity(0.15)
+                              : const Color(0xFF1E293B),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: cart.currentClient == client
+                                ? const Color(0xFFFF6D00)
+                                : const Color(0xFF334155),
+                            width: cart.currentClient == client ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              cart.currentClient == client
+                                  ? Icons.person
+                                  : Icons.person_outline,
+                              color: const Color(0xFFFF6D00),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              client,
+                              style: const TextStyle(
+                                color: Color(0xFFFF6D00),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                letterSpacing: 0.5,
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  cart.currentClient == client
-                                      ? Icons.person
-                                      : Icons.person_outline,
-                                  color: const Color(0xFFFF6D00),
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  client,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF6D00),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                if (cart.currentClient == client) ...[
-                                  const SizedBox(width: 6),
-                                  const Icon(Icons.edit, size: 11, color: Color(0xFFFF6D00)),
-                                ],
-                                const Spacer(),
-                                Text(
-                                  '\$${grouped[client]!.fold(0.0, (sum, e) => sum + e.value.dish.price * e.value.quantity).toStringAsFixed(2)}',
-                                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                                ),
-                                if (cart.clients.length > 1) ...[
-                                  const SizedBox(width: 8),
-                                  GestureDetector(
-                                    onTap: () => cart.removeClient(client),
-                                    child: const Icon(Icons.close, size: 15, color: Colors.white30),
-                                  ),
-                                ],
-                              ],
+                            if (cart.currentClient == client) ...[
+                              const SizedBox(width: 6),
+                              const Icon(Icons.edit, size: 11, color: Color(0xFFFF6D00)),
+                            ],
+                            const Spacer(),
+                            Text(
+                              '\$${grouped[client]!.fold(0.0, (sum, e) => sum + e.value.dish.price * e.value.quantity).toStringAsFixed(2)}',
+                              style: const TextStyle(color: Colors.white54, fontSize: 12),
+                            ),
+                            if (cart.clients.length > 1) ...[
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => cart.removeClient(client),
+                                child: const Icon(Icons.close, size: 15, color: Colors.white30),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Items for this client
+                    for (final entry in grouped[client]!)
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        leading: SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              entry.value.dish.imageUrl,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),
-                        // Items for this client
-                        for (final entry in grouped[client]!) ...[
-                          ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 4),
-                            leading: SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  entry.value.dish.imageUrl,
-                                  width: 44,
-                                  height: 44,
-                                  fit: BoxFit.cover,
-                                ),
+                        title: Text(
+                          entry.value.dish.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '\$${entry.value.dish.price.toStringAsFixed(2)}',
+                              style: const TextStyle(color: Colors.white54, fontSize: 11),
+                            ),
+                            if (entry.value.guisados.isNotEmpty)
+                              Text(
+                                entry.value.guisados.join(', '),
+                                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
                               ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.white54),
+                              onPressed: () => cart.decrementQuantity(entry.key),
                             ),
-                            title: Text(
-                              entry.value.dish.name,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: Colors.white),
+                            Text(
+                              '${entry.value.quantity}',
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '\$${entry.value.dish.price.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                      color: Colors.white54, fontSize: 11),
-                                ),
-                                if (entry.value.guisados.isNotEmpty)
-                                  Text(
-                                    entry.value.guisados.join(', '),
-                                    style: const TextStyle(
-                                        color: Color(0xFF94A3B8), fontSize: 10),
-                                  ),
-                              ],
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline, size: 20, color: Color(0xFFFF6D00)),
+                              onPressed: () => cart.incrementQuantity(entry.key),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline,
-                                      size: 20, color: Colors.white54),
-                                  onPressed: () =>
-                                      cart.decrementQuantity(entry.key),
-                                ),
-                                Text(
-                                  '${entry.value.quantity}',
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.add_circle_outline,
-                                      size: 20, color: Color(0xFFFF6D00)),
-                                  onPressed: () =>
-                                      cart.incrementQuantity(entry.key),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ],
-                    ],
+                          ],
+                        ),
+                      ),
                   ],
-                ),
+                ],
+            ],
+          ),
         ),
 
         // ── TOTAL GENERAL + BOTONES ────────────────────────────
