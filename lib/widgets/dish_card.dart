@@ -23,9 +23,16 @@ const _jugoFallback = [
 Future<List<String>> _loadDrinkFlavors(String type) async {
   try {
     final supabase = Supabase.instance.client;
-    final types = type == 'refresco'
-        ? ['refresco', 'refresco_255', 'refresco_600']
-        : [type];
+    List<String> types;
+    if (type == 'refresco') {
+      types = ['refresco', 'refresco_255', 'refresco_600'];
+    } else if (type == 'agua_600' || type == 'agua_1litro') {
+      types = [type, 'agua_fresca'];
+    } else if (type == 'jugo_330' || type == 'jugo_1litro') {
+      types = [type, 'jugo'];
+    } else {
+      types = [type];
+    }
     final rows = await supabase
         .from('drink_flavors')
         .select('name')
