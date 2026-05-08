@@ -942,7 +942,21 @@ class _ReportsViewState extends State<ReportsView> {
       );
     }
 
-    return ListView.builder(
+    // DEBUG — confirmar que el código nuevo está corriendo
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          color: Colors.orange,
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            'CÓDIGO NUEVO — ${_filteredOrders.length} órdenes',
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _filteredOrders.length + 1,
@@ -1022,6 +1036,8 @@ class _ReportsViewState extends State<ReportsView> {
           ),
         );
       },
+    ),
+      ],
     );
   }
 
