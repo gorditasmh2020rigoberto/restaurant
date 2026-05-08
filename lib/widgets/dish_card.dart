@@ -65,7 +65,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final nameLower = dish.name.toLowerCase();
   final bool isRefresco = nameLower.contains('refresco');
   final bool isAguaFresca = (nameLower.contains('agua fresca') || nameLower.startsWith('agua')) &&
-      !nameLower.contains('natural') && !nameLower.contains('mineral') && !nameLower.contains('500');
+      !nameLower.contains('natural');
   final bool isJugo = dish.category == 'jugos' || nameLower.contains('jugo');
 
   if (isRefresco || isAguaFresca || isJugo) {
