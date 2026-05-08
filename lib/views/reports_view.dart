@@ -29,6 +29,9 @@ class _ReportsViewState extends State<ReportsView> {
   double _ventasTarjeta = 0.0;
   double _ventasTransferencia = 0.0;
 
+  // Vista activa: 'historial' o 'cortes'
+  String _activeView = 'historial';
+
   // Filtros
   String _timeFilter = 'all'; // all, day, week, month, exact_date
   String _branchFilter = 'Todas'; 
@@ -627,6 +630,16 @@ class _ReportsViewState extends State<ReportsView> {
                   ),
                   const SizedBox(height: 32),
 
+                  // Toggle Historial / Cortes por Día
+                  Row(
+                    children: [
+                      _buildViewTab('historial', Icons.list_alt, 'Historial de Órdenes'),
+                      const SizedBox(width: 8),
+                      _buildViewTab('cortes', Icons.calendar_today, 'Cortes por Día'),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
                   // Data Table
                   Container(
                     decoration: BoxDecoration(
@@ -787,6 +800,7 @@ class _ReportsViewState extends State<ReportsView> {
                         ),
                         
                         // Table Headers & Body with Horizontal Scroll for Mobile
+                        if (_activeView == 'historial')
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           physics: isMobile ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
@@ -809,12 +823,10 @@ class _ReportsViewState extends State<ReportsView> {
                                       _buildHeaderCell('MESERO', 2),
                                       _buildHeaderCell('SUCURSAL', 2),
                                   _buildHeaderCell('TOTAL', 2, textAlign: TextAlign.right),
-                                  const SizedBox(width: 100), // Actions space
+                                  const SizedBox(width: 100),
                                 ],
                               ),
                             ),
-                            
-                            // Table Content - Using Column instead of ListView to avoid height issues in some browsers/layouts
                             if (_filteredOrders.isEmpty)
                               Container(
                                 height: 200,
@@ -885,6 +897,100 @@ class _ReportsViewState extends State<ReportsView> {
                         ),
                       ),
                     ),
+
+                        // ── CORTES POR DÍA ──
+                        if (_activeView == 'cortes')
+                        Builder(builder: (context) {
+                          final cuts = _buildDailyCuts();
+                          if (cuts.isEmpty) {
+                            return Container(
+                              height: 200,
+                              alignment: Alignment.center,
+                              child: const Text('No hay datos para este período', style: TextStyle(color: Colors.white54)),
+                            );
+                          }
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: isMobile ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minWidth: isMobile ? 800 : screenWidth - (isSmall ? 32 : 64),
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                    color: const Color(0xFF0F172A).withValues(alpha: 0.5),
+                                    child: Row(
+                                      children: [
+                                        _buildHeaderCell('FECHA', 3),
+                                        _buildHeaderCell('ÓRDENES', 2),
+                                        _buildHeaderCell('EFECTIVO', 2),
+                                        _buildHeaderCell('TARJETA', 2),
+                                        _buildHeaderCell('TRANSFERENCIA', 2),
+                                        _buildHeaderCell('TOTAL DÍA', 2, textAlign: TextAlign.right),
+                                      ],
+                                    ),
+                                  ),
+                                  ...cuts.map((c) {
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Divider(color: Color(0xFF334155), height: 1),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 3,
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      padding: const EdgeInsets.all(6),
+                                                      decoration: BoxDecoration(
+                                                        color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                                                        borderRadius: BorderRadius.circular(8),
+                                                      ),
+                                                      child: const Icon(Icons.calendar_today, color: Color(0xFFFF6D00), size: 14),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    Text(c['label'] as String, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                                  ],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.blueAccent.withValues(alpha: 0.15),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Text('${c['count']} órdenes', style: const TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
+                                                ),
+                                              ),
+                                              Expanded(flex: 2, child: Text('\$${(c['efectivo'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Colors.greenAccent))),
+                                              Expanded(flex: 2, child: Text('\$${(c['tarjeta'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFF6D00)))),
+                                              Expanded(flex: 2, child: Text('\$${(c['transferencia'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Colors.purpleAccent))),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  '\$${(c['total'] as double).toStringAsFixed(2)}',
+                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15),
+                                                  textAlign: TextAlign.right,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
 
                         // Pagination
                         Padding(
@@ -1003,6 +1109,63 @@ class _ReportsViewState extends State<ReportsView> {
                 ],
               ),
             ),
+    );
+  }
+
+  List<Map<String, dynamic>> _buildDailyCuts() {
+    final Map<String, Map<String, dynamic>> byDay = {};
+    for (final o in _filteredOrders) {
+      final date = DateTime.tryParse(o['created_at'].toString())?.toLocal() ?? DateTime.now();
+      final key = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      byDay.putIfAbsent(key, () => {
+        'date': key,
+        'label': '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}',
+        'count': 0,
+        'total': 0.0,
+        'efectivo': 0.0,
+        'tarjeta': 0.0,
+        'transferencia': 0.0,
+      });
+      final amt = (o['total_amount'] as num?)?.toDouble() ?? 0.0;
+      byDay[key]!['count'] = (byDay[key]!['count'] as int) + 1;
+      byDay[key]!['total'] = (byDay[key]!['total'] as double) + amt;
+      final pm = o['ui_method'] as String;
+      if (pm == 'TARJETA') {
+        byDay[key]!['tarjeta'] = (byDay[key]!['tarjeta'] as double) + amt;
+      } else if (pm == 'TRANSFERENCIA') {
+        byDay[key]!['transferencia'] = (byDay[key]!['transferencia'] as double) + amt;
+      } else {
+        byDay[key]!['efectivo'] = (byDay[key]!['efectivo'] as double) + amt;
+      }
+    }
+    final result = byDay.values.toList();
+    result.sort((a, b) => (b['date'] as String).compareTo(a['date'] as String));
+    return result;
+  }
+
+  Widget _buildViewTab(String value, IconData icon, String label) {
+    final isSelected = _activeView == value;
+    return GestureDetector(
+      onTap: () => setState(() => _activeView = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: isSelected ? Colors.white : Colors.white54),
+            const SizedBox(width: 8),
+            Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.white54, fontWeight: FontWeight.bold, fontSize: 13)),
+          ],
+        ),
+      ),
     );
   }
 
