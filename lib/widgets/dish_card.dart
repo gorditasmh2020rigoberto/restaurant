@@ -397,6 +397,109 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     return;
   }
 
+  final bool isHuevo = dish.category == 'huevos' ||
+      nameLower.contains('huevo');
+
+  if (isHuevo) {
+    const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
+    String? selectedTermino;
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: Text(dish.name, style: const TextStyle(color: Colors.white, fontSize: 16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'TÉRMINO DEL HUEVO',
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: terminosHuevo.map((termino) {
+                  final isSelected = selectedTermino == termino;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () => setDialogState(() => selectedTermino = termino),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                              : const Color(0xFF0F172A),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                            width: 2,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                              size: 16,
+                              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              termino,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.white60,
+                                fontSize: 14,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: selectedTermino == null ? null : () {
+                Navigator.pop(ctx);
+                cart.addItemWithGuisados(dish, ['Huevo $selectedTermino']);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('${dish.name} ($selectedTermino) agregado'),
+                    duration: const Duration(milliseconds: 500),
+                    behavior: SnackBarBehavior.floating,
+                    width: 260,
+                  ));
+                }
+              },
+              style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15)),
+              child: const Text('Agregar a la orden',
+                  style: TextStyle(color: Color(0xFFFF6D00))),
+            ),
+          ],
+        ),
+      ),
+    );
+    return;
+  }
+
   if (!dish.requiresGuisado && !isChilaquil) {
     cart.addItem(dish);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
