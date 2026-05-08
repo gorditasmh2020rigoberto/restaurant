@@ -464,10 +464,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
             ),
             content: SizedBox(
               width: 520,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // Toggles de queso y frita
                   if (showOptions) ...[
                     const Text(
@@ -748,6 +749,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     ),
                   ],
                 ],
+                ),
               ),
             ),
             actions: [
