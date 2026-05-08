@@ -92,10 +92,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           if (isRefresco) ...[
                             _ToggleOption(
                               icon: Icons.sports_bar,
-                              label: '255 ml',
-                              value: aguaSize == '255 ml',
+                              label: '355 ml',
+                              value: aguaSize == '355 ml',
                               onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '255 ml' : null;
+                                aguaSize = v ? '355 ml' : null;
                                 if (!sabores255.contains(selectedSabor)) selectedSabor = null;
                               }),
                             ),
@@ -235,9 +235,16 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       if (aguaSize != null) aguaSize!,
                       selectedSabor!,
                     ];
-                    final finalDish = (isAguaFresca && aguaSize == '1 litro')
-                        ? dish.copyWith(price: dish.price + 100)
-                        : dish;
+                    Dish finalDish = dish;
+                    if (isAguaFresca && aguaSize == '1 litro') {
+                      finalDish = dish.copyWith(price: dish.price + 100);
+                    } else if (isRefresco) {
+                      if (aguaSize == '600 ml') {
+                        finalDish = dish.copyWith(price: 30);
+                      } else if (aguaSize == '255 ml' || aguaSize == '355 ml') {
+                        finalDish = dish.copyWith(price: 25);
+                      }
+                    }
                     cart.addItemWithGuisados(finalDish, extras);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
