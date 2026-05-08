@@ -931,29 +931,6 @@ class _ReportsViewState extends State<ReportsView> {
       );
     }
 
-    // DEBUG — eliminar después de confirmar
-    return Container(
-      color: Colors.red.withValues(alpha: 0.2),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'DEBUG: ${_filteredOrders.length} órdenes | isLoading=$_isLoading',
-            style: const TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          if (_filteredOrders.isNotEmpty)
-            Text(
-              'Primera orden: ${_filteredOrders.first['id']} — \$${_filteredOrders.first['total_amount']}',
-              style: const TextStyle(color: Colors.white70),
-            ),
-        ],
-      ),
-    );
-
-    // ignore: dead_code
     if (_filteredOrders.isEmpty) {
       return Container(
         height: 200,
