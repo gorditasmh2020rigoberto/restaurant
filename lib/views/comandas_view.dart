@@ -32,6 +32,8 @@ class _ComandasViewState extends State<ComandasView> {
   List<Map<String, dynamic>> _waiters = [];
   StreamSubscription<List<Map<String, dynamic>>>? _orderStreamSubscription;
   final Set<String> _notifiedOrders = {};
+  final Set<String> _notifiedDrinksOrders = {};
+  final Set<String> _notifiedFoodOrders = {};
   StreamSubscription? _dishesSubscription;
   final TransformationController _mapTransformationController = TransformationController(Matrix4.diagonal3Values(0.5, 0.5, 1.0));
 
@@ -340,11 +342,25 @@ class _ComandasViewState extends State<ComandasView> {
             final orderId = order['id'].toString();
             final status = order['status'];
 
-            // Si está lista o incompleta y no hemos avisado aún
+            // Notificación: bebidas listas (bar completó su estación)
+            if (order['drinks_ready'] == true && !_notifiedDrinksOrders.contains(orderId)) {
+              _notifiedDrinksOrders.add(orderId);
+              if (!_isInitialLoad) {
+                _showStationReadyNotification(order, isDrinks: true);
+              }
+            }
+
+            // Notificación: alimentos listos (cocina completó su estación)
+            if (order['food_ready'] == true && !_notifiedFoodOrders.contains(orderId)) {
+              _notifiedFoodOrders.add(orderId);
+              if (!_isInitialLoad) {
+                _showStationReadyNotification(order, isDrinks: false);
+              }
+            }
+
+            // Notificación final: toda la orden lista o incompleta
             if ((status == 'ready' || status == 'incomplete') && !_notifiedOrders.contains(orderId)) {
               _notifiedOrders.add(orderId);
-              
-              // Solo mostrar el aviso si NO es la carga inicial (para evitar spam de órdenes viejas)
               if (!_isInitialLoad) {
                 _showReadyNotification(order, status == 'incomplete');
               }
@@ -387,6 +403,88 @@ class _ComandasViewState extends State<ComandasView> {
     _audioPlayer.dispose();
     _mapTransformationController.dispose();
     super.dispose();
+  }
+
+  void _showStationReadyNotification(Map<String, dynamic> order, {required bool isDrinks}) async {
+    String location = 'Orden';
+    if (order['order_type'] == 'dine_in' && order['table_id'] != null) {
+      try {
+        final tabRes = await _supabase
+            .from('restaurant_tables')
+            .select('table_number')
+            .eq('id', order['table_id'] as Object)
+            .maybeSingle();
+        if (tabRes != null) location = 'Mesa ${tabRes['table_number']}';
+      } catch (e) {
+        debugPrint('Error fetching table: $e');
+      }
+    } else {
+      location = order['customer_name'] ?? 'Cliente';
+    }
+
+    if (!mounted) return;
+
+    try {
+      await _audioPlayer.play(UrlSource('https://actions.google.com/sounds/v1/alarms/dinner_chime.ogg'));
+    } catch (e) {
+      debugPrint('Error playing sound: $e');
+    }
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: const Color(0xFF1E293B),
+        title: Row(
+          children: [
+            Icon(
+              isDrinks ? Icons.local_bar : Icons.soup_kitchen,
+              color: isDrinks ? const Color(0xFF38BDF8) : const Color(0xFFFF6D00),
+              size: 32,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isDrinks ? '¡Bebidas Listas!' : '¡Alimentos Listos!',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isDrinks
+                  ? 'Las bebidas de $location ya están listas en el bar.'
+                  : 'Los alimentos de $location ya están listos en cocina.',
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 18),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              isDrinks
+                  ? 'Pasa por las bebidas para llevarlas a la mesa.'
+                  : 'Pasa por los alimentos para llevarlos a la mesa.',
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDrinks ? const Color(0xFF38BDF8) : const Color(0xFFFF6D00),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Entendido', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showReadyNotification(Map<String, dynamic> order, [bool isIncomplete = false]) async {

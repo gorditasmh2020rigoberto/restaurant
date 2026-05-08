@@ -813,12 +813,19 @@ class _OrderTicketState extends State<_OrderTicket> {
                         return s == 'ready' || s == 'cancelled';
                       });
 
+                      // 3. Update station-ready flag and optionally close the whole order
+                      if (widget.isDrinksOnly) {
+                        await supabase.from('orders').update({'drinks_ready': true}).eq('id', orderId);
+                      } else {
+                        await supabase.from('orders').update({'food_ready': true}).eq('id', orderId);
+                      }
+
                       if (allDone) {
                         final anyIncomplete = allItemsList.any((i) => i['status'] == 'cancelled');
                         await supabase.from('orders').update({'status': anyIncomplete ? 'incomplete' : 'ready'}).eq('id', orderId);
                       }
 
-                      // 3. Hide this station's ticket locally
+                      // 4. Hide this station's ticket locally
                       if (mounted) setState(() => _stationDone = true);
 
                       if (!context.mounted) return;
