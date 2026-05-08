@@ -468,7 +468,7 @@ class _OrderTicketState extends State<_OrderTicket> {
     // Load items
     try {
       final response = await supabase.from('order_items').select('''
-        id, quantity, status, price_at_time, guisados_selected,
+        id, quantity, status, price_at_time, guisados_selected, client_label,
         dishes (name, category, max_time)
       ''').eq('order_id', orderId).order('id');
       
@@ -696,10 +696,12 @@ class _OrderTicketState extends State<_OrderTicket> {
                           } catch (_) {}
                         }
 
-                        // Subtitle: for bar show customer name; for kitchen show extras
-                        final String? subtitle = widget.isDrinksOnly
-                            ? (_customerName != null && _customerName!.isNotEmpty ? _customerName : null)
-                            : (extras.isNotEmpty ? extras.join(' • ') : null);
+                        final clientLabel = item['client_label'] as String? ?? 'Cliente 1';
+                        final extrasText = extras.isNotEmpty ? extras.join(' • ') : null;
+
+                        // Always show client label; additionally show extras in kitchen
+                        final String subtitleLine1 = clientLabel;
+                        final String? subtitleLine2 = !widget.isDrinksOnly ? extrasText : null;
 
                         return InkWell(
                           onTap: () => _toggleItemStatus(index, isReady),
@@ -730,17 +732,26 @@ class _OrderTicketState extends State<_OrderTicket> {
                                           decoration: isReady ? TextDecoration.lineThrough : null,
                                         ),
                                       ),
-                                      if (subtitle != null)
+                                      // Client label (always shown)
+                                      Text(
+                                        subtitleLine1,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: isReady
+                                              ? Colors.grey
+                                              : (widget.isDrinksOnly
+                                                  ? const Color(0xFF38BDF8)
+                                                  : const Color(0xFFFF6D00)),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      // Guisados (kitchen only)
+                                      if (subtitleLine2 != null)
                                         Text(
-                                          subtitle,
+                                          subtitleLine2,
                                           style: TextStyle(
-                                            fontSize: 13,
-                                            color: isReady
-                                                ? Colors.grey
-                                                : (widget.isDrinksOnly
-                                                    ? const Color(0xFF38BDF8)
-                                                    : const Color(0xFFFF6D00)),
-                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12,
+                                            color: isReady ? Colors.grey : Colors.white54,
                                           ),
                                         ),
                                     ],

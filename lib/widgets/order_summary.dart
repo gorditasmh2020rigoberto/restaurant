@@ -205,6 +205,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             'quantity': item.quantity,
             'price_at_time': item.dish.price,
             'status': 'pending',
+            'client_label': item.clientLabel,
             'guisados_selected': item.guisados.isNotEmpty
                 ? jsonEncode(item.guisados)
                 : null,
