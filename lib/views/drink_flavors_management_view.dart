@@ -18,6 +18,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   List<Map<String, dynamic>> _jugos = [];
   bool _loading = true;
   final Map<String, double> _jugoPrices = {};
+  final Map<String, double> _refrescoPrices = {};
 
 
   @override
@@ -42,17 +43,24 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           .order('name', ascending: true);
       final list = (data as List<dynamic>).cast<Map<String, dynamic>>();
 
-      // Cargar precios de jugos
+      // Cargar precios de jugos y refrescos
       try {
         final priceRows = await _supabase
             .from('drink_type_prices')
             .select()
-            .inFilter('type', ['jugo_330', 'jugo_1litro']);
-        final prices = <String, double>{};
+            .inFilter('type', ['jugo_330', 'jugo_1litro', 'refresco_355', 'refresco_600']);
+        final jugoP = <String, double>{};
+        final refrescoP = <String, double>{};
         for (final r in (priceRows as List)) {
-          prices[r['type'] as String] = (r['price'] as num).toDouble();
+          final t = r['type'] as String;
+          final p = (r['price'] as num).toDouble();
+          if (t.startsWith('jugo')) jugoP[t] = p;
+          if (t.startsWith('refresco')) refrescoP[t] = p;
         }
-        if (mounted) setState(() => _jugoPrices.addAll(prices));
+        if (mounted) setState(() {
+          _jugoPrices.addAll(jugoP);
+          _refrescoPrices.addAll(refrescoP);
+        });
       } catch (_) {}
 
       if (mounted) {
@@ -184,12 +192,18 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     final Set<String> selectedJugoSizes = {};
     String? selectedNonRefresco;
 
-    // Campos de precio para jugos
+    // Campos de precio para jugos y refrescos
     final jugo330PriceCtrl = TextEditingController(
       text: _jugoPrices['jugo_330']?.toStringAsFixed(0) ?? '',
     );
     final jugo1litroPriceCtrl = TextEditingController(
       text: _jugoPrices['jugo_1litro']?.toStringAsFixed(0) ?? '',
+    );
+    final refresco355PriceCtrl = TextEditingController(
+      text: _refrescoPrices['refresco_355']?.toStringAsFixed(0) ?? '',
+    );
+    final refresco600PriceCtrl = TextEditingController(
+      text: _refrescoPrices['refresco_600']?.toStringAsFixed(0) ?? '',
     );
 
     const refrescoTypes = ['refresco_255', 'refresco_600'];
@@ -308,7 +322,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                 const SizedBox(height: 20),
                 const Text('Subgrupo', style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 1)),
                 const SizedBox(height: 8),
-                // Refrescos — checkboxes (se pueden seleccionar ambos)
+                // Refrescos — checkboxes con precio por tamaño
                 _optionTile(
                   key: 'refresco_255',
                   label: 'Refresco 355 ml',
@@ -316,6 +330,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
                     selectedNonRefresco = null;
+                    selectedJugoSizes.clear();
                     if (selectedRefrescoSizes.contains('refresco_255')) {
                       selectedRefrescoSizes.remove('refresco_255');
                     } else {
@@ -323,6 +338,36 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     }
                   }),
                 ),
+                if (selectedRefrescoSizes.contains('refresco_255')) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, bottom: 6),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.attach_money, size: 16, color: Color(0xFF38BDF8)),
+                        const SizedBox(width: 4),
+                        const Text('Precio 355 ml:', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: refresco355PriceCtrl,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            decoration: const InputDecoration(
+                              prefixText: '\$',
+                              prefixStyle: TextStyle(color: Color(0xFF38BDF8)),
+                              hintText: '0',
+                              hintStyle: TextStyle(color: Colors.white38),
+                              isDense: true,
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF38BDF8))),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF38BDF8), width: 2)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 _optionTile(
                   key: 'refresco_600',
                   label: 'Refresco 600 ml',
@@ -330,6 +375,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
                     selectedNonRefresco = null;
+                    selectedJugoSizes.clear();
                     if (selectedRefrescoSizes.contains('refresco_600')) {
                       selectedRefrescoSizes.remove('refresco_600');
                     } else {
@@ -337,6 +383,36 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     }
                   }),
                 ),
+                if (selectedRefrescoSizes.contains('refresco_600')) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, bottom: 6),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.attach_money, size: 16, color: Color(0xFFA78BFA)),
+                        const SizedBox(width: 4),
+                        const Text('Precio 600 ml:', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: refresco600PriceCtrl,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            decoration: const InputDecoration(
+                              prefixText: '\$',
+                              prefixStyle: TextStyle(color: Color(0xFFA78BFA)),
+                              hintText: '0',
+                              hintStyle: TextStyle(color: Colors.white38),
+                              isDense: true,
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFA78BFA))),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFA78BFA), width: 2)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 // Agua Fresca — radio
                 _optionTile(
                   key: 'agua_fresca',
@@ -542,6 +618,25 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                           await _supabase.from('drink_flavors')
                               .delete()
                               .eq('id', existingByType[t]['id']);
+                        }
+                      }
+                      // Guardar precios por tamaño de refresco
+                      if (selectedRefrescoSizes.contains('refresco_255')) {
+                        final p = double.tryParse(refresco355PriceCtrl.text);
+                        if (p != null) {
+                          await _supabase.from('drink_type_prices').upsert(
+                            {'type': 'refresco_355', 'price': p},
+                            onConflict: 'type',
+                          );
+                        }
+                      }
+                      if (selectedRefrescoSizes.contains('refresco_600')) {
+                        final p = double.tryParse(refresco600PriceCtrl.text);
+                        if (p != null) {
+                          await _supabase.from('drink_type_prices').upsert(
+                            {'type': 'refresco_600', 'price': p},
+                            onConflict: 'type',
+                          );
                         }
                       }
                     }

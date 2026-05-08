@@ -269,11 +269,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     Dish finalDish = dish;
                     if (isAguaFresca && aguaSize == '1 litro') {
                       finalDish = dish.copyWith(price: dish.price + 100);
-                    } else if (isRefresco) {
-                      if (aguaSize == '600 ml') {
-                        finalDish = dish.copyWith(price: 30);
-                      } else if (aguaSize == '255 ml' || aguaSize == '355 ml') {
-                        finalDish = dish.copyWith(price: 25);
+                    } else if (isRefresco && aguaSize != null) {
+                      final priceType = aguaSize == '600 ml' ? 'refresco_600' : 'refresco_355';
+                      final refrescoPrice = await _loadDrinkPrice(priceType);
+                      if (refrescoPrice != null) {
+                        finalDish = dish.copyWith(price: refrescoPrice);
+                      } else {
+                        finalDish = dish.copyWith(price: aguaSize == '600 ml' ? 30 : 25);
                       }
                     } else if (isJugo && aguaSize != null) {
                       final priceType = aguaSize == '330 ml' ? 'jugo_330' : 'jugo_1litro';
