@@ -653,150 +653,37 @@ class _ReportsViewState extends State<ReportsView> {
                         // Table Header Actions
                         Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: Flex(
-                            direction: isMobile ? Axis.vertical : Axis.horizontal,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Flexible(
-                                flex: isMobile ? 0 : 2,
-                                child: TextField(
-                                  onChanged: (val) {
-                                    _searchQuery = val;
-                                    _applyFilter();
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: 'Buscar...',
-                                    hintStyle: const TextStyle(
-                                      color: Colors.white54,
-                                    ),
-                                    prefixIcon: const Icon(
-                                      Icons.search,
-                                      color: Colors.white54,
-                                    ),
-                                    filled: true,
-                                    fillColor: const Color(0xFF0F172A),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 0,
-                                    ),
-                                  ),
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              if (isMobile) const SizedBox(height: 12) else const SizedBox(width: 16),
-                              Flexible(
-                                flex: isMobile ? 0 : 1,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0F172A),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value:
-                                          _waitersList.any(
-                                            (w) => w['id'] == _waiterFilter,
-                                          )
-                                          ? _waiterFilter
-                                          : 'Todos',
-                                      isExpanded: true,
-                                      dropdownColor: const Color(0xFF1E293B),
-                                      style: const TextStyle(
-                                        color: Colors.white54,
+                          child: isMobile
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildSearchField(),
+                                    const SizedBox(height: 12),
+                                    _buildWaiterDropdown(),
+                                    const SizedBox(height: 12),
+                                    _buildPaymentDropdown(),
+                                  ],
+                                )
+                              : Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(flex: 2, child: _buildSearchField()),
+                                    const SizedBox(width: 16),
+                                    Expanded(flex: 1, child: _buildWaiterDropdown()),
+                                    const SizedBox(width: 16),
+                                    Expanded(flex: 1, child: _buildPaymentDropdown()),
+                                    const SizedBox(width: 16),
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF0F172A),
+                                        shape: BoxShape.circle,
                                       ),
-                                      items: [
-                                        const DropdownMenuItem(
-                                          value: 'Todos',
-                                          child: Text('Todos los Meseros'),
-                                        ),
-                                        ..._waitersList.map(
-                                          (w) => DropdownMenuItem(
-                                            value: w['id'],
-                                            child: Text(w['name']),
-                                          ),
-                                        ),
-                                      ],
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          setState(() => _waiterFilter = val);
-                                          _fetchReports();
-                                        }
-                                      },
+                                      child: const Icon(Icons.filter_list, color: Colors.white54, size: 20),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ),
-                              if (isMobile) const SizedBox(height: 12) else const SizedBox(width: 16),
-                              Flexible(
-                                flex: isMobile ? 0 : 1,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF0F172A),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
-                                      value: _paymentFilter,
-                                      isExpanded: true,
-                                      dropdownColor: const Color(0xFF1E293B),
-                                      style: const TextStyle(
-                                        color: Colors.white54,
-                                      ),
-                                      items: const [
-                                        DropdownMenuItem(
-                                          value: 'Todos',
-                                          child: Text('Método de Pago: Todos'),
-                                        ),
-                                        DropdownMenuItem(
-                                          value: 'EFECTIVO',
-                                          child: Text('Efectivo'),
-                                        ),
-                                        DropdownMenuItem(
-                                          value: 'TARJETA',
-                                          child: Text('Tarjeta/MercadoPago'),
-                                        ),
-                                        DropdownMenuItem(
-                                          value: 'TRANSFERENCIA',
-                                          child: Text('Transferencia'),
-                                        ),
-                                      ],
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          setState(() => _paymentFilter = val);
-                                          _applyFilter();
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              if (!isMobile) const Spacer(),
-                              if (!isMobile)
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF0F172A),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.filter_list,
-                                  color: Colors.white54,
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                         
                         // Tabla activa (historial o cortes)
@@ -805,15 +692,15 @@ class _ReportsViewState extends State<ReportsView> {
                         // Pagination
                         Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: Flex(
-                            direction: isSmall ? Axis.vertical : Axis.horizontal,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            runSpacing: 12,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text(
                                 'Mostrando 1-${_filteredOrders.length} de $_totalOrders órdenes',
                                 style: const TextStyle(color: Colors.white54, fontSize: 12),
                               ),
-                              if (isSmall) const SizedBox(height: 12),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -978,6 +865,86 @@ class _ReportsViewState extends State<ReportsView> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      onChanged: (val) {
+        _searchQuery = val;
+        _applyFilter();
+      },
+      decoration: InputDecoration(
+        hintText: 'Buscar...',
+        hintStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: const Icon(Icons.search, color: Colors.white54),
+        filled: true,
+        fillColor: const Color(0xFF0F172A),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+      ),
+      style: const TextStyle(color: Colors.white),
+    );
+  }
+
+  Widget _buildWaiterDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _waitersList.any((w) => w['id'] == _waiterFilter) ? _waiterFilter : 'Todos',
+          isExpanded: true,
+          dropdownColor: const Color(0xFF1E293B),
+          style: const TextStyle(color: Colors.white54),
+          items: [
+            const DropdownMenuItem(value: 'Todos', child: Text('Todos los Meseros')),
+            ..._waitersList.map((w) => DropdownMenuItem(value: w['id'], child: Text(w['name']))),
+          ],
+          onChanged: (val) {
+            if (val != null) {
+              setState(() => _waiterFilter = val);
+              _fetchReports();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _paymentFilter,
+          isExpanded: true,
+          dropdownColor: const Color(0xFF1E293B),
+          style: const TextStyle(color: Colors.white54),
+          items: const [
+            DropdownMenuItem(value: 'Todos', child: Text('Pago: Todos')),
+            DropdownMenuItem(value: 'EFECTIVO', child: Text('Efectivo')),
+            DropdownMenuItem(value: 'TARJETA', child: Text('Tarjeta')),
+            DropdownMenuItem(value: 'TRANSFERENCIA', child: Text('Transferencia')),
+          ],
+          onChanged: (val) {
+            if (val != null) {
+              setState(() => _paymentFilter = val);
+              _applyFilter();
+            }
+          },
+        ),
+      ),
     );
   }
 
