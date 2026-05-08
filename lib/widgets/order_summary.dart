@@ -435,6 +435,47 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
     );
   }
 
+  void _showRenameClientDialog(BuildContext context, CartProvider cart, String client) {
+    final controller = TextEditingController(text: client);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: const Text('Editar nombre', style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Nombre del cliente',
+            hintStyle: TextStyle(color: Colors.white38),
+            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
+            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
+          ),
+          onSubmitted: (v) {
+            if (v.trim().isNotEmpty) cart.renameClient(client, v.trim());
+            Navigator.pop(ctx);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) cart.renameClient(client, name);
+              Navigator.pop(ctx);
+            },
+            style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15)),
+            child: const Text('Guardar', style: TextStyle(color: Color(0xFFFF6D00))),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
@@ -571,48 +612,9 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               else
                 for (final client in cart.clients) ...[
                   if (grouped[client] != null && grouped[client]!.isNotEmpty) ...[
-                    // Client header — tap to select, double-tap to rename
+                    // Client header — tap to select, pencil to rename
                     GestureDetector(
                       onTap: () => cart.setCurrentClient(client),
-                      onDoubleTap: () {
-                        final controller = TextEditingController(text: client);
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            backgroundColor: const Color(0xFF1E293B),
-                            title: const Text('Editar nombre', style: TextStyle(color: Colors.white)),
-                            content: TextField(
-                              controller: controller,
-                              autofocus: true,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
-                                hintText: 'Nombre del cliente',
-                                hintStyle: TextStyle(color: Colors.white38),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
-                                focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
-                              ),
-                              onSubmitted: (v) {
-                                cart.renameClient(client, v);
-                                Navigator.pop(ctx);
-                              },
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(ctx),
-                                child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  cart.renameClient(client, controller.text);
-                                  Navigator.pop(ctx);
-                                },
-                                style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15)),
-                                child: const Text('Guardar', style: TextStyle(color: Color(0xFFFF6D00))),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
                         margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -648,10 +650,11 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            if (cart.currentClient == client) ...[
-                              const SizedBox(width: 6),
-                              const Icon(Icons.edit, size: 11, color: Color(0xFFFF6D00)),
-                            ],
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () => _showRenameClientDialog(context, cart, client),
+                              child: const Icon(Icons.edit, size: 16, color: Color(0xFFFF6D00)),
+                            ),
                             const Spacer(),
                             Text(
                               '\$${grouped[client]!.fold(0.0, (sum, e) => sum + e.value.dish.price * e.value.quantity).toStringAsFixed(2)}',
