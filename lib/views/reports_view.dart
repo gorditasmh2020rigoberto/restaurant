@@ -799,96 +799,8 @@ class _ReportsViewState extends State<ReportsView> {
                           ),
                         ),
                         
-                        // Table Headers & Body
-                        if (_activeView == 'historial')
-                        if (_filteredOrders.isEmpty)
-                          Container(
-                            height: 200,
-                            alignment: Alignment.center,
-                            child: Text(
-                              _isLoading ? 'Cargando datos...' : 'No hay datos registrados para esta selección',
-                              style: const TextStyle(color: Colors.white54),
-                            ),
-                          )
-                        else
-                          ...[
-                            // Headers
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              color: const Color(0xFF0F172A).withValues(alpha: 0.5),
-                              child: Row(
-                                children: [
-                                  _buildHeaderCell('ID ORDEN', 2),
-                                  _buildHeaderCell('HORA', 2),
-                                  _buildHeaderCell('MESA / CLIENTE', 3),
-                                  _buildHeaderCell('PAGO', 2),
-                                  _buildHeaderCell('MESERO', 2),
-                                  _buildHeaderCell('SUCURSAL', 2),
-                                  _buildHeaderCell('TOTAL', 2, textAlign: TextAlign.right),
-                                  const SizedBox(width: 80),
-                                ],
-                              ),
-                            ),
-                            // Rows
-                            ..._filteredOrders.map((o) {
-                              final date = DateTime.tryParse(o['created_at'].toString())?.toLocal() ?? DateTime.now();
-                              final hora = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-                              final mesaStr = _getMesaStr(o);
-                              final method = o['ui_method']?.toString() ?? 'EFECTIVO';
-                              final Color methodColor = (method == 'TARJETA') ? const Color(0xFFFF6D00) : (method == 'TRANSFERENCIA' ? Colors.purpleAccent : Colors.green);
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Divider(color: Color(0xFF334155), height: 1),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                    child: Row(
-                                      children: [
-                                        Expanded(flex: 2, child: Text('#ORD-${o['id'].toString().substring(0, 4)}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                        Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Colors.white70))),
-                                        Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis)),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: methodColor.withValues(alpha: 0.2),
-                                                borderRadius: BorderRadius.circular(10),
-                                                border: Border.all(color: methodColor.withValues(alpha: 0.5)),
-                                              ),
-                                              child: Text(method, style: TextStyle(color: methodColor, fontSize: 9, fontWeight: FontWeight.bold)),
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(flex: 2, child: Text(o['waiters']?['name'] ?? 'N/A', style: const TextStyle(color: Colors.white70), overflow: TextOverflow.ellipsis)),
-                                        Expanded(flex: 2, child: Text(o['branch_name'] ?? 'N/A', style: const TextStyle(color: Colors.white70, fontSize: 11), overflow: TextOverflow.ellipsis)),
-                                        Expanded(flex: 2, child: Text('\$${o['total_amount']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
-                                        SizedBox(
-                                          width: 80,
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 18),
-                                                tooltip: 'Facturación / Ticket',
-                                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }),
-                          ],
-
-                        // ── CORTES POR DÍA ──
-                        if (_activeView == 'cortes')
-                        ..._buildCortesWidget(),
+                        // Tabla activa (historial o cortes)
+                        _buildActiveTable(),
 
                         // Pagination
                         Padding(
@@ -1007,6 +919,117 @@ class _ReportsViewState extends State<ReportsView> {
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildActiveTable() {
+    if (_activeView == 'cortes') {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: _buildCortesWidget(),
+      );
+    }
+
+    // Historial
+    if (_filteredOrders.isEmpty) {
+      return Container(
+        height: 200,
+        alignment: Alignment.center,
+        child: Text(
+          _isLoading ? 'Cargando datos...' : 'No hay datos registrados para esta selección',
+          style: const TextStyle(color: Colors.white54),
+        ),
+      );
+    }
+
+    final List<Widget> rows = [];
+
+    // Header row
+    rows.add(
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        color: const Color(0xFF0F172A).withValues(alpha: 0.5),
+        child: Row(
+          children: [
+            _buildHeaderCell('ID ORDEN', 2),
+            _buildHeaderCell('HORA', 2),
+            _buildHeaderCell('MESA / CLIENTE', 3),
+            _buildHeaderCell('PAGO', 2),
+            _buildHeaderCell('MESERO', 2),
+            _buildHeaderCell('SUCURSAL', 2),
+            _buildHeaderCell('TOTAL', 2, textAlign: TextAlign.right),
+            const SizedBox(width: 80),
+          ],
+        ),
+      ),
+    );
+
+    for (final o in _filteredOrders) {
+      final date = DateTime.tryParse(o['created_at'].toString())?.toLocal() ?? DateTime.now();
+      final hora = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      final mesaStr = _getMesaStr(o);
+      final method = o['ui_method']?.toString() ?? 'EFECTIVO';
+      final Color methodColor = method == 'TARJETA'
+          ? const Color(0xFFFF6D00)
+          : method == 'TRANSFERENCIA'
+              ? Colors.purpleAccent
+              : Colors.green;
+      final String idShort = o['id'].toString().length >= 4
+          ? o['id'].toString().substring(0, 4)
+          : o['id'].toString();
+
+      rows.add(Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(color: Color(0xFF334155), height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              children: [
+                Expanded(flex: 2, child: Text('#ORD-$idShort', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Colors.white70))),
+                Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Colors.white), overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  flex: 2,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: methodColor.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: methodColor.withValues(alpha: 0.5)),
+                      ),
+                      child: Text(method, style: TextStyle(color: methodColor, fontSize: 9, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+                Expanded(flex: 2, child: Text(o['waiters']?['name'] ?? 'N/A', style: const TextStyle(color: Colors.white70), overflow: TextOverflow.ellipsis)),
+                Expanded(flex: 2, child: Text(o['branch_name'] ?? 'N/A', style: const TextStyle(color: Colors.white70, fontSize: 11), overflow: TextOverflow.ellipsis)),
+                Expanded(flex: 2, child: Text('\$${o['total_amount']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+                SizedBox(
+                  width: 80,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 18),
+                        tooltip: 'Facturación / Ticket',
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ));
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: rows,
     );
   }
 
