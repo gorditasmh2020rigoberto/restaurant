@@ -837,85 +837,144 @@ class _ReportsViewState extends State<ReportsView> {
 
                   const SizedBox(height: 24),
 
-                  // Bottom Modules - Responsive (Row to Column)
-                  Flex(
-                    direction: isMobile ? Axis.vertical : Axis.horizontal,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Productos más vendidos
-                      Expanded(
-                        flex: isMobile ? 0 : 2,
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFF334155)),
+                  // Bottom Modules - Responsive
+                  if (isMobile) ...[
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF334155)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(children: const [
+                            Icon(Icons.star, color: Colors.white54, size: 18),
+                            SizedBox(width: 8),
+                            Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ]),
+                          const SizedBox(height: 16),
+                          _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
+                          const SizedBox(height: 16),
+                          _buildProductRow('Croissant Clásico', 62, 100, Icons.bakery_dining),
+                          const SizedBox(height: 16),
+                          _buildProductRow('Sandwich de Pavo', 48, 100, Icons.lunch_dining),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFF334155)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(children: const [
+                            Icon(Icons.payments, color: Colors.white54, size: 18),
+                            SizedBox(width: 8),
+                            Text('MÉTODOS DE PAGO', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ]),
+                          const SizedBox(height: 24),
+                          _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
+                          const SizedBox(height: 16),
+                          _buildPaymentMethodRow('Efectivo', _efectivoEnCaja, Icons.money, Colors.greenAccent[400]!),
+                          const SizedBox(height: 16),
+                          _buildPaymentMethodRow('Transferencia', _ventasTransferencia, Icons.account_balance, Colors.purpleAccent),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF334155),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Ver Desglose Detallado'),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: const [
+                        ],
+                      ),
+                    ),
+                  ] else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(children: const [
                                   Icon(Icons.star, color: Colors.white54, size: 18),
                                   SizedBox(width: 8),
                                   Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
-                                ],
-                              ),
-                              const SizedBox(height: 16),
-                              _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
-                              const SizedBox(height: 16),
-                              _buildProductRow('Croissant Clásico', 62, 100, Icons.bakery_dining),
-                              const SizedBox(height: 16),
-                              _buildProductRow('Sandwich de Pavo', 48, 100, Icons.lunch_dining),
-                            ],
+                                ]),
+                                const SizedBox(height: 16),
+                                _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
+                                const SizedBox(height: 16),
+                                _buildProductRow('Croissant Clásico', 62, 100, Icons.bakery_dining),
+                                const SizedBox(height: 16),
+                                _buildProductRow('Sandwich de Pavo', 48, 100, Icons.lunch_dining),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      if (isMobile) const SizedBox(height: 24) else const SizedBox(width: 24),
-                      // Métodos de Pago
-                      Expanded(
-                        flex: isMobile ? 0 : 1,
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFF334155)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: const [
+                        const SizedBox(width: 24),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(children: const [
                                   Icon(Icons.payments, color: Colors.white54, size: 18),
                                   SizedBox(width: 8),
                                   Text('MÉTODOS DE PAGO', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
-                              const SizedBox(height: 16),
-                              _buildPaymentMethodRow('Efectivo', _efectivoEnCaja, Icons.money, Colors.greenAccent[400]!),
-                              const SizedBox(height: 16),
-                              _buildPaymentMethodRow('Transferencia', _ventasTransferencia, Icons.account_balance, Colors.purpleAccent),
-                              const SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF334155),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                ]),
+                                const SizedBox(height: 24),
+                                _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
+                                const SizedBox(height: 16),
+                                _buildPaymentMethodRow('Efectivo', _efectivoEnCaja, Icons.money, Colors.greenAccent[400]!),
+                                const SizedBox(height: 16),
+                                _buildPaymentMethodRow('Transferencia', _ventasTransferencia, Icons.account_balance, Colors.purpleAccent),
+                                const SizedBox(height: 24),
+                                ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF334155),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                  ),
+                                  child: const Text('Ver Desglose Detallado'),
                                 ),
-                                child: const Text('Ver Desglose Detallado'),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -947,7 +1006,6 @@ class _ReportsViewState extends State<ReportsView> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _filteredOrders.length + 1,
       itemBuilder: (context, index) {
-        // Fila encabezado
         if (index == 0) {
           return Container(
             color: const Color(0xFF0F172A),
