@@ -809,6 +809,7 @@ class _ReportsViewState extends State<ReportsView> {
                               minWidth: isMobile ? 900 : screenWidth - (isSmall ? 32 : 64),
                             ),
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 // Headers
                                 Container(
