@@ -444,8 +444,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   bool conHuevo = false; // solo para chilaquiles
   bool frita = false;
   String? selectedSalsa; // solo para chilaquiles
+  String? selectedTerminoHuevo; // solo para chilaquiles con huevo
 
   const salsasChilaquil = ['Roja', 'Verde', 'Ranchera'];
+  const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
 
   await showDialog(
     context: context,
@@ -484,7 +486,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             icon: Icons.egg,
                             label: 'Con Huevo',
                             value: conHuevo,
-                            onChanged: (v) => setDialogState(() => conHuevo = v),
+                            onChanged: (v) => setDialogState(() {
+                              conHuevo = v;
+                              if (!v) selectedTerminoHuevo = null;
+                            }),
                           )
                         else
                           _ToggleOption(
@@ -510,6 +515,67 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const SizedBox(height: 16),
                     const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
+                  ],
+
+                  // Término del huevo (solo cuando conHuevo está activo)
+                  if (isChilaquil && conHuevo) ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      'TÉRMINO DEL HUEVO',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: terminosHuevo.map((termino) {
+                        final isSelected = selectedTerminoHuevo == termino;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => setDialogState(() => selectedTerminoHuevo = termino),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                    : const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                                  width: 2,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                                    size: 16,
+                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    termino,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : Colors.white60,
+                                      fontSize: 14,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(color: Color(0xFF334155)),
                   ],
 
                   // Selector de salsa para chilaquiles
@@ -702,10 +768,19 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     );
                     return;
                   }
+                  if (isChilaquil && conHuevo && selectedTerminoHuevo == null) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text('Selecciona el término del huevo'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.pop(ctx);
                   final extras = [
                     if (isChilaquil && selectedSalsa != null) 'Salsa $selectedSalsa',
-                    if (isChilaquil && conHuevo) 'Con huevo',
+                    if (isChilaquil && conHuevo) 'Con huevo ${selectedTerminoHuevo != null ? "(${selectedTerminoHuevo})" : ""}',
                     if (!isChilaquil && conQueso) 'Con queso',
                     if (frita) 'Frita',
                     if (!isChilaquil) ...selected,
