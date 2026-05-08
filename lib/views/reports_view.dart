@@ -900,97 +900,7 @@ class _ReportsViewState extends State<ReportsView> {
 
                         // ── CORTES POR DÍA ──
                         if (_activeView == 'cortes')
-                        Builder(builder: (context) {
-                          final cuts = _buildDailyCuts();
-                          if (cuts.isEmpty) {
-                            return Container(
-                              height: 200,
-                              alignment: Alignment.center,
-                              child: const Text('No hay datos para este período', style: TextStyle(color: Colors.white54)),
-                            );
-                          }
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            physics: isMobile ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minWidth: isMobile ? 800 : screenWidth - (isSmall ? 32 : 64),
-                              ),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                    color: const Color(0xFF0F172A).withValues(alpha: 0.5),
-                                    child: Row(
-                                      children: [
-                                        _buildHeaderCell('FECHA', 3),
-                                        _buildHeaderCell('ÓRDENES', 2),
-                                        _buildHeaderCell('EFECTIVO', 2),
-                                        _buildHeaderCell('TARJETA', 2),
-                                        _buildHeaderCell('TRANSFERENCIA', 2),
-                                        _buildHeaderCell('TOTAL DÍA', 2, textAlign: TextAlign.right),
-                                      ],
-                                    ),
-                                  ),
-                                  ...cuts.map((c) {
-                                    return Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Divider(color: Color(0xFF334155), height: 1),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 3,
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                      padding: const EdgeInsets.all(6),
-                                                      decoration: BoxDecoration(
-                                                        color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
-                                                        borderRadius: BorderRadius.circular(8),
-                                                      ),
-                                                      child: const Icon(Icons.calendar_today, color: Color(0xFFFF6D00), size: 14),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    Text(c['label'] as String, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                                  ],
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.blueAccent.withValues(alpha: 0.15),
-                                                    borderRadius: BorderRadius.circular(12),
-                                                  ),
-                                                  child: Text('${c['count']} órdenes', style: const TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
-                                                ),
-                                              ),
-                                              Expanded(flex: 2, child: Text('\$${(c['efectivo'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Colors.greenAccent))),
-                                              Expanded(flex: 2, child: Text('\$${(c['tarjeta'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFF6D00)))),
-                                              Expanded(flex: 2, child: Text('\$${(c['transferencia'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Colors.purpleAccent))),
-                                              Expanded(
-                                                flex: 2,
-                                                child: Text(
-                                                  '\$${(c['total'] as double).toStringAsFixed(2)}',
-                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15),
-                                                  textAlign: TextAlign.right,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }).toList(),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
+                        ..._buildCortesWidget(),
 
                         // Pagination
                         Padding(
@@ -1110,6 +1020,89 @@ class _ReportsViewState extends State<ReportsView> {
               ),
             ),
     );
+  }
+
+  List<Widget> _buildCortesWidget() {
+    final cuts = _buildDailyCuts();
+    if (cuts.isEmpty) {
+      return [
+        Container(
+          height: 200,
+          alignment: Alignment.center,
+          child: const Text('No hay datos para este período', style: TextStyle(color: Colors.white54)),
+        ),
+      ];
+    }
+    return [
+      // Header
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        color: const Color(0xFF0F172A).withValues(alpha: 0.5),
+        child: const Row(
+          children: [
+            Expanded(flex: 3, child: Text('FECHA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('ÓRDENES', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('EFECTIVO', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('TARJETA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('TRANSFERENCIA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('TOTAL DÍA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+          ],
+        ),
+      ),
+      // Rows
+      ...cuts.map((c) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(color: Color(0xFF334155), height: 1),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.calendar_today, color: Color(0xFFFF6D00), size: 14),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(c['label'] as String, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text('${c['count']} órdenes', style: const TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                Expanded(flex: 2, child: Text('\$${(c['efectivo'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Colors.greenAccent))),
+                Expanded(flex: 2, child: Text('\$${(c['tarjeta'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFF6D00)))),
+                Expanded(flex: 2, child: Text('\$${(c['transferencia'] as double).toStringAsFixed(2)}', style: const TextStyle(color: Colors.purpleAccent))),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    '\$${(c['total'] as double).toStringAsFixed(2)}',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      )),
+    ];
   }
 
   List<Map<String, dynamic>> _buildDailyCuts() {
