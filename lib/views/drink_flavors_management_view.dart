@@ -152,121 +152,232 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   Future<void> _showFlavorDialog({Map<String, dynamic>? flavor, required String type}) async {
     final isEditing = flavor != null;
     final nameController = TextEditingController(text: isEditing ? flavor['name'] as String : '');
-    String selectedType = isEditing ? (flavor['type'] as String? ?? type) : type;
+    final initialType = isEditing ? (flavor['type'] as String? ?? type) : type;
 
-    const typeOptions = [
-      ('refresco_255', 'Refresco 255 ml'),
-      ('refresco_600', 'Refresco 600 ml'),
-      ('agua_fresca',  'Agua Fresca'),
-      ('jugo',         'Jugo'),
-    ];
+    // Refrescos usan checkboxes (multi); agua/jugo usan radio (único)
+    final Set<String> selectedRefrescoSizes = {};
+    String? selectedNonRefresco;
+
+    const refrescoTypes = ['refresco_255', 'refresco_600'];
+    if (refrescoTypes.contains(initialType)) {
+      selectedRefrescoSizes.add(initialType);
+      // Si estamos editando, buscar si ya existe el otro tamaño con el mismo nombre
+      if (isEditing) {
+        try {
+          final rows = await _supabase
+              .from('drink_flavors')
+              .select()
+              .inFilter('type', refrescoTypes)
+              .eq('name', flavor['name'] as String);
+          for (final r in (rows as List)) {
+            selectedRefrescoSizes.add(r['type'] as String);
+          }
+        } catch (_) {}
+      }
+    } else {
+      selectedNonRefresco = initialType;
+    }
+
+    Widget _optionTile({
+      required String key,
+      required String label,
+      required bool isSelected,
+      required bool isCheckbox,
+      required VoidCallback onTap,
+    }) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          margin: const EdgeInsets.only(bottom: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFFF6D00).withOpacity(0.15) : const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isCheckbox
+                    ? (isSelected ? Icons.check_box : Icons.check_box_outline_blank)
+                    : (isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked),
+                size: 18,
+                color: isSelected ? const Color(0xFFFF6D00) : Colors.white38,
+              ),
+              const SizedBox(width: 10),
+              Text(label, style: TextStyle(
+                color: isSelected ? Colors.white : Colors.white60,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              )),
+            ],
+          ),
+        ),
+      );
+    }
 
     await showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: Text(
-            isEditing ? 'Editar sabor' : 'Nuevo sabor',
-            style: const TextStyle(color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: nameController,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText: selectedType == 'agua_fresca' ? 'Ej. Jamaica, Horchata...' : 'Ej. Coca-Cola, Sprite...',
-                  hintStyle: const TextStyle(color: Colors.white38),
-                  enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
-                  focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text('Subgrupo', style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 1)),
-              const SizedBox(height: 8),
-              ...typeOptions.map((opt) {
-                final key = opt.$1;
-                final label = opt.$2;
-                final isSelected = selectedType == key;
-                return GestureDetector(
-                  onTap: () => setDlgState(() => selectedType = key),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    margin: const EdgeInsets.only(bottom: 6),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFFF6D00).withOpacity(0.15) : const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                            size: 18, color: isSelected ? const Color(0xFFFF6D00) : Colors.white38),
-                        const SizedBox(width: 10),
-                        Text(label, style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.white60,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        )),
-                      ],
-                    ),
+        builder: (ctx, setDlgState) {
+          final hintText = selectedNonRefresco == 'agua_fresca'
+              ? 'Ej. Jamaica, Horchata...'
+              : 'Ej. Coca-Cola, Sprite...';
+          final canSave = nameController.text.trim().isNotEmpty &&
+              (selectedRefrescoSizes.isNotEmpty || selectedNonRefresco != null);
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E293B),
+            title: Text(
+              isEditing ? 'Editar sabor' : 'Nuevo sabor',
+              style: const TextStyle(color: Colors.white),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: nameController,
+                  autofocus: true,
+                  style: const TextStyle(color: Colors.white),
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (_) => setDlgState(() {}),
+                  decoration: InputDecoration(
+                    hintText: hintText,
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
+                    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
                   ),
-                );
-              }),
+                ),
+                const SizedBox(height: 20),
+                const Text('Subgrupo', style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 1)),
+                const SizedBox(height: 8),
+                // Refrescos — checkboxes (se pueden seleccionar ambos)
+                _optionTile(
+                  key: 'refresco_255',
+                  label: 'Refresco 255 ml',
+                  isSelected: selectedRefrescoSizes.contains('refresco_255'),
+                  isCheckbox: true,
+                  onTap: () => setDlgState(() {
+                    selectedNonRefresco = null;
+                    if (selectedRefrescoSizes.contains('refresco_255')) {
+                      selectedRefrescoSizes.remove('refresco_255');
+                    } else {
+                      selectedRefrescoSizes.add('refresco_255');
+                    }
+                  }),
+                ),
+                _optionTile(
+                  key: 'refresco_600',
+                  label: 'Refresco 600 ml',
+                  isSelected: selectedRefrescoSizes.contains('refresco_600'),
+                  isCheckbox: true,
+                  onTap: () => setDlgState(() {
+                    selectedNonRefresco = null;
+                    if (selectedRefrescoSizes.contains('refresco_600')) {
+                      selectedRefrescoSizes.remove('refresco_600');
+                    } else {
+                      selectedRefrescoSizes.add('refresco_600');
+                    }
+                  }),
+                ),
+                // Agua Fresca y Jugo — radio (excluyente)
+                _optionTile(
+                  key: 'agua_fresca',
+                  label: 'Agua Fresca',
+                  isSelected: selectedNonRefresco == 'agua_fresca',
+                  isCheckbox: false,
+                  onTap: () => setDlgState(() {
+                    selectedRefrescoSizes.clear();
+                    selectedNonRefresco = 'agua_fresca';
+                  }),
+                ),
+                _optionTile(
+                  key: 'jugo',
+                  label: 'Jugo',
+                  isSelected: selectedNonRefresco == 'jugo',
+                  isCheckbox: false,
+                  onTap: () => setDlgState(() {
+                    selectedRefrescoSizes.clear();
+                    selectedNonRefresco = 'jugo';
+                  }),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+              ),
+              TextButton(
+                onPressed: canSave ? () async {
+                  final name = nameController.text.trim();
+                  Navigator.pop(ctx);
+                  try {
+                    if (selectedNonRefresco != null) {
+                      // Agua Fresca o Jugo — una sola fila
+                      if (isEditing) {
+                        await _supabase.from('drink_flavors')
+                            .update({'name': name, 'type': selectedNonRefresco})
+                            .eq('id', flavor['id']);
+                      } else {
+                        await _supabase.from('drink_flavors').insert({
+                          'name': name,
+                          'type': selectedNonRefresco,
+                          'available': true,
+                        });
+                      }
+                    } else {
+                      // Refrescos — una fila por tamaño seleccionado
+                      final existingRows = await _supabase
+                          .from('drink_flavors')
+                          .select()
+                          .inFilter('type', refrescoTypes)
+                          .eq('name', isEditing ? (flavor['name'] as String) : name);
+                      final existingByType = <String, dynamic>{};
+                      for (final r in (existingRows as List)) {
+                        existingByType[r['type'] as String] = r;
+                      }
+                      for (final t in refrescoTypes) {
+                        if (selectedRefrescoSizes.contains(t)) {
+                          if (existingByType.containsKey(t)) {
+                            await _supabase.from('drink_flavors')
+                                .update({'name': name})
+                                .eq('id', existingByType[t]['id']);
+                          } else {
+                            await _supabase.from('drink_flavors').insert({
+                              'name': name,
+                              'type': t,
+                              'available': true,
+                            });
+                          }
+                        } else if (existingByType.containsKey(t)) {
+                          await _supabase.from('drink_flavors')
+                              .delete()
+                              .eq('id', existingByType[t]['id']);
+                        }
+                      }
+                    }
+                    _fetchFlavors();
+                  } catch (e) {
+                    _fetchFlavors();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
+                  }
+                } : null,
+                style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15)),
+                child: Text(isEditing ? 'Guardar' : 'Agregar',
+                    style: const TextStyle(color: Color(0xFFFF6D00))),
+              ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
-            ),
-            TextButton(
-              onPressed: () async {
-                final name = nameController.text.trim();
-                if (name.isEmpty) return;
-                Navigator.pop(ctx);
-                try {
-                  if (isEditing) {
-                    final oldType = flavor['type'] as String;
-                    _updateLocal(selectedType, flavor['id'], {'name': name, 'type': selectedType});
-                    await _supabase.from('drink_flavors')
-                        .update({'name': name, 'type': selectedType}).eq('id', flavor['id']);
-                    if (oldType != selectedType) _fetchFlavors();
-                  } else {
-                    final result = await _supabase.from('drink_flavors').insert({
-                      'name': name,
-                      'type': selectedType,
-                      'available': true,
-                    }).select().single();
-                    setState(() {
-                      final list = _listForType(selectedType);
-                      list.add(result);
-                      list.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
-                    });
-                  }
-                } catch (e) {
-                  _fetchFlavors();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
-                    );
-                  }
-                }
-              },
-              style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15)),
-              child: Text(isEditing ? 'Guardar' : 'Agregar',
-                  style: const TextStyle(color: Color(0xFFFF6D00))),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
