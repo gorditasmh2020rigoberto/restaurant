@@ -73,7 +73,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     final List<String> sabores600 = isRefresco ? await _loadDrinkFlavors('refresco_600') : [];
     final List<String> sabores330 = isJugo ? await _loadDrinkFlavors('jugo_330') : [];
     final List<String> sabores1litro = isJugo ? await _loadDrinkFlavors('jugo_1litro') : [];
-    final List<String> sabores = (isRefresco || isJugo) ? [] : await _loadDrinkFlavors(drinkType);
+    final List<String> saboresAgua600 = isAguaFresca ? await _loadDrinkFlavors('agua_600') : [];
+    final List<String> saboresAgua1litro = isAguaFresca ? await _loadDrinkFlavors('agua_1litro') : [];
+    final List<String> sabores = (isRefresco || isJugo || isAguaFresca) ? [] : await _loadDrinkFlavors(drinkType);
     String? selectedSabor;
     String? aguaSize;
     await showDialog(
@@ -155,16 +157,20 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               icon: Icons.local_drink,
                               label: '600 ml',
                               value: aguaSize == '600 ml',
-                              onChanged: (v) => setDialogState(
-                                  () => aguaSize = v ? '600 ml' : null),
+                              onChanged: (v) => setDialogState(() {
+                                aguaSize = v ? '600 ml' : null;
+                                if (!saboresAgua600.contains(selectedSabor)) selectedSabor = null;
+                              }),
                             ),
                             const SizedBox(width: 10),
                             _ToggleOption(
                               icon: Icons.local_drink,
                               label: '1 litro',
                               value: aguaSize == '1 litro',
-                              onChanged: (v) => setDialogState(
-                                  () => aguaSize = v ? '1 litro' : null),
+                              onChanged: (v) => setDialogState(() {
+                                aguaSize = v ? '1 litro' : null;
+                                if (!saboresAgua1litro.contains(selectedSabor)) selectedSabor = null;
+                              }),
                             ),
                           ],
                         ],
@@ -195,7 +201,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   : aguaSize == '1 litro'
                                       ? sabores1litro
                                       : ({...sabores330, ...sabores1litro}.toList()..sort()))
-                              : sabores;
+                              : isAguaFresca
+                                  ? (aguaSize == '600 ml'
+                                      ? saboresAgua600
+                                      : aguaSize == '1 litro'
+                                          ? saboresAgua1litro
+                                          : ({...saboresAgua600, ...saboresAgua1litro}.toList()..sort()))
+                                  : sabores;
                       return GridView.builder(
                       shrinkWrap: true,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -267,8 +279,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       selectedSabor!,
                     ];
                     Dish finalDish = dish;
-                    if (isAguaFresca && aguaSize == '1 litro') {
-                      finalDish = dish.copyWith(price: dish.price + 100);
+                    if (isAguaFresca && aguaSize != null) {
+                      final priceType = aguaSize == '600 ml' ? 'agua_600' : 'agua_1litro';
+                      final aguaPrice = await _loadDrinkPrice(priceType);
+                      if (aguaPrice != null) finalDish = dish.copyWith(price: aguaPrice);
                     } else if (isRefresco && aguaSize != null) {
                       final priceType = aguaSize == '600 ml' ? 'refresco_600' : 'refresco_355';
                       final refrescoPrice = await _loadDrinkPrice(priceType);

@@ -19,6 +19,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   bool _loading = true;
   final Map<String, double> _jugoPrices = {};
   final Map<String, double> _refrescoPrices = {};
+  final Map<String, double> _aguaPrices = {};
 
 
   @override
@@ -48,18 +49,21 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
         final priceRows = await _supabase
             .from('drink_type_prices')
             .select()
-            .inFilter('type', ['jugo_330', 'jugo_1litro', 'refresco_355', 'refresco_600']);
+            .inFilter('type', ['jugo_330', 'jugo_1litro', 'refresco_355', 'refresco_600', 'agua_600', 'agua_1litro']);
         final jugoP = <String, double>{};
         final refrescoP = <String, double>{};
+        final aguaP = <String, double>{};
         for (final r in (priceRows as List)) {
           final t = r['type'] as String;
           final p = (r['price'] as num).toDouble();
           if (t.startsWith('jugo')) jugoP[t] = p;
           if (t.startsWith('refresco')) refrescoP[t] = p;
+          if (t.startsWith('agua')) aguaP[t] = p;
         }
         if (mounted) setState(() {
           _jugoPrices.addAll(jugoP);
           _refrescoPrices.addAll(refrescoP);
+          _aguaPrices.addAll(aguaP);
         });
       } catch (_) {}
 
@@ -71,7 +75,10 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   f['type'] == 'refresco_255' ||
                   f['type'] == 'refresco_600')
               .toList();
-          _aguas = list.where((f) => f['type'] == 'agua_fresca').toList();
+          _aguas = list.where((f) =>
+              f['type'] == 'agua_fresca' ||
+              f['type'] == 'agua_600' ||
+              f['type'] == 'agua_1litro').toList();
           _jugos = list
               .where((f) =>
                   f['type'] == 'jugo' ||
@@ -118,7 +125,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   }
 
   List<Map<String, dynamic>> _listForType(String type) {
-    if (type == 'agua_fresca') return _aguas;
+    if (type == 'agua_fresca' || type == 'agua_600' || type == 'agua_1litro') return _aguas;
     if (type == 'jugo' || type == 'jugo_330' || type == 'jugo_1litro') return _jugos;
     return _refrescos;
   }
@@ -129,6 +136,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       case 'refresco_600': return '600 ml';
       case 'jugo_330':     return '330 ml';
       case 'jugo_1litro':  return '1 litro';
+      case 'agua_600':     return '600 ml';
+      case 'agua_1litro':  return '1 litro';
       default:             return 'Genérico';
     }
   }
@@ -139,6 +148,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       case 'refresco_600': return const Color(0xFFA78BFA);
       case 'jugo_330':     return const Color(0xFF4ADE80);
       case 'jugo_1litro':  return const Color(0xFFFBBF24);
+      case 'agua_600':     return const Color(0xFF67E8F9);
+      case 'agua_1litro':  return const Color(0xFF6EE7B7);
       default:             return const Color(0xFF94A3B8);
     }
   }
@@ -187,10 +198,10 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     final nameController = TextEditingController(text: isEditing ? flavor['name'] as String : '');
     final initialType = isEditing ? (flavor['type'] as String? ?? type) : type;
 
-    // Refrescos usan checkboxes (multi); jugos también; agua usan radio (único)
+    // Todos usan checkboxes por tamaño
     final Set<String> selectedRefrescoSizes = {};
     final Set<String> selectedJugoSizes = {};
-    String? selectedNonRefresco;
+    final Set<String> selectedAguaSizes = {};
 
     // Campos de precio para jugos y refrescos
     final jugo330PriceCtrl = TextEditingController(
@@ -205,9 +216,16 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     final refresco600PriceCtrl = TextEditingController(
       text: _refrescoPrices['refresco_600']?.toStringAsFixed(0) ?? '',
     );
+    final agua600PriceCtrl = TextEditingController(
+      text: _aguaPrices['agua_600']?.toStringAsFixed(0) ?? '',
+    );
+    final agua1litroPriceCtrl = TextEditingController(
+      text: _aguaPrices['agua_1litro']?.toStringAsFixed(0) ?? '',
+    );
 
     const refrescoTypes = ['refresco_255', 'refresco_600'];
     const jugoTypes = ['jugo_330', 'jugo_1litro'];
+    const aguaTypes = ['agua_600', 'agua_1litro'];
 
     if (refrescoTypes.contains(initialType)) {
       selectedRefrescoSizes.add(initialType);
@@ -237,8 +255,20 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           }
         } catch (_) {}
       }
-    } else {
-      selectedNonRefresco = initialType;
+    } else if (aguaTypes.contains(initialType) || initialType == 'agua_fresca') {
+      if (aguaTypes.contains(initialType)) selectedAguaSizes.add(initialType);
+      if (isEditing) {
+        try {
+          final rows = await _supabase
+              .from('drink_flavors')
+              .select()
+              .inFilter('type', aguaTypes)
+              .eq('name', flavor['name'] as String);
+          for (final r in (rows as List)) {
+            selectedAguaSizes.add(r['type'] as String);
+          }
+        } catch (_) {}
+      }
     }
 
     Widget _optionTile({
@@ -286,7 +316,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) {
-          final hintText = selectedNonRefresco == 'agua_fresca'
+          final hintText = selectedAguaSizes.isNotEmpty
               ? 'Ej. Jamaica, Horchata...'
               : selectedJugoSizes.isNotEmpty
                   ? 'Ej. Naranja, Verde...'
@@ -294,7 +324,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           final canSave = nameController.text.trim().isNotEmpty &&
               (selectedRefrescoSizes.isNotEmpty ||
                selectedJugoSizes.isNotEmpty ||
-               selectedNonRefresco != null);
+               selectedAguaSizes.isNotEmpty);
 
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
@@ -329,8 +359,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   isSelected: selectedRefrescoSizes.contains('refresco_255'),
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
-                    selectedNonRefresco = null;
                     selectedJugoSizes.clear();
+                    selectedAguaSizes.clear();
                     if (selectedRefrescoSizes.contains('refresco_255')) {
                       selectedRefrescoSizes.remove('refresco_255');
                     } else {
@@ -374,8 +404,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   isSelected: selectedRefrescoSizes.contains('refresco_600'),
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
-                    selectedNonRefresco = null;
                     selectedJugoSizes.clear();
+                    selectedAguaSizes.clear();
                     if (selectedRefrescoSizes.contains('refresco_600')) {
                       selectedRefrescoSizes.remove('refresco_600');
                     } else {
@@ -413,18 +443,97 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     ),
                   ),
                 ],
-                // Agua Fresca — radio
+                // Agua Fresca — checkboxes con precio por tamaño
                 _optionTile(
-                  key: 'agua_fresca',
-                  label: 'Agua Fresca',
-                  isSelected: selectedNonRefresco == 'agua_fresca',
-                  isCheckbox: false,
+                  key: 'agua_600',
+                  label: 'Agua Fresca 600 ml',
+                  isSelected: selectedAguaSizes.contains('agua_600'),
+                  isCheckbox: true,
                   onTap: () => setDlgState(() {
                     selectedRefrescoSizes.clear();
                     selectedJugoSizes.clear();
-                    selectedNonRefresco = 'agua_fresca';
+                    if (selectedAguaSizes.contains('agua_600')) {
+                      selectedAguaSizes.remove('agua_600');
+                    } else {
+                      selectedAguaSizes.add('agua_600');
+                    }
                   }),
                 ),
+                if (selectedAguaSizes.contains('agua_600')) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, bottom: 6),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.attach_money, size: 16, color: Color(0xFF67E8F9)),
+                        const SizedBox(width: 4),
+                        const Text('Precio 600 ml:', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: agua600PriceCtrl,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            decoration: const InputDecoration(
+                              prefixText: '\$',
+                              prefixStyle: TextStyle(color: Color(0xFF67E8F9)),
+                              hintText: '0',
+                              hintStyle: TextStyle(color: Colors.white38),
+                              isDense: true,
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF67E8F9))),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF67E8F9), width: 2)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                _optionTile(
+                  key: 'agua_1litro',
+                  label: 'Agua Fresca 1 litro',
+                  isSelected: selectedAguaSizes.contains('agua_1litro'),
+                  isCheckbox: true,
+                  onTap: () => setDlgState(() {
+                    selectedRefrescoSizes.clear();
+                    selectedJugoSizes.clear();
+                    if (selectedAguaSizes.contains('agua_1litro')) {
+                      selectedAguaSizes.remove('agua_1litro');
+                    } else {
+                      selectedAguaSizes.add('agua_1litro');
+                    }
+                  }),
+                ),
+                if (selectedAguaSizes.contains('agua_1litro')) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, bottom: 6),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.attach_money, size: 16, color: Color(0xFF6EE7B7)),
+                        const SizedBox(width: 4),
+                        const Text('Precio 1 litro:', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 80,
+                          child: TextField(
+                            controller: agua1litroPriceCtrl,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                            decoration: const InputDecoration(
+                              prefixText: '\$',
+                              prefixStyle: TextStyle(color: Color(0xFF6EE7B7)),
+                              hintText: '0',
+                              hintStyle: TextStyle(color: Colors.white38),
+                              isDense: true,
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF6EE7B7))),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFF6EE7B7), width: 2)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 // Jugos — checkboxes con precio por tamaño
                 _optionTile(
                   key: 'jugo_330',
@@ -432,8 +541,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   isSelected: selectedJugoSizes.contains('jugo_330'),
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
-                    selectedNonRefresco = null;
                     selectedRefrescoSizes.clear();
+                    selectedAguaSizes.clear();
                     if (selectedJugoSizes.contains('jugo_330')) {
                       selectedJugoSizes.remove('jugo_330');
                     } else {
@@ -477,8 +586,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   isSelected: selectedJugoSizes.contains('jugo_1litro'),
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
-                    selectedNonRefresco = null;
                     selectedRefrescoSizes.clear();
+                    selectedAguaSizes.clear();
                     if (selectedJugoSizes.contains('jugo_1litro')) {
                       selectedJugoSizes.remove('jugo_1litro');
                     } else {
@@ -528,18 +637,46 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   final name = nameController.text.trim();
                   Navigator.pop(ctx);
                   try {
-                    if (selectedNonRefresco != null) {
-                      // Agua Fresca — una sola fila
-                      if (isEditing) {
-                        await _supabase.from('drink_flavors')
-                            .update({'name': name, 'type': selectedNonRefresco})
-                            .eq('id', flavor['id']);
-                      } else {
-                        await _supabase.from('drink_flavors').insert({
-                          'name': name,
-                          'type': selectedNonRefresco,
-                          'available': true,
-                        });
+                    if (selectedAguaSizes.isNotEmpty) {
+                      // Aguas Frescas — una fila por tamaño, con precios
+                      final existingRows = await _supabase
+                          .from('drink_flavors')
+                          .select()
+                          .inFilter('type', aguaTypes)
+                          .eq('name', isEditing ? (flavor['name'] as String) : name);
+                      final existingByType = <String, dynamic>{};
+                      for (final r in (existingRows as List)) {
+                        existingByType[r['type'] as String] = r;
+                      }
+                      for (final t in aguaTypes) {
+                        if (selectedAguaSizes.contains(t)) {
+                          if (existingByType.containsKey(t)) {
+                            await _supabase.from('drink_flavors')
+                                .update({'name': name})
+                                .eq('id', existingByType[t]['id']);
+                          } else {
+                            await _supabase.from('drink_flavors').insert({
+                              'name': name,
+                              'type': t,
+                              'available': true,
+                            });
+                          }
+                        } else if (existingByType.containsKey(t)) {
+                          await _supabase.from('drink_flavors')
+                              .delete()
+                              .eq('id', existingByType[t]['id']);
+                        }
+                      }
+                      // Guardar precios
+                      if (selectedAguaSizes.contains('agua_600')) {
+                        final p = double.tryParse(agua600PriceCtrl.text);
+                        if (p != null) await _supabase.from('drink_type_prices').upsert(
+                          {'type': 'agua_600', 'price': p}, onConflict: 'type');
+                      }
+                      if (selectedAguaSizes.contains('agua_1litro')) {
+                        final p = double.tryParse(agua1litroPriceCtrl.text);
+                        if (p != null) await _supabase.from('drink_type_prices').upsert(
+                          {'type': 'agua_1litro', 'price': p}, onConflict: 'type');
                       }
                     } else if (selectedJugoSizes.isNotEmpty) {
                       // Jugos — una fila por tamaño, con precios en drink_type_prices
@@ -716,7 +853,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     ),
                   ),
                 ),
-                if (tabType != 'agua_fresca' && ftype != 'jugo') ...[
+                if (ftype != 'jugo' && ftype != 'agua_fresca') ...[
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
