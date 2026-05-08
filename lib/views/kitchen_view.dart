@@ -377,6 +377,7 @@ class _OrderTicketState extends State<_OrderTicket> {
   String? _waiterName;
   Timer? _elapsedTimer;
   Duration _elapsed = Duration.zero;
+  bool _stationDone = false;
 
   @override
   void initState() {
@@ -541,6 +542,7 @@ class _OrderTicketState extends State<_OrderTicket> {
 
   @override
   Widget build(BuildContext context) {
+    if (_stationDone) return const SizedBox.shrink();
     // Si estamos en modo bebidas y este pedido no tiene bebidas cargadas, ocultamos el ticket
     if (widget.isDrinksOnly && _items != null && _items!.isEmpty) {
       return const SizedBox.shrink();
@@ -729,13 +731,13 @@ class _OrderTicketState extends State<_OrderTicket> {
             padding: const EdgeInsets.all(16.0),
             child: Builder(
               builder: (context) {
-                bool isAllReady = _items?.every((item) => item['status'] == 'ready') ?? false;
-                
+                final bool isAllStationReady = _items?.every((item) => item['status'] == 'ready') ?? false;
+
                 return ElevatedButton.icon(
                   onPressed: () async {
                     if (_items == null) return;
 
-                    if (!isAllReady) {
+                    if (!isAllStationReady) {
                       bool? confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -748,7 +750,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             ],
                           ),
                           content: const Text(
-                            'Faltan platillos por marcar como listos.\n\nSi continúas, la orden desaparecerá de producción y le avisaremos al mesero que faltan platillos (agotados).',
+                            'Faltan platillos por marcar como listos.\n\nSi continúas, le avisaremos al mesero que faltan platillos (agotados).',
                             style: TextStyle(color: Colors.white70),
                           ),
                           actions: [
@@ -769,51 +771,70 @@ class _OrderTicketState extends State<_OrderTicket> {
                     }
 
                     try {
-                      final finalStatus = isAllReady ? 'ready' : 'incomplete';
-                      
-                      if (!isAllReady) {
+                      // 1. Mark this station's items as ready or cancel pending ones
+                      if (!isAllStationReady) {
                         num amountToDeduct = 0;
                         List<String> cancelledIds = [];
-                        
+                        List<String> readyIds = [];
+
                         for (var item in _items!) {
                           if (item['status'] == 'pending') {
                             cancelledIds.add(item['id'].toString());
                             num qty = item['quantity'] as num;
                             num p = item['price_at_time'] as num;
                             amountToDeduct += (qty * p);
+                          } else if (item['status'] == 'ready') {
+                            readyIds.add(item['id'].toString());
                           }
                         }
 
+                        if (cancelledIds.isNotEmpty) {
+                          await supabase.from('order_items').update({'status': 'cancelled'}).inFilter('id', cancelledIds);
+                        }
+
                         if (amountToDeduct > 0) {
-                           final orderRes = await supabase.from('orders').select('total_amount').eq('id', orderId).single();
-                           num currentTotal = orderRes['total_amount'] as num;
-                           num newTotal = currentTotal - amountToDeduct;
-                           if (newTotal < 0) newTotal = 0;
-                           
-                           await Future.wait([
-                             supabase.from('orders').update({'status': finalStatus, 'total_amount': newTotal}).eq('id', orderId),
-                             supabase.from('order_items').update({'status': 'cancelled'}).inFilter('id', cancelledIds),
-                           ]);
-                        } else {
-                           await supabase.from('orders').update({'status': finalStatus}).eq('id', orderId);
+                          final orderRes = await supabase.from('orders').select('total_amount').eq('id', orderId).single();
+                          num currentTotal = orderRes['total_amount'] as num;
+                          num newTotal = currentTotal - amountToDeduct;
+                          if (newTotal < 0) newTotal = 0;
+                          await supabase.from('orders').update({'total_amount': newTotal}).eq('id', orderId);
                         }
                       } else {
-                        // Update the entire order status
-                        await supabase.from('orders').update({'status': finalStatus}).eq('id', orderId);
+                        // Ensure all station items are marked ready
+                        final stationIds = _items!.map((i) => i['id'].toString()).toList();
+                        await supabase.from('order_items').update({'status': 'ready'}).inFilter('id', stationIds);
                       }
-                      
+
+                      // 2. Check if ALL order_items (across both stations) are now done
+                      final allItems = await supabase.from('order_items').select('status').eq('order_id', orderId);
+                      final allItemsList = (allItems as List).cast<Map<String, dynamic>>();
+                      final allDone = allItemsList.every((i) {
+                        final s = i['status']?.toString() ?? 'pending';
+                        return s == 'ready' || s == 'cancelled';
+                      });
+
+                      if (allDone) {
+                        final anyIncomplete = allItemsList.any((i) => i['status'] == 'cancelled');
+                        await supabase.from('orders').update({'status': anyIncomplete ? 'incomplete' : 'ready'}).eq('id', orderId);
+                      }
+
+                      // 3. Hide this station's ticket locally
+                      if (mounted) setState(() => _stationDone = true);
+
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(isAllReady ? 'Orden marcada como Lista para entregar' : 'Aviso de platillos agotados enviado al mesero.\nSe descontaron las ausencias del total.')),
+                        SnackBar(content: Text(isAllStationReady
+                            ? 'Comanda de ${widget.isDrinksOnly ? "bebidas" : "cocina"} lista'
+                            : 'Aviso enviado. Productos agotados descontados del total.')),
                       );
                     } catch (e) {
                       debugPrint('Error: $e');
                     }
                   },
-                  icon: Icon(isAllReady ? Icons.done_all : Icons.warning_amber),
-                  label: Text(isAllReady ? 'Comanda Lista' : 'Avisar Agotado'),
+                  icon: Icon(isAllStationReady ? Icons.done_all : Icons.warning_amber),
+                  label: Text(isAllStationReady ? 'Comanda Lista' : 'Avisar Agotado'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isAllReady ? Colors.green : const Color(0xFFFF6D00),
+                    backgroundColor: isAllStationReady ? Colors.green : const Color(0xFFFF6D00),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
