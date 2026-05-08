@@ -16,11 +16,13 @@ const _aguaFallback = [
   'Pepino', 'Melón', 'Sandía', 'Guayaba', 'Fresa', 'Maracuyá', 'Otro',
 ];
 
+const _jugoFallback = [
+  'Naranja', 'Zanahoria', 'Verde', 'Piña', 'Manzana', 'Betabel', 'Otro',
+];
 
 Future<List<String>> _loadDrinkFlavors(String type) async {
   try {
     final supabase = Supabase.instance.client;
-    // Para refrescos cargamos todos los subtipos combinados y sin duplicados
     final types = type == 'refresco'
         ? ['refresco', 'refresco_255', 'refresco_600']
         : [type];
@@ -35,10 +37,27 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
         .toSet()
         .toList()..sort();
     if (list.isNotEmpty) return list;
-    return type.startsWith('refresco') ? _refrescoFallback : _aguaFallback;
+    if (type.startsWith('refresco')) return _refrescoFallback;
+    if (type.startsWith('jugo')) return _jugoFallback;
+    return _aguaFallback;
   } catch (_) {
-    return type.startsWith('refresco') ? _refrescoFallback : _aguaFallback;
+    if (type.startsWith('refresco')) return _refrescoFallback;
+    if (type.startsWith('jugo')) return _jugoFallback;
+    return _aguaFallback;
   }
+}
+
+Future<double?> _loadDrinkPrice(String type) async {
+  try {
+    final supabase = Supabase.instance.client;
+    final row = await supabase
+        .from('drink_type_prices')
+        .select('price')
+        .eq('type', type)
+        .maybeSingle();
+    if (row != null) return (row['price'] as num).toDouble();
+  } catch (_) {}
+  return null;
 }
 
 Future<void> addDishToCart(BuildContext context, Dish dish) async {
@@ -52,7 +71,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     final drinkType = isJugo ? 'jugo' : isRefresco ? 'refresco' : 'agua_fresca';
     final List<String> sabores255 = isRefresco ? await _loadDrinkFlavors('refresco_255') : [];
     final List<String> sabores600 = isRefresco ? await _loadDrinkFlavors('refresco_600') : [];
-    final List<String> sabores = isRefresco ? [] : await _loadDrinkFlavors(drinkType);
+    final List<String> sabores330 = isJugo ? await _loadDrinkFlavors('jugo_330') : [];
+    final List<String> sabores1litro = isJugo ? await _loadDrinkFlavors('jugo_1litro') : [];
+    final List<String> sabores = (isRefresco || isJugo) ? [] : await _loadDrinkFlavors(drinkType);
     String? selectedSabor;
     String? aguaSize;
     await showDialog(
@@ -114,16 +135,20 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               icon: Icons.blender,
                               label: '330 ml',
                               value: aguaSize == '330 ml',
-                              onChanged: (v) => setDialogState(
-                                  () => aguaSize = v ? '330 ml' : null),
+                              onChanged: (v) => setDialogState(() {
+                                aguaSize = v ? '330 ml' : null;
+                                if (!sabores330.contains(selectedSabor)) selectedSabor = null;
+                              }),
                             ),
                             const SizedBox(width: 10),
                             _ToggleOption(
                               icon: Icons.blender,
                               label: '1 litro',
                               value: aguaSize == '1 litro',
-                              onChanged: (v) => setDialogState(
-                                  () => aguaSize = v ? '1 litro' : null),
+                              onChanged: (v) => setDialogState(() {
+                                aguaSize = v ? '1 litro' : null;
+                                if (!sabores1litro.contains(selectedSabor)) selectedSabor = null;
+                              }),
                             ),
                           ] else ...[
                             _ToggleOption(
@@ -164,7 +189,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               : aguaSize == '600 ml'
                                   ? sabores600
                                   : ({...sabores255, ...sabores600}.toList()..sort()))
-                          : sabores;
+                          : isJugo
+                              ? (aguaSize == '330 ml'
+                                  ? sabores330
+                                  : aguaSize == '1 litro'
+                                      ? sabores1litro
+                                      : ({...sabores330, ...sabores1litro}.toList()..sort()))
+                              : sabores;
                       return GridView.builder(
                       shrinkWrap: true,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -229,7 +260,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
                 ),
                 TextButton(
-                  onPressed: selectedSabor == null ? null : () {
+                  onPressed: selectedSabor == null ? null : () async {
                     Navigator.pop(ctx);
                     final extras = [
                       if (aguaSize != null) aguaSize!,
@@ -244,6 +275,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       } else if (aguaSize == '255 ml' || aguaSize == '355 ml') {
                         finalDish = dish.copyWith(price: 25);
                       }
+                    } else if (isJugo && aguaSize != null) {
+                      final priceType = aguaSize == '330 ml' ? 'jugo_330' : 'jugo_1litro';
+                      final jugoPrice = await _loadDrinkPrice(priceType);
+                      if (jugoPrice != null) finalDish = dish.copyWith(price: jugoPrice);
                     }
                     cart.addItemWithGuisados(finalDish, extras);
                     if (context.mounted) {
