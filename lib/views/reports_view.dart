@@ -942,95 +942,84 @@ class _ReportsViewState extends State<ReportsView> {
       );
     }
 
-    // Construir filas de la tabla
-    final List<TableRow> tableRows = [];
-
-    // Fila encabezado
-    tableRows.add(TableRow(
-      decoration: BoxDecoration(color: const Color(0xFF0F172A).withValues(alpha: 0.7)),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _tableCell('ID ORDEN', isHeader: true),
-        _tableCell('HORA', isHeader: true),
-        _tableCell('MESA / CLIENTE', isHeader: true),
-        _tableCell('PAGO', isHeader: true),
-        _tableCell('MESERO', isHeader: true),
-        _tableCell('TOTAL', isHeader: true, align: TextAlign.right),
-      ],
-    ));
-
-    // Filas de datos
-    for (int i = 0; i < _filteredOrders.length; i++) {
-      final o = _filteredOrders[i];
-      final date = DateTime.tryParse(o['created_at'].toString())?.toLocal() ?? DateTime.now();
-      final hora = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-      final mesaStr = _getMesaStr(o);
-      final method = o['ui_method']?.toString() ?? 'EFECTIVO';
-      final Color methodColor = method == 'TARJETA'
-          ? const Color(0xFFFF6D00)
-          : method == 'TRANSFERENCIA'
-              ? Colors.purpleAccent
-              : Colors.green;
-      final String idShort = o['id'].toString().length >= 8
-          ? o['id'].toString().substring(0, 8)
-          : o['id'].toString();
-
-      tableRows.add(TableRow(
-        decoration: BoxDecoration(
-          color: i.isEven
-              ? const Color(0xFF1E293B)
-              : const Color(0xFF1E293B).withValues(alpha: 0.6),
-          border: const Border(top: BorderSide(color: Color(0xFF334155), width: 0.5)),
-        ),
-        children: [
-          _tableCell('#${idShort.toUpperCase()}', bold: true),
-          _tableCell(hora),
-          _tableCell(mesaStr),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-              decoration: BoxDecoration(
-                color: methodColor.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: methodColor.withValues(alpha: 0.5)),
-              ),
-              child: Text(
-                method,
-                style: TextStyle(color: methodColor, fontSize: 10, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
+        // Encabezado
+        Container(
+          color: const Color(0xFF0F172A),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: const [
+              Expanded(flex: 2, child: Text('ID ORDEN', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+              Expanded(flex: 2, child: Text('HORA', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+              Expanded(flex: 3, child: Text('MESA / CLIENTE', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+              Expanded(flex: 2, child: Text('PAGO', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+              Expanded(flex: 2, child: Text('MESERO', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+              Expanded(flex: 2, child: Text('TOTAL', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5), textAlign: TextAlign.right)),
+            ],
           ),
-          _tableCell(o['waiters']?['name'] ?? 'N/A'),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        ),
+        // Filas de datos
+        ...List.generate(_filteredOrders.length, (i) {
+          final o = _filteredOrders[i];
+          final date = DateTime.tryParse(o['created_at'].toString())?.toLocal() ?? DateTime.now();
+          final hora = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+          final mesaStr = _getMesaStr(o);
+          final method = o['ui_method']?.toString() ?? 'EFECTIVO';
+          final Color methodColor = method == 'TARJETA'
+              ? const Color(0xFFFF6D00)
+              : method == 'TRANSFERENCIA'
+                  ? Colors.purpleAccent
+                  : Colors.green;
+          final String idShort = o['id'].toString().length >= 8
+              ? o['id'].toString().substring(0, 8)
+              : o['id'].toString();
+
+          return Container(
+            decoration: BoxDecoration(
+              color: i.isEven ? const Color(0xFF1E293B) : const Color(0xFF1E293B).withValues(alpha: 0.6),
+              border: const Border(top: BorderSide(color: Color(0xFF334155), width: 0.5)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('\$${o['total_amount']}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                const SizedBox(width: 4),
-                InkWell(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
-                  child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 16),
+                Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
+                Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Colors.white, fontSize: 13), overflow: TextOverflow.ellipsis)),
+                Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Colors.white, fontSize: 13), overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: methodColor.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: methodColor.withValues(alpha: 0.5)),
+                    ),
+                    child: Text(method, style: TextStyle(color: methodColor, fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+                Expanded(flex: 2, child: Text(o['waiters']?['name'] ?? 'N/A', style: const TextStyle(color: Colors.white, fontSize: 13), overflow: TextOverflow.ellipsis)),
+                Expanded(
+                  flex: 2,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Text('\$${o['total_amount']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      const SizedBox(width: 4),
+                      InkWell(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
+                        child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 16),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
-      ));
-    }
-
-    return Table(
-      columnWidths: const {
-        0: FlexColumnWidth(2),
-        1: FlexColumnWidth(1.5),
-        2: FlexColumnWidth(3),
-        3: FlexColumnWidth(1.5),
-        4: FlexColumnWidth(2),
-        5: FlexColumnWidth(2),
-      },
-      children: tableRows,
+          );
+        }),
+      ],
     );
   }
 
