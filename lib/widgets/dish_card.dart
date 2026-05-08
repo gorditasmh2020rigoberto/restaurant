@@ -159,7 +159,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const SizedBox(height: 8),
                     Builder(builder: (ctx2) {
                       final currentSabores = isRefresco
-                          ? (aguaSize == '255 ml'
+                          ? (aguaSize == '355 ml'
                               ? sabores255
                               : aguaSize == '600 ml'
                                   ? sabores600

@@ -96,7 +96,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
 
   String _subtypeLabel(String type) {
     switch (type) {
-      case 'refresco_255': return '255 ml';
+      case 'refresco_255': return '355 ml';
       case 'refresco_600': return '600 ml';
       default:             return 'Genérico';
     }
@@ -258,7 +258,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                 // Refrescos — checkboxes (se pueden seleccionar ambos)
                 _optionTile(
                   key: 'refresco_255',
-                  label: 'Refresco 255 ml',
+                  label: 'Refresco 355 ml',
                   isSelected: selectedRefrescoSizes.contains('refresco_255'),
                   isCheckbox: true,
                   onTap: () => setDlgState(() {
