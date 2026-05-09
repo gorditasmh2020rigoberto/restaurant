@@ -829,7 +829,7 @@ class _ComandasViewState extends State<ComandasView> {
             builder: (context, cart, _) => Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (cart.currentClient.isNotEmpty)
+                if (cart.clients.length > 1)
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: Container(
