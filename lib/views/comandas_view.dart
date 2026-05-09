@@ -865,6 +865,18 @@ class _ComandasViewState extends State<ComandasView> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   ),
                   onPressed: () {
+                    final currentHasItems = cart.items.values
+                        .any((item) => item.clientLabel == cart.currentClient);
+                    if (!currentHasItems) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Agrega al menos un platillo al cliente actual primero'),
+                        duration: Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        width: 340,
+                      ));
+                      return;
+                    }
                     final name = 'Cliente ${cart.clients.length + 1}';
                     cart.addClient(name);
                     cart.setCurrentClient(name);
