@@ -67,6 +67,15 @@ Future<double?> _loadDrinkPrice(String type) async {
   return null;
 }
 
+String _formatDrinkSizeLabel(String type) {
+  // Strip category prefix (refresco_, agua_, jugo_)
+  final suffix = type.replaceFirst(RegExp(r'^(refresco|agua|jugo)_'), '');
+  if (suffix == '1litro' || suffix == '1_litro') return '1 litro';
+  if (RegExp(r'^\d+ml$').hasMatch(suffix)) return '${suffix.replaceAll('ml', '')} ml';
+  if (RegExp(r'^\d+$').hasMatch(suffix)) return '$suffix ml';
+  return suffix;
+}
+
 Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final cart = context.read<CartProvider>();
   final nameLower = dish.name.toLowerCase();
@@ -76,202 +85,146 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool isJugo = dish.category == 'jugos' || nameLower.contains('jugo');
 
   if (isRefresco || isAguaFresca || isJugo) {
-    final drinkType = isJugo ? 'jugo' : isRefresco ? 'refresco' : 'agua_fresca';
-    final List<String> sabores255 = isRefresco ? await _loadDrinkFlavors('refresco_255') : [];
-    final List<String> sabores600 = isRefresco ? await _loadDrinkFlavors('refresco_600') : [];
-    final List<String> sabores330 = isJugo ? await _loadDrinkFlavors('jugo_330') : [];
-    final List<String> sabores1litro = isJugo ? await _loadDrinkFlavors('jugo_1litro') : [];
-    final List<String> saboresAgua600 = isAguaFresca ? await _loadDrinkFlavors('agua_600') : [];
-    final List<String> saboresAgua1litro = isAguaFresca ? await _loadDrinkFlavors('agua_1litro') : [];
-    final List<String> sabores = (isRefresco || isJugo || isAguaFresca) ? [] : await _loadDrinkFlavors(drinkType);
+    final categoryPrefix = isJugo ? 'jugo' : isRefresco ? 'refresco' : 'agua';
+    final drinkIcon = isJugo ? Icons.blender : isRefresco ? Icons.sports_bar : Icons.local_drink;
+
+    // Cargar tamaños desde drink_type_prices
+    List<Map<String, dynamic>> drinkSizes = [];
+    try {
+      final supabase = Supabase.instance.client;
+      final rows = await supabase.from('drink_type_prices').select('type, price').order('price');
+      drinkSizes = (rows as List).cast<Map<String, dynamic>>()
+          .where((r) => (r['type'] as String).startsWith(categoryPrefix))
+          .toList();
+    } catch (_) {}
+
+    // Precargar sabores por cada tipo de tamaño
+    final Map<String, List<String>> flavorsByType = {};
+    for (final s in drinkSizes) {
+      final t = s['type'] as String;
+      flavorsByType[t] = await _loadDrinkFlavors(t);
+    }
+    // Sabores genéricos (sin tamaño) como fallback
+    final genericFlavors = await _loadDrinkFlavors(categoryPrefix);
+
+    String? selectedSizeType; // e.g. 'refresco_600', 'agua_500ml'
     String? selectedSabor;
-    String? aguaSize;
+
     await showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
+            // Sabores según el tamaño seleccionado
+            final currentSabores = selectedSizeType != null
+                ? (flavorsByType[selectedSizeType!] ?? genericFlavors)
+                : flavorsByType.values.fold<Set<String>>({}, (s, l) => s..addAll(l)).toList()..sort();
+
             return AlertDialog(
               backgroundColor: const Color(0xFF1E293B),
               title: Text(
-                isRefresco
-                    ? '¿De qué sabor/marca?'
-                    : isJugo
-                        ? '¿Qué jugo?'
-                        : '¿De qué sabor?',
+                isRefresco ? '¿De qué sabor/marca?' : isJugo ? '¿Qué jugo?' : '¿De qué sabor?',
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
               content: SizedBox(
                 width: 400,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Selector de tamaño para refrescos, aguas y jugos
-                    if (isRefresco || isAguaFresca || isJugo) ...[
-                      const Text(
-                        'TAMAÑO',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          if (isRefresco) ...[
-                            _ToggleOption(
-                              icon: Icons.sports_bar,
-                              label: '355 ml',
-                              value: aguaSize == '355 ml',
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (drinkSizes.isNotEmpty) ...[
+                        const Text('TAMAÑO',
+                            style: TextStyle(color: Colors.white70, fontSize: 11,
+                                fontWeight: FontWeight.w600, letterSpacing: 1)),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 8,
+                          children: drinkSizes.map((s) {
+                            final type = s['type'] as String;
+                            final label = _formatDrinkSizeLabel(type);
+                            return _ToggleOption(
+                              icon: drinkIcon,
+                              label: label,
+                              value: selectedSizeType == type,
                               onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '355 ml' : null;
-                                if (!sabores255.contains(selectedSabor)) selectedSabor = null;
+                                selectedSizeType = v ? type : null;
+                                // reset sabor si no está en los sabores del nuevo tamaño
+                                if (selectedSabor != null &&
+                                    !(flavorsByType[selectedSizeType ?? ''] ?? genericFlavors)
+                                        .contains(selectedSabor)) {
+                                  selectedSabor = null;
+                                }
                               }),
-                            ),
-                            const SizedBox(width: 10),
-                            _ToggleOption(
-                              icon: Icons.sports_bar,
-                              label: '600 ml',
-                              value: aguaSize == '600 ml',
-                              onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '600 ml' : null;
-                                if (!sabores600.contains(selectedSabor)) selectedSabor = null;
-                              }),
-                            ),
-                          ] else if (isJugo) ...[
-                            _ToggleOption(
-                              icon: Icons.blender,
-                              label: '330 ml',
-                              value: aguaSize == '330 ml',
-                              onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '330 ml' : null;
-                                if (!sabores330.contains(selectedSabor)) selectedSabor = null;
-                              }),
-                            ),
-                            const SizedBox(width: 10),
-                            _ToggleOption(
-                              icon: Icons.blender,
-                              label: '1 litro',
-                              value: aguaSize == '1 litro',
-                              onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '1 litro' : null;
-                                if (!sabores1litro.contains(selectedSabor)) selectedSabor = null;
-                              }),
-                            ),
-                          ] else ...[
-                            _ToggleOption(
-                              icon: Icons.local_drink,
-                              label: '600 ml',
-                              value: aguaSize == '600 ml',
-                              onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '600 ml' : null;
-                                if (!saboresAgua600.contains(selectedSabor)) selectedSabor = null;
-                              }),
-                            ),
-                            const SizedBox(width: 10),
-                            _ToggleOption(
-                              icon: Icons.local_drink,
-                              label: '1 litro',
-                              value: aguaSize == '1 litro',
-                              onChanged: (v) => setDialogState(() {
-                                aguaSize = v ? '1 litro' : null;
-                                if (!saboresAgua1litro.contains(selectedSabor)) selectedSabor = null;
-                              }),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Divider(color: Color(0xFF334155)),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 12),
+                        const Divider(color: Color(0xFF334155)),
+                        const SizedBox(height: 8),
+                      ],
+                      const Text('SABOR',
+                          style: TextStyle(color: Colors.white70, fontSize: 11,
+                              fontWeight: FontWeight.w600, letterSpacing: 1)),
                       const SizedBox(height: 8),
-                    ],
-                    const Text(
-                      'SABOR',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1),
-                    ),
-                    const SizedBox(height: 8),
-                    Builder(builder: (ctx2) {
-                      final currentSabores = isRefresco
-                          ? (aguaSize == '355 ml'
-                              ? sabores255
-                              : aguaSize == '600 ml'
-                                  ? sabores600
-                                  : ({...sabores255, ...sabores600}.toList()..sort()))
-                          : isJugo
-                              ? (aguaSize == '330 ml'
-                                  ? sabores330
-                                  : aguaSize == '1 litro'
-                                      ? sabores1litro
-                                      : ({...sabores330, ...sabores1litro}.toList()..sort()))
-                              : isAguaFresca
-                                  ? (aguaSize == '600 ml'
-                                      ? saboresAgua600
-                                      : aguaSize == '1 litro'
-                                          ? saboresAgua1litro
-                                          : ({...saboresAgua600, ...saboresAgua1litro}.toList()..sort()))
-                                  : sabores;
-                      return GridView.builder(
-                      shrinkWrap: true,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 6,
-                        childAspectRatio: 2.4,
-                      ),
-                      itemCount: currentSabores.length,
-                      itemBuilder: (ctx3, i) {
-                        final sabor = currentSabores[i];
-                        final isSelected = selectedSabor == sabor;
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(8),
-                          onTap: () => setDialogState(() => selectedSabor = sabor),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                                  : const Color(0xFF1E293B),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-                                width: 1.5,
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 6,
+                          childAspectRatio: 2.4,
+                        ),
+                        itemCount: currentSabores.length,
+                        itemBuilder: (ctx3, i) {
+                          final sabor = currentSabores[i];
+                          final isSelected = selectedSabor == sabor;
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => setDialogState(() => selectedSabor = sabor),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                    : const Color(0xFF1E293B),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                                    size: 14,
+                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
+                                      sabor,
+                                      style: TextStyle(
+                                        color: isSelected ? Colors.white : Colors.white70,
+                                        fontSize: 11,
+                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                                  size: 14,
-                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
-                                ),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    sabor,
-                                    style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.white70,
-                                      fontSize: 11,
-                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                    }),
-                  ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
               actions: [
@@ -282,27 +235,17 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 TextButton(
                   onPressed: selectedSabor == null ? null : () async {
                     Navigator.pop(ctx);
+                    final sizeLabel = selectedSizeType != null
+                        ? _formatDrinkSizeLabel(selectedSizeType!)
+                        : null;
                     final extras = [
-                      if (aguaSize != null) aguaSize!,
+                      if (sizeLabel != null) sizeLabel,
                       selectedSabor!,
                     ];
                     Dish finalDish = dish;
-                    if (isAguaFresca && aguaSize != null) {
-                      final priceType = aguaSize == '600 ml' ? 'agua_600' : 'agua_1litro';
-                      final aguaPrice = await _loadDrinkPrice(priceType);
-                      if (aguaPrice != null) finalDish = dish.copyWith(price: aguaPrice);
-                    } else if (isRefresco && aguaSize != null) {
-                      final priceType = aguaSize == '600 ml' ? 'refresco_600' : 'refresco_355';
-                      final refrescoPrice = await _loadDrinkPrice(priceType);
-                      if (refrescoPrice != null) {
-                        finalDish = dish.copyWith(price: refrescoPrice);
-                      } else {
-                        finalDish = dish.copyWith(price: aguaSize == '600 ml' ? 30 : 25);
-                      }
-                    } else if (isJugo && aguaSize != null) {
-                      final priceType = aguaSize == '330 ml' ? 'jugo_330' : 'jugo_1litro';
-                      final jugoPrice = await _loadDrinkPrice(priceType);
-                      if (jugoPrice != null) finalDish = dish.copyWith(price: jugoPrice);
+                    if (selectedSizeType != null) {
+                      final price = await _loadDrinkPrice(selectedSizeType!);
+                      if (price != null) finalDish = dish.copyWith(price: price);
                     }
                     cart.addItemWithGuisados(finalDish, extras);
                     if (context.mounted) {
