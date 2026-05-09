@@ -766,6 +766,201 @@ class _TableDetailPanel extends StatefulWidget {
 class _TableDetailPanelState extends State<_TableDetailPanel> {
   double _discountPercent = 0.0;
 
+  Future<void> _showAddItemDialog(BuildContext context, String orderId) async {
+    final supabase = Supabase.instance.client;
+    List<Map<String, dynamic>> dishes = [];
+    List<Map<String, dynamic>> guisados = [];
+    try {
+      final rows = await supabase.from('dishes').select().eq('available', true).order('name');
+      dishes = (rows as List).cast<Map<String, dynamic>>();
+      final gRows = await supabase.from('guisados').select().eq('available', true).order('name');
+      guisados = (gRows as List).cast<Map<String, dynamic>>()
+          .where((g) { final b = g['branch_name'] as String?; return b == null || b == Globals.currentBranch; })
+          .toList();
+    } catch (_) {}
+
+    if (!context.mounted) return;
+
+    final searchCtrl = TextEditingController();
+    Map<String, dynamic>? selectedDish;
+    List<String> selectedGuisados = [];
+    String? filterCategory;
+
+    // Categorías únicas
+    final categories = dishes.map((d) => d['category'] as String? ?? '').toSet().toList()..sort();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) {
+          final query = searchCtrl.text.toLowerCase();
+          final filtered = dishes.where((d) {
+            final name = (d['name'] as String).toLowerCase();
+            final cat = d['category'] as String? ?? '';
+            final matchSearch = query.isEmpty || name.contains(query);
+            final matchCat = filterCategory == null || cat == filterCategory;
+            return matchSearch && matchCat;
+          }).toList();
+
+          if (selectedDish != null) {
+            // Vista de personalización
+            final requiresGuisado = selectedDish!['requires_guisado'] as bool? ?? false;
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E293B),
+              title: Text(selectedDish!['name'] as String,
+                  style: const TextStyle(color: Colors.white, fontSize: 16)),
+              content: requiresGuisado && guisados.isNotEmpty
+                  ? SizedBox(
+                      width: 360,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('GUISADO', style: TextStyle(color: Colors.white70, fontSize: 11,
+                              fontWeight: FontWeight.w600, letterSpacing: 1)),
+                          const SizedBox(height: 8),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 320),
+                            child: GridView.builder(
+                              shrinkWrap: true,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 6, childAspectRatio: 2.6),
+                              itemCount: guisados.length,
+                              itemBuilder: (_, i) {
+                                final name = guisados[i]['name'] as String;
+                                final checked = selectedGuisados.contains(name);
+                                return InkWell(
+                                  onTap: () => setS(() {
+                                    if (checked) selectedGuisados.remove(name);
+                                    else if (selectedGuisados.length < 5) selectedGuisados.add(name);
+                                  }),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 120),
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: checked ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: checked ? const Color(0xFFFF6D00) : const Color(0xFF334155), width: 1.5),
+                                    ),
+                                    child: Row(children: [
+                                      Icon(checked ? Icons.check_circle : Icons.radio_button_unchecked,
+                                          size: 13, color: checked ? const Color(0xFFFF6D00) : const Color(0xFF64748B)),
+                                      const SizedBox(width: 4),
+                                      Expanded(child: Text(name,
+                                          style: TextStyle(color: checked ? Colors.white : Colors.white70, fontSize: 10),
+                                          maxLines: 2, overflow: TextOverflow.ellipsis)),
+                                    ]),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+              actions: [
+                TextButton(onPressed: () => setS(() { selectedDish = null; selectedGuisados = []; }),
+                    child: const Text('Atrás', style: TextStyle(color: Colors.white54))),
+                TextButton(
+                  onPressed: requiresGuisado && selectedGuisados.isEmpty ? null : () async {
+                    Navigator.pop(ctx);
+                    try {
+                      await supabase.from('order_items').insert({
+                        'order_id': orderId,
+                        'dish_id': selectedDish!['id'],
+                        'quantity': 1,
+                        'price_at_time': selectedDish!['price'],
+                        'status': 'pending',
+                        'guisados_selected': selectedGuisados.isNotEmpty ? jsonEncode(selectedGuisados) : null,
+                      });
+                      final orderRes = await supabase.from('orders').select('total_amount').eq('id', orderId).single();
+                      final newTotal = (orderRes['total_amount'] as num).toDouble() + (selectedDish!['price'] as num).toDouble();
+                      await supabase.from('orders').update({'total_amount': newTotal}).eq('id', orderId);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('${selectedDish!['name']} agregado'),
+                          duration: const Duration(milliseconds: 800),
+                        ));
+                      }
+                    } catch (e) {
+                      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  },
+                  style: TextButton.styleFrom(backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15)),
+                  child: const Text('Agregar', style: TextStyle(color: Color(0xFFFF6D00))),
+                ),
+              ],
+            );
+          }
+
+          // Vista de búsqueda de platillos
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1E293B),
+            title: const Text('Agregar artículo', style: TextStyle(color: Colors.white)),
+            content: SizedBox(
+              width: 420,
+              height: 480,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: searchCtrl,
+                    autofocus: true,
+                    onChanged: (_) => setS(() {}),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      hintText: 'Buscar platillo...',
+                      hintStyle: TextStyle(color: Colors.white38),
+                      prefixIcon: Icon(Icons.search, color: Colors.white38),
+                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 36,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _CatChip(label: 'Todos', selected: filterCategory == null,
+                            onTap: () => setS(() => filterCategory = null)),
+                        ...categories.map((c) => _CatChip(label: c, selected: filterCategory == c,
+                            onTap: () => setS(() => filterCategory = c))),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => const Divider(color: Color(0xFF334155), height: 1),
+                      itemBuilder: (_, i) {
+                        final d = filtered[i];
+                        return ListTile(
+                          dense: true,
+                          title: Text(d['name'] as String,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                          subtitle: Text(d['category'] as String? ?? '',
+                              style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                          trailing: Text('\$${(d['price'] as num).toStringAsFixed(0)}',
+                              style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+                          onTap: () => setS(() { selectedDish = d; selectedGuisados = []; }),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
+            ],
+          );
+        },
+      ),
+    );
+  }
 
   Future<void> _showCashPaymentDialog(BuildContext context, List<String> orderIds, double total, String? tableId) async {
     final cashController = TextEditingController();
@@ -1852,16 +2047,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                             ),
                             const SizedBox(height: 16),
                             OutlinedButton.icon(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/comandas',
-                                  arguments: {
-                                    'tableId': widget.tableId,
-                                    'tableNumber': widget.tableNumber,
-                                  },
-                                );
-                              },
+                              onPressed: () => _showAddItemDialog(context, orderIds.first),
                               icon: const Icon(Icons.add_shopping_cart, size: 22),
                               label: const Text('Agregar artículos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               style: OutlinedButton.styleFrom(
@@ -1926,6 +2112,40 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
           ],
         );
       },
+    );
+  }
+}
+
+class _CatChip extends StatelessWidget {
+  const _CatChip({required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        margin: const EdgeInsets.only(right: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFFF6D00) : const Color(0xFF0F172A),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : Colors.white54,
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
     );
   }
 }
