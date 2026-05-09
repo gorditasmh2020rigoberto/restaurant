@@ -37,6 +37,8 @@ class _ComandasViewState extends State<ComandasView> {
   StreamSubscription? _dishesSubscription;
   final TransformationController _mapTransformationController = TransformationController(Matrix4.diagonal3Values(0.5, 0.5, 1.0));
 
+  bool _argsParsed = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,9 +47,27 @@ class _ComandasViewState extends State<ComandasView> {
     _fetchDishes();
     _fetchWaiters();
     _setupNotifications();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showTableSelectionDialog();
-    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_argsParsed) {
+      _argsParsed = true;
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map && args['tableId'] != null) {
+        // Llegamos desde admin con mesa preseleccionada
+        setState(() {
+          _selectedTableId = args['tableId'] as String;
+          _selectedTableNumber = args['tableNumber']?.toString();
+          _selectedOrderType = 'dine_in';
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showTableSelectionDialog();
+        });
+      }
+    }
   }
 
   Future<void> _loadCategoryClickCounts() async {
