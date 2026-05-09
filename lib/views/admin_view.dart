@@ -1851,56 +1851,17 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () => _showCashPaymentDialog(context, orderIds, totalToPay, widget.tableId),
-                                    icon: const Icon(Icons.payments, size: 28),
-                                    label: const Text('Efectivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize: const Size.fromHeight(60),
-                                      backgroundColor: Colors.green[600],
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                      elevation: 4,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                        _payWithMercadoPago(context, totalToPay, () async {
-                                          try {
-                                            await supabase.from('orders').update({
-                                              'status': 'completed',
-                                              'payment_method': 'card',
-                                              'amount_card': totalToPay
-                                            }).inFilter('id', orderIds);
-                                            if (widget.tableId != null) {
-                                              await supabase.from('restaurant_tables').update({'status': 'available'}).eq('id', widget.tableId as Object);
-                                            }
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cobro con terminal exitoso')));
-                                              widget.onDeselect?.call();
-                                            }
-                                          } catch (e) {
-                                              if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-                                          }
-                                        });
-                                    },
-                                    icon: const Icon(Icons.point_of_sale),
-                                    label: const Text('Terminal M.P.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize: const Size.fromHeight(60),
-                                      backgroundColor: const Color(0xFF009EE3), 
-                                      foregroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            ElevatedButton.icon(
+                              onPressed: () => _showCashPaymentDialog(context, orderIds, totalToPay, widget.tableId),
+                              icon: const Icon(Icons.payments, size: 28),
+                              label: const Text('Efectivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(60),
+                                backgroundColor: Colors.green[600],
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 4,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
