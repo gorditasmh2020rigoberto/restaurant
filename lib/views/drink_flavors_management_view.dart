@@ -47,7 +47,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
         final priceRows = await _supabase
             .from('drink_type_prices')
             .select()
-            .inFilter('type', ['jugo_330', 'jugo_1litro', 'refresco_355', 'refresco_600', 'agua_600', 'agua_1litro']);
+            .order('type');
         final jugoP = <String, double>{};
         final refrescoP = <String, double>{};
         final aguaP = <String, double>{};
@@ -55,8 +55,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           final t = r['type'] as String;
           final p = (r['price'] as num).toDouble();
           if (t.startsWith('jugo')) jugoP[t] = p;
-          if (t.startsWith('refresco')) refrescoP[t] = p;
-          if (t.startsWith('agua')) aguaP[t] = p;
+          else if (t.startsWith('refresco')) refrescoP[t] = p;
+          else if (t.startsWith('agua')) aguaP[t] = p;
         }
         if (mounted) {
           setState(() {
