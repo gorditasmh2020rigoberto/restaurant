@@ -826,20 +826,52 @@ class _ComandasViewState extends State<ComandasView> {
         ),
         actions: [
           Consumer<CartProvider>(
-            builder: (context, cart, _) => TextButton.icon(
-              icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFFF6D00)),
-              label: const Text('Cliente', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 12)),
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6D00).withOpacity(0.1),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              ),
-              onPressed: () {
-                final name = 'Cliente ${cart.clients.length + 1}';
-                cart.addClient(name);
-                cart.setCurrentClient(name);
-                if (!_carritoVisible) setState(() => _carritoVisible = true);
-              },
+            builder: (context, cart, _) => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (cart.currentClient.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6D00).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFFF6D00), width: 1),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.person, size: 14, color: Color(0xFFFF6D00)),
+                          const SizedBox(width: 5),
+                          Text(
+                            cart.currentClient,
+                            style: const TextStyle(
+                              color: Color(0xFFFF6D00),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                TextButton.icon(
+                  icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFFF6D00)),
+                  label: const Text('Cliente', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 12)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6D00).withOpacity(0.1),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  ),
+                  onPressed: () {
+                    final name = 'Cliente ${cart.clients.length + 1}';
+                    cart.addClient(name);
+                    cart.setCurrentClient(name);
+                    if (!_carritoVisible) setState(() => _carritoVisible = true);
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 4),
