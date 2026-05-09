@@ -1852,6 +1852,19 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
+                              onPressed: () => _showCashPaymentDialog(context, orderIds, totalToPay, widget.tableId),
+                              icon: const Icon(Icons.payments, size: 28),
+                              label: const Text('Efectivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(60),
+                                backgroundColor: Colors.green[600],
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 4,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
                               onPressed: () => _payWithClip(
                                 context,
                                 orderIds,
