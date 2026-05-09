@@ -1851,6 +1851,27 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                               ],
                             ),
                             const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/comandas',
+                                  arguments: {
+                                    'tableId': widget.tableId,
+                                    'tableNumber': widget.tableNumber,
+                                  },
+                                );
+                              },
+                              icon: const Icon(Icons.add_shopping_cart, size: 22),
+                              label: const Text('Agregar artículos', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                foregroundColor: const Color(0xFFFF6D00),
+                                side: const BorderSide(color: Color(0xFFFF6D00), width: 2),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: () => _showCashPaymentDialog(context, orderIds, totalToPay, widget.tableId),
                               icon: const Icon(Icons.payments, size: 28),
