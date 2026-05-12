@@ -962,6 +962,160 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
     );
   }
 
+  // Pregunta propina y devuelve el total final (con propina), o null si se canceló
+  Future<double?> _askPropina(BuildContext context, double total) async {
+    int selectedPct = -1; // -1 = sin propina
+    final customController = TextEditingController();
+    double propinaAmount = 0.0;
+
+    return showDialog<double>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) {
+          void recalc() {
+            if (selectedPct == -1) {
+              propinaAmount = 0;
+            } else if (selectedPct == 0) {
+              propinaAmount = double.tryParse(customController.text) ?? 0;
+            } else {
+              propinaAmount = total * selectedPct / 100;
+            }
+          }
+
+          recalc();
+          final totalFinal = total + propinaAmount;
+
+          Widget pctBtn(String label, int pct) {
+            final active = selectedPct == pct;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setS(() { selectedPct = pct; recalc(); }),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: active ? const Color(0xFFFF6D00) : const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: active ? const Color(0xFFFF6D00) : const Color(0xFF334155), width: 1.5),
+                  ),
+                  child: Text(label, textAlign: TextAlign.center,
+                    style: TextStyle(color: active ? Colors.white : const Color(0xFF94A3B8), fontWeight: FontWeight.bold, fontSize: 15)),
+                ),
+              ),
+            );
+          }
+
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            backgroundColor: const Color(0xFF0F172A),
+            title: const Row(
+              children: [
+                Icon(Icons.volunteer_activism, color: Color(0xFFFF6D00), size: 28),
+                SizedBox(width: 12),
+                Text('¿Desea dejar propina?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Total base
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total de la cuenta:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 15)),
+                      Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Botones de porcentaje
+                Row(children: [
+                  pctBtn('Sin\npropina', -1),
+                  pctBtn('10%', 10),
+                  pctBtn('15%', 15),
+                  pctBtn('20%', 20),
+                ]),
+                const SizedBox(height: 16),
+                // Campo personalizado
+                TextField(
+                  controller: customController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  decoration: InputDecoration(
+                    labelText: 'Monto personalizado',
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    hintText: '0.00',
+                    hintStyle: const TextStyle(color: Colors.white30),
+                    prefixIcon: const Icon(Icons.edit, color: Color(0xFFFF6D00)),
+                    prefixText: '\$  ',
+                    prefixStyle: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onChanged: (_) => setS(() { selectedPct = 0; recalc(); }),
+                ),
+                const SizedBox(height: 20),
+                // Total final con propina
+                if (propinaAmount > 0) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6D00).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFFF6D00).withValues(alpha: 0.4), width: 1.5),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          const Text('Propina:', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 15)),
+                          Text('+\$${propinaAmount.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 18, fontWeight: FontWeight.bold)),
+                        ]),
+                        const Divider(color: Color(0xFFFF6D00), height: 16),
+                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          const Text('TOTAL A COBRAR:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+                          Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
+                        ]),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    const Text('TOTAL A COBRAR:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+                    Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
+                  ]),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, null),
+                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF94A3B8))),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(ctx, totalFinal),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Continuar al cobro', style: TextStyle(fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _showCashPaymentDialog(BuildContext context, List<String> orderIds, double total, String? tableId) async {
     final cashController = TextEditingController();
     double change = 0.0;
@@ -2059,7 +2213,11 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                             ),
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
-                              onPressed: () => _showCashPaymentDialog(context, orderIds, totalToPay, widget.tableId),
+                              onPressed: () async {
+                                final totalConPropina = await _askPropina(context, totalToPay);
+                                if (totalConPropina == null || !context.mounted) return;
+                                _showCashPaymentDialog(context, orderIds, totalConPropina, widget.tableId);
+                              },
                               icon: const Icon(Icons.payments, size: 28),
                               label: const Text('Efectivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(
@@ -2072,13 +2230,11 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
-                              onPressed: () => _payWithClip(
-                                context,
-                                orderIds,
-                                totalToPay,
-                                widget.tableId,
-                                panelTitle,
-                              ),
+                              onPressed: () async {
+                                final totalConPropina = await _askPropina(context, totalToPay);
+                                if (totalConPropina == null || !context.mounted) return;
+                                _payWithClip(context, orderIds, totalConPropina, widget.tableId, panelTitle);
+                              },
                               icon: const Icon(Icons.credit_card, size: 26),
                               label: const Text('Pagar con Clip', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(
