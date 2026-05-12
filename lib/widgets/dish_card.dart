@@ -25,7 +25,10 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
     final supabase = Supabase.instance.client;
     List<String> types;
     if (type == 'refresco') {
-      types = ['refresco', 'refresco_255', 'refresco_600'];
+      types = ['refresco', 'refresco_255', 'refresco_355', 'refresco_600'];
+    } else if (type == 'refresco_355') {
+      // Incluye también refresco_255 por compatibilidad con datos previos
+      types = ['refresco_355', 'refresco_255', 'refresco'];
     } else if (type == 'agua_600' || type == 'agua_1litro') {
       types = [type, 'agua_fresca'];
     } else if (type == 'jugo_330' || type == 'jugo_1litro') {

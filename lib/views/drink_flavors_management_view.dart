@@ -73,6 +73,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               .where((f) =>
                   f['type'] == 'refresco' ||
                   f['type'] == 'refresco_255' ||
+                  f['type'] == 'refresco_355' ||
                   f['type'] == 'refresco_600')
               .toList();
           _aguas = list.where((f) =>
@@ -132,7 +133,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
 
   String _subtypeLabel(String type) {
     switch (type) {
-      case 'refresco_255': return '355 ml';
+      case 'refresco_255': return '255 ml';
+      case 'refresco_355': return '355 ml';
       case 'refresco_600': return '600 ml';
       case 'jugo_330':     return '330 ml';
       case 'jugo_1litro':  return '1 litro';
@@ -145,6 +147,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   Color _subtypeColor(String type) {
     switch (type) {
       case 'refresco_255': return const Color(0xFF38BDF8);
+      case 'refresco_355': return const Color(0xFF34D399);
       case 'refresco_600': return const Color(0xFFA78BFA);
       case 'jugo_330':     return const Color(0xFF4ADE80);
       case 'jugo_1litro':  return const Color(0xFFFBBF24);
