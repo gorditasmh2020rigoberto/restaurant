@@ -146,6 +146,8 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
     final items = cart.items.values.toList();
     final double shippingToApply = widget.orderType == 'delivery' ? _shippingCost : 0.0;
     final double finalTotal = cart.totalAmount + shippingToApply;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -244,11 +246,11 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Total a Pagar:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text('Total a Pagar:', style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.bold, color: Colors.white)),
                             Text(
                               '\$${finalTotal.toStringAsFixed(2)}',
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: isMobile ? 20 : 24,
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -256,7 +258,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        const Text('Método de Pago:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('Método de Pago:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: isMobile ? 14 : 16)),
                         const SizedBox(height: 12),
                         SegmentedButton<String>(
                           style: ButtonStyle(
@@ -267,9 +269,9 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                               return Colors.transparent;
                             }),
                           ),
-                          segments: const [
-                            ButtonSegment(value: 'Efectivo', label: Text('Efectivo (Pagar en caja)'), icon: Icon(Icons.money)),
-                            ButtonSegment(value: 'Tarjeta', label: Text('Tarjeta (TPV)'), icon: Icon(Icons.credit_card)),
+                          segments: [
+                            ButtonSegment(value: 'Efectivo', label: Text(isMobile ? 'Efectivo' : 'Efectivo (Pagar en caja)'), icon: const Icon(Icons.money)),
+                            ButtonSegment(value: 'Tarjeta', label: Text(isMobile ? 'Tarjeta' : 'Tarjeta (TPV)'), icon: const Icon(Icons.credit_card)),
                           ],
                           selected: {_paymentMethod},
                           onSelectionChanged: (newSelection) {
@@ -310,7 +312,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           ),
                           child: _isSubmitting
                               ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : const Text('Confirmar y Enviar a Producción', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              : Text(isMobile ? 'Confirmar Pedido' : 'Confirmar y Enviar a Producción', style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),

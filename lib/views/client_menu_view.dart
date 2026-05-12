@@ -116,20 +116,27 @@ class _ClientMenuViewState extends State<ClientMenuView> {
                 ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: cart.itemCount > 0
-          ? Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: FloatingActionButton.extended(
-                  onPressed: _openCheckout,
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  label: Text(
-                    'Ver Carrito (${cart.itemCount}) - \$${cart.totalAmount.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          ? LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = MediaQuery.of(context).size.width < 600;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FloatingActionButton.extended(
+                      onPressed: _openCheckout,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      label: Text(
+                        isMobile
+                            ? 'Carrito (${cart.itemCount}) · \$${cart.totalAmount.toStringAsFixed(2)}'
+                            : 'Ver Carrito (${cart.itemCount}) - \$${cart.totalAmount.toStringAsFixed(2)}',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: isMobile ? 14 : 16),
+                      ),
+                      icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                    ),
                   ),
-                  icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                ),
-              ),
+                );
+              },
             )
           : null,
     );
