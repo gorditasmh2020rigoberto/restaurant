@@ -261,30 +261,32 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 450),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+            padding: EdgeInsets.symmetric(horizontal: isMobile ? 16 : 24, vertical: 32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // LOGO
-                Image.asset('assets/images/logo.png', height: 160),
-                const SizedBox(height: 24),
-                
-                const Text(
+                Image.asset('assets/images/logo.png', height: isMobile ? 120 : 160),
+                const SizedBox(height: 16),
+
+                Text(
                   'Gorditas Mis Hermanas',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5),
+                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5),
                 ),
                 const SizedBox(height: 32),
                 
                 // PHASE 1: SELECT BRANCH
                 if (!_entered) ...[
-                  const Text('¿En qué sucursal te encuentras?', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16)),
+                  Text('¿En qué sucursal te encuentras?', style: TextStyle(color: const Color(0xFF94A3B8), fontSize: isMobile ? 14 : 16)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(6),
@@ -326,7 +328,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                         elevation: 12,
                         shadowColor: const Color(0xFFFF6D00).withOpacity(0.4),
                       ),
-                      child: const Text('INGRESAR A SUCURSAL', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      child: Text('INGRESAR A SUCURSAL', style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.bold)),
                     ),
                 ],
                 

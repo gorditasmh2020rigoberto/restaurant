@@ -127,7 +127,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
               content: SizedBox(
-                width: 400,
+                width: double.maxFinite,
                 child: SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -509,7 +509,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
             content: SizedBox(
-              width: 520,
+              width: double.maxFinite,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -716,14 +716,17 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const SizedBox(height: 8),
                     ConstrainedBox(
                       constraints: const BoxConstraints(maxHeight: 420),
-                      child: GridView.builder(
+                      child: LayoutBuilder(
+                        builder: (ctx2, constraints2) {
+                          final cols = constraints2.maxWidth < 300 ? 2 : 3;
+                          return GridView.builder(
                         shrinkWrap: true,
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: cols,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 6,
-                          childAspectRatio: 2.8,
+                          childAspectRatio: cols == 2 ? 2.4 : 2.8,
                         ),
                         itemCount: guisados.length,
                         itemBuilder: (ctx2, gi) {
@@ -790,6 +793,8 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               ),
                             ),
                           );
+                        },
+                      );
                         },
                       ),
                     ),
