@@ -5,6 +5,31 @@ import '../models/dish.dart';
 import '../providers/cart_provider.dart';
 import '../globals.dart';
 
+/// Devuelve la imagen del platillo o un placeholder con el icono de la categoría.
+/// Si no hay URL válida muestra el icono grande de la categoría con un gradiente.
+Widget _dishImageOrIcon(Dish dish, {IconData? overrideIcon}) {
+  final url = dish.imageUrl;
+  final hasUrl = url.isNotEmpty && url.startsWith('http');
+  final icon = overrideIcon ?? Globals.categoryIcon(dish.category);
+  final placeholder = Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Colors.grey.shade800, Colors.grey.shade900],
+      ),
+    ),
+    alignment: Alignment.center,
+    child: Icon(icon, color: const Color(0xFFFF6D00), size: 56),
+  );
+  if (!hasUrl) return placeholder;
+  return Image.network(
+    url,
+    fit: BoxFit.cover,
+    errorBuilder: (context, error, stackTrace) => placeholder,
+  );
+}
+
 const _refrescoFallback = [
   'Coca-Cola', 'Pepsi', 'Sprite', 'Fanta Naranja', 'Fanta Uva',
   '7-Up', 'Manzanita Sol', 'Squirt', 'Mirinda', 'Del Valle',
@@ -841,14 +866,7 @@ class DishCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Image.network(
-                dish.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[800],
-                  child: const Icon(Icons.fastfood, color: Colors.grey),
-                ),
-              ),
+              child: _dishImageOrIcon(dish),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
@@ -1173,14 +1191,7 @@ class MultiFlavorVariantCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Image.network(
-                firstDish.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[800],
-                  child: const Icon(Icons.fastfood, color: Colors.grey),
-                ),
-              ),
+              child: _dishImageOrIcon(firstDish),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
@@ -1367,14 +1378,7 @@ class OrdenVariantCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: Image.network(
-                ordenDish.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey[800],
-                  child: const Icon(Icons.fastfood, color: Colors.grey),
-                ),
-              ),
+              child: _dishImageOrIcon(ordenDish),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
