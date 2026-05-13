@@ -266,16 +266,24 @@ class _MenuBrowserState extends State<MenuBrowser> {
     );
   }
 
-  /// Agrupa platillos con variantes Orden/1/2 Orden y aplica Enmoladas multi-sabor.
+  /// Agrupa platillos con variantes Orden/1/2 Orden y aplica multi-sabor a categorías configuradas.
+  static const _multiFlavorCategories = {
+    'enmoladas': 'Enmoladas',
+    'enchiladas': 'Enchiladas',
+    'molletes': 'Molletes',
+    'chilaquiles': 'Chilaquiles',
+  };
+
   List<Widget> _buildCategoryCards(List<Dish> items) {
     if (items.isEmpty) return [];
     final cat = items.first.category.toLowerCase();
-    if (cat == 'enmoladas') {
+    final mfName = _multiFlavorCategories[cat];
+    if (mfName != null) {
       return [
         MultiFlavorVariantCard(
           dishes: items,
-          displayName: 'Enmoladas',
-          categoryPrefix: 'Enmoladas',
+          displayName: mfName,
+          categoryPrefix: mfName,
         ),
       ];
     }
