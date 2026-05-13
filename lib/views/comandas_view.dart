@@ -1091,30 +1091,20 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: scroll horizontal en celular, Wrap en tablet y escritorio ──
-        if (isPhone)
-          SizedBox(
-            height: 80,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-              children: _availableCategories
-                  .map((label) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: _buildCategoryBlock(label),
-                      ))
-                  .toList(),
-            ),
-          )
-        else
-          Padding(
+        // ── Categorías: scroll horizontal siempre ──
+        SizedBox(
+          height: 70,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _availableCategories.map(_buildCategoryBlock).toList(),
-            ),
+            children: _availableCategories
+                .map((label) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildCategoryBlock(label),
+                    ))
+                .toList(),
           ),
+        ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
         // ── Submenu de bebidas ──
         if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
