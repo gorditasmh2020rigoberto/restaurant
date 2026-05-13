@@ -1070,7 +1070,7 @@ class _ComandasViewState extends State<ComandasView> {
     final availableWidth = screenWidth - sidebarWidth;
     int crossAxisCount;
     if (isPhone) {
-      crossAxisCount = (availableWidth / 110).floor().clamp(3, 4);
+      crossAxisCount = (availableWidth / 160).floor().clamp(2, 3);
     } else if (isTablet) {
       crossAxisCount = (availableWidth / 130).floor().clamp(4, 6);
     } else {
