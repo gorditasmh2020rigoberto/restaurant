@@ -29,6 +29,31 @@ class _ClientMenuViewState extends State<ClientMenuView> {
   List<Dish> _dishes = [];
   bool _isLoading = true;
 
+  List<Widget> get _groupedCards {
+    final Map<String, Map<String, Dish>> byBase = {};
+    for (final dish in _dishes) {
+      final isMedia = dish.name.toLowerCase().contains('1/2');
+      final base = dish.name
+          .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
+          .trim();
+      byBase.putIfAbsent(base, () => {});
+      byBase[base]![isMedia ? 'media' : 'orden'] = dish;
+    }
+    final List<Widget> cards = [];
+    for (final entry in byBase.entries) {
+      final orden = entry.value['orden'];
+      final media = entry.value['media'];
+      if (orden != null && media != null) {
+        cards.add(OrdenVariantCard(ordenDish: orden, mediaDish: media));
+      } else {
+        cards.add(DishCard(dish: orden ?? media!));
+      }
+    }
+    return cards;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -101,18 +126,15 @@ class _ClientMenuViewState extends State<ClientMenuView> {
           : _dishes.isEmpty
               ? const Center(child: Text('El menú está vacío', style: TextStyle(color: Colors.grey)))
               : GridView.builder(
-                  padding: const EdgeInsets.all(16).copyWith(bottom: 100), // padding for FAB
+                  padding: const EdgeInsets.all(16).copyWith(bottom: 100),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 300,
                     childAspectRatio: 0.75,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
-                  itemCount: _dishes.length,
-                  itemBuilder: (context, index) {
-                    final dish = _dishes[index];
-                    return DishCard(dish: dish);
-                  },
+                  itemCount: _groupedCards.length,
+                  itemBuilder: (context, index) => _groupedCards[index],
                 ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: cart.itemCount > 0
