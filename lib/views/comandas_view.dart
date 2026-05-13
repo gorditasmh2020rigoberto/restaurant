@@ -88,17 +88,19 @@ class _ComandasViewState extends State<ComandasView> {
         _categoryClickCounts[label] = newCount;
         _selectedCategory = label;
         if (label != 'drink') _selectedDrinkSubcat = null;
+        if (label != 'enmoladas') _selectedEnmoladasSubcat = null;
       });
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('cat_clicks_$label', newCount);
     } else {
-      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; });
+      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; _selectedEnmoladasSubcat = null; });
     }
   }
 
   bool _isInitialLoad = true;
   String _selectedCategory = 'Todos';
   String? _selectedDrinkSubcat; // submenu de bebidas
+  String? _selectedEnmoladasSubcat; // submenu de enmoladas
   String _searchQuery = '';
   bool _carritoVisible = false;
   Map<String, int> _categoryClickCounts = {};
@@ -120,6 +122,13 @@ class _ComandasViewState extends State<ComandasView> {
           if (!allDrinkCats.contains(dish.category)) continue;
           // Si hay subcategoría seleccionada en el submenu, filtrar por ella
           if (_selectedDrinkSubcat != null && _effectiveCat(dish) != _selectedDrinkSubcat) continue;
+        } else if (_selectedCategory == 'enmoladas') {
+          if (_effectiveCat(dish) != 'enmoladas') continue;
+          if (_selectedEnmoladasSubcat == 'media') {
+            if (!dish.name.toLowerCase().contains('1/2')) continue;
+          } else if (_selectedEnmoladasSubcat == 'orden') {
+            if (dish.name.toLowerCase().contains('1/2')) continue;
+          }
         } else {
           if (_effectiveCat(dish) != _selectedCategory) continue;
         }
@@ -1068,17 +1077,7 @@ class _ComandasViewState extends State<ComandasView> {
     final isPhone = screenWidth < 600;
     final isDesktop = screenWidth >= 1024;
     final isTablet = !isPhone && !isDesktop;
-    // Usa siempre el ancho con sidebar para que las tarjetas no cambien de tamaño
-    final sidebarWidth = isDesktop ? 380.0 : (isTablet ? (screenWidth < 800 ? 230.0 : 280.0) : 0.0);
-    final availableWidth = isPhone ? screenWidth : screenWidth - sidebarWidth;
-    int crossAxisCount;
-    if (isPhone) {
-      crossAxisCount = (availableWidth / 130).floor().clamp(2, 3);
-    } else if (isTablet) {
-      crossAxisCount = (availableWidth / 150).floor().clamp(2, 5);
-    } else {
-      crossAxisCount = (availableWidth / 180).floor().clamp(4, 8);
-    }
+    // isTablet se usa en _buildGroupedMenu via LayoutBuilder
 
     return Column(
       children: [
@@ -1111,6 +1110,8 @@ class _ComandasViewState extends State<ComandasView> {
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
         // ── Submenu de bebidas ──
         if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
+        // ── Submenu de enmoladas ──
+        if (_selectedCategory == 'enmoladas') _buildEnmoladasSubmenu(),
         // ── Grid de platillos (scrollable) ──
         Expanded(
           child: LayoutBuilder(
@@ -1161,6 +1162,63 @@ class _ComandasViewState extends State<ComandasView> {
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
                 onTap: () => setState(() => _selectedDrinkSubcat = key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: selected ? active : const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: selected ? active : const Color(0xFF334155),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 16, color: selected ? Colors.white : Colors.white60),
+                      const SizedBox(width: 6),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: selected ? Colors.white : Colors.white70,
+                          fontSize: 13,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEnmoladasSubmenu() {
+    const subcats = [
+      (null,    'Todas',     Icons.grid_view),
+      ('orden', '1 Orden',  Icons.restaurant),
+      ('media', '1/2 Orden', Icons.content_cut),
+    ];
+    const active = Color(0xFFE07A30);
+    return Container(
+      color: const Color(0xFF0F172A),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: subcats.map((s) {
+            final key = s.$1;
+            final label = s.$2;
+            final icon = s.$3;
+            final selected = _selectedEnmoladasSubcat == key;
+            return Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedEnmoladasSubcat = key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 160),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
