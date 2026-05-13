@@ -1208,42 +1208,18 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                     // Items for this client
                     for (final entry in grouped[client]!)
                       ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        leading: SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              entry.value.dish.imageUrl,
-                              width: 44,
-                              height: 44,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                         title: Text(
                           entry.value.dish.name,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          softWrap: true,
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '\$${entry.value.dish.price.toStringAsFixed(2)}',
-                              style: const TextStyle(color: Colors.white54, fontSize: 11),
-                            ),
-                            if (entry.value.guisados.isNotEmpty)
-                              Text(
-                                entry.value.guisados.join(', '),
-                                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
+                        subtitle: Text(
+                          '\$${entry.value.dish.price.toStringAsFixed(2)}${entry.value.guisados.isNotEmpty ? ' · ${entry.value.guisados.join(', ')}' : ''}',
+                          style: const TextStyle(color: Colors.white54, fontSize: 11),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
