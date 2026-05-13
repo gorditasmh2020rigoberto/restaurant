@@ -88,19 +88,19 @@ class _ComandasViewState extends State<ComandasView> {
         _categoryClickCounts[label] = newCount;
         _selectedCategory = label;
         if (label != 'drink') _selectedDrinkSubcat = null;
-        if (label != 'enmoladas') _selectedEnmoladasSubcat = null;
+        _selectedOrdenSubcat = null;
       });
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('cat_clicks_$label', newCount);
     } else {
-      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; _selectedEnmoladasSubcat = null; });
+      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; _selectedOrdenSubcat = null; });
     }
   }
 
   bool _isInitialLoad = true;
   String _selectedCategory = 'Todos';
   String? _selectedDrinkSubcat; // submenu de bebidas
-  String? _selectedEnmoladasSubcat; // submenu de enmoladas
+  String? _selectedOrdenSubcat; // submenu genérico 1 Orden / 1/2 Orden
   String _searchQuery = '';
   bool _carritoVisible = false;
   Map<String, int> _categoryClickCounts = {};
@@ -122,15 +122,13 @@ class _ComandasViewState extends State<ComandasView> {
           if (!allDrinkCats.contains(dish.category)) continue;
           // Si hay subcategoría seleccionada en el submenu, filtrar por ella
           if (_selectedDrinkSubcat != null && _effectiveCat(dish) != _selectedDrinkSubcat) continue;
-        } else if (_selectedCategory == 'enmoladas') {
-          if (_effectiveCat(dish) != 'enmoladas') continue;
-          if (_selectedEnmoladasSubcat == 'media') {
-            if (!dish.name.toLowerCase().contains('1/2')) continue;
-          } else if (_selectedEnmoladasSubcat == 'orden') {
-            if (dish.name.toLowerCase().contains('1/2')) continue;
-          }
         } else {
           if (_effectiveCat(dish) != _selectedCategory) continue;
+          if (_selectedOrdenSubcat == 'media') {
+            if (!dish.name.toLowerCase().contains('1/2')) continue;
+          } else if (_selectedOrdenSubcat == 'orden') {
+            if (dish.name.toLowerCase().contains('1/2')) continue;
+          }
         }
       }
 
@@ -196,6 +194,7 @@ class _ComandasViewState extends State<ComandasView> {
       rawCats.add('drink');
     }
 
+    rawCats.remove('platillos'); // ocultar categoría Platillos
     const pinned = ['gorditas', 'drink'];
     final rest = rawCats.where((c) => !pinned.contains(c)).toList();
     rest.sort((a, b) {
@@ -1111,7 +1110,9 @@ class _ComandasViewState extends State<ComandasView> {
         // ── Submenu de bebidas ──
         if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
         // ── Submenu de enmoladas ──
-        if (_selectedCategory == 'enmoladas') _buildEnmoladasSubmenu(),
+        if (_selectedCategory != 'Todos' && _selectedCategory != 'drink' &&
+            _filteredDishes.any((d) => d.name.toLowerCase().contains('1/2')))
+          _buildOrdenSubmenu(),
         // ── Grid de platillos (scrollable) ──
         Expanded(
           child: LayoutBuilder(
@@ -1197,7 +1198,7 @@ class _ComandasViewState extends State<ComandasView> {
     );
   }
 
-  Widget _buildEnmoladasSubmenu() {
+  Widget _buildOrdenSubmenu() {
     const subcats = [
       (null,    'Todas',     Icons.grid_view),
       ('orden', '1 Orden',  Icons.restaurant),
@@ -1214,11 +1215,11 @@ class _ComandasViewState extends State<ComandasView> {
             final key = s.$1;
             final label = s.$2;
             final icon = s.$3;
-            final selected = _selectedEnmoladasSubcat == key;
+            final selected = _selectedOrdenSubcat == key;
             return Padding(
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
-                onTap: () => setState(() => _selectedEnmoladasSubcat = key),
+                onTap: () => setState(() => _selectedOrdenSubcat = key),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 160),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
