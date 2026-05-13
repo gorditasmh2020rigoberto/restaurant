@@ -599,10 +599,19 @@ class _ComandasViewState extends State<ComandasView> {
               _isLoading = false;
             });
           }
-        }, onError: (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al cargar menú en tiempo real: $e')));
-            setState(() => _isLoading = false);
+        }, onError: (e) async {
+          debugPrint('Realtime dishes error, falling back to one-shot fetch: $e');
+          try {
+            final rows = await _supabase.from('dishes').select();
+            if (mounted) {
+              final dishes = (rows as List).map((d) => Dish.fromJson(d)).toList();
+              setState(() {
+                _dishes = dishes;
+                _isLoading = false;
+              });
+            }
+          } catch (_) {
+            if (mounted) setState(() => _isLoading = false);
           }
         });
   }
