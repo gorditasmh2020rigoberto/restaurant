@@ -1091,16 +1091,20 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: Wrap con ancho fijo basado en pantalla completa ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: screenWidth * (isPhone ? 1.0 : 0.55)),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: _availableCategories.map(_buildCategoryBlock).toList(),
+        // ── Categorías: 3 filas fijas con scroll horizontal ──
+        SizedBox(
+          height: 3 * 54 + 2 * 6 + 8,
+          child: GridView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 6,
+              childAspectRatio: 54 / 60,
             ),
+            itemCount: _availableCategories.length,
+            itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
           ),
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
