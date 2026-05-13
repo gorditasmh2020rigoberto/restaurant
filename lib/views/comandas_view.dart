@@ -113,6 +113,7 @@ class _ComandasViewState extends State<ComandasView> {
 
     final result = <Dish>[];
     for (final dish in _dishes) {
+      if (dish.category == 'platillos') continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           // Filtrar solo bebidas (cualquier categoría de bebida)

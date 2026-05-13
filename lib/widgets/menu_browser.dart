@@ -84,6 +84,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
     final seenNames = <String>{};
     final result = <Dish>[];
     for (final dish in widget.dishes) {
+      if (dish.category == 'platillos') continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           const allDrinkCats = {
