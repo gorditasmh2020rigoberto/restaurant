@@ -975,49 +975,81 @@ class DishCard extends StatelessWidget {
 }
 
 String _extractFlavor(String name, String categoryPrefix) {
-  // Strip variant suffix
-  final base = name
-      .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
-      .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
+  // Strip variant markers anywhere
+  var base = name
+      .replaceAll(RegExp(r'\s*\(Orden\)\s*', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'\s*\(1/2\)\s+orden\s*', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'\s*\(1/2\)\s*', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'\s*\(\d+\s*pzas?\.?\)\s*', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'\s*1/2\s+orden\s*', caseSensitive: false), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
   // Strip category prefix like "Enmoladas de " → "Cebolla"
   final prefix = RegExp(
-    r'^' + RegExp.escape(categoryPrefix) + r'\s+(?:de\s+|del\s+|con\s+)?',
+    r'^' + RegExp.escape(categoryPrefix) + r'\s+(?:de\s+|del\s+|con\s+|en\s+)?',
     caseSensitive: false,
   );
   return base.replaceFirst(prefix, '').trim();
+}
+
+int? _extractQuantity(String name) {
+  final m =
+      RegExp(r'\((\d+)\s*pzas?\.?\)', caseSensitive: false).firstMatch(name);
+  return m != null ? int.tryParse(m.group(1)!) : null;
+}
+
+String _extractSize(String name) {
+  return name.toLowerCase().contains('1/2') ? 'media' : 'orden';
 }
 
 Future<void> addMultiFlavorVariantToCart(BuildContext context,
     List<Dish> dishes, String displayName, String categoryPrefix) async {
   final cart = context.read<CartProvider>();
 
-  final flavors = <String>{};
-  for (final d in dishes) {
-    flavors.add(_extractFlavor(d.name, categoryPrefix));
-  }
+  // Detectar qué dimensiones tienen variación real
+  final sizes = dishes.map((d) => _extractSize(d.name)).toSet();
+  final quantities =
+      dishes.map((d) => _extractQuantity(d.name)).whereType<int>().toSet();
+  final flavors =
+      dishes.map((d) => _extractFlavor(d.name, categoryPrefix)).toSet();
   final sortedFlavors = flavors.toList()..sort();
+  final sortedQty = quantities.toList()..sort();
 
-  String? selectedSize; // 'orden' or 'media'
-  String? selectedFlavor;
+  final showSize = sizes.length > 1;
+  final showQty = quantities.length > 1;
+  final showFlavor = flavors.length > 1;
+
+  String? selectedSize = showSize ? null : (sizes.isNotEmpty ? sizes.first : null);
+  int? selectedQty = showQty ? null : (quantities.isNotEmpty ? quantities.first : null);
+  String? selectedFlavor =
+      showFlavor ? null : (flavors.isNotEmpty ? flavors.first : null);
 
   await showDialog(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDialogState) {
         Dish? matched;
-        if (selectedSize != null && selectedFlavor != null) {
-          final isMedia = selectedSize == 'media';
-          for (final d in dishes) {
-            final dIsMedia = d.name.toLowerCase().contains('1/2');
-            final dFlavor = _extractFlavor(d.name, categoryPrefix);
-            if (dIsMedia == isMedia && dFlavor == selectedFlavor) {
-              matched = d;
-              break;
-            }
+        for (final d in dishes) {
+          final dSize = _extractSize(d.name);
+          final dQty = _extractQuantity(d.name);
+          final dFlavor = _extractFlavor(d.name, categoryPrefix);
+          if (showSize && dSize != selectedSize) continue;
+          if (showQty && dQty != selectedQty) continue;
+          if (showFlavor && dFlavor != selectedFlavor) continue;
+          if (!showSize && sizes.isNotEmpty && dSize != sizes.first) continue;
+          if (!showQty && quantities.isNotEmpty && dQty != quantities.first) {
+            continue;
           }
+          if (!showFlavor && flavors.isNotEmpty && dFlavor != flavors.first) {
+            continue;
+          }
+          matched = d;
+          break;
         }
+        final canAdd = matched != null &&
+            (!showSize || selectedSize != null) &&
+            (!showQty || selectedQty != null) &&
+            (!showFlavor || selectedFlavor != null);
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
           title: Text(displayName,
@@ -1029,60 +1061,91 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('TAMAÑO',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1)),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 8,
-                    children: [
-                      _ToggleOption(
-                        icon: Icons.restaurant,
-                        label: '1 Orden',
-                        value: selectedSize == 'orden',
-                        onChanged: (v) => setDialogState(
-                            () => selectedSize = v ? 'orden' : null),
-                      ),
-                      _ToggleOption(
-                        icon: Icons.content_cut,
-                        label: '1/2 Orden',
-                        value: selectedSize == 'media',
-                        onChanged: (v) => setDialogState(
-                            () => selectedSize = v ? 'media' : null),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Divider(color: Color(0xFF334155)),
-                  const SizedBox(height: 8),
-                  const Text('SABOR',
-                      style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1)),
-                  const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 8,
-                    children: sortedFlavors
-                        .map((fl) => _ToggleOption(
-                              icon: Icons.local_dining,
-                              label: fl,
-                              value: selectedFlavor == fl,
-                              onChanged: (v) => setDialogState(
-                                  () => selectedFlavor = v ? fl : null),
-                            ))
-                        .toList(),
-                  ),
-                  if (matched != null) ...[
+                  if (showSize) ...[
+                    const Text('TAMAÑO',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [
+                        if (sizes.contains('orden'))
+                          _ToggleOption(
+                            icon: Icons.restaurant,
+                            label: '1 Orden',
+                            value: selectedSize == 'orden',
+                            onChanged: (v) => setDialogState(
+                                () => selectedSize = v ? 'orden' : null),
+                          ),
+                        if (sizes.contains('media'))
+                          _ToggleOption(
+                            icon: Icons.content_cut,
+                            label: '1/2 Orden',
+                            value: selectedSize == 'media',
+                            onChanged: (v) => setDialogState(
+                                () => selectedSize = v ? 'media' : null),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                  ],
+                  if (showQty) ...[
+                    const Text('CANTIDAD',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: sortedQty
+                          .map((q) => _ToggleOption(
+                                icon: Icons.numbers,
+                                label: q == 1 ? '$q pza' : '$q pzas',
+                                value: selectedQty == q,
+                                onChanged: (v) => setDialogState(
+                                    () => selectedQty = v ? q : null),
+                              ))
+                          .toList(),
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                  ],
+                  if (showFlavor) ...[
+                    const Text('SABOR',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: sortedFlavors
+                          .map((fl) => _ToggleOption(
+                                icon: Icons.local_dining,
+                                label: fl.isEmpty ? displayName : fl,
+                                value: selectedFlavor == fl,
+                                onChanged: (v) => setDialogState(
+                                    () => selectedFlavor = v ? fl : null),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                  if (canAdd) ...[
                     const SizedBox(height: 14),
                     Text(
-                      'Total: \$${matched.price.toStringAsFixed(0)}',
+                      'Total: \$${matched!.price.toStringAsFixed(0)}',
                       style: const TextStyle(
                           color: Color(0xFFFF6D00),
                           fontSize: 16,
@@ -1100,7 +1163,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   style: TextStyle(color: Colors.white54)),
             ),
             TextButton(
-              onPressed: matched == null
+              onPressed: !canAdd
                   ? null
                   : () {
                       Navigator.pop(ctx);

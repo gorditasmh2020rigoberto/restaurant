@@ -1282,21 +1282,19 @@ class _ComandasViewState extends State<ComandasView> {
   List<Widget> _buildCategoryCards(List<Dish> items) {
     if (items.isEmpty) return [];
 
-    // Categorías que colapsan a una tarjeta con selector sabor + tamaño
-    const multiFlavor = {
-      'enmoladas': 'Enmoladas',
-      'enchiladas': 'Enchiladas',
-      'molletes': 'Molletes',
-      'chilaquiles': 'Chilaquiles',
+    // Categorías que mantienen tarjetas individuales (lógica especial)
+    const skipMultiFlavor = {
+      'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
+      'gorditas',
     };
     final cat = items.first.category.toLowerCase();
-    final mfName = multiFlavor[cat];
-    if (mfName != null) {
+    if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
+      final displayName = _translateCategory(cat);
       return [
         MultiFlavorVariantCard(
           dishes: items,
-          displayName: mfName,
-          categoryPrefix: mfName,
+          displayName: displayName,
+          categoryPrefix: displayName,
         ),
       ];
     }

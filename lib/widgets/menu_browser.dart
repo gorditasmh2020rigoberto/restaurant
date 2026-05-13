@@ -266,24 +266,24 @@ class _MenuBrowserState extends State<MenuBrowser> {
     );
   }
 
-  /// Agrupa platillos con variantes Orden/1/2 Orden y aplica multi-sabor a categorías configuradas.
-  static const _multiFlavorCategories = {
-    'enmoladas': 'Enmoladas',
-    'enchiladas': 'Enchiladas',
-    'molletes': 'Molletes',
-    'chilaquiles': 'Chilaquiles',
+  /// Categorías que mantienen tarjetas individuales (lógica especial)
+  static const _skipMultiFlavor = {
+    'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
+    'gorditas',
   };
 
   List<Widget> _buildCategoryCards(List<Dish> items) {
     if (items.isEmpty) return [];
     final cat = items.first.category.toLowerCase();
-    final mfName = _multiFlavorCategories[cat];
-    if (mfName != null) {
+
+    // Para categorías con 2+ platillos, colapsar a una sola tarjeta multi-sabor
+    if (items.length > 1 && !_skipMultiFlavor.contains(cat)) {
+      final displayName = _translateCategory(cat);
       return [
         MultiFlavorVariantCard(
           dishes: items,
-          displayName: mfName,
-          categoryPrefix: mfName,
+          displayName: displayName,
+          categoryPrefix: displayName,
         ),
       ];
     }
