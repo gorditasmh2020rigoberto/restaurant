@@ -49,6 +49,12 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
         combinedCustomerName += ' - DIR: ${_addressController.text.trim()}';
       }
 
+      // Si paga online (Tarjeta o Clip), se registra el método al crear la orden.
+      // En Efectivo se queda en null para que la caja lo finalice al cobrar.
+      String? paymentMethodForDb;
+      if (_paymentMethod == 'Tarjeta') paymentMethodForDb = 'card';
+      if (_paymentMethod == 'Clip') paymentMethodForDb = 'clip';
+
       String orderId;
 
       if (widget.tableId != null) {
@@ -62,30 +68,36 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
         if (existingOrder != null) {
           orderId = existingOrder['id'] as String;
           final newTotal = (existingOrder['total_amount'] as num).toDouble() + cart.totalAmount;
-          await _supabase.from('orders').update({
+          final updateData = <String, dynamic>{
             'total_amount': newTotal,
             'customer_name': combinedCustomerName,
-          }).eq('id', orderId);
+          };
+          if (paymentMethodForDb != null) {
+            updateData['payment_method'] = paymentMethodForDb;
+          }
+          await _supabase.from('orders').update(updateData).eq('id', orderId);
         } else {
           final orderResponse = await _supabase.from('orders').insert({
             'table_id': widget.tableId,
-            'waiter_id': null, 
+            'waiter_id': null,
             'status': 'pending',
             'total_amount': finalTotal,
             'order_type': widget.orderType,
             'customer_name': combinedCustomerName,
+            if (paymentMethodForDb != null) 'payment_method': paymentMethodForDb,
           }).select().single();
           orderId = orderResponse['id'] as String;
         }
       } else {
         // Takeout/Delivery
         final orderResponse = await _supabase.from('orders').insert({
-          'table_id': null, 'branch_name': Globals.currentBranch, 
+          'table_id': null, 'branch_name': Globals.currentBranch,
           'waiter_id': null,
           'status': 'pending',
           'total_amount': finalTotal,
           'order_type': widget.orderType,
           'customer_name': combinedCustomerName,
+          if (paymentMethodForDb != null) 'payment_method': paymentMethodForDb,
         }).select().single();
         orderId = orderResponse['id'] as String;
       }
