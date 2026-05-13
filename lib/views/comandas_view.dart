@@ -977,17 +977,10 @@ class _ComandasViewState extends State<ComandasView> {
     final isDesktop = w >= 1024;
 
     if (isPhone) {
-      // Celular: menú arriba, resumen abajo (toggle con botón ≡)
-      if (!_carritoVisible) {
-        return _buildMenuContent(context);
-      }
-      return Column(
-        children: [
-          Expanded(flex: 5, child: _buildMenuContent(context)),
-          const Divider(height: 1, thickness: 1, color: Color(0xFF334155)),
-          Expanded(flex: 3, child: _buildOrderSummaryContent()),
-        ],
-      );
+      // Celular: pantalla completa para menú o comanda (toggle con botón ≡)
+      return _carritoVisible
+          ? _buildOrderSummaryContent()
+          : _buildMenuContent(context);
     }
 
     // Tablet y escritorio: lado a lado
@@ -1070,7 +1063,7 @@ class _ComandasViewState extends State<ComandasView> {
     final availableWidth = screenWidth - sidebarWidth;
     int crossAxisCount;
     if (isPhone) {
-      crossAxisCount = (availableWidth / 160).floor().clamp(2, 3);
+      crossAxisCount = (availableWidth / 130).floor().clamp(2, 3);
     } else if (isTablet) {
       crossAxisCount = (availableWidth / 130).floor().clamp(4, 6);
     } else {
@@ -1256,7 +1249,7 @@ class _ComandasViewState extends State<ComandasView> {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: isMobile ? 0.95 : (isTablet ? 0.80 : 0.70),
+              childAspectRatio: isMobile ? 0.78 : (isTablet ? 0.80 : 0.70),
               crossAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
               mainAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
             ),
