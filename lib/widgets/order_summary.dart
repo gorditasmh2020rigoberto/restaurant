@@ -1254,8 +1254,17 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         ),
 
         // ── TOTAL GENERAL + BOTONES ────────────────────────────
-        Container(
-          padding: const EdgeInsets.all(16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 400;
+            final btnHeight = isCompact ? 44.0 : 52.0;
+            final totalFontSize = isCompact ? 16.0 : 20.0;
+            final amountFontSize = isCompact ? 20.0 : 24.0;
+            final btnFontSize = isCompact ? 14.0 : 18.0;
+            final pad = isCompact ? 10.0 : 16.0;
+
+            return Container(
+          padding: EdgeInsets.all(pad),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             boxShadow: const [
@@ -1269,58 +1278,57 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('Total',
+                      style: TextStyle(fontSize: totalFontSize, fontWeight: FontWeight.bold)),
                   Text(
                     '\$${cart.totalAmount.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: amountFontSize,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: isCompact ? 8 : 12),
 
               if (_existingItems.isNotEmpty) ...[
                 ElevatedButton.icon(
                   onPressed: () => _cobrarCuenta(context),
-                  icon: const Icon(Icons.point_of_sale, size: 22),
+                  icon: Icon(Icons.point_of_sale, size: isCompact ? 18 : 22),
                   label: Text(
-                    'Cobrar Cuenta · \$${_existingTotal.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    'Cobrar · \$${_existingTotal.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: btnFontSize, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
+                    minimumSize: Size.fromHeight(btnHeight),
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: isCompact ? 6 : 10),
               ],
               ElevatedButton.icon(
                 onPressed: (_isSubmitting || widget.waiterId == null || cart.items.isEmpty)
                     ? null
                     : () => _submitOrder(cart),
                 icon: _isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
+                    ? SizedBox(
+                        height: isCompact ? 16 : 20,
+                        width: isCompact ? 16 : 20,
+                        child: const CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Icon(Icons.send, size: 22),
+                    : Icon(Icons.send, size: isCompact ? 18 : 22),
                 label: Text(
                   widget.waiterId == null
                       ? 'Selecciona Mesero'
-                      : 'Enviar a Producción',
-                  style: const TextStyle(fontSize: 18),
+                      : isCompact ? 'Enviar' : 'Enviar a Producción',
+                  style: TextStyle(fontSize: btnFontSize),
                 ),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize: Size.fromHeight(btnHeight),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -1329,6 +1337,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               ),
             ],
           ),
+            );
+          },
         ),
       ],
     );

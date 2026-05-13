@@ -828,11 +828,17 @@ class _ComandasViewState extends State<ComandasView> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isPhone = screenWidth < 600;
+
     String titleStr = 'Toma de Comandas';
     if (_selectedOrderType == 'dine_in' && _selectedTableNumber != null) {
-      titleStr = 'Comandas - Mesa $_selectedTableNumber';
+      titleStr = isPhone ? 'Mesa $_selectedTableNumber' : 'Comandas - Mesa $_selectedTableNumber';
     } else if (_selectedOrderType != 'dine_in') {
-      titleStr = 'Comandas - ${_selectedOrderType == "takeout" ? "Para Llevar" : "Delivery"} (${_customerName ?? ""})';
+      final typeLabel = _selectedOrderType == 'takeout' ? 'Para Llevar' : 'Delivery';
+      titleStr = isPhone
+          ? '$typeLabel (${_customerName ?? ""})'
+          : 'Comandas - $typeLabel (${_customerName ?? ""})';
     }
 
     return Scaffold(
@@ -840,8 +846,11 @@ class _ComandasViewState extends State<ComandasView> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(titleStr, style: const TextStyle(fontSize: 18)),
-            Text('Sucursal: ${Globals.currentBranch}', style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+            Text(titleStr, style: TextStyle(fontSize: isPhone ? 15 : 18),
+                overflow: TextOverflow.ellipsis),
+            if (!isPhone)
+              Text('Sucursal: ${Globals.currentBranch}',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
           ],
         ),
         actions: [
@@ -849,7 +858,7 @@ class _ComandasViewState extends State<ComandasView> {
             builder: (context, cart, _) => Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (cart.clients.length > 1)
+                if (!isPhone && cart.clients.length > 1)
                   Padding(
                     padding: const EdgeInsets.only(right: 6),
                     child: Container(
@@ -876,38 +885,61 @@ class _ComandasViewState extends State<ComandasView> {
                       ),
                     ),
                   ),
-                TextButton.icon(
-                  icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFFF6D00)),
-                  label: const Text('Cliente', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 12)),
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6D00).withOpacity(0.1),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  ),
-                  onPressed: () {
-                    final currentHasItems = cart.items.values
-                        .any((item) => item.clientLabel == cart.currentClient);
-                    if (!currentHasItems) {
-                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Agrega al menos un platillo al cliente actual primero'),
-                        duration: Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                        width: 340,
-                      ));
-                      return;
-                    }
-                    final name = 'Cliente ${cart.clients.length + 1}';
-                    cart.addClient(name);
-                    cart.setCurrentClient(name);
-                    if (!_carritoVisible) setState(() => _carritoVisible = true);
-                  },
-                ),
+                // En móvil: solo ícono; en tablet+: ícono + texto
+                isPhone
+                    ? IconButton(
+                        icon: const Icon(Icons.person_add, color: Color(0xFFFF6D00)),
+                        tooltip: 'Agregar cliente',
+                        onPressed: () {
+                          final currentHasItems = cart.items.values
+                              .any((item) => item.clientLabel == cart.currentClient);
+                          if (!currentHasItems) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text('Agrega al menos un platillo al cliente actual primero'),
+                              duration: Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ));
+                            return;
+                          }
+                          final name = 'Cliente ${cart.clients.length + 1}';
+                          cart.addClient(name);
+                          cart.setCurrentClient(name);
+                          if (!_carritoVisible) setState(() => _carritoVisible = true);
+                        },
+                      )
+                    : TextButton.icon(
+                        icon: const Icon(Icons.person_add, size: 18, color: Color(0xFFFF6D00)),
+                        label: const Text('Cliente', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 12)),
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6D00).withOpacity(0.1),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        ),
+                        onPressed: () {
+                          final currentHasItems = cart.items.values
+                              .any((item) => item.clientLabel == cart.currentClient);
+                          if (!currentHasItems) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text('Agrega al menos un platillo al cliente actual primero'),
+                              duration: Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                              width: 340,
+                            ));
+                            return;
+                          }
+                          final name = 'Cliente ${cart.clients.length + 1}';
+                          cart.addClient(name);
+                          cart.setCurrentClient(name);
+                          if (!_carritoVisible) setState(() => _carritoVisible = true);
+                        },
+                      ),
               ],
             ),
           ),
           const SizedBox(width: 4),
-          if (_selectedWaiterId != null && _waiters.isNotEmpty)
+          if (!isPhone && _selectedWaiterId != null && _waiters.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Chip(
@@ -932,7 +964,7 @@ class _ComandasViewState extends State<ComandasView> {
             icon: const Icon(Icons.table_restaurant),
             onPressed: _showTableSelectionDialog,
           ),
-          const SizedBox(width: 16),
+          if (!isPhone) const SizedBox(width: 16),
         ],
       ),
       body: _buildAdaptiveBody(context),
