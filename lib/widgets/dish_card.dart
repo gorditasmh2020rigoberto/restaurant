@@ -974,6 +974,273 @@ class DishCard extends StatelessWidget {
   }
 }
 
+String _extractFlavor(String name, String categoryPrefix) {
+  // Strip variant suffix
+  final base = name
+      .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
+      .trim();
+  // Strip category prefix like "Enmoladas de " → "Cebolla"
+  final prefix = RegExp(
+    r'^' + RegExp.escape(categoryPrefix) + r'\s+(?:de\s+|del\s+|con\s+)?',
+    caseSensitive: false,
+  );
+  return base.replaceFirst(prefix, '').trim();
+}
+
+Future<void> addMultiFlavorVariantToCart(BuildContext context,
+    List<Dish> dishes, String displayName, String categoryPrefix) async {
+  final cart = context.read<CartProvider>();
+
+  final flavors = <String>{};
+  for (final d in dishes) {
+    flavors.add(_extractFlavor(d.name, categoryPrefix));
+  }
+  final sortedFlavors = flavors.toList()..sort();
+
+  String? selectedSize; // 'orden' or 'media'
+  String? selectedFlavor;
+
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setDialogState) {
+        Dish? matched;
+        if (selectedSize != null && selectedFlavor != null) {
+          final isMedia = selectedSize == 'media';
+          for (final d in dishes) {
+            final dIsMedia = d.name.toLowerCase().contains('1/2');
+            final dFlavor = _extractFlavor(d.name, categoryPrefix);
+            if (dIsMedia == isMedia && dFlavor == selectedFlavor) {
+              matched = d;
+              break;
+            }
+          }
+        }
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: Text(displayName,
+              style: const TextStyle(color: Colors.white, fontSize: 16)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('TAMAÑO',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: [
+                      _ToggleOption(
+                        icon: Icons.restaurant,
+                        label: '1 Orden',
+                        value: selectedSize == 'orden',
+                        onChanged: (v) => setDialogState(
+                            () => selectedSize = v ? 'orden' : null),
+                      ),
+                      _ToggleOption(
+                        icon: Icons.content_cut,
+                        label: '1/2 Orden',
+                        value: selectedSize == 'media',
+                        onChanged: (v) => setDialogState(
+                            () => selectedSize = v ? 'media' : null),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 8),
+                  const Text('SABOR',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: sortedFlavors
+                        .map((fl) => _ToggleOption(
+                              icon: Icons.local_dining,
+                              label: fl,
+                              value: selectedFlavor == fl,
+                              onChanged: (v) => setDialogState(
+                                  () => selectedFlavor = v ? fl : null),
+                            ))
+                        .toList(),
+                  ),
+                  if (matched != null) ...[
+                    const SizedBox(height: 14),
+                    Text(
+                      'Total: \$${matched.price.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                          color: Color(0xFFFF6D00),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Colors.white54)),
+            ),
+            TextButton(
+              onPressed: matched == null
+                  ? null
+                  : () {
+                      Navigator.pop(ctx);
+                      cart.addItemWithGuisados(matched!, []);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text('${matched.name} agregado'),
+                          duration: const Duration(milliseconds: 500),
+                          behavior: SnackBarBehavior.floating,
+                          width: 260,
+                        ));
+                      }
+                    },
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+              ),
+              child: const Text('Agregar a la orden',
+                  style: TextStyle(color: Color(0xFFFF6D00))),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
+class MultiFlavorVariantCard extends StatelessWidget {
+  final List<Dish> dishes;
+  final String displayName;
+  final String categoryPrefix;
+
+  const MultiFlavorVariantCard({
+    super.key,
+    required this.dishes,
+    required this.displayName,
+    required this.categoryPrefix,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final minPrice =
+        dishes.map((d) => d.price).reduce((a, b) => a < b ? a : b);
+    final maxPrice =
+        dishes.map((d) => d.price).reduce((a, b) => a > b ? a : b);
+    final firstDish = dishes.first;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () => addMultiFlavorVariantToCart(
+            context, dishes, displayName, categoryPrefix),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Image.network(
+                firstDish.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[800],
+                  child: const Icon(Icons.fastfood, color: Colors.grey),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    displayName,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Builder(
+                    builder: (context) {
+                      final cart = context.watch<CartProvider>();
+                      final totalQ = dishes.fold<int>(
+                          0,
+                          (sum, d) =>
+                              sum + (cart.items[d.id]?.quantity ?? 0));
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '\$${minPrice.toStringAsFixed(0)} - \$${maxPrice.toStringAsFixed(0)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (totalQ > 0) ...[
+                                Text('$totalQ',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13)),
+                                const SizedBox(width: 4),
+                              ],
+                              IconButton.filledTonal(
+                                onPressed: () => addMultiFlavorVariantToCart(
+                                    context,
+                                    dishes,
+                                    displayName,
+                                    categoryPrefix),
+                                icon: const Icon(Icons.add, size: 16),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                    minHeight: 28, minWidth: 28),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 String _baseOrdenName(String name) {
   return name
       .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')

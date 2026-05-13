@@ -1280,6 +1280,20 @@ class _ComandasViewState extends State<ComandasView> {
 
   /// Agrupa platillos con variantes Orden/1/2 Orden en una sola tarjeta.
   List<Widget> _buildCategoryCards(List<Dish> items) {
+    if (items.isEmpty) return [];
+
+    // Enmoladas: una sola tarjeta con selector de sabor + tamaño
+    final cat = items.first.category.toLowerCase();
+    if (cat == 'enmoladas') {
+      return [
+        MultiFlavorVariantCard(
+          dishes: items,
+          displayName: 'Enmoladas',
+          categoryPrefix: 'Enmoladas',
+        ),
+      ];
+    }
+
     // Mapa: nombre base → {orden: Dish?, media: Dish?}
     final Map<String, Map<String, Dish>> byBase = {};
     for (final dish in items) {

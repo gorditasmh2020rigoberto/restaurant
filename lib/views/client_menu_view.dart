@@ -30,8 +30,16 @@ class _ClientMenuViewState extends State<ClientMenuView> {
   bool _isLoading = true;
 
   List<Widget> get _groupedCards {
+    // Separar enmoladas (un solo card con selector sabor+tamaño)
+    final enmoladas = _dishes
+        .where((d) => d.category.toLowerCase() == 'enmoladas')
+        .toList();
+    final otras = _dishes
+        .where((d) => d.category.toLowerCase() != 'enmoladas')
+        .toList();
+
     final Map<String, Map<String, Dish>> byBase = {};
-    for (final dish in _dishes) {
+    for (final dish in otras) {
       final isMedia = dish.name.toLowerCase().contains('1/2');
       final base = dish.name
           .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
@@ -42,6 +50,13 @@ class _ClientMenuViewState extends State<ClientMenuView> {
       byBase[base]![isMedia ? 'media' : 'orden'] = dish;
     }
     final List<Widget> cards = [];
+    if (enmoladas.isNotEmpty) {
+      cards.add(MultiFlavorVariantCard(
+        dishes: enmoladas,
+        displayName: 'Enmoladas',
+        categoryPrefix: 'Enmoladas',
+      ));
+    }
     for (final entry in byBase.entries) {
       final orden = entry.value['orden'];
       final media = entry.value['media'];
