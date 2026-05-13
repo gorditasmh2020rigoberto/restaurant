@@ -1091,18 +1091,16 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: scroll horizontal siempre ──
-        SizedBox(
-          height: 70,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            children: _availableCategories
-                .map((label) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _buildCategoryBlock(label),
-                    ))
-                .toList(),
+        // ── Categorías: Wrap con ancho fijo basado en pantalla completa ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: screenWidth * (isPhone ? 1.0 : 0.55)),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: _availableCategories.map(_buildCategoryBlock).toList(),
+            ),
           ),
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
