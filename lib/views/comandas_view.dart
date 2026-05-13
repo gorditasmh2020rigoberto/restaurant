@@ -1111,7 +1111,7 @@ class _ComandasViewState extends State<ComandasView> {
         if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
         // ── Submenu de enmoladas ──
         if (_selectedCategory != 'Todos' && _selectedCategory != 'drink' &&
-            _filteredDishes.any((d) => d.name.toLowerCase().contains('1/2')))
+            _dishes.any((d) => _effectiveCat(d) == _selectedCategory && d.name.toLowerCase().contains('1/2')))
           _buildOrdenSubmenu(),
         // ── Grid de platillos (scrollable) ──
         Expanded(
