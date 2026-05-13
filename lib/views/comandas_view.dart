@@ -1113,11 +1113,24 @@ class _ComandasViewState extends State<ComandasView> {
         if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
         // ── Grid de platillos (scrollable) ──
         Expanded(
-          child: CustomScrollView(
-            slivers: [
-              ..._buildGroupedMenu(filteredDishes, crossAxisCount, isPhone, isTablet: isTablet),
-              const SliverToBoxAdapter(child: SizedBox(height: 40)),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final realWidth = constraints.maxWidth;
+              int cols;
+              if (isPhone) {
+                cols = (realWidth / 130).floor().clamp(2, 3);
+              } else if (isTablet) {
+                cols = (realWidth / 150).floor().clamp(2, 5);
+              } else {
+                cols = (realWidth / 180).floor().clamp(4, 8);
+              }
+              return CustomScrollView(
+                slivers: [
+                  ..._buildGroupedMenu(filteredDishes, cols, isPhone, isTablet: isTablet),
+                  const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                ],
+              );
+            },
           ),
         ),
       ],
