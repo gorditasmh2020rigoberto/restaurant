@@ -272,6 +272,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           segments: [
                             ButtonSegment(value: 'Efectivo', label: Text(isMobile ? 'Efectivo' : 'Efectivo (Pagar en caja)'), icon: const Icon(Icons.money)),
                             ButtonSegment(value: 'Tarjeta', label: Text(isMobile ? 'Tarjeta' : 'Tarjeta (TPV)'), icon: const Icon(Icons.credit_card)),
+                            ButtonSegment(value: 'Clip', label: const Text('Clip'), icon: const Icon(Icons.contactless)),
                           ],
                           selected: {_paymentMethod},
                           onSelectionChanged: (newSelection) {

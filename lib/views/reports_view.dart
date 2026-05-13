@@ -27,6 +27,7 @@ class _ReportsViewState extends State<ReportsView> {
   double _ticketPromedio = 0.0;
   double _efectivoEnCaja = 0.0;
   double _ventasTarjeta = 0.0;
+  double _ventasClip = 0.0;
   double _ventasTransferencia = 0.0;
 
   // Vista activa: 'historial' o 'cortes'
@@ -84,7 +85,7 @@ class _ReportsViewState extends State<ReportsView> {
       _filteredOrders = localFiltered;
 
       double total = 0.0;
-      double eff = 0.0, tar = 0.0, tra = 0.0;
+      double eff = 0.0, tar = 0.0, clip = 0.0, tra = 0.0;
 
       for (var o in _filteredOrders) {
         final amt = (o['total_amount'] as num?)?.toDouble() ?? 0.0;
@@ -93,6 +94,8 @@ class _ReportsViewState extends State<ReportsView> {
 
         if (pm == 'TARJETA') {
           tar += amt;
+        } else if (pm == 'CLIP') {
+          clip += amt;
         } else if (pm == 'TRANSFERENCIA') {
           tra += amt;
         } else {
@@ -105,6 +108,7 @@ class _ReportsViewState extends State<ReportsView> {
       _ticketPromedio = _totalOrders > 0 ? _totalSales / _totalOrders : 0.0;
       _efectivoEnCaja = eff;
       _ventasTarjeta = tar;
+      _ventasClip = clip;
       _ventasTransferencia = tra;
     });
   }
@@ -184,7 +188,9 @@ class _ReportsViewState extends State<ReportsView> {
 
       for (var o in orders) {
         final pm = o['payment_method']?.toString().toUpperCase() ?? 'EFECTIVO';
-        if (pm.contains('TARJETA') || pm.contains('MERCADO')) {
+        if (pm.contains('CLIP')) {
+          o['ui_method'] = 'CLIP';
+        } else if (pm.contains('TARJETA') || pm.contains('CARD') || pm.contains('MERCADO')) {
           o['ui_method'] = 'TARJETA';
         } else if (pm.contains('TRANS')) {
           o['ui_method'] = 'TRANSFERENCIA';
@@ -770,6 +776,8 @@ class _ReportsViewState extends State<ReportsView> {
                           ]),
                           const SizedBox(height: 24),
                           _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
+                          const SizedBox(height: 16),
+                          _buildPaymentMethodRow('Clip', _ventasClip, Icons.contactless, Colors.amberAccent),
                           const SizedBox(height: 16),
                           _buildPaymentMethodRow('Efectivo', _efectivoEnCaja, Icons.money, Colors.greenAccent[400]!),
                           const SizedBox(height: 16),

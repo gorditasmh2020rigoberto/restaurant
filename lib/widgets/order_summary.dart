@@ -347,6 +347,20 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                     borderRadius: BorderRadius.circular(14)),
               ),
             ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'clip'),
+              icon: const Icon(Icons.contactless),
+              label: const Text('Clip',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                backgroundColor: const Color(0xFFFF6D00),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
           ],
         ),
         actions: [
@@ -518,11 +532,12 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         ),
       );
     } else {
-      // Tarjeta — mark as completed directly
+      // Tarjeta o Clip — mark as completed directly
+      final isClip = method == 'clip';
       try {
         await supabase.from('orders').update({
           'status': 'completed',
-          'payment_method': 'card',
+          'payment_method': isClip ? 'clip' : 'card',
         }).inFilter('id', orderIds);
         if (tableId != null) {
           await supabase
@@ -531,8 +546,10 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         }
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Pago con tarjeta registrado'),
+            SnackBar(
+                content: Text(isClip
+                    ? 'Pago con Clip registrado'
+                    : 'Pago con tarjeta registrado'),
                 backgroundColor: Colors.green),
           );
           setState(() => _existingItems = []);
