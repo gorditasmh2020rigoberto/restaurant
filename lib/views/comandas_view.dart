@@ -1068,8 +1068,9 @@ class _ComandasViewState extends State<ComandasView> {
     final isPhone = screenWidth < 600;
     final isDesktop = screenWidth >= 1024;
     final isTablet = !isPhone && !isDesktop;
+    // Usa siempre el ancho con sidebar para que las tarjetas no cambien de tamaño
     final sidebarWidth = isDesktop ? 380.0 : (isTablet ? (screenWidth < 800 ? 230.0 : 280.0) : 0.0);
-    final availableWidth = screenWidth - sidebarWidth;
+    final availableWidth = isPhone ? screenWidth : screenWidth - sidebarWidth;
     int crossAxisCount;
     if (isPhone) {
       crossAxisCount = (availableWidth / 130).floor().clamp(2, 3);
