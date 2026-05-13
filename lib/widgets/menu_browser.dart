@@ -428,7 +428,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
               final realWidth = constraints.maxWidth;
               int cols;
               if (isPhone) {
-                cols = (realWidth / 130).floor().clamp(2, 3);
+                cols = 3;
               } else if (isTablet) {
                 cols = (realWidth / 150).floor().clamp(2, 5);
               } else {
