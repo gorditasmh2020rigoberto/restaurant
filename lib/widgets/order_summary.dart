@@ -1089,7 +1089,13 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   }
                   return ListTile(
                     dense: true,
-                    title: Text(item['name'], style: const TextStyle(color: Colors.white70)),
+                    title: Text(
+                      item['name'],
+                      style: const TextStyle(color: Colors.white70),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1101,6 +1107,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                           Text(
                             guisadosList.join(', '),
                             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                       ],
                     ),
@@ -1109,10 +1117,13 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                       children: [
                         Text('x${item['quantity']}',
                             style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 4),
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent, size: 18),
                           onPressed: () => _deleteExistingItem(item),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                          visualDensity: VisualDensity.compact,
                         ),
                       ],
                     ),
@@ -1214,6 +1225,9 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                         title: Text(
                           entry.value.dish.name,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1226,6 +1240,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               Text(
                                 entry.value.guisados.join(', '),
                                 style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                           ],
                         ),
@@ -1233,16 +1249,25 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.remove_circle_outline, size: 20, color: Colors.white54),
+                              icon: const Icon(Icons.remove_circle_outline, size: 18, color: Colors.white54),
                               onPressed: () => cart.decrementQuantity(entry.key),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                              visualDensity: VisualDensity.compact,
                             ),
-                            Text(
-                              '${entry.value.quantity}',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              child: Text(
+                                '${entry.value.quantity}',
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
                             ),
                             IconButton(
-                              icon: const Icon(Icons.add_circle_outline, size: 20, color: Color(0xFFFF6D00)),
+                              icon: const Icon(Icons.add_circle_outline, size: 18, color: Color(0xFFFF6D00)),
                               onPressed: () => cart.incrementQuantity(entry.key),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                              visualDensity: VisualDensity.compact,
                             ),
                           ],
                         ),
