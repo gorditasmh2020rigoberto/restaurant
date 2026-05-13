@@ -983,9 +983,9 @@ class _ComandasViewState extends State<ComandasView> {
       }
       return Column(
         children: [
-          Expanded(flex: 3, child: _buildMenuContent(context)),
+          Expanded(flex: 5, child: _buildMenuContent(context)),
           const Divider(height: 1, thickness: 1, color: Color(0xFF334155)),
-          Expanded(flex: 2, child: _buildOrderSummaryContent()),
+          Expanded(flex: 3, child: _buildOrderSummaryContent()),
         ],
       );
     }
@@ -1256,7 +1256,7 @@ class _ComandasViewState extends State<ComandasView> {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: isMobile ? 0.72 : (isTablet ? 0.80 : 0.70),
+              childAspectRatio: isMobile ? 0.95 : (isTablet ? 0.80 : 0.70),
               crossAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
               mainAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
             ),
