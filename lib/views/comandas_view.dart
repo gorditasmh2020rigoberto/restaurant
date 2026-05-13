@@ -272,11 +272,11 @@ class _ComandasViewState extends State<ComandasView> {
       onTap: () => _onCategoryTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 72,
-        height: 64,
+        width: 60,
+        height: 54,
         decoration: BoxDecoration(
           color: selected ? activeColor : const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? activeColor : const Color(0xFF334155),
             width: 1.5,
@@ -287,7 +287,7 @@ class _ComandasViewState extends State<ComandasView> {
           children: [
             Icon(
               Globals.categoryIcon(label),
-              size: 24,
+              size: 20,
               color: selected ? Colors.white : Colors.white60,
             ),
             const SizedBox(height: 4),
