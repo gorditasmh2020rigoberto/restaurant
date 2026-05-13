@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/dish.dart';
 import '../providers/cart_provider.dart';
-import '../widgets/dish_card.dart';
+import '../widgets/menu_browser.dart';
 import 'client_checkout_view.dart';
 
 class ClientMenuView extends StatefulWidget {
@@ -29,45 +29,6 @@ class _ClientMenuViewState extends State<ClientMenuView> {
   List<Dish> _dishes = [];
   bool _isLoading = true;
 
-  List<Widget> get _groupedCards {
-    // Separar enmoladas (un solo card con selector sabor+tamaño)
-    final enmoladas = _dishes
-        .where((d) => d.category.toLowerCase() == 'enmoladas')
-        .toList();
-    final otras = _dishes
-        .where((d) => d.category.toLowerCase() != 'enmoladas')
-        .toList();
-
-    final Map<String, Map<String, Dish>> byBase = {};
-    for (final dish in otras) {
-      final isMedia = dish.name.toLowerCase().contains('1/2');
-      final base = dish.name
-          .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
-          .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
-          .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
-          .trim();
-      byBase.putIfAbsent(base, () => {});
-      byBase[base]![isMedia ? 'media' : 'orden'] = dish;
-    }
-    final List<Widget> cards = [];
-    if (enmoladas.isNotEmpty) {
-      cards.add(MultiFlavorVariantCard(
-        dishes: enmoladas,
-        displayName: 'Enmoladas',
-        categoryPrefix: 'Enmoladas',
-      ));
-    }
-    for (final entry in byBase.entries) {
-      final orden = entry.value['orden'];
-      final media = entry.value['media'];
-      if (orden != null && media != null) {
-        cards.add(OrdenVariantCard(ordenDish: orden, mediaDish: media));
-      } else {
-        cards.add(DishCard(dish: orden ?? media!));
-      }
-    }
-    return cards;
-  }
 
   @override
   void initState() {
@@ -140,17 +101,7 @@ class _ClientMenuViewState extends State<ClientMenuView> {
           ? const Center(child: CircularProgressIndicator())
           : _dishes.isEmpty
               ? const Center(child: Text('El menú está vacío', style: TextStyle(color: Colors.grey)))
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16).copyWith(bottom: 100),
-                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 300,
-                    childAspectRatio: 0.75,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: _groupedCards.length,
-                  itemBuilder: (context, index) => _groupedCards[index],
-                ),
+              : MenuBrowser(dishes: _dishes),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: cart.itemCount > 0
           ? LayoutBuilder(
