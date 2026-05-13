@@ -188,14 +188,18 @@ class _ComandasViewState extends State<ComandasView> {
     }
 
     rawCats.remove('platillos'); // ocultar categoría Platillos
-    const pinned = ['gorditas', 'drink'];
-    final rest = rawCats.where((c) => !pinned.contains(c)).toList();
-    rest.sort((a, b) {
-      final countA = _categoryClickCounts[a] ?? 0;
-      final countB = _categoryClickCounts[b] ?? 0;
-      if (countB != countA) return countB.compareTo(countA);
-      return a.compareTo(b);
-    });
+    // Orden fijo solicitado para las primeras categorías
+    const pinned = [
+      'gorditas',
+      'drink',
+      'chilaquiles',
+      'huevos',
+      'molletes',
+      'enchiladas',
+      'huaraches',
+      'arrachera',
+    ];
+    final rest = rawCats.where((c) => !pinned.contains(c)).toList()..sort();
     final ordered = [...pinned.where(rawCats.contains), ...rest];
     return ['Todos', ...ordered];
   }
