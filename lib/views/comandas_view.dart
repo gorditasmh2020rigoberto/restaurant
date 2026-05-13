@@ -993,7 +993,7 @@ class _ComandasViewState extends State<ComandasView> {
     }
 
     // Tablet y escritorio: lado a lado
-    final sidebarWidth = isDesktop ? 380.0 : (w < 800 ? 260.0 : 320.0);
+    final sidebarWidth = isDesktop ? 380.0 : (w < 800 ? 230.0 : 280.0);
     return Row(
       children: [
         Expanded(child: _buildMenuContent(context)),
@@ -1068,7 +1068,7 @@ class _ComandasViewState extends State<ComandasView> {
     final isPhone = screenWidth < 600;
     final isDesktop = screenWidth >= 1024;
     final isTablet = !isPhone && !isDesktop;
-    final sidebarWidth = isDesktop ? 380.0 : (isTablet ? (screenWidth < 800 ? 260.0 : 320.0) : 0.0);
+    final sidebarWidth = isDesktop ? 380.0 : (isTablet ? (screenWidth < 800 ? 230.0 : 280.0) : 0.0);
     final availableWidth = screenWidth - sidebarWidth;
     int crossAxisCount;
     if (isPhone) {
