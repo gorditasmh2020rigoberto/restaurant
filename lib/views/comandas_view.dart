@@ -1091,14 +1091,14 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: 3 filas fijas con scroll horizontal ──
+        // ── Categorías: 2 filas fijas con scroll horizontal ──
         SizedBox(
-          height: 3 * 54 + 2 * 6 + 8,
+          height: 2 * 54 + 1 * 6 + 8,
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: 2,
               mainAxisSpacing: 8,
               crossAxisSpacing: 6,
               childAspectRatio: 54 / 60,
