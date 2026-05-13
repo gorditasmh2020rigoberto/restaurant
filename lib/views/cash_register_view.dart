@@ -240,7 +240,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                         fillColor: const Color(0xFF0F172A),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      items: ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA']
+                      items: ['EFECTIVO', 'TARJETA', 'CLIP', 'TRANSFERENCIA']
                           .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                           .toList(),
                       onChanged: (val) => setDialogState(() => _selectedPaymentMethod = val!),
