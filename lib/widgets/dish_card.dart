@@ -974,6 +974,208 @@ class DishCard extends StatelessWidget {
   }
 }
 
+String _baseOrdenName(String name) {
+  return name
+      .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
+      .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
+      .trim();
+}
+
+Future<void> addOrdenVariantToCart(
+    BuildContext context, Dish ordenDish, Dish mediaDish) async {
+  final cart = context.read<CartProvider>();
+  Dish? selected;
+
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setDialogState) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: Text(
+          _baseOrdenName(ordenDish.name),
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('TAMAÑO',
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1)),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              children: [
+                _ToggleOption(
+                  icon: Icons.restaurant,
+                  label: '1 Orden  \$${ordenDish.price.toStringAsFixed(0)}',
+                  value: selected?.id == ordenDish.id,
+                  onChanged: (v) =>
+                      setDialogState(() => selected = v ? ordenDish : null),
+                ),
+                _ToggleOption(
+                  icon: Icons.content_cut,
+                  label: '1/2 Orden  \$${mediaDish.price.toStringAsFixed(0)}',
+                  value: selected?.id == mediaDish.id,
+                  onChanged: (v) =>
+                      setDialogState(() => selected = v ? mediaDish : null),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: selected == null
+                ? null
+                : () {
+                    Navigator.pop(ctx);
+                    cart.addItemWithGuisados(selected!, []);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('${selected!.name} agregado'),
+                        duration: const Duration(milliseconds: 500),
+                        behavior: SnackBarBehavior.floating,
+                        width: 260,
+                      ));
+                    }
+                  },
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+            ),
+            child: const Text('Agregar a la orden',
+                style: TextStyle(color: Color(0xFFFF6D00))),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class OrdenVariantCard extends StatelessWidget {
+  final Dish ordenDish;
+  final Dish mediaDish;
+
+  const OrdenVariantCard({
+    super.key,
+    required this.ordenDish,
+    required this.mediaDish,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final baseName = _baseOrdenName(ordenDish.name);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () => addOrdenVariantToCart(context, ordenDish, mediaDish),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Image.network(
+                ordenDish.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[800],
+                  child: const Icon(Icons.fastfood, color: Colors.grey),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    baseName,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Builder(
+                    builder: (context) {
+                      final cart = context.watch<CartProvider>();
+                      final qOrden = cart.items[ordenDish.id]?.quantity ?? 0;
+                      final qMedia = cart.items[mediaDish.id]?.quantity ?? 0;
+                      final totalQ = qOrden + qMedia;
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '\$${ordenDish.price.toStringAsFixed(0)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              Text(
+                                '1/2: \$${mediaDish.price.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                    color: Colors.white54, fontSize: 10),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (totalQ > 0) ...[
+                                Text(
+                                  '$totalQ',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13),
+                                ),
+                                const SizedBox(width: 4),
+                              ],
+                              IconButton.filledTonal(
+                                onPressed: () => addOrdenVariantToCart(
+                                    context, ordenDish, mediaDish),
+                                icon: const Icon(Icons.add, size: 16),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                    minHeight: 28, minWidth: 28),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ToggleOption extends StatelessWidget {
   final IconData icon;
   final String label;

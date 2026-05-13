@@ -88,19 +88,17 @@ class _ComandasViewState extends State<ComandasView> {
         _categoryClickCounts[label] = newCount;
         _selectedCategory = label;
         if (label != 'drink') _selectedDrinkSubcat = null;
-        _selectedOrdenSubcat = null;
       });
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('cat_clicks_$label', newCount);
     } else {
-      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; _selectedOrdenSubcat = null; });
+      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; });
     }
   }
 
   bool _isInitialLoad = true;
   String _selectedCategory = 'Todos';
   String? _selectedDrinkSubcat; // submenu de bebidas
-  String? _selectedOrdenSubcat; // submenu genérico 1 Orden / 1/2 Orden
   String _searchQuery = '';
   bool _carritoVisible = false;
   Map<String, int> _categoryClickCounts = {};
@@ -124,11 +122,6 @@ class _ComandasViewState extends State<ComandasView> {
           if (_selectedDrinkSubcat != null && _effectiveCat(dish) != _selectedDrinkSubcat) continue;
         } else {
           if (_effectiveCat(dish) != _selectedCategory) continue;
-          if (_selectedOrdenSubcat == 'media') {
-            if (!dish.name.toLowerCase().contains('1/2')) continue;
-          } else if (_selectedOrdenSubcat == 'orden') {
-            if (dish.name.toLowerCase().contains('1/2')) continue;
-          }
         }
       }
 
@@ -1109,10 +1102,6 @@ class _ComandasViewState extends State<ComandasView> {
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
         // ── Submenu de bebidas ──
         if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
-        // ── Submenu de enmoladas ──
-        if (_selectedCategory != 'Todos' && _selectedCategory != 'drink' &&
-            _dishes.any((d) => _effectiveCat(d) == _selectedCategory && d.name.toLowerCase().contains('1/2')))
-          _buildOrdenSubmenu(),
         // ── Grid de platillos (scrollable) ──
         Expanded(
           child: LayoutBuilder(
@@ -1198,63 +1187,6 @@ class _ComandasViewState extends State<ComandasView> {
     );
   }
 
-  Widget _buildOrdenSubmenu() {
-    const subcats = [
-      (null,    'Todas',     Icons.grid_view),
-      ('orden', '1 Orden',  Icons.restaurant),
-      ('media', '1/2 Orden', Icons.content_cut),
-    ];
-    const active = Color(0xFFE07A30);
-    return Container(
-      color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: subcats.map((s) {
-            final key = s.$1;
-            final label = s.$2;
-            final icon = s.$3;
-            final selected = _selectedOrdenSubcat == key;
-            return Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: GestureDetector(
-                onTap: () => setState(() => _selectedOrdenSubcat = key),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 160),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: selected ? active : const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: selected ? active : const Color(0xFF334155),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(icon, size: 16, color: selected ? Colors.white : Colors.white60),
-                      const SizedBox(width: 6),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: selected ? Colors.white : Colors.white70,
-                          fontSize: 13,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
   List<Widget> _buildGroupedMenu(List<Dish> items, int crossAxisCount, bool isPhone, {bool isTablet = false}) {
     final isMobile = isPhone;
     if (items.isEmpty) {
@@ -1279,7 +1211,10 @@ class _ComandasViewState extends State<ComandasView> {
 
     for (var category in sortedCategories) {
       final categoryItems = groups[category]!;
-      
+
+      // Group dishes into cards: pair Orden + 1/2 Orden variants, rest stay solo
+      final List<Widget> cards = _buildCategoryCards(categoryItems);
+
       // Category Header
       slivers.add(
         SliverToBoxAdapter(
@@ -1307,7 +1242,7 @@ class _ComandasViewState extends State<ComandasView> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '(${categoryItems.length})',
+                  '(${cards.length})',
                   style: const TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
                 ),
               ],
@@ -1328,8 +1263,8 @@ class _ComandasViewState extends State<ComandasView> {
               mainAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
             ),
             delegate: SliverChildBuilderDelegate(
-              (context, index) => DishCard(dish: categoryItems[index]),
-              childCount: categoryItems.length,
+              (context, index) => cards[index],
+              childCount: cards.length,
             ),
           ),
         ),
@@ -1337,6 +1272,38 @@ class _ComandasViewState extends State<ComandasView> {
     }
 
     return slivers;
+  }
+
+  /// Agrupa platillos con variantes Orden/1/2 Orden en una sola tarjeta.
+  List<Widget> _buildCategoryCards(List<Dish> items) {
+    // Mapa: nombre base → {orden: Dish?, media: Dish?}
+    final Map<String, Map<String, Dish>> byBase = {};
+    for (final dish in items) {
+      final name = dish.name;
+      final isMedia = name.toLowerCase().contains('1/2');
+      // Extraer nombre base quitando sufijo de variante
+      final base = name
+          .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
+          .trim();
+      byBase.putIfAbsent(base, () => {});
+      byBase[base]![isMedia ? 'media' : 'orden'] = dish;
+    }
+
+    final List<Widget> cards = [];
+    for (final entry in byBase.entries) {
+      final orden = entry.value['orden'];
+      final media = entry.value['media'];
+      if (orden != null && media != null) {
+        cards.add(OrdenVariantCard(ordenDish: orden, mediaDish: media));
+      } else {
+        // Solo una variante — tarjeta normal
+        final solo = orden ?? media!;
+        cards.add(DishCard(dish: solo));
+      }
+    }
+    return cards;
   }
 }
 
