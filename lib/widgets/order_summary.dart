@@ -46,6 +46,517 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
     }
   }
 
+  double get _existingTotal => _existingItems.fold(
+      0.0,
+      (sum, item) =>
+          sum +
+          (item['price'] as num).toDouble() *
+              (item['quantity'] as num).toInt());
+
+  List<String> get _existingOrderIds =>
+      _existingItems.map((i) => i['order_id'] as String).toSet().toList();
+
+  Future<double?> _askPropina(BuildContext context, double total) async {
+    int selectedPct = -1;
+    final customController = TextEditingController();
+    double propinaAmount = 0.0;
+
+    return showDialog<double>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) {
+          void recalc() {
+            if (selectedPct == -1) {
+              propinaAmount = 0;
+            } else if (selectedPct == 0) {
+              propinaAmount = double.tryParse(customController.text) ?? 0;
+            } else {
+              propinaAmount = total * selectedPct / 100;
+            }
+          }
+
+          recalc();
+          final totalFinal = total + propinaAmount;
+
+          Widget pctBtn(String label, int pct) {
+            final active = selectedPct == pct;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setS(() {
+                  selectedPct = pct;
+                  recalc();
+                }),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: active
+                        ? const Color(0xFFFF6D00)
+                        : const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: active
+                            ? const Color(0xFFFF6D00)
+                            : const Color(0xFF334155),
+                        width: 1.5),
+                  ),
+                  child: Text(label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: active
+                              ? Colors.white
+                              : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15)),
+                ),
+              ),
+            );
+          }
+
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            backgroundColor: const Color(0xFF0F172A),
+            title: const Row(
+              children: [
+                Icon(Icons.volunteer_activism,
+                    color: Color(0xFFFF6D00), size: 28),
+                SizedBox(width: 12),
+                Text('¿Desea dejar propina?',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total de la cuenta:',
+                          style: TextStyle(
+                              color: Color(0xFF94A3B8), fontSize: 15)),
+                      Text('\$${total.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(children: [
+                  pctBtn('Sin\npropina', -1),
+                  pctBtn('10%', 10),
+                  pctBtn('15%', 15),
+                  pctBtn('20%', 20),
+                ]),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: customController,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                  decoration: InputDecoration(
+                    labelText: 'Monto personalizado',
+                    labelStyle: const TextStyle(color: Colors.white54),
+                    hintText: '0.00',
+                    hintStyle: const TextStyle(color: Colors.white30),
+                    prefixIcon: const Icon(Icons.edit, color: Color(0xFFFF6D00)),
+                    prefixText: '\$  ',
+                    prefixStyle: const TextStyle(
+                        color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
+                    filled: true,
+                    fillColor: const Color(0xFF1E293B),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onChanged: (_) => setS(() {
+                    selectedPct = 0;
+                    recalc();
+                  }),
+                ),
+                const SizedBox(height: 20),
+                if (propinaAmount > 0) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color:
+                          const Color(0xFFFF6D00).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: const Color(0xFFFF6D00)
+                              .withValues(alpha: 0.4),
+                          width: 1.5),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Propina:',
+                                  style: TextStyle(
+                                      color: Color(0xFFFF6D00), fontSize: 15)),
+                              Text('+\$${propinaAmount.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                      color: Color(0xFFFF6D00),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                            ]),
+                        const Divider(color: Color(0xFFFF6D00), height: 16),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('TOTAL A COBRAR:',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 16)),
+                              Text('\$${totalFinal.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w900)),
+                            ]),
+                      ],
+                    ),
+                  ),
+                ] else ...[
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('TOTAL A COBRAR:',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 16)),
+                        Text('\$${totalFinal.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900)),
+                      ]),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, null),
+                child: const Text('Cancelar',
+                    style: TextStyle(color: Color(0xFF94A3B8))),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.pop(ctx, totalFinal),
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text('Continuar al cobro',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 20, vertical: 14),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showPaymentDialog(
+      BuildContext context, List<String> orderIds, double total) async {
+    final tableId = widget.tableId;
+    final supabase = Supabase.instance.client;
+
+    String? method = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: const Color(0xFF0F172A),
+        title: const Row(
+          children: [
+            Icon(Icons.point_of_sale, color: Color(0xFFFF6D00), size: 28),
+            SizedBox(width: 12),
+            Text('Método de Pago',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(16)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Total a Cobrar:',
+                      style:
+                          TextStyle(color: Color(0xFF94A3B8), fontSize: 16)),
+                  Text('\$${total.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'cash'),
+              icon: const Icon(Icons.payments),
+              label: const Text('Efectivo',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(ctx, 'card'),
+              icon: const Icon(Icons.credit_card),
+              label: const Text('Tarjeta / TPV',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Color(0xFF94A3B8))),
+          ),
+        ],
+      ),
+    );
+
+    if (method == null || !context.mounted) return;
+
+    if (method == 'cash') {
+      final cashController = TextEditingController();
+      double change = 0.0;
+
+      await showDialog(
+        context: context,
+        builder: (ctx) => StatefulBuilder(
+          builder: (ctx2, setS) => AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24)),
+            backgroundColor: const Color(0xFF0F172A),
+            title: const Row(
+              children: [
+                Icon(Icons.payments, color: Colors.green, size: 28),
+                SizedBox(width: 12),
+                Text('Cobro en Efectivo',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total a Cobrar:',
+                          style: TextStyle(
+                              color: Color(0xFF94A3B8), fontSize: 16)),
+                      Text('\$${total.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: cashController,
+                  autofocus: true,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFF6D00)),
+                  decoration: InputDecoration(
+                    labelText: 'Monto Recibido',
+                    hintText: '0.00',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.attach_money),
+                  ),
+                  onChanged: (value) {
+                    final cash = double.tryParse(value) ?? 0.0;
+                    setS(() {
+                      change = cash - total;
+                      if (change < 0) change = 0;
+                    });
+                  },
+                ),
+                const SizedBox(height: 24),
+                if (change > 0 ||
+                    (double.tryParse(cashController.text) ?? 0) >= total)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: Colors.green.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      children: [
+                        const Text('CAMBIO PARA EL CLIENTE',
+                            style: TextStyle(
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                letterSpacing: 1.2)),
+                        const SizedBox(height: 8),
+                        Text('\$${change.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                                color: Colors.green,
+                                fontSize: 40,
+                                fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar',
+                    style: TextStyle(color: Color(0xFF94A3B8))),
+              ),
+              ElevatedButton(
+                onPressed:
+                    (double.tryParse(cashController.text) ?? 0) < total
+                        ? null
+                        : () async {
+                            try {
+                              await supabase.from('orders').update({
+                                'status': 'completed',
+                                'payment_method': 'cash',
+                                'amount_cash': total,
+                              }).inFilter('id', orderIds);
+                              if (tableId != null) {
+                                await supabase
+                                    .from('restaurant_tables')
+                                    .update({'status': 'available'}).eq(
+                                        'id', tableId as Object);
+                              }
+                              if (ctx2.mounted) {
+                                Navigator.pop(ctx2);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Pago finalizado con éxito'),
+                                        backgroundColor: Colors.green),
+                                  );
+                                  setState(() => _existingItems = []);
+                                }
+                              }
+                            } catch (e) {
+                              if (ctx2.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error: $e')));
+                              }
+                            }
+                          },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(150, 50),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('FINALIZAR COBRO',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      // Tarjeta — mark as completed directly
+      try {
+        await supabase.from('orders').update({
+          'status': 'completed',
+          'payment_method': 'card',
+        }).inFilter('id', orderIds);
+        if (tableId != null) {
+          await supabase
+              .from('restaurant_tables')
+              .update({'status': 'available'}).eq('id', tableId as Object);
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Pago con tarjeta registrado'),
+                backgroundColor: Colors.green),
+          );
+          setState(() => _existingItems = []);
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      }
+    }
+  }
+
+  Future<void> _cobrarCuenta(BuildContext context) async {
+    final total = _existingTotal;
+    final orderIds = _existingOrderIds;
+    if (orderIds.isEmpty) return;
+
+    final totalConPropina = await _askPropina(context, total);
+    if (totalConPropina == null || !context.mounted) return;
+
+    await _showPaymentDialog(context, orderIds, totalConPropina);
+  }
+
   Future<void> _deleteExistingItem(Map<String, dynamic> item) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -743,8 +1254,17 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         ),
 
         // ── TOTAL GENERAL + BOTONES ────────────────────────────
-        Container(
-          padding: const EdgeInsets.all(16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final isCompact = constraints.maxWidth < 400;
+            final btnHeight = isCompact ? 44.0 : 52.0;
+            final totalFontSize = isCompact ? 16.0 : 20.0;
+            final amountFontSize = isCompact ? 20.0 : 24.0;
+            final btnFontSize = isCompact ? 14.0 : 18.0;
+            final pad = isCompact ? 10.0 : 16.0;
+
+            return Container(
+          padding: EdgeInsets.all(pad),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             boxShadow: const [
@@ -758,40 +1278,57 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Total',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('Total',
+                      style: TextStyle(fontSize: totalFontSize, fontWeight: FontWeight.bold)),
                   Text(
                     '\$${cart.totalAmount.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: amountFontSize,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: isCompact ? 8 : 12),
 
+              if (_existingItems.isNotEmpty) ...[
+                ElevatedButton.icon(
+                  onPressed: () => _cobrarCuenta(context),
+                  icon: Icon(Icons.point_of_sale, size: isCompact ? 18 : 22),
+                  label: Text(
+                    'Cobrar · \$${_existingTotal.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: btnFontSize, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size.fromHeight(btnHeight),
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+                SizedBox(height: isCompact ? 6 : 10),
+              ],
               ElevatedButton.icon(
                 onPressed: (_isSubmitting || widget.waiterId == null || cart.items.isEmpty)
                     ? null
                     : () => _submitOrder(cart),
                 icon: _isSubmitting
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
+                    ? SizedBox(
+                        height: isCompact ? 16 : 20,
+                        width: isCompact ? 16 : 20,
+                        child: const CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Icon(Icons.send, size: 22),
+                    : Icon(Icons.send, size: isCompact ? 18 : 22),
                 label: Text(
                   widget.waiterId == null
                       ? 'Selecciona Mesero'
-                      : 'Enviar a Producción',
-                  style: const TextStyle(fontSize: 18),
+                      : isCompact ? 'Enviar' : 'Enviar a Producción',
+                  style: TextStyle(fontSize: btnFontSize),
                 ),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize: Size.fromHeight(btnHeight),
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -800,6 +1337,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               ),
             ],
           ),
+            );
+          },
         ),
       ],
     );
