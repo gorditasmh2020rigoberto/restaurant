@@ -3,19 +3,22 @@
 //
 // Endpoint: POST {SUPABASE_URL}/functions/v1/clip-pago
 //
+// Lee la configuración de la tabla `app_config`:
+//   key                  value
+//   ------------------   -------------------------------------------------
+//   clip_secret_key      eccc0d71-f36a-4c23-8c12-5876cae1999e
+//   clip_api_url         https://api.payclip.com
+//   resend_api_key       re_xxxxxx
+//   ticket_from_email    tickets@misdominio.mx  (debe estar verificado en Resend)
+//   restaurant_name      Gorditas Mis Hermanas
+//
 // Acciones (campo "action" del body):
 //   - "clip"   → procesa un pago tokenizado contra la API de Clip
 //   - "ticket" → envía un ticket por email vía Resend
-//
-// Variables de entorno requeridas (configurar en Supabase):
-//   - CLIP_SECRET_KEY   : tu secret key de Clip (ej. eccc0d71-...)
-//   - CLIP_API_URL      : https://api.payclip.com  (default)
-//   - RESEND_API_KEY    : token de Resend para envío de email (opcional)
-//   - TICKET_FROM_EMAIL : correo remitente del ticket (ej. tickets@mi-restaurante.mx)
-//   - RESTAURANT_NAME   : nombre del restaurante para el ticket (ej. "Gorditas Mis Hermanas")
 
 // deno-lint-ignore-file no-explicit-any
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -29,16 +32,29 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: CORS_HEADERS });
 }
 
-const CLIP_SECRET = Deno.env.get('CLIP_SECRET_KEY') ?? '';
-const CLIP_API_URL =
-  Deno.env.get('CLIP_API_URL') ?? 'https://api.payclip.com';
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') ?? '';
-const TICKET_FROM_EMAIL =
-  Deno.env.get('TICKET_FROM_EMAIL') ?? 'tickets@example.com';
-const RESTAURANT_NAME =
-  Deno.env.get('RESTAURANT_NAME') ?? 'Gorditas Mis Hermanas';
+// Cargar config desde la tabla app_config (cacheada por ejecución)
+let _configCache: Record<string, string> | null = null;
+async function loadConfig(): Promise<Record<string, string>> {
+  if (_configCache) return _configCache;
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
+  const { data, error } = await supabase
+    .from('app_config')
+    .select('key, value');
+  if (error) throw new Error(`No se pudo leer app_config: ${error.message}`);
+  const cfg: Record<string, string> = {};
+  for (const row of (data ?? []) as Array<{ key: string; value: string }>) {
+    cfg[row.key] = row.value;
+  }
+  _configCache = cfg;
+  return cfg;
+}
 
 async function procesarPagoClip(body: any) {
+  const cfg = await loadConfig();
   const token = String(body.token ?? '').trim();
   const amount = Number(body.amount ?? 0);
   const email = String(body.email ?? '').trim();
@@ -46,26 +62,28 @@ async function procesarPagoClip(body: any) {
   if (!amount || amount <= 0) {
     return json({ ok: false, message: 'Monto inválido' }, 400);
   }
-  if (!CLIP_SECRET) {
+  const clipSecret = cfg.clip_secret_key;
+  if (!clipSecret) {
     return json(
-      { ok: false, message: 'CLIP_SECRET_KEY no configurada' },
+      { ok: false, message: 'clip_secret_key no configurada en app_config' },
       500,
     );
   }
+  const clipApiUrl = cfg.clip_api_url || 'https://api.payclip.com';
+  const restaurantName = cfg.restaurant_name || 'Restaurante';
 
-  // Llamada a la API de Clip — endpoint /payments
-  const resp = await fetch(`${CLIP_API_URL}/payments`, {
+  const resp = await fetch(`${clipApiUrl}/payments`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${CLIP_SECRET}`,
+      Authorization: `Bearer ${clipSecret}`,
     },
     body: JSON.stringify({
       amount,
       currency: 'MXN',
       source: { token_id: token },
       capture: true,
-      description: `Pedido ${RESTAURANT_NAME}`,
+      description: `Pedido ${restaurantName}`,
       receipt_email: email || undefined,
     }),
   });
@@ -96,7 +114,7 @@ async function procesarPagoClip(body: any) {
   });
 }
 
-function renderTicketHtml(payload: any): string {
+function renderTicketHtml(payload: any, restaurantName: string): string {
   const items: Array<{ nombre: string; cantidad: number; precio: number }> =
     Array.isArray(payload.items) ? payload.items : [];
   const total = Number(payload.total ?? 0);
@@ -119,7 +137,7 @@ function renderTicketHtml(payload: any): string {
     .join('');
   return `<!doctype html><html><body style="font-family:system-ui,sans-serif;background:#f4f4f4;padding:24px;color:#0f172a">
     <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,0.05)">
-      <h2 style="margin:0 0 8px 0">${escapeHtml(RESTAURANT_NAME)}</h2>
+      <h2 style="margin:0 0 8px 0">${escapeHtml(restaurantName)}</h2>
       <p style="margin:0 0 16px 0;color:#64748b;font-size:13px">${fecha}</p>
       <p style="margin:0 0 4px 0;font-size:13px;color:#64748b">ID de pago: <code>${paymentId}</code></p>
       <table style="width:100%;border-collapse:collapse;margin-top:16px;font-size:14px">
@@ -149,26 +167,30 @@ function escapeHtml(s: string): string {
 }
 
 async function enviarTicket(body: any) {
+  const cfg = await loadConfig();
   const to = String(body.email ?? '').trim();
   if (!to) return json({ ok: false, message: 'Falta email' }, 400);
-  if (!RESEND_API_KEY) {
+  const resendKey = cfg.resend_api_key;
+  if (!resendKey || resendKey.startsWith('pon-')) {
     return json(
-      { ok: false, message: 'RESEND_API_KEY no configurada' },
+      { ok: false, message: 'resend_api_key no configurada en app_config' },
       500,
     );
   }
+  const fromEmail = cfg.ticket_from_email || 'tickets@example.com';
+  const restaurantName = cfg.restaurant_name || 'Restaurante';
 
-  const html = renderTicketHtml(body);
+  const html = renderTicketHtml(body, restaurantName);
   const resp = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${RESEND_API_KEY}`,
+      Authorization: `Bearer ${resendKey}`,
     },
     body: JSON.stringify({
-      from: `${RESTAURANT_NAME} <${TICKET_FROM_EMAIL}>`,
+      from: `${restaurantName} <${fromEmail}>`,
       to: [to],
-      subject: `Ticket de tu pedido - ${RESTAURANT_NAME}`,
+      subject: `Ticket de tu pedido - ${restaurantName}`,
       html,
     }),
   });
