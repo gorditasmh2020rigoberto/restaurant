@@ -307,6 +307,28 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool isArrachera = dish.category == 'arrachera' ||
       nameLower.contains('arrachera');
 
+  // Bebidas que no necesitan modal (agua natural, té, leche simple, etc.)
+  final bool isBebidaSimple = (dish.category == 'aguas' ||
+          dish.category == 'cafes' ||
+          dish.category == 'drink' ||
+          dish.category == 'bebidas') &&
+      !isRefresco &&
+      !isAguaFresca &&
+      !isJugo;
+  if (isBebidaSimple) {
+    cart.addItemWithGuisados(dish, []);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('${dish.name} agregado'),
+        duration: const Duration(milliseconds: 500),
+        behavior: SnackBarBehavior.floating,
+        width: 200,
+      ));
+    }
+    return;
+  }
+
   if (isArrachera) {
     cart.addItemWithGuisados(dish, []);
     if (context.mounted) {
