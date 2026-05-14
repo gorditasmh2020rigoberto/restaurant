@@ -458,12 +458,68 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           ),
                         ),
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          onPressed: _isSubmitting ? null : () => _simularPagoDemo(cart),
+                          icon: const Icon(Icons.science_outlined, size: 18),
+                          label: const Text('Modo Demo (simular pago aprobado)',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(44),
+                            foregroundColor: Colors.amber,
+                            side: const BorderSide(color: Colors.amber, width: 1.2),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
+    );
+  }
+
+  /// Simula un pago aprobado sin llamar a Clip — útil para probar el flujo
+  /// de orden + cocina + ticket sin depender del SDK de pago.
+  Future<void> _simularPagoDemo(CartProvider cart) async {
+    if (cart.items.isEmpty) return;
+    if (widget.orderType == 'delivery' &&
+        _addressController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Por favor, ingresa tu dirección de entrega')));
+      return;
+    }
+    final email = _emailController.text.trim();
+    final double shippingToApply =
+        widget.orderType == 'delivery' ? _shippingCost : 0.0;
+    final double finalTotal = cart.totalAmount + shippingToApply;
+    final items = cart.items.values
+        .map((it) => {
+              'nombre': it.dish.name,
+              'precio': it.dish.price,
+              'cantidad': it.quantity,
+            })
+        .toList();
+    final fakePaymentId =
+        'DEMO-CLIP-${DateTime.now().millisecondsSinceEpoch}';
+
+    await _createOrderAndNotify(
+      cart: cart,
+      finalTotal: finalTotal,
+      paymentMethodForDb: 'clip',
+      onAfterCreate: () async {
+        if (_isValidEmail(email)) {
+          try {
+            await ClipService.enviarTicket(
+              email: email,
+              paymentId: fakePaymentId,
+              total: finalTotal,
+              items: items,
+            );
+          } catch (_) {}
+        }
+      },
     );
   }
 }
