@@ -27,7 +27,7 @@ class ClientCheckoutView extends StatefulWidget {
 class _ClientCheckoutViewState extends State<ClientCheckoutView> {
   final _supabase = Supabase.instance.client;
   bool _isSubmitting = false;
-  String _paymentMethod = 'Efectivo'; // 'Efectivo' | 'Tarjeta' | 'Clip'
+  final String _paymentMethod = 'Clip'; // único método disponible
   final _addressController = TextEditingController();
   final _emailController = TextEditingController();
   final double _shippingCost = 35.0;
@@ -412,72 +412,51 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                         const SizedBox(height: 24),
                         Text('Método de Pago:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: isMobile ? 14 : 16)),
                         const SizedBox(height: 12),
-                        SegmentedButton<String>(
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return Theme.of(context).colorScheme.primary.withValues(alpha: 0.2);
-                              }
-                              return Colors.transparent;
-                            }),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFC4C02).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFFC4C02), width: 1.5),
                           ),
-                          segments: [
-                            ButtonSegment(value: 'Efectivo', label: Text(isMobile ? 'Efectivo' : 'Efectivo (Pagar en caja)'), icon: const Icon(Icons.money)),
-                            ButtonSegment(value: 'Tarjeta', label: Text(isMobile ? 'Tarjeta' : 'Tarjeta (TPV)'), icon: const Icon(Icons.credit_card)),
-                            ButtonSegment(value: 'Clip', label: const Text('Clip'), icon: const Icon(Icons.contactless)),
-                          ],
-                          selected: {_paymentMethod},
-                          onSelectionChanged: (newSelection) {
-                            setState(() => _paymentMethod = newSelection.first);
-                          },
+                          child: const Row(
+                            children: [
+                              Icon(Icons.contactless, color: Color(0xFFFC4C02), size: 26),
+                              SizedBox(width: 12),
+                              Text('Pago con Clip',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFFC4C02))),
+                            ],
+                          ),
                         ),
-                        if (_paymentMethod == 'Clip') ...[
-                          const SizedBox(height: 16),
-                          TextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              labelText: 'Correo para recibir el ticket',
-                              prefixIcon: Icon(Icons.email_outlined),
-                              border: OutlineInputBorder(),
-                            ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            labelText: 'Correo para recibir el ticket',
+                            prefixIcon: Icon(Icons.email_outlined),
+                            border: OutlineInputBorder(),
                           ),
-                        ],
-                        if (widget.orderType == 'takeout') ...[
-                          const SizedBox(height: 16),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(Icons.info_outline, color: Colors.amber, size: 20),
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Al ser pedido para llevar, favor de pasar a la caja para realizar su pago.',
-                                    style: TextStyle(color: Colors.amber, fontSize: 13, fontWeight: FontWeight.w500),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
                         const SizedBox(height: 24),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: _isSubmitting ? null : () => _submitOrder(cart),
+                          icon: _isSubmitting
+                              ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Icon(Icons.contactless, color: Colors.white),
+                          label: Text(
+                            _isSubmitting ? 'Procesando...' : 'Pagar con Clip',
+                            style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size.fromHeight(56),
-                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            backgroundColor: const Color(0xFFFC4C02),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           ),
-                          child: _isSubmitting
-                              ? const SizedBox(height: 24, width: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : Text(isMobile ? 'Confirmar Pedido' : 'Confirmar y Enviar a Producción', style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
