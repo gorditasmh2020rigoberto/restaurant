@@ -3,13 +3,14 @@ import 'package:http/http.dart' as http;
 
 /// Servicio para procesar pagos con Clip y enviar tickets por email.
 ///
-/// Usa la edge function `mp-pago` desplegada en el Supabase del proyecto PV,
-/// que también maneja Clip via `action='clip'` y emails via `action='ticket'`.
+/// Usa la edge function `clip-pago` desplegada en el Supabase del restaurante.
+/// Lee credenciales (clip_secret_key, resend_api_key, etc.) de la tabla
+/// `public.app_config`.
 class ClipService {
-  static const _pvSupabaseUrl = 'https://oahpmdsmjemyyxeryvyn.supabase.co';
-  static const _pvAnonKey =
-      'sb_publishable_CiRH0sWx0ScGlN41Vo7EOw_OVsNjbwj';
-  static const _fnUrl = '$_pvSupabaseUrl/functions/v1/mp-pago';
+  static const _supabaseUrl = 'https://jcaqolmacqhhgtjdgvaz.supabase.co';
+  static const _anonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjYXFvbG1hY3FoaGd0amRndmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDExMDIsImV4cCI6MjA4OTI3NzEwMn0.9TS8QZ5ZWG1MOct4nif0yiTW_bq_qbgAGbTjTle1_fk';
+  static const _fnUrl = '$_supabaseUrl/functions/v1/clip-pago';
 
   static Future<Map<String, dynamic>> _call(
       Map<String, dynamic> body) async {
@@ -17,7 +18,8 @@ class ClipService {
       Uri.parse(_fnUrl),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_pvAnonKey',
+        'Authorization': 'Bearer $_anonKey',
+        'apikey': _anonKey,
       },
       body: jsonEncode(body),
     );
