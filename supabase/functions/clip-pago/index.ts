@@ -114,6 +114,66 @@ async function procesarPagoClip(body: any) {
   });
 }
 
+// Crea un Payment Link de Clip y devuelve la URL para redirigir al cliente.
+async function crearLinkPago(body: any) {
+  const cfg = await loadConfig();
+  const amount = Number(body.amount ?? 0);
+  const description = String(body.description ?? 'Pedido').slice(0, 250);
+  const redirectUrl = String(body.redirect_url ?? '');
+  if (!amount || amount <= 0) {
+    return json({ ok: false, message: 'Monto inválido' }, 400);
+  }
+  const clipSecret = cfg.clip_secret_key;
+  if (!clipSecret) {
+    return json(
+      { ok: false, message: 'clip_secret_key no configurada' },
+      500,
+    );
+  }
+  const clipApiUrl = cfg.clip_api_url || 'https://api.payclip.com';
+
+  // Endpoint de Clip para Payment Links / Checkout online
+  const resp = await fetch(`${clipApiUrl}/checkout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${clipSecret}`,
+    },
+    body: JSON.stringify({
+      amount,
+      currency: 'MXN',
+      purchase_description: description,
+      redirection_url: {
+        success: redirectUrl || undefined,
+        error: redirectUrl || undefined,
+        default: redirectUrl || undefined,
+      },
+    }),
+  });
+
+  let data: any = {};
+  try {
+    data = await resp.json();
+  } catch (_) {
+    data = { raw: await resp.text() };
+  }
+
+  if (!resp.ok) {
+    return json({
+      ok: false,
+      message: data.message ?? data.error_message ?? `HTTP ${resp.status}`,
+      detail: data,
+    }, resp.status);
+  }
+
+  return json({
+    ok: true,
+    payment_id: data.id ?? data.payment_request_id ?? null,
+    url: data.payment_request_url ?? data.url ?? data.checkout_url ?? null,
+    raw: data,
+  });
+}
+
 function renderTicketHtml(payload: any, restaurantName: string): string {
   const items: Array<{ nombre: string; cantidad: number; precio: number }> =
     Array.isArray(payload.items) ? payload.items : [];
@@ -219,6 +279,7 @@ serve(async (req: Request) => {
   try {
     if (action === 'clip') return await procesarPagoClip(body);
     if (action === 'ticket') return await enviarTicket(body);
+    if (action === 'create_link') return await crearLinkPago(body);
     return json({ ok: false, message: `Acción desconocida: ${action}` }, 400);
   } catch (e: any) {
     return json(
