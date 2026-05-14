@@ -219,8 +219,19 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
           }
           await _supabase.from('orders').update(updateData).eq('id', orderId);
         } else {
+          // Obtener el branch_name desde la mesa para que la cocina filtre correctamente
+          String? branchFromTable;
+          try {
+            final tableRow = await _supabase
+                .from('restaurant_tables')
+                .select('branch_name')
+                .eq('id', widget.tableId as Object)
+                .maybeSingle();
+            branchFromTable = tableRow?['branch_name'] as String?;
+          } catch (_) {}
           final orderResponse = await _supabase.from('orders').insert({
             'table_id': widget.tableId,
+            'branch_name': branchFromTable ?? Globals.currentBranch,
             'waiter_id': null,
             'status': 'pending',
             'total_amount': finalTotal,
