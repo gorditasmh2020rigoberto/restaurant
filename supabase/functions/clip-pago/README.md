@@ -2,51 +2,63 @@
 
 Procesa pagos con Clip y envía tickets por correo desde el Supabase del restaurante.
 
-## Variables de entorno (obligatorias)
+La función lee la configuración de la tabla `public.app_config` (key/value).
 
-Configúralas en el panel de Supabase → Settings → Edge Functions → Secrets:
+## Crear la tabla y los registros (SQL Editor)
 
-| Variable | Valor de ejemplo | Para qué |
-|---|---|---|
-| `CLIP_SECRET_KEY` | `eccc0d71-f36a-4c23-8c12-5876cae1999e` | Autenticar contra la API de Clip |
-| `CLIP_API_URL` | `https://api.payclip.com` | Base URL de Clip (sandbox o prod) |
-| `RESEND_API_KEY` | `re_xxxxxxxx` | Token de Resend para enviar email |
-| `TICKET_FROM_EMAIL` | `tickets@misdominio.mx` | Remitente del correo (debe estar verificado en Resend) |
-| `RESTAURANT_NAME` | `Gorditas Mis Hermanas` | Nombre que aparece en el ticket |
+```sql
+CREATE TABLE IF NOT EXISTS public.app_config (
+  key   text PRIMARY KEY,
+  value text NOT NULL
+);
 
-## Despliegue
+INSERT INTO public.app_config (key, value) VALUES
+  ('clip_secret_key',    'eccc0d71-f36a-4c23-8c12-5876cae1999e'),
+  ('clip_api_url',       'https://api.payclip.com'),
+  ('resend_api_key',     'TU_TOKEN_DE_RESEND'),
+  ('ticket_from_email',  'tickets@TU-DOMINIO-VERIFICADO.com'),
+  ('restaurant_name',    'Gorditas Mis Hermanas')
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+```
+
+> ⚠️ Reemplaza `TU_TOKEN_DE_RESEND` y `ticket_from_email` por valores reales antes de probar.
+
+## Despliegue (CLI)
 
 ```bash
-# Desde la raíz del repo
-supabase login                                  # solo la primera vez
-supabase link --project-ref jcaqolmacqhhgtjdgvaz
-supabase functions deploy clip-pago --no-verify-jwt
+# Si tienes problemas con `supabase login`, usa un token:
+# https://supabase.com/dashboard/account/tokens
+export SUPABASE_ACCESS_TOKEN=<token>
+
+supabase functions deploy clip-pago \
+  --project-ref jcaqolmacqhhgtjdgvaz \
+  --no-verify-jwt
 ```
+
+## Despliegue (sin CLI, desde el dashboard)
+
+1. https://supabase.com/dashboard/project/jcaqolmacqhhgtjdgvaz/functions
+2. **Create a new function** → nombre `clip-pago`
+3. Pega el contenido de `index.ts`
+4. **Deploy**
 
 ## Probar
 
 ```bash
-# Procesar un pago (necesitas un token_id de Clip)
+# Enviar un ticket de prueba
 curl -X POST \
   "https://jcaqolmacqhhgtjdgvaz.supabase.co/functions/v1/clip-pago" \
   -H "Content-Type: application/json" \
-  -d '{"action":"clip","token":"tok_xxx","amount":40,"email":"test@gmail.com"}'
-
-# Enviar un ticket
-curl -X POST \
-  "https://jcaqolmacqhhgtjdgvaz.supabase.co/functions/v1/clip-pago" \
-  -H "Content-Type: application/json" \
-  -d '{"action":"ticket","email":"test@gmail.com","payment_id":"pi_123","total":40,"items":[{"nombre":"Refresco","cantidad":1,"precio":40}]}'
+  -d '{
+    "action":"ticket",
+    "email":"tu@correo.com",
+    "payment_id":"DEMO-1",
+    "total":40,
+    "items":[{"nombre":"Refresco","cantidad":1,"precio":40}]
+  }'
 ```
 
-## Cambiar la URL en el cliente
+## Cambiar la URL en la app Flutter
 
-Una vez desplegada, actualiza `lib/services/clip_service.dart`:
-
-```dart
-static const _pvSupabaseUrl = 'https://jcaqolmacqhhgtjdgvaz.supabase.co';
-static const _pvAnonKey = 'TU_ANON_KEY_AQUI'; // del proyecto del restaurante
-static const _fnUrl = '$_pvSupabaseUrl/functions/v1/clip-pago';
-```
-
-(Y renombra las constantes para que no se llamen `_pvSupabaseUrl` ya que apuntan al restaurante.)
+Una vez desplegada, actualiza `lib/services/clip_service.dart` para que apunte aquí
+en lugar del Supabase del proyecto PV.
