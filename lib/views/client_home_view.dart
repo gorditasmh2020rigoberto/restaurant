@@ -113,6 +113,12 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            Icon(
+                              Icons.table_restaurant,
+                              size: 22,
+                              color: occupied ? Colors.orange : Colors.green,
+                            ),
+                            const SizedBox(height: 4),
                             Text(
                               '${t['table_number']}',
                               style: const TextStyle(
