@@ -1,10 +1,11 @@
+// ignore_for_file: avoid_web_libraries_in_flutter
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../globals.dart';
 import '../services/clip_service.dart';
-import '../widgets/clip_brick_widget.dart';
 
 class ClientCheckoutView extends StatefulWidget {
   final String orderType;
@@ -38,8 +39,11 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
     return r.hasMatch(s.trim());
   }
 
-  /// Inicia el flujo de pago con Clip antes de crear la orden.
-  /// Si el pago se aprueba, crea la orden con payment_method=clip y envía el ticket.
+  /// Flujo de Checkout Redireccionado de Clip:
+  /// 1. Crea un Payment Link en la edge function
+  /// 2. Abre el link en una nueva pestaña
+  /// 3. Muestra un diálogo esperando que el usuario complete el pago
+  /// 4. Cuando confirma, crea la orden y manda el ticket
   Future<void> _payWithClip(CartProvider cart) async {
     final email = _emailController.text.trim();
     if (!_isValidEmail(email)) {
@@ -58,84 +62,83 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
             })
         .toList();
 
+    setState(() => _isSubmitting = true);
+    String? linkUrl;
     String? errorMsg;
-    String? paymentId;
+    try {
+      linkUrl = await ClipService.crearLinkPago(
+        amount: finalTotal,
+        description: 'Pedido ${widget.customerName ?? "Cliente"}',
+        redirectUrl: html.window.location.origin,
+      );
+    } catch (e) {
+      errorMsg = '$e';
+    }
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+    if (linkUrl == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('No se pudo crear el link de Clip: ${errorMsg ?? "error desconocido"}')));
+      return;
+    }
+
+    // Abrir el link en una nueva pestaña
+    html.window.open(linkUrl, '_blank');
 
     setState(() => _clipDialogOpen = true);
+    bool paid = false;
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setDialog) {
-          return AlertDialog(
-            title: const Text('Pago con Clip'),
-            content: SizedBox(
-              width: 420,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Total: \$${finalTotal.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    ClipBrickWidget(
-                      amount: finalTotal,
-                      onSubmit: (data) async {
-                        final token = (data['token_id'] ??
-                                data['token'] ??
-                                '')
-                            .toString();
-                        if (token.isEmpty) {
-                          setDialog(() => errorMsg = 'Token vacío de Clip');
-                          return;
-                        }
-                        try {
-                          final r = await ClipService.procesarPago(
-                            token: token,
-                            amount: finalTotal,
-                            email: email,
-                            items: items,
-                          );
-                          if (r.approved) {
-                            paymentId = r.paymentId ??
-                                'CLIP-${DateTime.now().millisecondsSinceEpoch}';
-                            if (ctx.mounted) Navigator.pop(ctx);
-                          } else {
-                            setDialog(() => errorMsg =
-                                r.detail ?? r.errorMessage ?? 'Pago rechazado');
-                          }
-                        } catch (e) {
-                          setDialog(() => errorMsg = 'Error: $e');
-                        }
-                      },
-                      onError: (err) => setDialog(() => errorMsg = err),
-                    ),
-                    if (errorMsg != null) ...[
-                      const SizedBox(height: 12),
-                      Text(errorMsg!,
-                          style: const TextStyle(
-                              color: Colors.redAccent, fontSize: 13)),
-                    ],
-                  ],
-                ),
+      builder: (ctx) => AlertDialog(
+        title: const Text('Pago con Clip'),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Total: \$${finalTotal.toStringAsFixed(2)}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              const Text(
+                'Se abrió una pestaña con la página de pago de Clip. Completa tu pago ahí y regresa aquí.',
+                textAlign: TextAlign.center,
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancelar'),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: () => html.window.open(linkUrl!, '_blank'),
+                icon: const Icon(Icons.open_in_new),
+                label: const Text('Volver a abrir página de pago'),
               ),
             ],
-          );
-        });
-      },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              paid = true;
+              Navigator.pop(ctx);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFC4C02),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Ya completé el pago'),
+          ),
+        ],
+      ),
     );
-
     if (mounted) setState(() => _clipDialogOpen = false);
-    if (paymentId == null) return; // cancelado o falló
-    if (!mounted) return;
+    if (!paid) return;
 
+    final paymentId = 'CLIP-${DateTime.now().millisecondsSinceEpoch}';
     await _createOrderAndNotify(
       cart: cart,
       finalTotal: finalTotal,
@@ -144,13 +147,11 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
         try {
           await ClipService.enviarTicket(
             email: email,
-            paymentId: paymentId!,
+            paymentId: paymentId,
             total: finalTotal,
             items: items,
           );
-        } catch (_) {
-          // no bloquear UX si falla el email
-        }
+        } catch (_) {}
       },
     );
   }
