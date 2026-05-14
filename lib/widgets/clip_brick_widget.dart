@@ -29,7 +29,6 @@ class _ClipBrickWidgetState extends State<ClipBrickWidget> {
   late final String _viewId;
   late final String _containerId;
   bool _listo = false;
-  bool _procesando = false;
 
   @override
   void initState() {
@@ -52,13 +51,11 @@ class _ClipBrickWidgetState extends State<ClipBrickWidget> {
     };
 
     js.context['_clipOnSubmit'] = (String rawData) {
-      if (mounted) setState(() => _procesando = false);
       final data = jsonDecode(rawData) as Map<String, dynamic>;
       widget.onSubmit(data);
     };
 
     js.context['_clipOnError'] = (String rawError) {
-      if (mounted) setState(() => _procesando = false);
       widget.onError?.call(rawError);
     };
 
@@ -77,44 +74,47 @@ class _ClipBrickWidgetState extends State<ClipBrickWidget> {
     super.dispose();
   }
 
-  void _pagar() {
-    setState(() => _procesando = true);
-    js.context.callMethod('clipSubmitPago', []);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(
           height: 360,
           child: HtmlElementView(viewType: _viewId),
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: (_listo && !_procesando) ? _pagar : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFC4C02),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+        const SizedBox(height: 8),
+        if (!_listo)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(
+              child: Text('Cargando Clip…',
+                  style: TextStyle(color: Colors.white54, fontSize: 13)),
             ),
-            child: _procesando
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
-                  )
-                : const Text('Pagar con Clip',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFC4C02).withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(8),
+              border:
+                  Border.all(color: const Color(0xFFFC4C02).withValues(alpha: 0.4)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.arrow_downward, color: Color(0xFFFC4C02), size: 18),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Pulsa el botón naranja "Pagar con Clip" al pie de la pantalla',
+                    style: TextStyle(fontSize: 12.5, color: Color(0xFFFC4C02), fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
