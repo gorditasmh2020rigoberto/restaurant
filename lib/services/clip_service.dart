@@ -52,6 +52,24 @@ class ClipService {
     );
   }
 
+  /// Crea un link de Checkout Redireccionado de Clip.
+  /// Retorna la URL a abrir en el navegador, o null si falla.
+  static Future<String?> crearLinkPago({
+    required double amount,
+    required String description,
+    String? redirectUrl,
+  }) async {
+    final json = await _call({
+      'action': 'create_link',
+      'amount': amount,
+      'description': description,
+      if (redirectUrl != null) 'redirect_url': redirectUrl,
+    });
+    if (json['ok'] != true) return null;
+    final url = json['url']?.toString();
+    return (url != null && url.isNotEmpty) ? url : null;
+  }
+
   /// Envía el ticket por email después de un pago exitoso.
   static Future<void> enviarTicket({
     required String email,
