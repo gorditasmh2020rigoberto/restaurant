@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../globals.dart';
+import '../services/clip_service.dart';
+import '../widgets/clip_brick_widget.dart';
 
 class ClientCheckoutView extends StatefulWidget {
   final String orderType;
@@ -25,9 +27,130 @@ class ClientCheckoutView extends StatefulWidget {
 class _ClientCheckoutViewState extends State<ClientCheckoutView> {
   final _supabase = Supabase.instance.client;
   bool _isSubmitting = false;
-  String _paymentMethod = 'Efectivo'; // 'Efectivo' or 'Tarjeta'
+  String _paymentMethod = 'Efectivo'; // 'Efectivo' | 'Tarjeta' | 'Clip'
   final _addressController = TextEditingController();
+  final _emailController = TextEditingController();
   final double _shippingCost = 35.0;
+
+  bool _isValidEmail(String s) {
+    final r = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    return r.hasMatch(s.trim());
+  }
+
+  /// Inicia el flujo de pago con Clip antes de crear la orden.
+  /// Si el pago se aprueba, crea la orden con payment_method=clip y envía el ticket.
+  Future<void> _payWithClip(CartProvider cart) async {
+    final email = _emailController.text.trim();
+    if (!_isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Ingresa un correo válido para recibir el ticket')));
+      return;
+    }
+    final double shippingToApply =
+        widget.orderType == 'delivery' ? _shippingCost : 0.0;
+    final double finalTotal = cart.totalAmount + shippingToApply;
+    final items = cart.items.values
+        .map((it) => {
+              'nombre': it.dish.name,
+              'precio': it.dish.price,
+              'cantidad': it.quantity,
+            })
+        .toList();
+
+    String? errorMsg;
+    String? paymentId;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(builder: (ctx, setDialog) {
+          return AlertDialog(
+            title: const Text('Pago con Clip'),
+            content: SizedBox(
+              width: 420,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Total: \$${finalTotal.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    ClipBrickWidget(
+                      amount: finalTotal,
+                      onSubmit: (data) async {
+                        final token = (data['token_id'] ??
+                                data['token'] ??
+                                '')
+                            .toString();
+                        if (token.isEmpty) {
+                          setDialog(() => errorMsg = 'Token vacío de Clip');
+                          return;
+                        }
+                        try {
+                          final r = await ClipService.procesarPago(
+                            token: token,
+                            amount: finalTotal,
+                            email: email,
+                            items: items,
+                          );
+                          if (r.approved) {
+                            paymentId = r.paymentId ??
+                                'CLIP-${DateTime.now().millisecondsSinceEpoch}';
+                            if (ctx.mounted) Navigator.pop(ctx);
+                          } else {
+                            setDialog(() => errorMsg =
+                                r.detail ?? r.errorMessage ?? 'Pago rechazado');
+                          }
+                        } catch (e) {
+                          setDialog(() => errorMsg = 'Error: $e');
+                        }
+                      },
+                      onError: (err) => setDialog(() => errorMsg = err),
+                    ),
+                    if (errorMsg != null) ...[
+                      const SizedBox(height: 12),
+                      Text(errorMsg!,
+                          style: const TextStyle(
+                              color: Colors.redAccent, fontSize: 13)),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+
+    if (paymentId == null) return; // cancelado o falló
+    if (!mounted) return;
+
+    await _createOrderAndNotify(
+      cart: cart,
+      finalTotal: finalTotal,
+      paymentMethodForDb: 'clip',
+      onAfterCreate: () async {
+        try {
+          await ClipService.enviarTicket(
+            email: email,
+            paymentId: paymentId!,
+            total: finalTotal,
+            items: items,
+          );
+        } catch (_) {
+          // no bloquear UX si falla el email
+        }
+      },
+    );
+  }
 
   Future<void> _submitOrder(CartProvider cart) async {
     if (cart.items.isEmpty) return;
@@ -35,25 +158,40 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, ingresa tu dirección de entrega')));
       return;
     }
+    if (_paymentMethod == 'Clip') {
+      await _payWithClip(cart);
+      return;
+    }
 
+    final double shippingToApply =
+        widget.orderType == 'delivery' ? _shippingCost : 0.0;
+    final double finalTotal = cart.totalAmount + shippingToApply;
+    final String? paymentMethodForDb =
+        _paymentMethod == 'Tarjeta' ? 'card' : null;
+    await _createOrderAndNotify(
+      cart: cart,
+      finalTotal: finalTotal,
+      paymentMethodForDb: paymentMethodForDb,
+    );
+  }
+
+  /// Crea la orden y muestra el diálogo de éxito.
+  /// [onAfterCreate] se ejecuta después de crear la orden (ej. enviar ticket).
+  Future<void> _createOrderAndNotify({
+    required CartProvider cart,
+    required double finalTotal,
+    String? paymentMethodForDb,
+    Future<void> Function()? onAfterCreate,
+  }) async {
     setState(() => _isSubmitting = true);
 
     try {
-      double shippingToApply = widget.orderType == 'delivery' ? _shippingCost : 0.0;
-      double finalTotal = cart.totalAmount + shippingToApply;
-
       // Create a combined name to store the payment method and address
       String combinedCustomerName = widget.customerName ?? 'Cliente';
       combinedCustomerName += ' (Pago: $_paymentMethod)';
       if (widget.orderType == 'delivery') {
         combinedCustomerName += ' - DIR: ${_addressController.text.trim()}';
       }
-
-      // Si paga online (Tarjeta o Clip), se registra el método al crear la orden.
-      // En Efectivo se queda en null para que la caja lo finalice al cobrar.
-      String? paymentMethodForDb;
-      if (_paymentMethod == 'Tarjeta') paymentMethodForDb = 'card';
-      if (_paymentMethod == 'Clip') paymentMethodForDb = 'clip';
 
       String orderId;
 
@@ -115,6 +253,8 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
       if (widget.tableId != null) {
         await _supabase.from('restaurant_tables').update({'status': 'occupied'}).eq('id', widget.tableId as Object);
       }
+
+      if (onAfterCreate != null) await onAfterCreate();
 
       if (mounted) {
         cart.clearCart();
@@ -291,6 +431,18 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                             setState(() => _paymentMethod = newSelection.first);
                           },
                         ),
+                        if (_paymentMethod == 'Clip') ...[
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Correo para recibir el ticket',
+                              prefixIcon: Icon(Icons.email_outlined),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ],
                         if (widget.orderType == 'takeout') ...[
                           const SizedBox(height: 16),
                           Container(
