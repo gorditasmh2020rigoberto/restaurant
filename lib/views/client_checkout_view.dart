@@ -27,6 +27,7 @@ class ClientCheckoutView extends StatefulWidget {
 class _ClientCheckoutViewState extends State<ClientCheckoutView> {
   final _supabase = Supabase.instance.client;
   bool _isSubmitting = false;
+  bool _clipDialogOpen = false;
   final String _paymentMethod = 'Clip'; // único método disponible
   final _addressController = TextEditingController();
   final _emailController = TextEditingController();
@@ -60,6 +61,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
     String? errorMsg;
     String? paymentId;
 
+    setState(() => _clipDialogOpen = true);
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -130,6 +132,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
       },
     );
 
+    if (mounted) setState(() => _clipDialogOpen = false);
     if (paymentId == null) return; // cancelado o falló
     if (!mounted) return;
 
@@ -442,35 +445,37 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: _isSubmitting ? null : () => _submitOrder(cart),
-                          icon: _isSubmitting
-                              ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                              : const Icon(Icons.contactless, color: Colors.white),
-                          label: Text(
-                            _isSubmitting ? 'Procesando...' : 'Pagar con Clip',
-                            style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        if (!_clipDialogOpen) ...[
+                          ElevatedButton.icon(
+                            onPressed: _isSubmitting ? null : () => _submitOrder(cart),
+                            icon: _isSubmitting
+                                ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                                : const Icon(Icons.contactless, color: Colors.white),
+                            label: Text(
+                              _isSubmitting ? 'Procesando...' : 'Pagar con Clip',
+                              style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(56),
+                              backgroundColor: const Color(0xFFFC4C02),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(56),
-                            backgroundColor: const Color(0xFFFC4C02),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          const SizedBox(height: 10),
+                          OutlinedButton.icon(
+                            onPressed: _isSubmitting ? null : () => _simularPagoDemo(cart),
+                            icon: const Icon(Icons.science_outlined, size: 18),
+                            label: const Text('Modo Demo (simular pago aprobado)',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size.fromHeight(44),
+                              foregroundColor: Colors.amber,
+                              side: const BorderSide(color: Colors.amber, width: 1.2),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        OutlinedButton.icon(
-                          onPressed: _isSubmitting ? null : () => _simularPagoDemo(cart),
-                          icon: const Icon(Icons.science_outlined, size: 18),
-                          label: const Text('Modo Demo (simular pago aprobado)',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(44),
-                            foregroundColor: Colors.amber,
-                            side: const BorderSide(color: Colors.amber, width: 1.2),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
