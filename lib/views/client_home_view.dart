@@ -85,14 +85,14 @@ class _ClientHomeViewState extends State<ClientHomeView> {
               ),
               const SizedBox(height: 16),
               OutlinedButton(
-                onPressed: () => _navigateToMenu(type: 'delivery'),
+                onPressed: () => _navigateToMenu(type: 'dine_in'),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(56),
                   side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
                   foregroundColor: Theme.of(context).colorScheme.primary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('A Domicilio', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                child: const Text('Comer Aquí', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
