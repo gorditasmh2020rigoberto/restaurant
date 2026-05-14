@@ -115,7 +115,7 @@
         ].join(';');
 
         try {
-          const sdk = new ClipSDK(apiKey, { env: 'prod' });
+          const sdk = new ClipSDK(apiKey, { env: 'sandbox' });
           const card = sdk.element.create('Card', {
             locale: 'es',
             paymentAmount: parseFloat(amount),
