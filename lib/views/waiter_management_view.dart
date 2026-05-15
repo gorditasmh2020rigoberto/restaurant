@@ -141,14 +141,23 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
             onPressed: () async {
               Navigator.pop(context, false);
               try {
+                // Desconectar órdenes del mesero antes de eliminar
+                await _supabase
+                    .from('orders')
+                    .update({'waiter_id': null})
+                    .eq('waiter_id', id);
+                // Ahora sí eliminar
                 await _supabase.from('waiters').delete().eq('id', id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text('Mesero eliminado'),
+                    duration: Duration(seconds: 2),
+                  ));
+                }
               } catch (e) {
-                final msg = e.toString().contains('foreign key') || e.toString().contains('23503')
-                    ? 'No se puede eliminar: el mesero tiene órdenes registradas'
-                    : 'Error al eliminar: $e';
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(msg),
+                    content: Text('Error al eliminar: $e'),
                     backgroundColor: Colors.red,
                     duration: const Duration(seconds: 4),
                   ));
