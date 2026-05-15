@@ -172,9 +172,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           children: drinkSizes.map((s) {
                             final type = s['type'] as String;
                             final label = _formatDrinkSizeLabel(type);
+                            final priceNum = s['price'];
+                            final priceStr = priceNum != null
+                                ? '\$${(priceNum as num).toStringAsFixed(0)}'
+                                : null;
                             return _ToggleOption(
                               icon: drinkIcon,
                               label: label,
+                              price: priceStr,
                               value: selectedSizeType == type,
                               onChanged: (v) => setDialogState(() {
                                 selectedSizeType = v ? type : null;
@@ -1367,14 +1372,16 @@ Future<void> addOrdenVariantToCart(
               children: [
                 _ToggleOption(
                   icon: Icons.restaurant,
-                  label: '1 Orden  \$${ordenDish.price.toStringAsFixed(0)}',
+                  label: '1 Orden',
+                  price: '\$${ordenDish.price.toStringAsFixed(0)}',
                   value: selected?.id == ordenDish.id,
                   onChanged: (v) =>
                       setDialogState(() => selected = v ? ordenDish : null),
                 ),
                 _ToggleOption(
                   icon: Icons.content_cut,
-                  label: '1/2 Orden  \$${mediaDish.price.toStringAsFixed(0)}',
+                  label: '1/2 Orden',
+                  price: '\$${mediaDish.price.toStringAsFixed(0)}',
                   value: selected?.id == mediaDish.id,
                   onChanged: (v) =>
                       setDialogState(() => selected = v ? mediaDish : null),
