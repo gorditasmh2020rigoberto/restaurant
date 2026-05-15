@@ -1,12 +1,28 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
 import '../utils/app_updater.dart';
 import 'comandas_view.dart';
 
+/// Lee el parámetro ?branch= del fragmento de la URL (hash routing).
+/// Ejemplo: /#/mesero?branch=Sucursal+1  →  "Sucursal 1"
+String? _branchFromUrl() {
+  if (!kIsWeb) return null;
+  try {
+    final fragment = Uri.base.fragment; // e.g. "/mesero?branch=Sucursal+1"
+    final qIdx = fragment.indexOf('?');
+    if (qIdx == -1) return null;
+    final params = Uri.splitQueryString(fragment.substring(qIdx + 1));
+    return params['branch'];
+  } catch (_) {
+    return null;
+  }
+}
+
 /// Vista de acceso directo para meseros.
-/// Se usa instalando la PWA con la ruta /#/mesero en la tablet.
-/// Solo pide el PIN — la sucursal ya está guardada en el dispositivo.
+/// Se usa instalando la PWA con la ruta /#/mesero?branch=Sucursal+1 en la tablet.
+/// La sucursal se lee de la URL — no hay que configurar nada manualmente.
 class MeseroLoginView extends StatefulWidget {
   const MeseroLoginView({super.key});
 
@@ -19,6 +35,21 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
   final _pinController = TextEditingController();
   bool _loading = false;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _applyBranchFromUrl();
+  }
+
+  /// Si la URL trae ?branch=..., actualiza Globals y SharedPreferences.
+  Future<void> _applyBranchFromUrl() async {
+    final branch = _branchFromUrl();
+    if (branch != null && branch.isNotEmpty && branch != Globals.currentBranch) {
+      await Globals.setBranch(branch);
+      if (mounted) setState(() {});
+    }
+  }
 
   @override
   void dispose() {
@@ -85,7 +116,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                       color: Colors.white),
                 ),
                 const SizedBox(height: 6),
-                // Sucursal (solo informativo, no editable)
+                // Sucursal leída de la URL (o del dispositivo)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
