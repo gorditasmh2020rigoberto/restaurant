@@ -293,10 +293,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       );
                     }
                   },
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6D00),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: const Color(0xFF334155),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    minimumSize: const Size(0, 44),
                   ),
-                  child: const Text('Agregar a la orden', style: TextStyle(color: Color(0xFFFF6D00))),
+                  child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -436,24 +440,30 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
             ),
-            TextButton(
-              onPressed: selectedTermino == null ? null : () {
-                Navigator.pop(ctx);
-                cart.addItemWithGuisados(dish, ['Huevo $selectedTermino']);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('${dish.name} ($selectedTermino) agregado'),
-                    duration: const Duration(milliseconds: 500),
-                    behavior: SnackBarBehavior.floating,
-                    width: 260,
-                  ));
-                }
-              },
-              style: TextButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15)),
-              child: const Text('Agregar a la orden',
-                  style: TextStyle(color: Color(0xFFFF6D00))),
+            SizedBox(
+              height: 44,
+              child: ElevatedButton(
+                onPressed: selectedTermino == null ? null : () {
+                  Navigator.pop(ctx);
+                  cart.addItemWithGuisados(dish, ['Huevo $selectedTermino']);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text('${dish.name} ($selectedTermino) agregado'),
+                      duration: const Duration(milliseconds: 500),
+                      behavior: SnackBarBehavior.floating,
+                      width: 260,
+                    ));
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFF334155),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
             ),
           ],
         ),
@@ -866,7 +876,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 child: const Text('Cancelar',
                     style: TextStyle(color: Colors.white54)),
               ),
-              TextButton(
+              SizedBox(
+                height: 44,
+                child: ElevatedButton(
                 onPressed: () {
                   // Chilaquiles requieren salsa seleccionada
                   if (isChilaquil && selectedSalsa == null) {
@@ -911,12 +923,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     );
                   }
                 },
-                style: TextButton.styleFrom(
-                  backgroundColor:
-                      const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFF334155),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Agregar a la orden',
-                    style: TextStyle(color: Color(0xFFFF6D00))),
+                child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
               ),
             ],
           );
@@ -1490,11 +1504,14 @@ Future<void> addOrdenVariantToCart(
                       ));
                     }
                   },
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF6D00),
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFF334155),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: const Size(0, 44),
             ),
-            child: const Text('Agregar a la orden',
-                style: TextStyle(color: Color(0xFFFF6D00))),
+            child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
