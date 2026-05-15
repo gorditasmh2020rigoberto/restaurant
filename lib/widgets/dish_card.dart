@@ -152,7 +152,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               backgroundColor: const Color(0xFF1E293B),
               title: Text(
                 isRefresco ? '¿De qué sabor/marca?' : isJugo ? '¿Qué jugo?' : '¿De qué sabor?',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
               ),
               content: SizedBox(
                 width: double.maxFinite,
@@ -367,7 +367,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(dish.name, style: const TextStyle(color: Colors.white, fontSize: 16)),
+              Text(dish.name, style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
               const SizedBox(height: 2),
               Text(
                 '\$${dish.price.toStringAsFixed(0)}',
@@ -539,7 +539,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   isChilaquil
                       ? '¿Cómo quieres los ${dish.name}?'
                       : '¿Qué guisado lleva el ${dish.name}?',
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1117,7 +1117,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
           title: Text(displayName,
-              style: const TextStyle(color: Colors.white, fontSize: 16)),
+              style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -1408,7 +1408,7 @@ class MultiFlavorVariantCard extends StatelessWidget {
                                 icon: const Icon(Icons.add, size: 16),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(
-                                    minHeight: 28, minWidth: 28),
+                                    minHeight: 36, minWidth: 36),
                               ),
                             ],
                           ),
@@ -1446,7 +1446,7 @@ Future<void> addOrdenVariantToCart(
         backgroundColor: const Color(0xFF1E293B),
         title: Text(
           _baseOrdenName(ordenDish.name),
-          style: const TextStyle(color: Colors.white, fontSize: 16),
+          style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1606,7 +1606,7 @@ class OrdenVariantCard extends StatelessWidget {
                                 icon: const Icon(Icons.add, size: 16),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(
-                                    minHeight: 28, minWidth: 28),
+                                    minHeight: 36, minWidth: 36),
                               ),
                             ],
                           ),
@@ -1661,6 +1661,7 @@ class _ToggleOption extends StatelessWidget {
       onTap: enabled ? () => onChanged(!value) : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
+        constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: effectiveColor,
