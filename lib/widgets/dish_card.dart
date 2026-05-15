@@ -359,7 +359,18 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
-          title: Text(dish.name, style: const TextStyle(color: Colors.white, fontSize: 16)),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(dish.name, style: const TextStyle(color: Colors.white, fontSize: 16)),
+              const SizedBox(height: 2),
+              Text(
+                '\$${dish.price.toStringAsFixed(0)}',
+                style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -510,11 +521,22 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
         builder: (ctx, setDialogState) {
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
-            title: Text(
-              isChilaquil
-                  ? '¿Cómo quieres los ${dish.name}?'
-                  : '¿Qué guisado lleva el ${dish.name}?',
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  isChilaquil
+                      ? '¿Cómo quieres los ${dish.name}?'
+                      : '¿Qué guisado lleva el ${dish.name}?',
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '\$${dish.price.toStringAsFixed(0)}',
+                  style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
+                ),
+              ],
             ),
             content: SizedBox(
               width: double.maxFinite,
@@ -550,6 +572,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           _ToggleOption(
                             icon: Icons.egg_alt,
                             label: 'Con Queso',
+                            price: isTapa ? '+\$25' : null,
                             value: conQueso,
                             onChanged: (v) => setDialogState(() => conQueso = v),
                           ),
@@ -821,6 +844,18 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       },
                     ),
                   ],
+                  // Total dinámico
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Total: \$${((isTapa && conQueso) ? dish.price + 25 : dish.price).toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      color: Color(0xFFFF6D00),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
                 ),
               ),
