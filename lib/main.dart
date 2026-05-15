@@ -83,6 +83,20 @@ class RestaurantApp extends StatelessWidget {
         '/ventas': (context) => const ReportsView(),
         '/mesero': (context) => const MeseroLoginView(),
       },
+      // Maneja rutas dinámicas tipo /{sucursal}/mesero
+      onGenerateRoute: (settings) {
+        final name = settings.name ?? '';
+        final segments = name.split('/').where((s) => s.isNotEmpty).toList();
+        // /{sucursal}/mesero  →  segments = ['sucursal', 'mesero']
+        if (segments.length == 2 && segments.last == 'mesero') {
+          final branch = Uri.decodeComponent(segments.first);
+          return MaterialPageRoute(
+            builder: (_) => MeseroLoginView(branch: branch),
+            settings: settings,
+          );
+        }
+        return null;
+      },
     );
   }
 }

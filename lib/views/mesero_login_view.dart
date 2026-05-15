@@ -21,10 +21,13 @@ String? _branchFromUrl() {
 }
 
 /// Vista de acceso directo para meseros.
-/// Se usa instalando la PWA con la ruta /#/mesero?branch=Sucursal+1 en la tablet.
-/// La sucursal se lee de la URL — no hay que configurar nada manualmente.
+/// URLs soportadas:
+///   /#/Maravillas/mesero        → branch "Maravillas" en el path
+///   /#/mesero?branch=Sucursal+1 → branch por query param (fallback)
 class MeseroLoginView extends StatefulWidget {
-  const MeseroLoginView({super.key});
+  /// Sucursal leída del path de la URL (puede ser null si viene por query param).
+  final String? branch;
+  const MeseroLoginView({super.key, this.branch});
 
   @override
   State<MeseroLoginView> createState() => _MeseroLoginViewState();
@@ -39,12 +42,12 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
   @override
   void initState() {
     super.initState();
-    _applyBranchFromUrl();
+    _applyBranch();
   }
 
-  /// Si la URL trae ?branch=..., actualiza Globals y SharedPreferences.
-  Future<void> _applyBranchFromUrl() async {
-    final branch = _branchFromUrl();
+  /// Aplica la sucursal: primero del path, luego del query param de la URL.
+  Future<void> _applyBranch() async {
+    final branch = widget.branch ?? _branchFromUrl();
     if (branch != null && branch.isNotEmpty && branch != Globals.currentBranch) {
       await Globals.setBranch(branch);
       if (mounted) setState(() {});
