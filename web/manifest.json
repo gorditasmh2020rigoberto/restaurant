@@ -6,7 +6,7 @@
     "background_color": "#FF6D00",
     "theme_color": "#FF6D00",
     "description": "Gorditas Mis Hermanas PWA",
-    "orientation": "portrait-primary",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {
