@@ -721,7 +721,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       constraints: const BoxConstraints(maxHeight: 420),
                       child: LayoutBuilder(
                         builder: (ctx2, constraints2) {
-                          final cols = constraints2.maxWidth < 300 ? 2 : 3;
+                          final cols = constraints2.maxWidth < 480 ? 2 : 3;
                           return GridView.builder(
                         shrinkWrap: true,
                         gridDelegate:
@@ -729,7 +729,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           crossAxisCount: cols,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 6,
-                          childAspectRatio: cols == 2 ? 2.4 : 2.8,
+                          childAspectRatio: cols == 2 ? 1.8 : 2.2,
                         ),
                         itemCount: guisados.length,
                         itemBuilder: (ctx2, gi) {
@@ -788,7 +788,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                             ? FontWeight.w600
                                             : FontWeight.w400,
                                       ),
-                                      maxLines: 2,
+                                      maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
