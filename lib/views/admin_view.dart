@@ -15,7 +15,8 @@ import 'access_management_view.dart';
 import 'billing_view.dart';
 import 'clients_view.dart';
 import 'payroll_view.dart';
-import 'dart:html' as html if (dart.library.io) 'dart:io'; 
+import 'dart:html' as html if (dart.library.io) 'dart:io';
+import '../utils/app_updater.dart';
 
 class AdminView extends StatefulWidget {
   const AdminView({super.key});
@@ -300,29 +301,7 @@ class _AdminViewState extends State<AdminView> {
                         const Text('SISTEMA', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 10, fontWeight: FontWeight.bold)),
                         const Text('Versión: 1.0.12', style: TextStyle(color: Colors.white54, fontSize: 11)),
                         const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            if (identical(0, 0.0)) {
-                               ScaffoldMessenger.of(context).showSnackBar(
-                                 const SnackBar(content: Text('Recargando aplicación para limpiar caché...'), backgroundColor: Colors.blue)
-                               );
-                               Future.delayed(const Duration(seconds: 1), () {
-                                 try {
-                                   (html.window as dynamic).location.reload();
-                                 } catch (e) {
-                                   debugPrint('Reload error: $e');
-                                 }
-                               });
-                            }
-                          },
-                          icon: const Icon(Icons.refresh, size: 16),
-                          label: const Text('Limpiar Caché', style: TextStyle(fontSize: 11)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1E293B),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(32),
-                          ),
-                        ),
+                        const UpdateAppButton(),
                       ],
                     ),
                   ),

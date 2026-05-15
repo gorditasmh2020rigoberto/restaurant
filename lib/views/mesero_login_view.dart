@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
+import '../utils/app_updater.dart';
 import 'comandas_view.dart';
 
 /// Vista de acceso directo para meseros.
@@ -155,6 +156,8 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
+                const SizedBox(height: 24),
+                const UpdateAppButton(compact: true),
               ],
             ),
           ),
