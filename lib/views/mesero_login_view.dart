@@ -35,7 +35,6 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
           .from('waiters')
           .select()
           .eq('pin', pin)
-          .eq('branch_name', Globals.currentBranch)
           .maybeSingle();
       if (!mounted) return;
       if (response != null) {
