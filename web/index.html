@@ -30,7 +30,21 @@
   <link rel="icon" type="image/png" href="favicon.png?v=2"/>
 
   <title>Gorditas Mis Hermanas</title>
-  <link rel="manifest" href="manifest.json">
+  <link id="pwa-manifest" rel="manifest" href="manifest.json">
+  <script>
+    // Selecciona el manifest correcto según la sucursal en la URL
+    // Ej: /#/Maravillas/mesero  →  manifest-maravillas.json
+    (function () {
+      try {
+        var hash = window.location.hash || '';
+        var m = hash.match(/[#\/]+([^\/]+)\/mesero/i);
+        if (m) {
+          var slug = m[1].toLowerCase();
+          document.getElementById('pwa-manifest').href = 'manifest-' + slug + '.json';
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- Clip SDK -->
   <script src="https://sdk.clip.mx/js/clip-sdk.js"></script>
