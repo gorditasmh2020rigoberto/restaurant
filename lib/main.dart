@@ -84,12 +84,20 @@ class RestaurantApp extends StatelessWidget {
         '/mesero': (context) => const MeseroLoginView(),
       },
       // Maneja rutas dinámicas tipo /{sucursal}/mesero
+      // Ejemplo: /#/Maravillas/mesero → branch "Sucursal Maravillas"
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';
         final segments = name.split('/').where((s) => s.isNotEmpty).toList();
-        // /{sucursal}/mesero  →  segments = ['sucursal', 'mesero']
         if (segments.length == 2 && segments.last == 'mesero') {
-          final branch = Uri.decodeComponent(segments.first);
+          final slug = Uri.decodeComponent(segments.first);
+          // Busca rama exacta primero, luego "Sucursal {slug}"
+          final branch = Globals.branches.firstWhere(
+            (b) => b.toLowerCase() == slug.toLowerCase(),
+            orElse: () => Globals.branches.firstWhere(
+              (b) => b.toLowerCase().contains(slug.toLowerCase()),
+              orElse: () => slug,
+            ),
+          );
           return MaterialPageRoute(
             builder: (_) => MeseroLoginView(branch: branch),
             settings: settings,
