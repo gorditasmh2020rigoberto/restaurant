@@ -776,11 +776,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             ),
                           );
                         }
-                        return SingleChildScrollView(
-                          child: Wrap(
-                            spacing: 6,
-                            runSpacing: 6,
-                            children: guisados.map(buildItem).toList(),
+                        return SizedBox(
+                          height: 380,
+                          child: SingleChildScrollView(
+                            child: Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: guisados.map(buildItem).toList(),
+                            ),
                           ),
                         );
                       },
