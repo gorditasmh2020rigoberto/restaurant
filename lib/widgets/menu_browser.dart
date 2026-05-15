@@ -150,15 +150,57 @@ class _MenuBrowserState extends State<MenuBrowser> {
 
   String _translateCategory(String c) => Globals.translateCategory(c);
 
+  /// Abre el diálogo directo si la categoría produce exactamente 1 tarjeta.
+  /// Devuelve true si se abrió el diálogo (no hace falta filtrar).
+  bool _triggerSingleCardAction(BuildContext context, String label) {
+    final items = widget.dishes
+        .where((d) => _effectiveCat(d) == label)
+        .toList();
+    if (items.isEmpty) return false;
+
+    const skipMultiFlavor = {
+      'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
+    };
+    final cat = items.first.category.toLowerCase();
+
+    // Múltiples platillos en categoría no-skip → siempre 1 MultiFlavorVariantCard
+    if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
+      final displayName = _translateCategory(cat);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      return true;
+    }
+
+    // Lógica byBase (categorías skip o ítem único)
+    final byBase = <String, Map<String, Dish>>{};
+    for (final dish in items) {
+      final isMedia = dish.name.toLowerCase().contains('1/2');
+      final base = dish.name
+          .replaceAll(RegExp(r'\s*\(Orden\)\s*$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\s*\(1/2\)\s*$', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\s*1/2\s*$', caseSensitive: false), '')
+          .trim();
+      byBase.putIfAbsent(base, () => {});
+      byBase[base]![isMedia ? 'media' : 'orden'] = dish;
+    }
+
+    if (byBase.length == 1) {
+      final entry = byBase.entries.first;
+      final orden = entry.value['orden'];
+      final media = entry.value['media'];
+      if (orden != null && media != null) {
+        addOrdenVariantToCart(context, orden, media);
+      } else {
+        addDishToCart(context, orden ?? media!);
+      }
+      return true;
+    }
+
+    return false; // Múltiples tarjetas → filtrar normalmente
+  }
+
   void _onCategoryTap(String label) {
     if (label != 'Todos' && label != 'drink') {
-      final categoryDishes = widget.dishes
-          .where((d) => _effectiveCat(d) == label)
-          .toList();
-      if (categoryDishes.length == 1) {
-        addDishToCart(context, categoryDishes.first);
-        return;
-      }
+      if (_triggerSingleCardAction(context, label)) return;
     }
     setState(() {
       _selectedCategory = label;
@@ -237,15 +279,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
                 onTap: () {
-                  if (key != null) {
-                    final subcatDishes = widget.dishes
-                        .where((d) => _effectiveCat(d) == key)
-                        .toList();
-                    if (subcatDishes.length == 1) {
-                      addDishToCart(context, subcatDishes.first);
-                      return;
-                    }
-                  }
+                  if (key != null && _triggerSingleCardAction(context, key)) return;
                   setState(() => _selectedDrinkSubcat = key);
                 },
                 child: AnimatedContainer(
