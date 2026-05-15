@@ -151,6 +151,15 @@ class _MenuBrowserState extends State<MenuBrowser> {
   String _translateCategory(String c) => Globals.translateCategory(c);
 
   void _onCategoryTap(String label) {
+    if (label != 'Todos' && label != 'drink') {
+      final categoryDishes = widget.dishes
+          .where((d) => _effectiveCat(d) == label)
+          .toList();
+      if (categoryDishes.length == 1) {
+        addDishToCart(context, categoryDishes.first);
+        return;
+      }
+    }
     setState(() {
       _selectedCategory = label;
       if (label != 'drink') _selectedDrinkSubcat = null;

@@ -82,6 +82,15 @@ class _ComandasViewState extends State<ComandasView> {
   }
 
   Future<void> _onCategoryTap(String label) async {
+    if (label != 'Todos' && label != 'drink') {
+      final categoryDishes = _dishes
+          .where((d) => _effectiveCat(d) == label)
+          .toList();
+      if (categoryDishes.length == 1) {
+        addDishToCart(context, categoryDishes.first);
+        return;
+      }
+    }
     if (label != 'Todos') {
       final newCount = (_categoryClickCounts[label] ?? 0) + 1;
       setState(() {
