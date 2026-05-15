@@ -1317,9 +1317,9 @@ class _ComandasViewState extends State<ComandasView> {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              childAspectRatio: isMobile ? 1.6 : (isTablet ? 1.7 : 1.8),
-              crossAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
-              mainAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
+              childAspectRatio: isMobile ? (crossAxisCount == 2 ? 1.45 : 1.6) : (isTablet ? 1.7 : 1.8),
+              crossAxisSpacing: isMobile ? 8 : (isTablet ? 8 : 12),
+              mainAxisSpacing: isMobile ? 8 : (isTablet ? 8 : 12),
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => cards[index],
