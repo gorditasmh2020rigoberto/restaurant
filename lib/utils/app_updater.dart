@@ -1,6 +1,15 @@
-import 'dart:html' as html if (dart.library.io) 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:js_interop';
+
+/// Enlace a window.forceUpdate() definida en web/index.html
+/// Desregistra service workers, limpia todos los caches y recarga.
+@JS('forceUpdate')
+external void _jsForceUpdate();
+
+/// Fallback: recarga simple sin limpiar caché
+@JS('location.reload')
+external void _jsReload();
 
 /// Limpia caché del navegador y service workers, luego recarga la app.
 /// Solo funciona en web (PWA). En nativo no hace nada.
@@ -9,7 +18,7 @@ Future<void> forceAppUpdate(BuildContext context) async {
 
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(
-      content: Text('Actualizando app... se recargará en un momento'),
+      content: Text('Limpiando caché... se recargará en un momento'),
       duration: Duration(seconds: 2),
       behavior: SnackBarBehavior.floating,
     ),
@@ -18,23 +27,9 @@ Future<void> forceAppUpdate(BuildContext context) async {
   await Future.delayed(const Duration(milliseconds: 900));
 
   try {
-    // Desregistrar service workers y limpiar caché vía JS eval
-    (html.window as dynamic).eval(r'''
-      (async () => {
-        if ("serviceWorker" in navigator) {
-          const regs = await navigator.serviceWorker.getRegistrations();
-          for (const r of regs) await r.unregister();
-        }
-        if ("caches" in window) {
-          const keys = await caches.keys();
-          for (const k of keys) await caches.delete(k);
-        }
-        window.location.reload();
-      })();
-    ''');
+    _jsForceUpdate(); // Llama window.forceUpdate() del index.html
   } catch (_) {
-    // Fallback: recarga simple
-    (html.window as dynamic).location.reload();
+    _jsReload(); // Fallback: recarga simple
   }
 }
 
