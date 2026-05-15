@@ -1156,7 +1156,24 @@ class _ComandasViewState extends State<ComandasView> {
             return Padding(
               padding: const EdgeInsets.only(right: 10),
               child: GestureDetector(
-                onTap: () => setState(() => _selectedDrinkSubcat = key),
+                onTap: () {
+                  if (key == 'refrescos') {
+                    final refrescosDishes = _dishes
+                        .where((d) => _effectiveCat(d) == 'refrescos')
+                        .toList();
+                    if (refrescosDishes.isNotEmpty) {
+                      final dish = refrescosDishes.firstWhere(
+                        (d) => d.name.toLowerCase().trim() == 'refresco',
+                        orElse: () => refrescosDishes.first,
+                      );
+                      addDishToCart(context, dish);
+                    } else {
+                      setState(() => _selectedDrinkSubcat = key);
+                    }
+                  } else {
+                    setState(() => _selectedDrinkSubcat = key);
+                  }
+                },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 160),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
