@@ -1068,6 +1068,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   int? selectedQty = showQty ? null : (quantities.isNotEmpty ? quantities.first : null);
   String? selectedFlavor =
       showFlavor ? null : (flavors.isNotEmpty ? flavors.first : null);
+  int? selectedEnmolQty; // cantidad solo para enmoladas
 
   await showDialog(
     context: context,
@@ -1091,10 +1092,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
           matched = d;
           break;
         }
+        final selectedIsEnmolada =
+            (selectedFlavor ?? '').toLowerCase().contains('enmolad');
         final canAdd = matched != null &&
             (!showSize || selectedSize != null) &&
             (!showQty || selectedQty != null) &&
-            (!showFlavor || selectedFlavor != null);
+            (!showFlavor || selectedFlavor != null) &&
+            (!selectedIsEnmolada || selectedEnmolQty != null);
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
           title: Text(displayName,
@@ -1209,10 +1213,39 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           label: fl.isEmpty ? displayName : fl,
                           price: priceStr,
                           value: selectedFlavor == fl,
-                          onChanged: (v) => setDialogState(
-                              () => selectedFlavor = v ? fl : null),
+                          onChanged: (v) => setDialogState(() {
+                            selectedFlavor = v ? fl : null;
+                            // resetear cantidad enmoladas si cambia el sabor
+                            if (!((selectedFlavor ?? '').toLowerCase().contains('enmolad'))) {
+                              selectedEnmolQty = null;
+                            }
+                          }),
                         );
                       }).toList(),
+                    ),
+                  ],
+                  // Cantidad: solo aparece cuando el sabor es Enmoladas
+                  if (selectedIsEnmolada) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('CANTIDAD',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [2, 3].map((q) => _ToggleOption(
+                        icon: Icons.numbers,
+                        label: '$q pzas',
+                        value: selectedEnmolQty == q,
+                        onChanged: (v) => setDialogState(
+                            () => selectedEnmolQty = v ? q : null),
+                      )).toList(),
                     ),
                   ],
                   if (canAdd) ...[
@@ -1240,7 +1273,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   ? null
                   : () {
                       Navigator.pop(ctx);
-                      cart.addItemWithGuisados(matched!, []);
+                      final extras = [
+                        if (selectedIsEnmolada && selectedEnmolQty != null)
+                          '$selectedEnmolQty piezas',
+                      ];
+                      cart.addItemWithGuisados(matched!, extras);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
