@@ -1082,6 +1082,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           _ToggleOption(
                             icon: Icons.restaurant,
                             label: '1 Orden',
+                            price: () {
+                              final d = dishes.firstWhere(
+                                (d) => _extractSize(d.name) == 'orden' &&
+                                    (!showFlavor || _extractFlavor(d.name, categoryPrefix) == (selectedFlavor ?? sortedFlavors.firstOrNull)),
+                                orElse: () => dishes.firstWhere((d) => _extractSize(d.name) == 'orden', orElse: () => dishes.first),
+                              );
+                              return '\$${d.price.toStringAsFixed(0)}';
+                            }(),
                             value: selectedSize == 'orden',
                             onChanged: (v) => setDialogState(
                                 () => selectedSize = v ? 'orden' : null),
@@ -1090,6 +1098,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           _ToggleOption(
                             icon: Icons.content_cut,
                             label: '1/2 Orden',
+                            price: () {
+                              final d = dishes.firstWhere(
+                                (d) => _extractSize(d.name) == 'media' &&
+                                    (!showFlavor || _extractFlavor(d.name, categoryPrefix) == (selectedFlavor ?? sortedFlavors.firstOrNull)),
+                                orElse: () => dishes.firstWhere((d) => _extractSize(d.name) == 'media', orElse: () => dishes.first),
+                              );
+                              return '\$${d.price.toStringAsFixed(0)}';
+                            }(),
                             value: selectedSize == 'media',
                             onChanged: (v) => setDialogState(
                                 () => selectedSize = v ? 'media' : null),
@@ -1136,15 +1152,27 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     Wrap(
                       spacing: 10,
                       runSpacing: 8,
-                      children: sortedFlavors
-                          .map((fl) => _ToggleOption(
-                                icon: Icons.local_dining,
-                                label: fl.isEmpty ? displayName : fl,
-                                value: selectedFlavor == fl,
-                                onChanged: (v) => setDialogState(
-                                    () => selectedFlavor = v ? fl : null),
-                              ))
-                          .toList(),
+                      children: sortedFlavors.map((fl) {
+                        // Buscar el precio de la variante que coincide con este sabor
+                        Dish? matchDish;
+                        for (final d in dishes) {
+                          if (_extractFlavor(d.name, categoryPrefix) != fl) continue;
+                          if (showSize && selectedSize != null && _extractSize(d.name) != selectedSize) continue;
+                          matchDish = d;
+                          break;
+                        }
+                        final priceStr = matchDish != null
+                            ? '\$${matchDish.price.toStringAsFixed(0)}'
+                            : null;
+                        return _ToggleOption(
+                          icon: Icons.local_dining,
+                          label: fl.isEmpty ? displayName : fl,
+                          price: priceStr,
+                          value: selectedFlavor == fl,
+                          onChanged: (v) => setDialogState(
+                              () => selectedFlavor = v ? fl : null),
+                        );
+                      }).toList(),
                     ),
                   ],
                   if (canAdd) ...[
@@ -1496,6 +1524,7 @@ class OrdenVariantCard extends StatelessWidget {
 class _ToggleOption extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String? price;
   final bool value;
   final bool enabled;
   final ValueChanged<bool> onChanged;
@@ -1505,6 +1534,7 @@ class _ToggleOption extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onChanged,
+    this.price,
     this.enabled = true,
   });
 
@@ -1519,6 +1549,9 @@ class _ToggleOption extends StatelessWidget {
         : const Color(0xFF2D3748);
     final contentColor = enabled
         ? (value ? Colors.white : Colors.white54)
+        : Colors.white24;
+    final priceColor = enabled
+        ? (value ? Colors.white70 : const Color(0xFF64748B))
         : Colors.white24;
 
     return GestureDetector(
@@ -1536,13 +1569,28 @@ class _ToggleOption extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: contentColor),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: value ? FontWeight.w700 : FontWeight.w400,
-                color: contentColor,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: value ? FontWeight.w700 : FontWeight.w400,
+                    color: contentColor,
+                  ),
+                ),
+                if (price != null)
+                  Text(
+                    price!,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: priceColor,
+                    ),
+                  ),
+              ],
             ),
             if (!enabled) ...[
               const SizedBox(width: 6),
