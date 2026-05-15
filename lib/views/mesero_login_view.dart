@@ -79,7 +79,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                 ),
                 const SizedBox(height: 20),
                 const Text(
-                  'Modo Mesero',
+                  'Mesero',
                   style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
