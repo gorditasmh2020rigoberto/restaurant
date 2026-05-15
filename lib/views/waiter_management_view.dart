@@ -63,17 +63,49 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (nameController.text.trim().isEmpty) return;
+                final name = nameController.text.trim();
+                final pin = pinController.text.trim();
+                if (name.isEmpty) return;
+
+                // Validar PIN: exactamente 4 dígitos
+                if (pin.length != 4 || int.tryParse(pin) == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('El PIN debe ser de exactamente 4 dígitos'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                // Validar PIN único (no lo tenga otro mesero)
                 try {
+                  var query = _supabase.from('waiters').select('id').eq('pin', pin);
+                  if (isEditing) query = query.neq('id', waiter['id']);
+                  final existing = await query;
+                  if ((existing as List).isNotEmpty) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Ese PIN ya lo usa otro mesero, elige uno diferente'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                    return;
+                  }
+
                   if (isEditing) {
                     await _supabase.from('waiters').update({
-                      'name': nameController.text.trim(),
-                      'pin': pinController.text.trim(), 'branch_name': Globals.currentBranch,
+                      'name': name,
+                      'pin': pin,
+                      'branch_name': Globals.currentBranch,
                     }).eq('id', waiter['id']);
                   } else {
                     await _supabase.from('waiters').insert({
-                      'name': nameController.text.trim(),
-                      'pin': pinController.text.trim(), 'branch_name': Globals.currentBranch,
+                      'name': name,
+                      'pin': pin,
+                      'branch_name': Globals.currentBranch,
                     });
                   }
                   if (context.mounted) Navigator.pop(context, true);
@@ -107,11 +139,20 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar', style: TextStyle(color: Colors.grey))),
           TextButton(
             onPressed: () async {
+              Navigator.pop(context, false);
               try {
                 await _supabase.from('waiters').delete().eq('id', id);
-                if (context.mounted) Navigator.pop(context, true);
               } catch (e) {
-                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('No se puede eliminar porque tiene órdenes registradas. $e')));
+                final msg = e.toString().contains('foreign key') || e.toString().contains('23503')
+                    ? 'No se puede eliminar: el mesero tiene órdenes registradas'
+                    : 'Error al eliminar: $e';
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(msg),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 4),
+                  ));
+                }
               }
             },
             child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
