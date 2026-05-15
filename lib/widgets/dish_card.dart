@@ -965,10 +965,11 @@ class DishCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '\$${dish.price.toStringAsFixed(2)}',
+                            '\$${dish.price.toStringAsFixed(dish.price % 1 == 0 ? 0 : 2)}',
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 13,
                                 ),
                           ),
                           Row(
@@ -982,8 +983,8 @@ class DishCard extends StatelessWidget {
                                   icon: const Icon(Icons.remove, size: 16),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(
-                                    minHeight: 28,
-                                    minWidth: 28,
+                                    minHeight: 36,
+                                    minWidth: 36,
                                   ),
                                 ),
                               if (quantity > 0)
@@ -999,8 +1000,8 @@ class DishCard extends StatelessWidget {
                                 icon: const Icon(Icons.add, size: 16),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(
-                                  minHeight: 28,
-                                  minWidth: 28,
+                                  minHeight: 36,
+                                  minWidth: 36,
                                 ),
                               ),
                             ],

@@ -1195,53 +1195,77 @@ class _ComandasViewState extends State<ComandasView> {
     const active = Color(0xFFE07A30);
     return Container(
       color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: subcats.map((s) {
-            final key = s.$1;
-            final label = s.$2;
-            final icon = s.$3;
-            final selected = _selectedDrinkSubcat == key;
-            return Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: GestureDetector(
-                onTap: () {
-                  if (key != null && _triggerSingleCardAction(context, key)) return;
-                  setState(() => _selectedDrinkSubcat = key);
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 160),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: selected ? active : const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: selected ? active : const Color(0xFF334155),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(icon, size: 16, color: selected ? Colors.white : Colors.white60),
-                      const SizedBox(width: 6),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: selected ? Colors.white : Colors.white70,
-                          fontSize: 13,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: subcats.map((s) {
+                final key = s.$1;
+                final label = s.$2;
+                final icon = s.$3;
+                final selected = _selectedDrinkSubcat == key;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: GestureDetector(
+                    onTap: () {
+                      if (key != null && _triggerSingleCardAction(context, key)) return;
+                      setState(() => _selectedDrinkSubcat = key);
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: selected ? active : const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: selected ? active : const Color(0xFF334155),
+                          width: 1.5,
                         ),
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(icon, size: 16, color: selected ? Colors.white : Colors.white60),
+                          const SizedBox(width: 6),
+                          Text(
+                            label,
+                            style: TextStyle(
+                              color: selected ? Colors.white : Colors.white70,
+                              fontSize: 13,
+                              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          // Degradado derecho: indica que hay más chips al deslizar
+          Positioned(
+            right: 0, top: 0, bottom: 0,
+            child: IgnorePointer(
+              child: Container(
+                width: 32,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      const Color(0xFF0F172A).withValues(alpha: 0),
+                      const Color(0xFF0F172A),
                     ],
                   ),
                 ),
               ),
-            );
-          }).toList(),
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }

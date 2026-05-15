@@ -266,11 +266,14 @@ class _MenuBrowserState extends State<MenuBrowser> {
     const active = Color(0xFFE07A30);
     return Container(
       color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: subcats.map((s) {
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: subcats.map((s) {
             final key = s.$1;
             final label = s.$2;
             final icon = s.$3;
@@ -315,8 +318,29 @@ class _MenuBrowserState extends State<MenuBrowser> {
                 ),
               ),
             );
-          }).toList(),
-        ),
+              }).toList(),
+            ),
+          ),
+          // Degradado derecho indicando que hay más chips
+          Positioned(
+            right: 0, top: 0, bottom: 0,
+            child: IgnorePointer(
+              child: Container(
+                width: 32,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      const Color(0xFF0F172A).withValues(alpha: 0),
+                      const Color(0xFF0F172A),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
