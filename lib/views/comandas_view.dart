@@ -752,7 +752,7 @@ class _ComandasViewState extends State<ComandasView> {
                                       builder: (context, constraints) {
                                         final availW = constraints.maxWidth;
                                         final availH = constraints.maxHeight;
-                                        final cols = availW < 380 ? 4 : availW < 600 ? 5 : 7;
+                                        final cols = availW < 380 ? 3 : availW < 600 ? 4 : 7;
                                         final rows = (tables.length / cols).ceil();
                                         const spacing = 8.0;
                                         final ext = ((availH - (rows - 1) * spacing - 8) / rows).clamp(52.0, 120.0);
@@ -1165,7 +1165,7 @@ class _ComandasViewState extends State<ComandasView> {
               final realWidth = constraints.maxWidth;
               int cols;
               if (isPhone) {
-                cols = (realWidth / 130).floor().clamp(2, 3);
+                cols = realWidth < 400 ? 2 : (realWidth / 130).floor().clamp(2, 3);
               } else if (isTablet) {
                 cols = (realWidth / 150).floor().clamp(2, 5);
               } else {

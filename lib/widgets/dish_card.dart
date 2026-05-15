@@ -204,11 +204,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: MediaQuery.of(ctx).size.width < 400 ? 2 : 3,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 6,
-                          childAspectRatio: 2.4,
+                          childAspectRatio: MediaQuery.of(ctx).size.width < 400 ? 2.0 : 2.4,
                         ),
                         itemCount: currentSabores.length,
                         itemBuilder: (ctx3, i) {
@@ -1268,7 +1268,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
               child: const Text('Cancelar',
                   style: TextStyle(color: Colors.white54)),
             ),
-            TextButton(
+            SizedBox(
+              height: 44,
+              child: ElevatedButton(
               onPressed: !canAdd
                   ? null
                   : () {
@@ -1288,11 +1290,15 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         ));
                       }
                     },
-              style: TextButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D00),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFF334155),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Agregar a la orden',
-                  style: TextStyle(color: Color(0xFFFF6D00))),
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
             ),
           ],
         );

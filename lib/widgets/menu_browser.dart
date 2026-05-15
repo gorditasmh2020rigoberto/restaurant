@@ -215,8 +215,8 @@ class _MenuBrowserState extends State<MenuBrowser> {
       onTap: () => _onCategoryTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 60,
-        height: 54,
+        width: 68,
+        height: 62,
         decoration: BoxDecoration(
           color: selected ? activeColor : const Color(0xFF1E293B),
           borderRadius: BorderRadius.circular(12),
@@ -242,7 +242,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: 10,
                   height: 1.1,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                   color: selected ? Colors.white : Colors.white60,
@@ -434,9 +434,9 @@ class _MenuBrowserState extends State<MenuBrowser> {
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               childAspectRatio:
-                  isMobile ? 1.6 : (isTablet ? 1.7 : 1.8),
-              crossAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
-              mainAxisSpacing: isMobile ? 6 : (isTablet ? 8 : 12),
+                  isMobile ? (crossAxisCount == 2 ? 1.45 : 1.6) : (isTablet ? 1.7 : 1.8),
+              crossAxisSpacing: isMobile ? 8 : (isTablet ? 8 : 12),
+              mainAxisSpacing: isMobile ? 8 : (isTablet ? 8 : 12),
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => cards[index],
@@ -469,7 +469,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           ),
         ),
         SizedBox(
-          height: 2 * 54 + 1 * 6 + 8,
+          height: 2 * 62 + 1 * 6 + 8,
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -477,7 +477,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
               crossAxisCount: 2,
               mainAxisSpacing: 8,
               crossAxisSpacing: 6,
-              childAspectRatio: 54 / 60,
+              childAspectRatio: 62 / 68,
             ),
             itemCount: _availableCategories.length,
             itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
@@ -491,7 +491,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
               final realWidth = constraints.maxWidth;
               int cols;
               if (isPhone) {
-                cols = 3;
+                cols = realWidth < 400 ? 2 : 3;
               } else if (isTablet) {
                 cols = (realWidth / 150).floor().clamp(2, 5);
               } else {
