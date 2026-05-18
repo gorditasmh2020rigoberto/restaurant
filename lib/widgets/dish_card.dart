@@ -137,6 +137,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
 
     String? selectedSizeType; // e.g. 'refresco_600', 'agua_500ml'
     String? selectedSabor;
+    int dialogQty = 1;
 
     await showDialog(
       context: context,
@@ -256,6 +257,54 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           );
                         },
                       ),
+                      const SizedBox(height: 12),
+                      const Divider(color: Color(0xFF334155)),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('CANTIDAD',
+                              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  width: 36, height: 36,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFF334155)),
+                                  ),
+                                  child: const Icon(Icons.remove, color: Colors.white70, size: 18),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 48,
+                                child: Text(
+                                  '$dialogQty',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () => setDialogState(() => dialogQty++),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  width: 36, height: 36,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: const Color(0xFFFF6D00)),
+                                  ),
+                                  child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -280,15 +329,15 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       final price = await _loadDrinkPrice(selectedSizeType!);
                       if (price != null) finalDish = dish.copyWith(price: price);
                     }
-                    cart.addItemWithGuisados(finalDish, extras);
+                    cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${dish.name} ($selectedSabor) agregado'),
+                          content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($selectedSabor) agregado'),
                           duration: const Duration(milliseconds: 500),
                           behavior: SnackBarBehavior.floating,
-                          width: 260,
+                          width: 280,
                         ),
                       );
                     }
@@ -358,6 +407,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   if (isHuevo) {
     const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
     String? selectedTermino;
+    int dialogQty = 1;
     await showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -433,6 +483,54 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFF334155)),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('CANTIDAD',
+                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF334155)),
+                          ),
+                          child: const Icon(Icons.remove, color: Colors.white70, size: 18),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 48,
+                        child: Text(
+                          '$dialogQty',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => setDialogState(() => dialogQty++),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFFF6D00)),
+                          ),
+                          child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           ),
           actions: [
@@ -445,14 +543,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               child: ElevatedButton(
                 onPressed: selectedTermino == null ? null : () {
                   Navigator.pop(ctx);
-                  cart.addItemWithGuisados(dish, ['Huevo $selectedTermino']);
+                  cart.addItemWithGuisados(dish, ['Huevo $selectedTermino'], quantity: dialogQty);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('${dish.name} ($selectedTermino) agregado'),
+                      content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($selectedTermino) agregado'),
                       duration: const Duration(milliseconds: 500),
                       behavior: SnackBarBehavior.floating,
-                      width: 260,
+                      width: 280,
                     ));
                   }
                 },
@@ -520,6 +618,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   bool frita = false;
   String? selectedSalsa; // solo para chilaquiles
   String? selectedTerminoHuevo; // solo para chilaquiles con huevo
+  int dialogQty = 1;
 
   const salsasChilaquil = ['Roja', 'Verde', 'Ranchera'];
   const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
@@ -854,12 +953,61 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       },
                     ),
                   ],
+                  // Selector de cantidad
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('CANTIDAD',
+                          style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFF334155)),
+                              ),
+                              child: const Icon(Icons.remove, color: Colors.white70, size: 18),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 48,
+                            child: Text(
+                              '$dialogQty',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => setDialogState(() => dialogQty++),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFFF6D00)),
+                              ),
+                              child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   // Total dinámico
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: \$${((isTapa && conQueso) ? dish.price + 25 : dish.price).toStringAsFixed(0)}',
+                    'Total: \$${(((isTapa && conQueso) ? dish.price + 25 : dish.price) * dialogQty).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
                     style: const TextStyle(
                       color: Color(0xFFFF6D00),
                       fontSize: 15,
@@ -910,15 +1058,15 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   final finalDish = (isTapa && conQueso)
                       ? dish.copyWith(price: dish.price + 25)
                       : dish;
-                  cart.addItemWithGuisados(finalDish, extras);
+                  cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${dish.name} agregado'),
+                        content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} agregado'),
                         duration: const Duration(milliseconds: 500),
                         behavior: SnackBarBehavior.floating,
-                        width: 200,
+                        width: 220,
                       ),
                     );
                   }

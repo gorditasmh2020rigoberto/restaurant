@@ -90,12 +90,13 @@ class CartProvider with ChangeNotifier {
 
   /// Adds a dish with specific guisados. Each call creates a unique entry
   /// (uses a timestamp suffix so multiple guisado combos can coexist).
-  void addItemWithGuisados(Dish dish, List<String> guisados) {
+  void addItemWithGuisados(Dish dish, List<String> guisados, {int quantity = 1}) {
     final key = '${dish.id}_${currentClient}_${DateTime.now().millisecondsSinceEpoch}';
     _items[key] = CartItem(
       dish: dish,
       clientLabel: currentClient,
       guisados: List<String>.from(guisados),
+      quantity: quantity,
     );
     notifyListeners();
   }
