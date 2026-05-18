@@ -475,10 +475,13 @@ class _PayrollViewState extends State<PayrollView> {
   Future<void> _showWeeklyReportDialog() async {
     DateTime selectedDate = DateTime.now();
     
-    // Find Monday of selected week
-    DateTime getMonday(DateTime date) => date.subtract(Duration(days: date.weekday - 1));
+    // Find Monday of selected week (normalize to midnight to avoid time overflow)
+    DateTime getMonday(DateTime date) {
+      final d = DateTime(date.year, date.month, date.day);
+      return d.subtract(Duration(days: d.weekday - 1));
+    }
     DateTime startOfWeek = getMonday(selectedDate);
-    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59));
+    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
 
     await showDialog(
       context: context,
@@ -516,7 +519,7 @@ class _PayrollViewState extends State<PayrollView> {
                         setDialogState(() {
                           selectedDate = picked;
                           startOfWeek = getMonday(selectedDate);
-                          endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59));
+                          endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
                         });
                       }
                     },
