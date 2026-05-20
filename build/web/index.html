@@ -30,7 +30,21 @@
   <link rel="icon" type="image/png" href="favicon.png?v=2"/>
 
   <title>Gorditas Mis Hermanas</title>
-  <link rel="manifest" href="manifest.json">
+  <link id="pwa-manifest" rel="manifest" href="manifest.json">
+  <script>
+    // Selecciona el manifest correcto según la sucursal en la URL
+    // Ej: /#/Maravillas/mesero  →  manifest-maravillas.json
+    (function () {
+      try {
+        var hash = window.location.hash || '';
+        var m = hash.match(/[#\/]+([^\/]+)\/mesero/i);
+        if (m) {
+          var slug = m[1].toLowerCase();
+          document.getElementById('pwa-manifest').href = 'manifest-' + slug + '.json';
+        }
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- Clip SDK -->
   <script src="https://sdk.clip.mx/js/clip-sdk.js"></script>
@@ -64,6 +78,23 @@
         });
       });
     }
+
+    // Función global para limpiar caché y recargar — llamada desde Flutter vía dart:js
+    window.forceUpdate = async function() {
+      try {
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) await r.unregister();
+        }
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          for (const k of keys) await caches.delete(k);
+        }
+      } catch(e) {
+        console.warn('forceUpdate error:', e);
+      }
+      window.location.reload(true);
+    };
   </script>
   <script>
     // ── Puente Flutter ↔ Clip ────────────────────────────────────

@@ -355,6 +355,55 @@ class _MenuBrowserState extends State<MenuBrowser> {
     if (items.isEmpty) return [];
     final cat = items.first.category.toLowerCase();
 
+    // Menudo: variantes de tamaño separadas de las Cuajadillas (complemento independiente)
+    if (cat == 'menudo' && items.length > 1) {
+      final menudos = items.where((d) => d.name.toLowerCase().contains('menudo')).toList();
+      final cuajadillas = items.where((d) => d.name.toLowerCase().contains('cuajadilla')).toList();
+      final others = items.where((d) =>
+          !d.name.toLowerCase().contains('menudo') &&
+          !d.name.toLowerCase().contains('cuajadilla')).toList();
+      final cards = <Widget>[];
+      if (menudos.length > 1) {
+        cards.add(MultiFlavorVariantCard(
+          dishes: menudos,
+          displayName: 'Menudo',
+          categoryPrefix: 'Menudo',
+        ));
+      } else {
+        for (final d in menudos) cards.add(DishCard(dish: d));
+      }
+      if (cuajadillas.length > 1) {
+        cards.add(MultiFlavorVariantCard(
+          dishes: cuajadillas,
+          displayName: 'Cuajadilla',
+          categoryPrefix: 'Cuajadilla',
+        ));
+      } else {
+        for (final d in cuajadillas) cards.add(DishCard(dish: d));
+      }
+      for (final d in others) cards.add(DishCard(dish: d));
+      return cards;
+    }
+
+    // Lo dulce: Molletes Dulces por orden; Churros y Hot Cakes por cantidad
+    if (cat == 'lo_dulce' && items.length > 1) {
+      final molletes = items.where((d) => d.name.toLowerCase().contains('mollete')).toList();
+      final piezas = items.where((d) => !d.name.toLowerCase().contains('mollete')).toList();
+      final cards = <Widget>[];
+      for (final d in molletes) {
+        cards.add(DishCard(dish: d));
+      }
+      if (piezas.isNotEmpty) {
+        final displayName = _translateCategory(cat);
+        cards.add(MultiFlavorVariantCard(
+          dishes: piezas,
+          displayName: displayName,
+          categoryPrefix: displayName,
+        ));
+      }
+      return cards;
+    }
+
     // Para categorías con 2+ platillos, colapsar a una sola tarjeta multi-sabor
     if (items.length > 1 && !_skipMultiFlavor.contains(cat)) {
       final displayName = _translateCategory(cat);

@@ -1229,39 +1229,63 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
 
   String? selectedSize = showSize ? null : (sizes.isNotEmpty ? sizes.first : null);
   int? selectedQty = showQty ? null : (quantities.isNotEmpty ? quantities.first : null);
-  String? selectedFlavor =
-      showFlavor ? null : (flavors.isNotEmpty ? flavors.first : null);
-  int? selectedEnmolQty; // cantidad solo para enmoladas
+  // Multi-select: se pueden elegir varios sabores a la vez
+  final Set<String> selectedFlavors =
+      showFlavor ? {} : (flavors.isNotEmpty ? {flavors.first} : {});
+  int? selectedEnmolQty; // cantidad solo para enmoladas (single-flavor)
+  int dialogQty = 1;
+
+  // Sabores que tienen variantes de piezas en la BD (e.g. Hot Cakes pero no Churros)
+  final flavorsWithQtyVariants = dishes
+      .where((d) => _extractQuantity(d.name) != null)
+      .map((d) => _extractFlavor(d.name, categoryPrefix))
+      .toSet();
 
   await showDialog(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDialogState) {
-        Dish? matched;
-        for (final d in dishes) {
-          final dSize = _extractSize(d.name);
-          final dQty = _extractQuantity(d.name);
-          final dFlavor = _extractFlavor(d.name, categoryPrefix);
-          if (showSize && dSize != selectedSize) continue;
-          if (showQty && dQty != selectedQty) continue;
-          if (showFlavor && dFlavor != selectedFlavor) continue;
-          if (!showSize && sizes.isNotEmpty && dSize != sizes.first) continue;
-          if (!showQty && quantities.isNotEmpty && dQty != quantities.first) {
-            continue;
+        // Encontrar el platillo que coincide con cada sabor seleccionado.
+        // Para sabores SIN variantes pza. (e.g. Churros), matchear el platillo base.
+        final Map<String, Dish> matchedByFlavor = {};
+        for (final fl in selectedFlavors) {
+          final flHasQtyVariants = flavorsWithQtyVariants.contains(fl);
+          for (final d in dishes) {
+            final dSize = _extractSize(d.name);
+            final dQty = _extractQuantity(d.name);
+            final dFlavor = _extractFlavor(d.name, categoryPrefix);
+            if (showFlavor && dFlavor != fl) continue;
+            if (showSize && dSize != selectedSize) continue;
+            if (flHasQtyVariants) {
+              if (dQty != selectedQty) continue;
+            } else {
+              if (dQty != null) continue; // solo la versión base (sin sufijo pzas.)
+            }
+            if (!showSize && sizes.isNotEmpty && dSize != sizes.first) continue;
+            if (!showFlavor && flavors.isNotEmpty && dFlavor != flavors.first) continue;
+            matchedByFlavor[fl] = d;
+            break;
           }
-          if (!showFlavor && flavors.isNotEmpty && dFlavor != flavors.first) {
-            continue;
-          }
-          matched = d;
-          break;
         }
-        final selectedIsEnmolada =
-            (selectedFlavor ?? '').toLowerCase().contains('enmolad');
-        final canAdd = matched != null &&
+
+        // Mostrar selector de piezas solo si algún sabor seleccionado tiene variantes pza.
+        final anySelectedHasQtyVariants = selectedFlavors.any(
+            (fl) => flavorsWithQtyVariants.contains(fl));
+        final effectiveShowQty = showQty && anySelectedHasQtyVariants;
+
+        // Enmoladas: solo cuando hay exactamente ese sabor seleccionado
+        final selectedIsEnmolada = selectedFlavors.length == 1 &&
+            selectedFlavors.first.toLowerCase().contains('enmolad');
+        final canAdd = matchedByFlavor.isNotEmpty &&
             (!showSize || selectedSize != null) &&
-            (!showQty || selectedQty != null) &&
-            (!showFlavor || selectedFlavor != null) &&
+            (!effectiveShowQty || selectedQty != null) &&
+            (!showFlavor || selectedFlavors.isNotEmpty) &&
             (!selectedIsEnmolada || selectedEnmolQty != null);
+
+        final totalPrice =
+            matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
+                dialogQty;
+
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
           title: Text(displayName,
@@ -1290,9 +1314,12 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             icon: Icons.restaurant,
                             label: '1 Orden',
                             price: () {
+                              final firstFl = selectedFlavors.isNotEmpty
+                                  ? selectedFlavors.first
+                                  : sortedFlavors.firstOrNull;
                               final d = dishes.firstWhere(
                                 (d) => _extractSize(d.name) == 'orden' &&
-                                    (!showFlavor || _extractFlavor(d.name, categoryPrefix) == (selectedFlavor ?? sortedFlavors.firstOrNull)),
+                                    (!showFlavor || _extractFlavor(d.name, categoryPrefix) == firstFl),
                                 orElse: () => dishes.firstWhere((d) => _extractSize(d.name) == 'orden', orElse: () => dishes.first),
                               );
                               return '\$${d.price.toStringAsFixed(0)}';
@@ -1306,9 +1333,12 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             icon: Icons.content_cut,
                             label: '1/2 Orden',
                             price: () {
+                              final firstFl = selectedFlavors.isNotEmpty
+                                  ? selectedFlavors.first
+                                  : sortedFlavors.firstOrNull;
                               final d = dishes.firstWhere(
                                 (d) => _extractSize(d.name) == 'media' &&
-                                    (!showFlavor || _extractFlavor(d.name, categoryPrefix) == (selectedFlavor ?? sortedFlavors.firstOrNull)),
+                                    (!showFlavor || _extractFlavor(d.name, categoryPrefix) == firstFl),
                                 orElse: () => dishes.firstWhere((d) => _extractSize(d.name) == 'media', orElse: () => dishes.first),
                               );
                               return '\$${d.price.toStringAsFixed(0)}';
@@ -1323,8 +1353,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                   ],
-                  if (showQty) ...[
-                    const Text('CANTIDAD',
+                  if (effectiveShowQty) ...[
+                    const Text('PIEZAS',
                         style: TextStyle(
                             color: Colors.white70,
                             fontSize: 11,
@@ -1360,7 +1390,6 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       spacing: 10,
                       runSpacing: 8,
                       children: sortedFlavors.map((fl) {
-                        // Buscar el precio de la variante que coincide con este sabor
                         Dish? matchDish;
                         for (final d in dishes) {
                           if (_extractFlavor(d.name, categoryPrefix) != fl) continue;
@@ -1375,11 +1404,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           icon: Icons.local_dining,
                           label: fl.isEmpty ? displayName : fl,
                           price: priceStr,
-                          value: selectedFlavor == fl,
+                          value: selectedFlavors.contains(fl),
                           onChanged: (v) => setDialogState(() {
-                            selectedFlavor = v ? fl : null;
-                            // resetear cantidad enmoladas si cambia el sabor
-                            if (!((selectedFlavor ?? '').toLowerCase().contains('enmolad'))) {
+                            if (v) {
+                              selectedFlavors.add(fl);
+                            } else {
+                              selectedFlavors.remove(fl);
+                            }
+                            // Resetear cantidad enmoladas si ya no es selección única
+                            if (!(selectedFlavors.length == 1 &&
+                                selectedFlavors.first.toLowerCase().contains('enmolad'))) {
                               selectedEnmolQty = null;
                             }
                           }),
@@ -1387,12 +1421,12 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       }).toList(),
                     ),
                   ],
-                  // Cantidad: solo aparece cuando el sabor es Enmoladas
+                  // Cantidad de piezas: solo para enmoladas seleccionadas en solitario
                   if (selectedIsEnmolada) ...[
                     const SizedBox(height: 12),
                     const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
-                    const Text('CANTIDAD',
+                    const Text('PIEZAS',
                         style: TextStyle(
                             color: Colors.white70,
                             fontSize: 11,
@@ -1411,10 +1445,66 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       )).toList(),
                     ),
                   ],
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('CANTIDAD',
+                          style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1)),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => setDialogState(
+                                () { if (dialogQty > 1) dialogQty--; }),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0F172A),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFF334155)),
+                              ),
+                              child: const Icon(Icons.remove, color: Colors.white70, size: 18),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 48,
+                            child: Text(
+                              '$dialogQty',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () => setDialogState(() => dialogQty++),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 36, height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFFF6D00)),
+                              ),
+                              child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   if (canAdd) ...[
                     const SizedBox(height: 14),
                     Text(
-                      'Total: \$${matched!.price.toStringAsFixed(0)}',
+                      'Total: \$${totalPrice.toStringAsFixed(0)}',
                       style: const TextStyle(
                           color: Color(0xFFFF6D00),
                           fontSize: 16,
@@ -1442,14 +1532,20 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         if (selectedIsEnmolada && selectedEnmolQty != null)
                           '$selectedEnmolQty piezas',
                       ];
-                      cart.addItemWithGuisados(matched!, extras);
+                      for (final dish in matchedByFlavor.values) {
+                        cart.addItemWithGuisados(dish, extras, quantity: dialogQty);
+                      }
                       if (context.mounted) {
+                        final names = matchedByFlavor.values
+                            .map((d) => d.name)
+                            .join(', ');
+                        final prefix = dialogQty > 1 ? '$dialogQty × ' : '';
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('${matched.name} agregado'),
-                          duration: const Duration(milliseconds: 500),
+                          content: Text('$prefix$names agregado${matchedByFlavor.length > 1 ? 's' : ''}'),
+                          duration: const Duration(milliseconds: 800),
                           behavior: SnackBarBehavior.floating,
-                          width: 260,
+                          width: 300,
                         ));
                       }
                     },
