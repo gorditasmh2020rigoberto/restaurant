@@ -405,9 +405,52 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
       nameLower.contains('huevo');
 
   if (isHuevo) {
+    const tiposHuevo = ['Estrellado', 'Revuelto'];
     const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
+    String? selectedTipo;
     String? selectedTermino;
     int dialogQty = 1;
+
+    Widget _buildOpcion(String label, bool isSelected, VoidCallback onTap) {
+      return GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                : const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+              width: 2,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                size: 16,
+                color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.white60,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     await showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
@@ -425,64 +468,29 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               ),
             ],
           ),
-          content: Column(
+          content: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'TÉRMINO DEL HUEVO',
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1),
-              ),
+              const Text('TIPO DE HUEVO',
+                  style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
               const SizedBox(height: 10),
-              Row(
-                children: terminosHuevo.map((termino) {
-                  final isSelected = selectedTermino == termino;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () => setDialogState(() => selectedTermino = termino),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                              : const Color(0xFF0F172A),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-                            width: 2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                              size: 16,
-                              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              termino,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.white60,
-                                fontSize: 14,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+              ...tiposHuevo.map((tipo) => _buildOpcion(
+                tipo,
+                selectedTipo == tipo,
+                () => setDialogState(() => selectedTipo = tipo),
+              )),
+              const Divider(color: Color(0xFF334155)),
+              const SizedBox(height: 8),
+              const Text('TÉRMINO DEL HUEVO',
+                  style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+              const SizedBox(height: 10),
+              ...terminosHuevo.map((termino) => _buildOpcion(
+                termino,
+                selectedTermino == termino,
+                () => setDialogState(() => selectedTermino = termino),
+              )),
               const SizedBox(height: 12),
               const Divider(color: Color(0xFF334155)),
               const SizedBox(height: 8),
@@ -531,7 +539,53 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   ),
                 ],
               ),
+              const Divider(color: Color(0xFF334155)),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('CANTIDAD',
+                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F172A),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF334155)),
+                          ),
+                          child: const Icon(Icons.remove, color: Colors.white70, size: 18),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 48,
+                        child: Text('$dialogQty',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                      ),
+                      InkWell(
+                        onTap: () => setDialogState(() => dialogQty++),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFFF6D00)),
+                          ),
+                          child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
+          ),
           ),
           actions: [
             TextButton(
@@ -541,16 +595,17 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
             SizedBox(
               height: 44,
               child: ElevatedButton(
-                onPressed: selectedTermino == null ? null : () {
+                onPressed: (selectedTipo == null || selectedTermino == null) ? null : () {
                   Navigator.pop(ctx);
-                  cart.addItemWithGuisados(dish, ['Huevo $selectedTermino'], quantity: dialogQty);
+                  final nota = '$selectedTipo $selectedTermino';
+                  cart.addItemWithGuisados(dish, [nota], quantity: dialogQty);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($selectedTermino) agregado'),
+                      content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($nota) agregado'),
                       duration: const Duration(milliseconds: 500),
                       behavior: SnackBarBehavior.floating,
-                      width: 280,
+                      width: 300,
                     ));
                   }
                 },
