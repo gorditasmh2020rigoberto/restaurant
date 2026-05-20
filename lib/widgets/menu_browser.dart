@@ -385,12 +385,21 @@ class _MenuBrowserState extends State<MenuBrowser> {
       return cards;
     }
 
-    // Lo dulce: Molletes Dulces por orden; Churros y Hot Cakes por cantidad
+    // Lo dulce: Molletes Dulces por orden; Churros y Hot Cakes por cantidad (sin Orden/1/2 Orden)
     if (cat == 'lo_dulce' && items.length > 1) {
       final molletes = items.where((d) => d.name.toLowerCase().contains('mollete')).toList();
-      final piezas = items.where((d) => !d.name.toLowerCase().contains('mollete')).toList();
+      // Excluir cualquier variante "1/2" del grupo de piezas para que no aparezca el selector de tamaño
+      final piezas = items.where((d) =>
+          !d.name.toLowerCase().contains('mollete') &&
+          !d.name.toLowerCase().contains('1/2')).toList();
+      final mediaOtros = items.where((d) =>
+          !d.name.toLowerCase().contains('mollete') &&
+          d.name.toLowerCase().contains('1/2')).toList();
       final cards = <Widget>[];
       for (final d in molletes) {
+        cards.add(DishCard(dish: d));
+      }
+      for (final d in mediaOtros) {
         cards.add(DishCard(dish: d));
       }
       if (piezas.isNotEmpty) {
