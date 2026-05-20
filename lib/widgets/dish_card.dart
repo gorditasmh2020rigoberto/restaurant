@@ -1211,7 +1211,8 @@ String _extractSize(String name) {
 }
 
 Future<void> addMultiFlavorVariantToCart(BuildContext context,
-    List<Dish> dishes, String displayName, String categoryPrefix) async {
+    List<Dish> dishes, String displayName, String categoryPrefix,
+    {bool multiSelectFlavors = false}) async {
   final cart = context.read<CartProvider>();
 
   // Detectar qué dimensiones tienen variación real
@@ -1438,10 +1439,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           price: priceStr,
                           value: selectedFlavors.contains(fl),
                           onChanged: (v) => setDialogState(() {
-                            if (v) {
-                              selectedFlavors.add(fl);
+                            if (!multiSelectFlavors) {
+                              // Single-select: radio button behavior
+                              selectedFlavors.clear();
+                              if (v) selectedFlavors.add(fl);
                             } else {
-                              selectedFlavors.remove(fl);
+                              if (v) {
+                                selectedFlavors.add(fl);
+                              } else {
+                                selectedFlavors.remove(fl);
+                              }
                             }
                             // Resetear cantidad enmoladas si ya no es selección única
                             if (!(selectedFlavors.length == 1 &&
@@ -1730,12 +1737,14 @@ class MultiFlavorVariantCard extends StatelessWidget {
   final List<Dish> dishes;
   final String displayName;
   final String categoryPrefix;
+  final bool multiSelectFlavors;
 
   const MultiFlavorVariantCard({
     super.key,
     required this.dishes,
     required this.displayName,
     required this.categoryPrefix,
+    this.multiSelectFlavors = false,
   });
 
   @override
@@ -1750,7 +1759,8 @@ class MultiFlavorVariantCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => addMultiFlavorVariantToCart(
-            context, dishes, displayName, categoryPrefix),
+            context, dishes, displayName, categoryPrefix,
+            multiSelectFlavors: multiSelectFlavors),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
           child: Column(
@@ -1808,7 +1818,8 @@ class MultiFlavorVariantCard extends StatelessWidget {
                                     context,
                                     dishes,
                                     displayName,
-                                    categoryPrefix),
+                                    categoryPrefix,
+                                    multiSelectFlavors: multiSelectFlavors),
                                 icon: const Icon(Icons.add, size: 16),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(

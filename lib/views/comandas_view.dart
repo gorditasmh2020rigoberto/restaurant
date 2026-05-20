@@ -94,10 +94,12 @@ class _ComandasViewState extends State<ComandasView> {
     };
     final cat = items.first.category.toLowerCase();
 
+    const multiSelectCategories = {'arrachera', 'quesadillas'};
     // Múltiples platillos en categoría no-skip → siempre 1 MultiFlavorVariantCard
     if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
       final displayName = _translateCategory(cat);
-      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName,
+          multiSelectFlavors: multiSelectCategories.contains(cat));
       return true;
     }
 
@@ -1366,6 +1368,7 @@ class _ComandasViewState extends State<ComandasView> {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
       'gorditas',
     };
+    const multiSelectCategories = {'arrachera', 'quesadillas'};
     final cat = items.first.category.toLowerCase();
     if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
       final displayName = _translateCategory(cat);
@@ -1374,6 +1377,7 @@ class _ComandasViewState extends State<ComandasView> {
           dishes: items,
           displayName: displayName,
           categoryPrefix: displayName,
+          multiSelectFlavors: multiSelectCategories.contains(cat),
         ),
       ];
     }
