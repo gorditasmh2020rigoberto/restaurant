@@ -1235,11 +1235,39 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   int? selectedEnmolQty; // cantidad solo para enmoladas (single-flavor)
   int dialogQty = 1;
 
+  // Menudo: tipo de carne (Pata, Libro, Panza, Callo, Pañal, Surtido)
+  final isMenudo = categoryPrefix.toLowerCase() == 'menudo';
+  final Set<String> selectedTiposCarne = {};
+  const menudoTipos = ['Pata', 'Libro', 'Panza', 'Callo', 'Pañal', 'Surtido'];
+
   // Sabores que tienen variantes de piezas en la BD (e.g. Hot Cakes pero no Churros)
   final flavorsWithQtyVariants = dishes
       .where((d) => _extractQuantity(d.name) != null)
       .map((d) => _extractFlavor(d.name, categoryPrefix))
       .toSet();
+
+  // Cargar guisados si algún platillo de esta categoría los requiere
+  List<Map<String, dynamic>> guisados = [];
+  if (dishes.any((d) => d.requiresGuisado)) {
+    try {
+      final supabase = Supabase.instance.client;
+      final rows = await supabase
+          .from('guisados')
+          .select()
+          .eq('available', true)
+          .order('name');
+      guisados = (rows as List).cast<Map<String, dynamic>>()
+          .where((g) {
+            final branch = g['branch_name'] as String?;
+            return branch == null || branch == Globals.currentBranch;
+          })
+          .toList();
+    } catch (e) {
+      debugPrint('Error cargando guisados: $e');
+    }
+    if (!context.mounted) return;
+  }
+  List<String> selectedGuisados = [];
 
   await showDialog(
     context: context,
@@ -1276,11 +1304,15 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         // Enmoladas: solo cuando hay exactamente ese sabor seleccionado
         final selectedIsEnmolada = selectedFlavors.length == 1 &&
             selectedFlavors.first.toLowerCase().contains('enmolad');
+        final anyRequiresGuisado =
+            matchedByFlavor.values.any((d) => d.requiresGuisado);
         final canAdd = matchedByFlavor.isNotEmpty &&
             (!showSize || selectedSize != null) &&
             (!effectiveShowQty || selectedQty != null) &&
             (!showFlavor || selectedFlavors.isNotEmpty) &&
-            (!selectedIsEnmolada || selectedEnmolQty != null);
+            (!selectedIsEnmolada || selectedEnmolQty != null) &&
+            (!isMenudo || selectedTiposCarne.isNotEmpty) &&
+            (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
 
         final totalPrice =
             matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
@@ -1379,8 +1411,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     const SizedBox(height: 8),
                   ],
                   if (showFlavor) ...[
-                    const Text('SABOR',
-                        style: TextStyle(
+                    Text(isMenudo ? 'TAMAÑO' : 'SABOR',
+                        style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -1419,6 +1451,131 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           }),
                         );
                       }).toList(),
+                    ),
+                  ],
+                  // Tipo de carne: solo para Menudo
+                  if (isMenudo) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('TIPO DE CARNE',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: menudoTipos.map((tipo) => _ToggleOption(
+                        icon: Icons.soup_kitchen,
+                        label: tipo,
+                        value: selectedTiposCarne.contains(tipo),
+                        onChanged: (v) => setDialogState(() {
+                          if (v) selectedTiposCarne.add(tipo);
+                          else selectedTiposCarne.remove(tipo);
+                        }),
+                      )).toList(),
+                    ),
+                  ],
+                  // Guisado: aparece cuando algún platillo seleccionado lo requiere
+                  if (anyRequiresGuisado && guisados.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('GUISADO',
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1)),
+                        Text(
+                          '${selectedGuisados.length}/5',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: selectedGuisados.length >= 5
+                                ? const Color(0xFFFF6D00)
+                                : Colors.white38,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 260,
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: guisados.map((g) {
+                            final name = g['name'] as String;
+                            final isChecked = selectedGuisados.contains(name);
+                            final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
+                            return SizedBox(
+                              width: itemW,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () => setDialogState(() {
+                                  if (isChecked) {
+                                    selectedGuisados.remove(name);
+                                  } else if (selectedGuisados.length < 5) {
+                                    selectedGuisados.add(name);
+                                  }
+                                }),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isChecked
+                                        ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                        : const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isChecked
+                                          ? const Color(0xFFFF6D00)
+                                          : const Color(0xFF334155),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isChecked
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        size: 14,
+                                        color: isChecked
+                                            ? const Color(0xFFFF6D00)
+                                            : const Color(0xFF64748B),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        name,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: isChecked ? Colors.white : Colors.white70,
+                                          fontSize: 11,
+                                          fontWeight: isChecked
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ],
                   // Cantidad de piezas: solo para enmoladas seleccionadas en solitario
@@ -1528,11 +1685,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   ? null
                   : () {
                       Navigator.pop(ctx);
-                      final extras = [
-                        if (selectedIsEnmolada && selectedEnmolQty != null)
-                          '$selectedEnmolQty piezas',
-                      ];
                       for (final dish in matchedByFlavor.values) {
+                        final extras = [
+                          if (dish.requiresGuisado) ...selectedGuisados,
+                          if (selectedIsEnmolada && selectedEnmolQty != null)
+                            '$selectedEnmolQty piezas',
+                          if (isMenudo && selectedTiposCarne.isNotEmpty)
+                            selectedTiposCarne.join(', '),
+                        ];
                         cart.addItemWithGuisados(dish, extras, quantity: dialogQty);
                       }
                       if (context.mounted) {
