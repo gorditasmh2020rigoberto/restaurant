@@ -90,7 +90,8 @@ class _ComandasViewState extends State<ComandasView> {
     if (items.isEmpty) return false;
 
     const skipMultiFlavor = {
-      'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
+      'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
+      'gorditas', 'huevos', 'breakfast',
     };
     final cat = items.first.category.toLowerCase();
 
@@ -1366,7 +1367,7 @@ class _ComandasViewState extends State<ComandasView> {
     // Categorías que mantienen tarjetas individuales (lógica especial)
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
-      'gorditas',
+      'gorditas', 'huevos', 'breakfast',
     };
     const multiSelectCategories = {'arrachera', 'quesadillas'};
     final cat = items.first.category.toLowerCase();
