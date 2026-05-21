@@ -33,6 +33,7 @@ FROM nginx:alpine
 
 # Copiar el resultado de la etapa anterior al directorio de Nginx
 COPY --from=build-env /app/build/web /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto 80 (el puerto web estándar)
 EXPOSE 80
