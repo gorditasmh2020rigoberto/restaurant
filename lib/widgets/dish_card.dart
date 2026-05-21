@@ -689,7 +689,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     LayoutBuilder(
                       builder: (ctx2, constraints2) {
                         final w = constraints2.maxWidth;
-                        final itemW = (w - 12) / 3;
+                        final itemW = (w - 18) / 4;
                         Widget buildItem(Map<String, dynamic> g) {
                           final name = g['name'] as String;
                           final isChecked = selected.contains(name);
@@ -1457,7 +1457,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           children: guisados.map((g) {
                             final name = g['name'] as String;
                             final isChecked = selectedGuisados.contains(name);
-                            final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
+                            final itemW = (MediaQuery.of(ctx).size.width - 100) / 4;
                             return SizedBox(
                               width: itemW,
                               child: InkWell(
