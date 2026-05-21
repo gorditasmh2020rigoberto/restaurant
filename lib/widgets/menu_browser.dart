@@ -579,7 +579,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           ),
         ),
         SizedBox(
-          height: 5 * 68 + 4 * 6 + 8,
+          height: 4 * 68 + 3 * 6 + 8,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
