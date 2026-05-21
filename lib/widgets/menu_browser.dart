@@ -576,12 +576,12 @@ class _MenuBrowserState extends State<MenuBrowser> {
           ),
         ),
         SizedBox(
-          height: 2 * 62 + 1 * 6 + 8,
+          height: 4 * 62 + 3 * 6 + 8,
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 4,
               mainAxisSpacing: 8,
               crossAxisSpacing: 6,
               childAspectRatio: 62 / 68,
