@@ -352,8 +352,10 @@ class _MenuBrowserState extends State<MenuBrowser> {
   /// y que no debe mostrarse en el menú de comandas.
   static bool _isPlatillosCategory(String cat) {
     final c = cat.toLowerCase().trim();
-    return c == 'platillos' || c == 'maincourse' || c == 'main_course' ||
-        c == 'main course' || Globals.translateCategory(cat).toLowerCase() == 'platillos';
+    if (c == 'platillos' || c == 'maincourse' || c == 'main_course' ||
+        c == 'main course') return true;
+    final translated = Globals.translateCategory(cat).toLowerCase();
+    return translated == 'platillos' || translated.contains('platillo');
   }
 
   /// Categorías que mantienen tarjetas individuales (lógica especial)
