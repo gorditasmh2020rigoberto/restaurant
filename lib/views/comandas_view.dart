@@ -91,7 +91,6 @@ class _ComandasViewState extends State<ComandasView> {
 
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
-      'huevos', 'breakfast',
     };
     final cat = items.first.category.toLowerCase();
 
@@ -1367,7 +1366,7 @@ class _ComandasViewState extends State<ComandasView> {
     // Categorías que mantienen tarjetas individuales (lógica especial)
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
-      'gorditas', 'huevos', 'breakfast',
+      'gorditas',
     };
     const multiSelectCategories = {'arrachera', 'quesadillas'};
     final cat = items.first.category.toLowerCase();

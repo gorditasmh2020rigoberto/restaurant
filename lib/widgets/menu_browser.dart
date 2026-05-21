@@ -349,8 +349,6 @@ class _MenuBrowserState extends State<MenuBrowser> {
   static const _skipMultiFlavor = {
     'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
     'gorditas',
-    // Huevos: cada platillo tiene su propio selector de término (Tierno/Cocido/Sellados)
-    'huevos', 'breakfast',
   };
 
   /// Categorías donde se puede elegir MÁS DE UN sabor/producto a la vez

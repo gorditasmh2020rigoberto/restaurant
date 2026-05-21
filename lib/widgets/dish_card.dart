@@ -401,229 +401,6 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     return;
   }
 
-  final bool isHuevo = dish.category == 'huevos' ||
-      nameLower.contains('huevo');
-
-  if (isHuevo) {
-    const tiposHuevo = ['Estrellado', 'Revuelto'];
-    const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
-    String? selectedTipo;
-    String? selectedTermino;
-    int dialogQty = 1;
-
-    Widget _buildOpcion(String label, bool isSelected, VoidCallback onTap) {
-      return GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          margin: const EdgeInsets.only(bottom: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                : const Color(0xFF0F172A),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-              width: 2,
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                size: 16,
-                color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white60,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(dish.name, style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
-              const SizedBox(height: 2),
-              Text(
-                '\$${dish.price.toStringAsFixed(0)}',
-                style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('TIPO DE HUEVO',
-                  style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
-              const SizedBox(height: 10),
-              ...tiposHuevo.map((tipo) => _buildOpcion(
-                tipo,
-                selectedTipo == tipo,
-                () => setDialogState(() => selectedTipo = tipo),
-              )),
-              const Divider(color: Color(0xFF334155)),
-              const SizedBox(height: 8),
-              const Text('TÉRMINO DEL HUEVO',
-                  style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
-              const SizedBox(height: 10),
-              ...terminosHuevo.map((termino) => _buildOpcion(
-                termino,
-                selectedTermino == termino,
-                () => setDialogState(() => selectedTermino = termino),
-              )),
-              const SizedBox(height: 12),
-              const Divider(color: Color(0xFF334155)),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('CANTIDAD',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF334155)),
-                          ),
-                          child: const Icon(Icons.remove, color: Colors.white70, size: 18),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 48,
-                        child: Text(
-                          '$dialogQty',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => setDialogState(() => dialogQty++),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFFF6D00)),
-                          ),
-                          child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const Divider(color: Color(0xFF334155)),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('CANTIDAD',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF334155)),
-                          ),
-                          child: const Icon(Icons.remove, color: Colors.white70, size: 18),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 48,
-                        child: Text('$dialogQty',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                      ),
-                      InkWell(
-                        onTap: () => setDialogState(() => dialogQty++),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFFF6D00)),
-                          ),
-                          child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
-            ),
-            SizedBox(
-              height: 44,
-              child: ElevatedButton(
-                onPressed: (selectedTipo == null || selectedTermino == null) ? null : () {
-                  Navigator.pop(ctx);
-                  final nota = '$selectedTipo $selectedTermino';
-                  cart.addItemWithGuisados(dish, [nota], quantity: dialogQty);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($nota) agregado'),
-                      duration: const Duration(milliseconds: 500),
-                      behavior: SnackBarBehavior.floating,
-                      width: 300,
-                    ));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF334155),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    return;
-  }
 
   if (!dish.requiresGuisado && !isChilaquil) {
     cart.addItem(dish);
@@ -1296,6 +1073,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   final Set<String> selectedTiposCarne = {};
   const menudoTipos = ['Pata', 'Libro', 'Panza', 'Callo', 'Pañal', 'Surtido'];
 
+  // Huevos: selector de término (Tierno, Cocido, Sellados)
+  final isHuevoCategory = dishes.any((d) =>
+      d.category == 'huevos' ||
+      d.name.toLowerCase().contains('huevo'));
+  String? selectedTerminoHuevo;
+  const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
+
   // Sabores que tienen variantes de piezas en la BD (e.g. Hot Cakes pero no Churros)
   final flavorsWithQtyVariants = dishes
       .where((d) => _extractQuantity(d.name) != null)
@@ -1368,6 +1152,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!showFlavor || selectedFlavors.isNotEmpty) &&
             (!selectedIsEnmolada || selectedEnmolQty != null) &&
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
+            (!isHuevoCategory || selectedTerminoHuevo != null) &&
             (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
 
         final totalPrice =
@@ -1467,7 +1252,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     const SizedBox(height: 8),
                   ],
                   if (showFlavor) ...[
-                    Text(isMenudo ? 'TAMAÑO' : 'SABOR',
+                    Text(isMenudo ? 'TAMAÑO' : isHuevoCategory ? 'TIPO DE HUEVO' : 'SABOR',
                         style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 11,
@@ -1537,6 +1322,31 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         onChanged: (v) => setDialogState(() {
                           if (v) selectedTiposCarne.add(tipo);
                           else selectedTiposCarne.remove(tipo);
+                        }),
+                      )).toList(),
+                    ),
+                  ],
+                  // Término del huevo: solo para categoría huevos
+                  if (isHuevoCategory) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('TÉRMINO DEL HUEVO',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: terminosHuevo.map((termino) => _ToggleOption(
+                        icon: Icons.egg_alt,
+                        label: termino,
+                        value: selectedTerminoHuevo == termino,
+                        onChanged: (v) => setDialogState(() {
+                          selectedTerminoHuevo = v ? termino : null;
                         }),
                       )).toList(),
                     ),
@@ -1754,6 +1564,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             '$selectedEnmolQty piezas',
                           if (isMenudo && selectedTiposCarne.isNotEmpty)
                             selectedTiposCarne.join(', '),
+                          if (isHuevoCategory && selectedTerminoHuevo != null)
+                            selectedTerminoHuevo!,
                         ];
                         cart.addItemWithGuisados(dish, extras, quantity: dialogQty);
                       }
