@@ -360,6 +360,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
   static const _skipMultiFlavor = {
     'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
     'gorditas',
+    'menudo',             // tarjetas separadas: Menudo + Cuajadillas
     'lo_dulce', 'dessert', // tarjetas separadas: Molletes vs Churros+HotCakes
   };
 
