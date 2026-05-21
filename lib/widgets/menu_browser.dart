@@ -348,7 +348,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
   /// Categorías que mantienen tarjetas individuales (lógica especial)
   static const _skipMultiFlavor = {
     'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
-    'gorditas', 'huevos', 'breakfast',
+    'gorditas',
   };
 
   /// Categorías donde se puede elegir MÁS DE UN sabor/producto a la vez
