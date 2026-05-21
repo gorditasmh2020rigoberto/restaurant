@@ -84,7 +84,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
     final seenNames = <String>{};
     final result = <Dish>[];
     for (final dish in widget.dishes) {
-      if (dish.category == 'platillos' || dish.category == 'mainCourse') continue;
+      if (_isPlatillosCategory(dish.category)) continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           const allDrinkCats = {
@@ -132,7 +132,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
       rawCats.removeAll(allDrinkCats);
       rawCats.add('drink');
     }
-    rawCats.removeAll({'platillos', 'mainCourse'});
+    rawCats.removeWhere(_isPlatillosCategory);
     const pinned = [
       'gorditas',
       'drink',
@@ -346,6 +346,14 @@ class _MenuBrowserState extends State<MenuBrowser> {
         ],
       ),
     );
+  }
+
+  /// Devuelve true para cualquier categoría que represente "Platillos generales"
+  /// y que no debe mostrarse en el menú de comandas.
+  static bool _isPlatillosCategory(String cat) {
+    final c = cat.toLowerCase().trim();
+    return c == 'platillos' || c == 'maincourse' || c == 'main_course' ||
+        c == 'main course' || Globals.translateCategory(cat).toLowerCase() == 'platillos';
   }
 
   /// Categorías que mantienen tarjetas individuales (lógica especial)
