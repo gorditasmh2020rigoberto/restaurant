@@ -145,7 +145,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
     ];
     final rest = rawCats.where((c) => !pinned.contains(c)).toList()..sort();
     final ordered = [...pinned.where(rawCats.contains), ...rest];
-    return ['Todos', ...ordered];
+    return [...ordered];
   }
 
   String _translateCategory(String c) => Globals.translateCategory(c);
@@ -206,7 +206,8 @@ class _MenuBrowserState extends State<MenuBrowser> {
       if (_triggerSingleCardAction(context, label)) return;
     }
     setState(() {
-      _selectedCategory = label;
+      // Tocar la categoría activa la deselecciona (muestra todo)
+      _selectedCategory = (_selectedCategory == label) ? 'Todos' : label;
       if (label != 'drink') _selectedDrinkSubcat = null;
     });
   }
