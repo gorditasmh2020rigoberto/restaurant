@@ -84,7 +84,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
     final seenNames = <String>{};
     final result = <Dish>[];
     for (final dish in widget.dishes) {
-      if (dish.category == 'platillos') continue;
+      if (dish.category == 'platillos' || dish.category == 'mainCourse') continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           const allDrinkCats = {
@@ -132,7 +132,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
       rawCats.removeAll(allDrinkCats);
       rawCats.add('drink');
     }
-    rawCats.remove('platillos');
+    rawCats.removeAll({'platillos', 'mainCourse'});
     const pinned = [
       'gorditas',
       'drink',
