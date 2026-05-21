@@ -26,7 +26,7 @@ COPY . .
 
 # Obtener dependencias y compilar para web
 RUN flutter pub get
-RUN flutter build web --release --no-tree-shake-icons
+RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none
 
 # ETAPA 2: Servir con Nginx (Servidor Web)
 FROM nginx:alpine
