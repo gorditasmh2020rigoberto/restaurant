@@ -582,37 +582,19 @@ class _MenuBrowserState extends State<MenuBrowser> {
           height: 4 * 68 + 3 * 6 + 8,
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            child: Builder(builder: (context) {
-              final cats = _availableCategories;
-              // Dividir categorías en 4 filas
-              final int total = cats.length;
-              final int cols = (total / 4).ceil();
-              final rows = List.generate(4, (row) {
-                final List<Widget> items = [];
-                for (int col = 0; col < cols; col++) {
-                  final idx = col * 4 + row;
-                  if (idx < total) {
-                    items.add(SizedBox(
-                      width: 68,
-                      height: 68,
-                      child: _buildCategoryBlock(cats[idx]),
-                    ));
-                    if (col < cols - 1) items.add(const SizedBox(width: 8));
-                  }
-                }
-                return Row(children: items);
-              });
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: rows
-                    .map((r) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3),
-                          child: r,
-                        ))
-                    .toList(),
-              );
-            }),
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+            child: Wrap(
+              direction: Axis.vertical,
+              spacing: 6,
+              runSpacing: 8,
+              children: _availableCategories
+                  .map((cat) => SizedBox(
+                        width: 68,
+                        height: 68,
+                        child: _buildCategoryBlock(cat),
+                      ))
+                  .toList(),
+            ),
           ),
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
