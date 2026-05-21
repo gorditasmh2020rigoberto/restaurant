@@ -1311,25 +1311,52 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     const SizedBox(height: 12),
                     const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
-                    const Text('TIPO DE CARNE',
-                        style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1)),
+                    Row(
+                      children: [
+                        const Text('TIPO DE CARNE',
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1)),
+                        const SizedBox(width: 8),
+                        Text(
+                          selectedTiposCarne.isEmpty
+                              ? 'elige uno o más'
+                              : selectedTiposCarne.join(', '),
+                          style: TextStyle(
+                            color: selectedTiposCarne.isEmpty
+                                ? const Color(0xFF64748B)
+                                : const Color(0xFFFF6D00),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 10),
                     Wrap(
                       spacing: 10,
                       runSpacing: 8,
-                      children: menudoTipos.map((tipo) => _ToggleOption(
-                        icon: Icons.soup_kitchen,
-                        label: tipo,
-                        value: selectedTiposCarne.contains(tipo),
-                        onChanged: (v) => setDialogState(() {
-                          if (v) selectedTiposCarne.add(tipo);
-                          else selectedTiposCarne.remove(tipo);
-                        }),
-                      )).toList(),
+                      children: menudoTipos.map((tipo) {
+                        const tipoIcons = <String, IconData>{
+                          'Pata':    Icons.pets,
+                          'Libro':   Icons.layers,
+                          'Panza':   Icons.circle_outlined,
+                          'Callo':   Icons.grid_view,
+                          'Pañal':   Icons.texture,
+                          'Surtido': Icons.shuffle,
+                        };
+                        return _ToggleOption(
+                          icon: tipoIcons[tipo] ?? Icons.soup_kitchen,
+                          label: tipo,
+                          value: selectedTiposCarne.contains(tipo),
+                          onChanged: (v) => setDialogState(() {
+                            if (v) selectedTiposCarne.add(tipo);
+                            else selectedTiposCarne.remove(tipo);
+                          }),
+                        );
+                      }).toList(),
                     ),
                   ],
                   // Término del huevo: solo para categoría huevos
@@ -1640,6 +1667,8 @@ class MultiFlavorVariantCard extends StatelessWidget {
   final String displayName;
   final String categoryPrefix;
   final bool multiSelectFlavors;
+  final IconData? overrideIcon;
+  final String? subtitle;
 
   const MultiFlavorVariantCard({
     super.key,
@@ -1647,6 +1676,8 @@ class MultiFlavorVariantCard extends StatelessWidget {
     required this.displayName,
     required this.categoryPrefix,
     this.multiSelectFlavors = false,
+    this.overrideIcon,
+    this.subtitle,
   });
 
   @override
@@ -1655,7 +1686,6 @@ class MultiFlavorVariantCard extends StatelessWidget {
         dishes.map((d) => d.price).reduce((a, b) => a < b ? a : b);
     final maxPrice =
         dishes.map((d) => d.price).reduce((a, b) => a > b ? a : b);
-    final firstDish = dishes.first;
     return Card(
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -1673,14 +1703,36 @@ class MultiFlavorVariantCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    displayName,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (overrideIcon != null) ...[
+                        Icon(overrideIcon, size: 14, color: const Color(0xFFFF6D00)),
+                        const SizedBox(width: 5),
+                      ],
+                      Expanded(
+                        child: Text(
+                          displayName,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   Builder(
                     builder: (context) {

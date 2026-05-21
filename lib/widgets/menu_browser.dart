@@ -160,6 +160,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
 
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
+      'menudo', // needs separate Menudo + Cuajadilla cards
     };
     final cat = items.first.category.toLowerCase();
 
@@ -375,6 +376,8 @@ class _MenuBrowserState extends State<MenuBrowser> {
           displayName: 'Menudo',
           categoryPrefix: 'Menudo',
           multiSelectFlavors: false,
+          overrideIcon: Icons.soup_kitchen,
+          subtitle: 'Sáb · Dom',
         ));
       } else {
         for (final d in menudos) cards.add(DishCard(dish: d));
@@ -385,6 +388,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           displayName: 'Cuajadilla',
           categoryPrefix: 'Cuajadilla',
           multiSelectFlavors: false,
+          overrideIcon: Icons.lunch_dining,
         ));
       } else {
         for (final d in cuajadillas) cards.add(DishCard(dish: d));
