@@ -62,20 +62,15 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script>
-    // Script para detectar nuevas versiones y forzar la recarga del navegador (Limpieza de Caché)
+    // Desregistrar Service Workers y limpiar caché en cada carga para garantizar código fresco
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('flutter_service_worker.js?v=' + new Date().getTime()).then(function (reg) {
-          reg.onupdatefound = function () {
-            const installingWorker = reg.installing;
-            installingWorker.onstatechange = function () {
-              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('¡Nueva versión detectada! Recargando para actualizar...');
-                window.location.reload();
-              }
-            };
-          };
-        });
+      window.addEventListener('load', async function () {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) await r.unregister();
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          for (const k of keys) await caches.delete(k);
+        }
       });
     }
 
