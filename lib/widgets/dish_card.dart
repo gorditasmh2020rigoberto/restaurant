@@ -1081,7 +1081,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
 
   // Lo Dulce: selector de piezas (1, 2, 3)
-  final isLoDulce = dishes.any((d) => d.category == 'lo_dulce');
+  // Detecta por categoryPrefix (Lo dulce) o por categoría de los platillos
+  final isLoDulce = categoryPrefix.toLowerCase() == 'lo dulce' ||
+      dishes.any((d) => d.category == 'lo_dulce' || d.category == 'dessert');
   int? selectedPiezasLoDulce;
   const loDulcePiezas = [1, 2, 3];
 
@@ -1119,7 +1121,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDialogState) {
         // Encontrar el platillo que coincide con cada sabor seleccionado.
-        // Para sabores SIN variantes pza. (e.g. Churros), matchear el platillo base.
+        // Para isLoDulce con variantes de piezas (Hot Cakes), usar selectedPiezasLoDulce
+        // para el matching en lugar de selectedQty (que se controla con otro picker).
         final Map<String, Dish> matchedByFlavor = {};
         for (final fl in selectedFlavors) {
           final flHasQtyVariants = flavorsWithQtyVariants.contains(fl);
@@ -1130,7 +1133,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             if (showFlavor && dFlavor != fl) continue;
             if (showSize && dSize != selectedSize) continue;
             if (flHasQtyVariants) {
-              if (dQty != selectedQty) continue;
+              // Lo dulce: las piezas se controlan con selectedPiezasLoDulce
+              final matchQty = isLoDulce ? selectedPiezasLoDulce : selectedQty;
+              if (dQty != matchQty) continue;
             } else {
               if (dQty != null) continue; // solo la versión base (sin sufijo pzas.)
             }
@@ -1141,10 +1146,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
           }
         }
 
-        // Mostrar selector de piezas solo si algún sabor seleccionado tiene variantes pza.
+        // Para isLoDulce el selector de piezas lo maneja su propia sección;
+        // no mostrar el picker genérico de qty para evitar doble selector.
         final anySelectedHasQtyVariants = selectedFlavors.any(
             (fl) => flavorsWithQtyVariants.contains(fl));
-        final effectiveShowQty = showQty && anySelectedHasQtyVariants;
+        final effectiveShowQty = showQty && anySelectedHasQtyVariants && !isLoDulce;
 
         // Enmoladas: solo cuando hay exactamente ese sabor seleccionado
         final selectedIsEnmolada = selectedFlavors.length == 1 &&
@@ -1161,9 +1167,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!isLoDulce || selectedPiezasLoDulce != null) &&
             (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
 
+        // Para lo_dulce: si la variante ya incluye las piezas (Hot Cakes 2 pzas.)
+        // el qty efectivo es 1; si no tiene variante (Churros) es selectedPiezasLoDulce.
+        final loDulceEffectiveQty = isLoDulce
+            ? (matchedByFlavor.values.any((d) => _extractQuantity(d.name) != null)
+                ? 1
+                : (selectedPiezasLoDulce ?? 1))
+            : dialogQty;
         final totalPrice =
             matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
-                dialogQty;
+                (isLoDulce ? loDulceEffectiveQty : dialogQty);
 
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
@@ -1617,7 +1630,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   : () {
                       Navigator.pop(ctx);
                       final effectiveQty = isLoDulce
-                          ? (selectedPiezasLoDulce ?? 1)
+                          ? loDulceEffectiveQty
                           : dialogQty;
                       for (final dish in matchedByFlavor.values) {
                         final extras = [

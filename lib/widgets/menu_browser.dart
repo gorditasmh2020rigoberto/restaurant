@@ -160,7 +160,9 @@ class _MenuBrowserState extends State<MenuBrowser> {
 
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
-      'menudo', // needs separate Menudo + Cuajadilla cards
+      'menudo',   // needs separate Menudo + Cuajadilla cards
+      'lo_dulce', // needs separate Molletes / Churros+HotCakes cards
+      'dessert',  // same items sometimes stored as 'dessert'
     };
     final cat = items.first.category.toLowerCase();
 
@@ -350,6 +352,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
   static const _skipMultiFlavor = {
     'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
     'gorditas',
+    'lo_dulce', 'dessert', // tarjetas separadas: Molletes vs Churros+HotCakes
   };
 
   /// Categorías donde se puede elegir MÁS DE UN sabor/producto a la vez
@@ -397,8 +400,8 @@ class _MenuBrowserState extends State<MenuBrowser> {
       return cards;
     }
 
-    // Lo dulce: Molletes Dulces por orden; Churros y Hot Cakes por cantidad (sin Orden/1/2 Orden)
-    if (cat == 'lo_dulce' && items.length > 1) {
+    // Lo dulce / dessert: Molletes Dulces por orden; Churros y Hot Cakes por cantidad
+    if ((cat == 'lo_dulce' || cat == 'dessert') && items.length > 1) {
       final molletes = items.where((d) => d.name.toLowerCase().contains('mollete')).toList();
       // Excluir cualquier variante "1/2" del grupo de piezas para que no aparezca el selector de tamaño
       final piezas = items.where((d) =>
