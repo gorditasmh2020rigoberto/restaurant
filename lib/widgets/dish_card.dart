@@ -1080,6 +1080,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   String? selectedTerminoHuevo;
   const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
 
+  // Lo Dulce: selector de piezas (1, 2, 3)
+  final isLoDulce = dishes.any((d) => d.category == 'lo_dulce');
+  int? selectedPiezasLoDulce;
+  const loDulcePiezas = [1, 2, 3];
+
   // Sabores que tienen variantes de piezas en la BD (e.g. Hot Cakes pero no Churros)
   final flavorsWithQtyVariants = dishes
       .where((d) => _extractQuantity(d.name) != null)
@@ -1153,6 +1158,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!selectedIsEnmolada || selectedEnmolQty != null) &&
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
+            (!isLoDulce || selectedPiezasLoDulce != null) &&
             (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
 
         final totalPrice =
@@ -1170,7 +1176,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (showSize) ...[
+                  if (showSize && !isLoDulce) ...[
                     const Text('TAMAÑO',
                         style: TextStyle(
                             color: Colors.white70,
@@ -1351,6 +1357,30 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       )).toList(),
                     ),
                   ],
+                  // Piezas: para Lo Dulce (Churros, Hot Cakes)
+                  if (isLoDulce) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('PIEZAS',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: loDulcePiezas.map((p) => _ToggleOption(
+                        icon: Icons.numbers,
+                        label: p == 1 ? '1 pieza' : '$p piezas',
+                        value: selectedPiezasLoDulce == p,
+                        onChanged: (v) => setDialogState(
+                            () => selectedPiezasLoDulce = v ? p : null),
+                      )).toList(),
+                    ),
+                  ],
                   // Guisado: aparece cuando algún platillo seleccionado lo requiere
                   if (anyRequiresGuisado && guisados.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -1474,6 +1504,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       )).toList(),
                     ),
                   ],
+                  if (!isLoDulce) ...[
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 8),
@@ -1530,6 +1561,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       ),
                     ],
                   ),
+                  ], // end if (!isLoDulce) CANTIDAD block
                   if (canAdd) ...[
                     const SizedBox(height: 14),
                     Text(
@@ -1557,6 +1589,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   ? null
                   : () {
                       Navigator.pop(ctx);
+                      final effectiveQty = isLoDulce
+                          ? (selectedPiezasLoDulce ?? 1)
+                          : dialogQty;
                       for (final dish in matchedByFlavor.values) {
                         final extras = [
                           if (dish.requiresGuisado) ...selectedGuisados,
@@ -1567,7 +1602,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           if (isHuevoCategory && selectedTerminoHuevo != null)
                             selectedTerminoHuevo!,
                         ];
-                        cart.addItemWithGuisados(dish, extras, quantity: dialogQty);
+                        cart.addItemWithGuisados(dish, extras, quantity: effectiveQty);
                       }
                       if (context.mounted) {
                         final names = matchedByFlavor.values
