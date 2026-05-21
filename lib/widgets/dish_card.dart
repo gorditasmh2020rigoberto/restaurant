@@ -401,174 +401,6 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     return;
   }
 
-  final bool isHuevo = dish.category == 'huevos' ||
-      nameLower.contains('huevo');
-
-  if (isHuevo) {
-    const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
-    String? selectedTermino;
-    int dialogQty = 1;
-    await showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(dish.name, style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
-              const SizedBox(height: 2),
-              Text(
-                '\$${dish.price.toStringAsFixed(0)}',
-                style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'TÉRMINO DEL HUEVO',
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: terminosHuevo.map((termino) {
-                  final isSelected = selectedTermino == termino;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () => setDialogState(() => selectedTermino = termino),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                              : const Color(0xFF0F172A),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-                            width: 2,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                              size: 16,
-                              color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              termino,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.white60,
-                                fontSize: 14,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 12),
-              const Divider(color: Color(0xFF334155)),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('CANTIDAD',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
-                  Row(
-                    children: [
-                      InkWell(
-                        onTap: () => setDialogState(() { if (dialogQty > 1) dialogQty--; }),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF334155)),
-                          ),
-                          child: const Icon(Icons.remove, color: Colors.white70, size: 18),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 48,
-                        child: Text(
-                          '$dialogQty',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => setDialogState(() => dialogQty++),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFFFF6D00)),
-                          ),
-                          child: const Icon(Icons.add, color: Color(0xFFFF6D00), size: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
-            ),
-            SizedBox(
-              height: 44,
-              child: ElevatedButton(
-                onPressed: selectedTermino == null ? null : () {
-                  Navigator.pop(ctx);
-                  cart.addItemWithGuisados(dish, ['Huevo $selectedTermino'], quantity: dialogQty);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($selectedTermino) agregado'),
-                      duration: const Duration(milliseconds: 500),
-                      behavior: SnackBarBehavior.floating,
-                      width: 280,
-                    ));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF334155),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    return;
-  }
 
   if (!dish.requiresGuisado && !isChilaquil) {
     cart.addItem(dish);
@@ -1211,7 +1043,8 @@ String _extractSize(String name) {
 }
 
 Future<void> addMultiFlavorVariantToCart(BuildContext context,
-    List<Dish> dishes, String displayName, String categoryPrefix) async {
+    List<Dish> dishes, String displayName, String categoryPrefix,
+    {bool multiSelectFlavors = false}) async {
   final cart = context.read<CartProvider>();
 
   // Detectar qué dimensiones tienen variación real
@@ -1235,11 +1068,46 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   int? selectedEnmolQty; // cantidad solo para enmoladas (single-flavor)
   int dialogQty = 1;
 
+  // Menudo: tipo de carne (Pata, Libro, Panza, Callo, Pañal, Surtido)
+  final isMenudo = categoryPrefix.toLowerCase() == 'menudo';
+  final Set<String> selectedTiposCarne = {};
+  const menudoTipos = ['Pata', 'Libro', 'Panza', 'Callo', 'Pañal', 'Surtido'];
+
+  // Huevos: selector de término (Tierno, Cocido, Sellados)
+  final isHuevoCategory = dishes.any((d) =>
+      d.category == 'huevos' ||
+      d.name.toLowerCase().contains('huevo'));
+  String? selectedTerminoHuevo;
+  const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
+
   // Sabores que tienen variantes de piezas en la BD (e.g. Hot Cakes pero no Churros)
   final flavorsWithQtyVariants = dishes
       .where((d) => _extractQuantity(d.name) != null)
       .map((d) => _extractFlavor(d.name, categoryPrefix))
       .toSet();
+
+  // Cargar guisados si algún platillo de esta categoría los requiere
+  List<Map<String, dynamic>> guisados = [];
+  if (dishes.any((d) => d.requiresGuisado)) {
+    try {
+      final supabase = Supabase.instance.client;
+      final rows = await supabase
+          .from('guisados')
+          .select()
+          .eq('available', true)
+          .order('name');
+      guisados = (rows as List).cast<Map<String, dynamic>>()
+          .where((g) {
+            final branch = g['branch_name'] as String?;
+            return branch == null || branch == Globals.currentBranch;
+          })
+          .toList();
+    } catch (e) {
+      debugPrint('Error cargando guisados: $e');
+    }
+    if (!context.mounted) return;
+  }
+  List<String> selectedGuisados = [];
 
   await showDialog(
     context: context,
@@ -1276,11 +1144,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         // Enmoladas: solo cuando hay exactamente ese sabor seleccionado
         final selectedIsEnmolada = selectedFlavors.length == 1 &&
             selectedFlavors.first.toLowerCase().contains('enmolad');
+        final anyRequiresGuisado =
+            matchedByFlavor.values.any((d) => d.requiresGuisado);
         final canAdd = matchedByFlavor.isNotEmpty &&
             (!showSize || selectedSize != null) &&
             (!effectiveShowQty || selectedQty != null) &&
             (!showFlavor || selectedFlavors.isNotEmpty) &&
-            (!selectedIsEnmolada || selectedEnmolQty != null);
+            (!selectedIsEnmolada || selectedEnmolQty != null) &&
+            (!isMenudo || selectedTiposCarne.isNotEmpty) &&
+            (!isHuevoCategory || selectedTerminoHuevo != null) &&
+            (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
 
         final totalPrice =
             matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
@@ -1379,8 +1252,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     const SizedBox(height: 8),
                   ],
                   if (showFlavor) ...[
-                    const Text('SABOR',
-                        style: TextStyle(
+                    Text(isMenudo ? 'TAMAÑO' : isHuevoCategory ? 'TIPO DE HUEVO' : 'SABOR',
+                        style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
@@ -1406,10 +1279,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           price: priceStr,
                           value: selectedFlavors.contains(fl),
                           onChanged: (v) => setDialogState(() {
-                            if (v) {
-                              selectedFlavors.add(fl);
+                            if (!multiSelectFlavors) {
+                              // Single-select: radio button behavior
+                              selectedFlavors.clear();
+                              if (v) selectedFlavors.add(fl);
                             } else {
-                              selectedFlavors.remove(fl);
+                              if (v) {
+                                selectedFlavors.add(fl);
+                              } else {
+                                selectedFlavors.remove(fl);
+                              }
                             }
                             // Resetear cantidad enmoladas si ya no es selección única
                             if (!(selectedFlavors.length == 1 &&
@@ -1419,6 +1298,156 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           }),
                         );
                       }).toList(),
+                    ),
+                  ],
+                  // Tipo de carne: solo para Menudo
+                  if (isMenudo) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('TIPO DE CARNE',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: menudoTipos.map((tipo) => _ToggleOption(
+                        icon: Icons.soup_kitchen,
+                        label: tipo,
+                        value: selectedTiposCarne.contains(tipo),
+                        onChanged: (v) => setDialogState(() {
+                          if (v) selectedTiposCarne.add(tipo);
+                          else selectedTiposCarne.remove(tipo);
+                        }),
+                      )).toList(),
+                    ),
+                  ],
+                  // Término del huevo: solo para categoría huevos
+                  if (isHuevoCategory) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('TÉRMINO DEL HUEVO',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: terminosHuevo.map((termino) => _ToggleOption(
+                        icon: Icons.egg_alt,
+                        label: termino,
+                        value: selectedTerminoHuevo == termino,
+                        onChanged: (v) => setDialogState(() {
+                          selectedTerminoHuevo = v ? termino : null;
+                        }),
+                      )).toList(),
+                    ),
+                  ],
+                  // Guisado: aparece cuando algún platillo seleccionado lo requiere
+                  if (anyRequiresGuisado && guisados.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('GUISADO',
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1)),
+                        Text(
+                          '${selectedGuisados.length}/5',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: selectedGuisados.length >= 5
+                                ? const Color(0xFFFF6D00)
+                                : Colors.white38,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 260,
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: guisados.map((g) {
+                            final name = g['name'] as String;
+                            final isChecked = selectedGuisados.contains(name);
+                            final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
+                            return SizedBox(
+                              width: itemW,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () => setDialogState(() {
+                                  if (isChecked) {
+                                    selectedGuisados.remove(name);
+                                  } else if (selectedGuisados.length < 5) {
+                                    selectedGuisados.add(name);
+                                  }
+                                }),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 150),
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isChecked
+                                        ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                        : const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isChecked
+                                          ? const Color(0xFFFF6D00)
+                                          : const Color(0xFF334155),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isChecked
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        size: 14,
+                                        color: isChecked
+                                            ? const Color(0xFFFF6D00)
+                                            : const Color(0xFF64748B),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        name,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: isChecked ? Colors.white : Colors.white70,
+                                          fontSize: 11,
+                                          fontWeight: isChecked
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ],
                   // Cantidad de piezas: solo para enmoladas seleccionadas en solitario
@@ -1528,11 +1557,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   ? null
                   : () {
                       Navigator.pop(ctx);
-                      final extras = [
-                        if (selectedIsEnmolada && selectedEnmolQty != null)
-                          '$selectedEnmolQty piezas',
-                      ];
                       for (final dish in matchedByFlavor.values) {
+                        final extras = [
+                          if (dish.requiresGuisado) ...selectedGuisados,
+                          if (selectedIsEnmolada && selectedEnmolQty != null)
+                            '$selectedEnmolQty piezas',
+                          if (isMenudo && selectedTiposCarne.isNotEmpty)
+                            selectedTiposCarne.join(', '),
+                          if (isHuevoCategory && selectedTerminoHuevo != null)
+                            selectedTerminoHuevo!,
+                        ];
                         cart.addItemWithGuisados(dish, extras, quantity: dialogQty);
                       }
                       if (context.mounted) {
@@ -1570,12 +1604,14 @@ class MultiFlavorVariantCard extends StatelessWidget {
   final List<Dish> dishes;
   final String displayName;
   final String categoryPrefix;
+  final bool multiSelectFlavors;
 
   const MultiFlavorVariantCard({
     super.key,
     required this.dishes,
     required this.displayName,
     required this.categoryPrefix,
+    this.multiSelectFlavors = false,
   });
 
   @override
@@ -1590,7 +1626,8 @@ class MultiFlavorVariantCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => addMultiFlavorVariantToCart(
-            context, dishes, displayName, categoryPrefix),
+            context, dishes, displayName, categoryPrefix,
+            multiSelectFlavors: multiSelectFlavors),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
           child: Column(
@@ -1648,7 +1685,8 @@ class MultiFlavorVariantCard extends StatelessWidget {
                                     context,
                                     dishes,
                                     displayName,
-                                    categoryPrefix),
+                                    categoryPrefix,
+                                    multiSelectFlavors: multiSelectFlavors),
                                 icon: const Icon(Icons.add, size: 16),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(

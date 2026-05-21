@@ -351,6 +351,12 @@ class _MenuBrowserState extends State<MenuBrowser> {
     'gorditas',
   };
 
+  /// Categorías donde se puede elegir MÁS DE UN sabor/producto a la vez
+  static const _multiSelectCategories = {
+    'arrachera',
+    'quesadillas',
+  };
+
   List<Widget> _buildCategoryCards(List<Dish> items) {
     if (items.isEmpty) return [];
     final cat = items.first.category.toLowerCase();
@@ -368,6 +374,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           dishes: menudos,
           displayName: 'Menudo',
           categoryPrefix: 'Menudo',
+          multiSelectFlavors: false,
         ));
       } else {
         for (final d in menudos) cards.add(DishCard(dish: d));
@@ -377,6 +384,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           dishes: cuajadillas,
           displayName: 'Cuajadilla',
           categoryPrefix: 'Cuajadilla',
+          multiSelectFlavors: false,
         ));
       } else {
         for (final d in cuajadillas) cards.add(DishCard(dish: d));
@@ -385,12 +393,21 @@ class _MenuBrowserState extends State<MenuBrowser> {
       return cards;
     }
 
-    // Lo dulce: Molletes Dulces por orden; Churros y Hot Cakes por cantidad
+    // Lo dulce: Molletes Dulces por orden; Churros y Hot Cakes por cantidad (sin Orden/1/2 Orden)
     if (cat == 'lo_dulce' && items.length > 1) {
       final molletes = items.where((d) => d.name.toLowerCase().contains('mollete')).toList();
-      final piezas = items.where((d) => !d.name.toLowerCase().contains('mollete')).toList();
+      // Excluir cualquier variante "1/2" del grupo de piezas para que no aparezca el selector de tamaño
+      final piezas = items.where((d) =>
+          !d.name.toLowerCase().contains('mollete') &&
+          !d.name.toLowerCase().contains('1/2')).toList();
+      final mediaOtros = items.where((d) =>
+          !d.name.toLowerCase().contains('mollete') &&
+          d.name.toLowerCase().contains('1/2')).toList();
       final cards = <Widget>[];
       for (final d in molletes) {
+        cards.add(DishCard(dish: d));
+      }
+      for (final d in mediaOtros) {
         cards.add(DishCard(dish: d));
       }
       if (piezas.isNotEmpty) {
@@ -399,6 +416,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           dishes: piezas,
           displayName: displayName,
           categoryPrefix: displayName,
+          multiSelectFlavors: _multiSelectCategories.contains(cat),
         ));
       }
       return cards;
@@ -412,6 +430,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
           dishes: items,
           displayName: displayName,
           categoryPrefix: displayName,
+          multiSelectFlavors: _multiSelectCategories.contains(cat),
         ),
       ];
     }
