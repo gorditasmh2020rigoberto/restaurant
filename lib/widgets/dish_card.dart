@@ -402,6 +402,178 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   }
 
 
+  // Huevos: selector de término solamente (Tierno / Cocido / Sellados)
+  final bool isHuevo = dish.category == 'huevos' ||
+      dish.category == 'breakfast' ||
+      nameLower.contains('huevo');
+  if (isHuevo) {
+    String? selectedTermino;
+    int dialogQty = 1;
+    const terminos = ['Tierno', 'Cocido', 'Sellados'];
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(dish.name,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
+              const SizedBox(height: 2),
+              Text('\$${dish.price.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                      color: Color(0xFFFF6D00),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700)),
+            ],
+          ),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('TÉRMINO DEL HUEVO',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 8,
+                    children: terminos.map((t) => _ToggleOption(
+                      icon: Icons.egg_alt,
+                      label: t,
+                      value: selectedTermino == t,
+                      onChanged: (v) =>
+                          setDialogState(() => selectedTermino = v ? t : null),
+                    )).toList(),
+                  ),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('CANTIDAD',
+                          style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1)),
+                      Row(children: [
+                        InkWell(
+                          onTap: () => setDialogState(
+                              () { if (dialogQty > 1) dialogQty--; }),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: const Icon(Icons.remove,
+                                color: Colors.white70, size: 18),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          child: Text('$dialogQty',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                        InkWell(
+                          onTap: () =>
+                              setDialogState(() => dialogQty++),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6D00)
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: const Color(0xFFFF6D00)),
+                            ),
+                            child: const Icon(Icons.add,
+                                color: Color(0xFFFF6D00), size: 18),
+                          ),
+                        ),
+                      ]),
+                    ],
+                  ),
+                  if (selectedTermino != null) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Total: \$${(dish.price * dialogQty).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
+                      style: const TextStyle(
+                          color: Color(0xFFFF6D00),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Colors.white54)),
+            ),
+            SizedBox(
+              height: 44,
+              child: ElevatedButton(
+                onPressed: selectedTermino == null
+                    ? null
+                    : () {
+                        Navigator.pop(ctx);
+                        cart.addItemWithGuisados(dish, [selectedTermino!],
+                            quantity: dialogQty);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                '${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($selectedTermino) agregado'),
+                            duration: const Duration(milliseconds: 600),
+                            behavior: SnackBarBehavior.floating,
+                            width: 280,
+                          ));
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFF334155),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Agregar a la orden',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    return;
+  }
+
   if (!dish.requiresGuisado && !isChilaquil) {
     cart.addItem(dish);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
