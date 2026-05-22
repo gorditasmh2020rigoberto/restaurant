@@ -514,7 +514,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 Text(
                   isChilaquil
                       ? '¿Cómo quieres los ${activeDish.name}?'
-                      : '¿Qué guisado lleva el ${activeDish.name}?',
+                      : (isGordita
+                          ? '¿Qué Gordita?'
+                          : '¿Qué guisado lleva el ${activeDish.name}?'),
                   style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
                 ),
                 const SizedBox(height: 2),
