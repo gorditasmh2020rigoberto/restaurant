@@ -391,11 +391,11 @@ class _ComandasViewState extends State<ComandasView> {
       onTap: () => _onCategoryTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 60,
-        height: 54,
+        width: 80,
+        height: 72,
         decoration: BoxDecoration(
           color: selected ? activeColor : const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? activeColor : const Color(0xFF334155),
             width: 1.5,
@@ -406,19 +406,19 @@ class _ComandasViewState extends State<ComandasView> {
           children: [
             Icon(
               Globals.categoryIcon(label),
-              size: 20,
+              size: 26,
               color: selected ? Colors.white : Colors.white60,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: Text(
                 _translateCategory(label),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 9,
+                  fontSize: 11,
                   height: 1.1,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                   color: selected ? Colors.white : Colors.white60,
@@ -1203,15 +1203,15 @@ class _ComandasViewState extends State<ComandasView> {
         ),
         // ── Categorías: 4 filas fijas con scroll horizontal ──
         SizedBox(
-          height: 4 * 54 + 3 * 6 + 8,
+          height: 4 * 72 + 3 * 8 + 8,
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
-              mainAxisSpacing: 6,
-              crossAxisSpacing: 6,
-              childAspectRatio: 54 / 60,
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 72 / 80,
             ),
             itemCount: _availableCategories.length,
             itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
