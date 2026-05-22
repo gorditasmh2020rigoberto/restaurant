@@ -89,6 +89,23 @@ class _ComandasViewState extends State<ComandasView> {
         .toList();
     if (items.isEmpty) return false;
 
+    // Gorditas: una sola tarjeta canónica con selector de BASE en el diálogo.
+    // Tapear "Gorditas" en la barra de categorías abre el diálogo directo,
+    // sin pasar por la pantalla intermedia de la sección.
+    if (label == 'gorditas') {
+      Dish? canonica;
+      for (final d in items) {
+        final n = d.name.toLowerCase().trim();
+        if (n == 'gordita de maíz' || n == 'gordita de maiz') {
+          canonica = d;
+          break;
+        }
+      }
+      canonica ??= items.first;
+      addDishToCart(context, canonica.copyWith(name: 'Gordita'));
+      return true;
+    }
+
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
       'gorditas',
