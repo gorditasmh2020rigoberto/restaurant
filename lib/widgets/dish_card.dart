@@ -135,6 +135,24 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     // Sabores genéricos (sin tamaño) como fallback
     final genericFlavors = await _loadDrinkFlavors(categoryPrefix);
 
+    // Para Agua Fresca: buscar también el dish "Agua Natural" para ofrecerlo
+    // como un sabor más ("Natural") sin que el usuario tenga que volver al menú.
+    Dish? aguaNaturalDish;
+    if (isAguaFresca) {
+      try {
+        final supabase = Supabase.instance.client;
+        final rows = await supabase
+            .from('dishes')
+            .select()
+            .ilike('name', '%agua natural%');
+        final list = (rows as List)
+            .cast<Map<String, dynamic>>()
+            .map(Dish.fromJson)
+            .toList();
+        if (list.isNotEmpty) aguaNaturalDish = list.first;
+      } catch (_) {}
+    }
+
     String? selectedSizeType; // e.g. 'refresco_600', 'agua_500ml'
     String? selectedSabor;
     int dialogQty = 1;
@@ -145,9 +163,18 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
             // Sabores según el tamaño seleccionado
-            final currentSabores = selectedSizeType != null
+            final List<String> baseSabores = selectedSizeType != null
                 ? (flavorsByType[selectedSizeType!] ?? genericFlavors)
-                : flavorsByType.values.fold<Set<String>>({}, (s, l) => s..addAll(l)).toList()..sort();
+                : (flavorsByType.values.fold<Set<String>>({}, (s, l) => s..addAll(l)).toList()..sort());
+            // Para Agua Fresca, agregar "Natural" como un sabor extra
+            // (mapea al dish de Agua Natural).
+            final currentSabores = [
+              ...baseSabores.where((s) => s.toLowerCase() != 'natural'),
+              if (aguaNaturalDish != null) 'Natural',
+            ];
+            // Cuando se elige "Natural", el tamaño no aplica (Agua Natural es
+            // de tamaño fijo). Ocultamos el selector de TAMAÑO en ese caso.
+            final bool isNaturalSelected = selectedSabor == 'Natural';
 
             return AlertDialog(
               backgroundColor: const Color(0xFF1E293B),
@@ -162,7 +189,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (drinkSizes.isNotEmpty) ...[
+                      if (drinkSizes.isNotEmpty && !isNaturalSelected) ...[
                         const Text('TAMAÑO',
                             style: TextStyle(color: Colors.white70, fontSize: 11,
                                 fontWeight: FontWeight.w600, letterSpacing: 1)),
@@ -317,6 +344,24 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 TextButton(
                   onPressed: selectedSabor == null ? null : () async {
                     Navigator.pop(ctx);
+                    // Caso especial: si el sabor elegido es "Natural" y
+                    // existe el dish de Agua Natural, usamos ese (precio y
+                    // nombre vienen de la BD).
+                    if (isNaturalSelected && aguaNaturalDish != null) {
+                      cart.addItemWithGuisados(aguaNaturalDish!, [], quantity: dialogQty);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${aguaNaturalDish!.name} agregado'),
+                            duration: const Duration(milliseconds: 500),
+                            behavior: SnackBarBehavior.floating,
+                            width: 280,
+                          ),
+                        );
+                      }
+                      return;
+                    }
                     final sizeLabel = selectedSizeType != null
                         ? _formatDrinkSizeLabel(selectedSizeType!)
                         : null;
