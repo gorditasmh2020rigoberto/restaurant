@@ -23,9 +23,9 @@ class Dish {
     this.requiresGuisado = false,
   });
 
-  Dish copyWith({double? price}) => Dish(
+  Dish copyWith({double? price, String? name}) => Dish(
         id: id,
-        name: name,
+        name: name ?? this.name,
         description: description,
         price: price ?? this.price,
         imageUrl: imageUrl,
