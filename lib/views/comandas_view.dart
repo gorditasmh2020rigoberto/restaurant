@@ -133,21 +133,22 @@ class _ComandasViewState extends State<ComandasView> {
   }
 
   Future<void> _onCategoryTap(String label) async {
-    if (label != 'Todos' && label != 'drink') {
+    if (label != 'drink') {
       if (_triggerSingleCardAction(context, label)) return;
     }
-    if (label != 'Todos') {
-      final newCount = (_categoryClickCounts[label] ?? 0) + 1;
-      setState(() {
-        _categoryClickCounts[label] = newCount;
-        _selectedCategory = label;
-        if (label != 'drink') _selectedDrinkSubcat = null;
-      });
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('cat_clicks_$label', newCount);
-    } else {
-      setState(() { _selectedCategory = label; _selectedDrinkSubcat = null; });
+    // Toggle: tocar la categoría activa la deselecciona (vuelve a "ver todo")
+    if (_selectedCategory == label) {
+      setState(() { _selectedCategory = 'Todos'; _selectedDrinkSubcat = null; });
+      return;
     }
+    final newCount = (_categoryClickCounts[label] ?? 0) + 1;
+    setState(() {
+      _categoryClickCounts[label] = newCount;
+      _selectedCategory = label;
+      if (label != 'drink') _selectedDrinkSubcat = null;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('cat_clicks_$label', newCount);
   }
 
   bool _isInitialLoad = true;
@@ -167,7 +168,7 @@ class _ComandasViewState extends State<ComandasView> {
 
     final result = <Dish>[];
     for (final dish in _dishes) {
-      if (dish.category == 'platillos') continue;
+      if (_isPlatillosCategory(dish.category)) continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           // Filtrar solo bebidas (cualquier categoría de bebida)
@@ -242,7 +243,7 @@ class _ComandasViewState extends State<ComandasView> {
       rawCats.add('drink');
     }
 
-    rawCats.remove('platillos'); // ocultar categoría Platillos
+    rawCats.removeWhere(_isPlatillosCategory); // ocultar categoría Platillos (todas las variantes)
     // Orden fijo solicitado para las primeras categorías
     const pinned = [
       'gorditas',
@@ -256,7 +257,20 @@ class _ComandasViewState extends State<ComandasView> {
     ];
     final rest = rawCats.where((c) => !pinned.contains(c)).toList()..sort();
     final ordered = [...pinned.where(rawCats.contains), ...rest];
-    return ['Todos', ...ordered];
+    return ordered;
+  }
+
+  /// Detecta cualquier categoría que represente "Platillos" — coincide con
+  /// nombres internos ('platillos', 'mainCourse', etc.) y con cualquier categoría
+  /// cuya traducción visible sea "Platillos".
+  static bool _isPlatillosCategory(String cat) {
+    final c = cat.toLowerCase().trim();
+    if (c == 'platillos' ||
+        c == 'maincourse' ||
+        c == 'main_course' ||
+        c == 'main course') return true;
+    final translated = Globals.translateCategory(cat).toLowerCase();
+    return translated == 'platillos' || translated.contains('platillo');
   }
 
   Widget _buildCategoryChip(String label, {bool isMobile = false}) {
@@ -1142,15 +1156,15 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: 2 filas fijas con scroll horizontal ──
+        // ── Categorías: 4 filas fijas con scroll horizontal ──
         SizedBox(
-          height: 2 * 54 + 1 * 6 + 8,
+          height: 4 * 54 + 3 * 6 + 8,
           child: GridView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
+              crossAxisCount: 4,
+              mainAxisSpacing: 6,
               crossAxisSpacing: 6,
               childAspectRatio: 54 / 60,
             ),
