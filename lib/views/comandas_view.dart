@@ -163,8 +163,10 @@ class _ComandasViewState extends State<ComandasView> {
   }
 
   List<Dish> get _filteredDishes {
-    const gordtasPermitidas = {'gordita de maíz', 'gordita de maiz', 'gordita de harina'};
-    final seenNames = <String>{};
+    // Gorditas: una sola tarjeta canónica. El diálogo permite elegir la base
+    // (Maíz / Harina) — ver `_BaseChip` en dish_card.dart.
+    const gorditaCanonica = {'gordita de maíz', 'gordita de maiz'};
+    bool gorditaYaIncluida = false;
 
     final result = <Dish>[];
     for (final dish in _dishes) {
@@ -181,11 +183,18 @@ class _ComandasViewState extends State<ComandasView> {
         }
       }
 
-      // Gorditas: solo Maíz y Harina (nombre exacto), sin duplicados por nombre
+      // Gorditas: mostrar solo la variante de Maíz como tarjeta única.
+      // (La Harina se elige desde el diálogo, no como tarjeta separada.)
+      // Renombramos la tarjeta a "Gordita" porque ya no representa solo Maíz.
       if (dish.category == 'gorditas') {
         final n = dish.name.toLowerCase().trim();
-        if (!gordtasPermitidas.contains(n)) continue;
-        if (!seenNames.add(n)) continue; // ya existe uno con ese nombre
+        if (!gorditaCanonica.contains(n)) continue;
+        if (gorditaYaIncluida) continue;
+        gorditaYaIncluida = true;
+        if (_searchQuery.isNotEmpty &&
+            !'gordita'.contains(_searchQuery.toLowerCase())) continue;
+        result.add(dish.copyWith(name: 'Gordita'));
+        continue;
       }
 
       if (_searchQuery.isNotEmpty &&
