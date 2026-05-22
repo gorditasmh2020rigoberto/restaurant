@@ -106,6 +106,25 @@ class _ComandasViewState extends State<ComandasView> {
       return true;
     }
 
+    // Aguas: una sola tarjeta canónica (Agua Fresca) cuyo diálogo ya incluye
+    // "Natural" como sabor (mapea al dish de Agua Natural). Tapear "Aguas" en
+    // el submenú abre el diálogo unificado directo.
+    if (label == 'aguas') {
+      Dish? aguaFresca;
+      for (final d in items) {
+        final n = d.name.toLowerCase();
+        if (n.contains('agua fresca') ||
+            (n.startsWith('agua') && !n.contains('natural'))) {
+          aguaFresca = d;
+          break;
+        }
+      }
+      if (aguaFresca != null) {
+        addDishToCart(context, aguaFresca);
+        return true;
+      }
+    }
+
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
       'gorditas',
