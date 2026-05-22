@@ -1288,6 +1288,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             selectedFlavors.first.toLowerCase().contains('enmolad');
         final anyRequiresGuisado =
             matchedByFlavor.values.any((d) => d.requiresGuisado);
+
+        // Lo dulce: el selector PIEZAS solo aplica a sabores que se venden por
+        // unidad (Churros, Hot Cakes). Los Molletes se cobran por orden, así
+        // que cuando solo hay Molletes seleccionados ocultamos el selector.
+        bool isMolleteFlavor(String f) => f.toLowerCase().contains('mollete');
+        final needsPiezas =
+            isLoDulce && selectedFlavors.any((f) => !isMolleteFlavor(f));
+
         final canAdd = matchedByFlavor.isNotEmpty &&
             (!showSize || selectedSize != null) &&
             (!effectiveShowQty || selectedQty != null) &&
@@ -1295,19 +1303,25 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!selectedIsEnmolada || selectedEnmolQty != null) &&
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
-            (!isLoDulce || selectedPiezasLoDulce != null) &&
+            (!needsPiezas || selectedPiezasLoDulce != null) &&
             (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
 
-        // Para lo_dulce: si la variante ya incluye las piezas (Hot Cakes 2 pzas.)
-        // el qty efectivo es 1; si no tiene variante (Churros) es selectedPiezasLoDulce.
-        final loDulceEffectiveQty = isLoDulce
-            ? (matchedByFlavor.values.any((d) => _extractQuantity(d.name) != null)
-                ? 1
-                : (selectedPiezasLoDulce ?? 1))
-            : dialogQty;
-        final totalPrice =
-            matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
-                (isLoDulce ? loDulceEffectiveQty : dialogQty);
+        // Para lo_dulce: la cantidad efectiva se calcula por-platillo.
+        // - Molletes Dulces → 1 (una orden, sin multiplicar)
+        // - Variante con piezas en el nombre (Hot Cakes 2 pzas.) → 1
+        // - Churros u otro sin variantes → selectedPiezasLoDulce
+        int qtyForLoDulceDish(Dish d, String flavor) {
+          if (isMolleteFlavor(flavor)) return 1;
+          if (_extractQuantity(d.name) != null) return 1;
+          return selectedPiezasLoDulce ?? 1;
+        }
+
+        // Sumar el subtotal real respetando la cantidad por-platillo
+        final double totalPrice = isLoDulce
+            ? matchedByFlavor.entries.fold<double>(0, (s, e) =>
+                s + e.value.price * qtyForLoDulceDish(e.value, e.key))
+            : matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
+                dialogQty;
 
         return AlertDialog(
           backgroundColor: const Color(0xFF1E293B),
@@ -1528,8 +1542,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       )).toList(),
                     ),
                   ],
-                  // Piezas: para Lo Dulce (Churros, Hot Cakes)
-                  if (isLoDulce) ...[
+                  // Piezas: solo para Churros / Hot Cakes (no Molletes Dulces,
+                  // que se cobran por orden)
+                  if (needsPiezas) ...[
                     const SizedBox(height: 12),
                     const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
@@ -1760,10 +1775,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   ? null
                   : () {
                       Navigator.pop(ctx);
-                      final effectiveQty = isLoDulce
-                          ? loDulceEffectiveQty
-                          : dialogQty;
-                      for (final dish in matchedByFlavor.values) {
+                      for (final entry in matchedByFlavor.entries) {
+                        final flavor = entry.key;
+                        final dish = entry.value;
+                        // Cantidad por-platillo:
+                        // - Lo dulce: Molletes=1, Hot Cakes (con qty en BD)=1,
+                        //   Churros (sin qty)=selectedPiezasLoDulce
+                        // - Resto: dialogQty
+                        final effectiveQty = isLoDulce
+                            ? qtyForLoDulceDish(dish, flavor)
+                            : dialogQty;
                         final extras = [
                           if (dish.requiresGuisado) ...selectedGuisados,
                           if (selectedIsEnmolada && selectedEnmolQty != null)
