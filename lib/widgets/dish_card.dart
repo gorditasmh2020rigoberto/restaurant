@@ -444,7 +444,48 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool isTapa = dish.category == 'tapas' ||
       dish.name.toLowerCase().contains('tapa');
   final bool showOptions = isGordita || isTapa || isChilaquil;
-  final bool canBeFrita = isGordita && !dish.name.toLowerCase().contains('harina');
+
+  // Cargar ambas variantes de gordita (Maíz / Harina) si aplica, para que el
+  // diálogo permita cambiar la base sin cerrarse.
+  Dish? gorditaMaizDish;
+  Dish? gorditaHarinaDish;
+  if (isGordita) {
+    try {
+      final rows = await supabase
+          .from('dishes')
+          .select()
+          .eq('category', 'gorditas');
+      final all = (rows as List)
+          .cast<Map<String, dynamic>>()
+          .map(Dish.fromJson)
+          .toList();
+      for (final d in all) {
+        final n = d.name.toLowerCase().trim();
+        if (n == 'gordita de harina' || n.contains('harina')) {
+          gorditaHarinaDish ??= d;
+        } else if (n == 'gordita de maíz' ||
+            n == 'gordita de maiz' ||
+            n.contains('maíz') ||
+            n.contains('maiz')) {
+          gorditaMaizDish ??= d;
+        }
+      }
+    } catch (e) {
+      debugPrint('Error cargando variantes de gordita: $e');
+    }
+  }
+  // Si solo se encontró una variante, no mostramos selector.
+  final bool showBaseSelector =
+      isGordita && gorditaMaizDish != null && gorditaHarinaDish != null;
+  // Estado de la base seleccionada — arranca según la tarjeta que se tocó.
+  String selectedBase =
+      dish.name.toLowerCase().contains('harina') ? 'harina' : 'maíz';
+  Dish currentDish() {
+    if (!isGordita) return dish;
+    if (selectedBase == 'harina') return gorditaHarinaDish ?? dish;
+    return gorditaMaizDish ?? dish;
+  }
+
   bool conQueso = false;
   bool conHuevo = false; // solo para chilaquiles
   bool frita = false;
@@ -460,6 +501,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setDialogState) {
+          // Recalcula en cada rebuild: la base puede haber cambiado.
+          final Dish activeDish = currentDish();
+          final bool canBeFrita =
+              isGordita && !(selectedBase == 'harina');
           return AlertDialog(
             backgroundColor: const Color(0xFF1E293B),
             title: Column(
@@ -468,13 +513,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               children: [
                 Text(
                   isChilaquil
-                      ? '¿Cómo quieres los ${dish.name}?'
-                      : '¿Qué guisado lleva el ${dish.name}?',
+                      ? '¿Cómo quieres los ${activeDish.name}?'
+                      : '¿Qué guisado lleva el ${activeDish.name}?',
                   style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '\$${dish.price.toStringAsFixed(0)}',
+                  '\$${activeDish.price.toStringAsFixed(0)}',
                   style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
                 ),
               ],
@@ -486,6 +531,45 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                  // Selector de base de la gordita (Maíz / Harina)
+                  if (showBaseSelector) ...[
+                    const Text(
+                      'BASE',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _BaseChip(
+                          label: 'Maíz',
+                          price: gorditaMaizDish!.price,
+                          selected: selectedBase == 'maíz',
+                          onTap: () => setDialogState(() {
+                            selectedBase = 'maíz';
+                          }),
+                        ),
+                        const SizedBox(width: 10),
+                        _BaseChip(
+                          label: 'Harina',
+                          price: gorditaHarinaDish!.price,
+                          selected: selectedBase == 'harina',
+                          onTap: () => setDialogState(() {
+                            selectedBase = 'harina';
+                            // Harina no puede ser frita
+                            frita = false;
+                          }),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                  ],
+
                   // Toggles de queso y frita
                   if (showOptions) ...[
                     const Text(
@@ -839,7 +923,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: \$${(((isTapa && conQueso) ? dish.price + 25 : dish.price) * dialogQty).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
+                    'Total: \$${(((isTapa && conQueso) ? activeDish.price + 25 : activeDish.price) * dialogQty).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
                     style: const TextStyle(
                       color: Color(0xFFFF6D00),
                       fontSize: 15,
@@ -888,14 +972,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     if (!isChilaquil) ...selected,
                   ];
                   final finalDish = (isTapa && conQueso)
-                      ? dish.copyWith(price: dish.price + 25)
-                      : dish;
+                      ? activeDish.copyWith(price: activeDish.price + 25)
+                      : activeDish;
                   cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} agregado'),
+                        content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${activeDish.name} agregado'),
                         duration: const Duration(milliseconds: 500),
                         behavior: SnackBarBehavior.floating,
                         width: 220,
@@ -2083,6 +2167,84 @@ class _ToggleOption extends StatelessWidget {
               Icon(Icons.block, size: 14, color: Colors.white24),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Chip de base de gordita (Maíz / Harina). A diferencia de `_ToggleOption`
+/// son mutuamente excluyentes y muestran el precio de cada base.
+class _BaseChip extends StatelessWidget {
+  final String label;
+  final double price;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BaseChip({
+    required this.label,
+    required this.price,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const activeColor = Color(0xFFFF6D00);
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected
+                ? activeColor.withValues(alpha: 0.15)
+                : const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? activeColor : const Color(0xFF334155),
+              width: 2,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                selected
+                    ? Icons.check_circle
+                    : Icons.radio_button_unchecked,
+                size: 16,
+                color: selected ? activeColor : const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          selected ? FontWeight.w700 : FontWeight.w500,
+                      color: selected ? Colors.white : Colors.white60,
+                    ),
+                  ),
+                  Text(
+                    '\$${price.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: selected ? Colors.white70 : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
