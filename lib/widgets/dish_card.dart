@@ -236,7 +236,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           crossAxisCount: MediaQuery.of(ctx).size.width < 400 ? 2 : 3,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 6,
-                          childAspectRatio: MediaQuery.of(ctx).size.width < 400 ? 2.0 : 2.4,
+                          mainAxisExtent: 46,
                         ),
                         itemCount: currentSabores.length,
                         itemBuilder: (ctx3, i) {
