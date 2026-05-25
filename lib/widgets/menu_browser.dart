@@ -76,6 +76,9 @@ class _MenuBrowserState extends State<MenuBrowser> {
   }
 
   List<Dish> get _filteredDishes {
+    // Sin categoría seleccionada y sin búsqueda: no mostrar tarjetas,
+    // solo la cuadrícula de categorías.
+    if (_selectedCategory == 'Todos' && _searchQuery.isEmpty) return [];
     const gordtasPermitidas = {
       'gordita de maíz',
       'gordita de maiz',
@@ -482,13 +485,18 @@ class _MenuBrowserState extends State<MenuBrowser> {
       {bool isTablet = false}) {
     final isMobile = isPhone;
     if (items.isEmpty) {
+      final initial = _selectedCategory == 'Todos' && _searchQuery.isEmpty;
       return [
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.all(32.0),
+            padding: const EdgeInsets.all(32.0),
             child: Center(
-              child: Text('No hay coincidencias',
-                  style: TextStyle(color: Colors.grey)),
+              child: Text(
+                initial
+                    ? 'Selecciona una categoría'
+                    : 'No hay coincidencias',
+                style: const TextStyle(color: Colors.grey),
+              ),
             ),
           ),
         ),
