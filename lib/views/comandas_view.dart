@@ -1204,20 +1204,26 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: 4 filas fijas con scroll horizontal ──
-        SizedBox(
-          height: 4 * 72 + 3 * 8 + 8,
-          child: GridView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 72 / 80,
+        // ── Categorías: cuadrícula vertical de 3 columnas (≈6 filas) ──
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  mainAxisExtent: 76,
+                ),
+                itemCount: _availableCategories.length,
+                itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
+              ),
             ),
-            itemCount: _availableCategories.length,
-            itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
           ),
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
