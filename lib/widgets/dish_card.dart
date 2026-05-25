@@ -168,13 +168,21 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 : (flavorsByType.values.fold<Set<String>>({}, (s, l) => s..addAll(l)).toList()..sort());
             // Para Agua Fresca, agregar "Natural" como un sabor extra
             // (mapea al dish de Agua Natural).
+            final bool hasAguaNatural = aguaNaturalDish != null;
             final currentSabores = [
-              ...baseSabores.where((s) => s.toLowerCase() != 'natural'),
-              if (aguaNaturalDish != null) 'Natural',
+              ...baseSabores.where((s) {
+                final n = s.toLowerCase().trim();
+                if (n == 'natural') return false;
+                // Evita el duplicado: si existe el dish dedicado de Agua
+                // Natural, no mostramos también el sabor "Agua Natural".
+                if (n == 'agua natural' && hasAguaNatural) return false;
+                return true;
+              }),
+              if (hasAguaNatural) 'Agua Natural',
             ];
-            // Cuando se elige "Natural", el tamaño no aplica (Agua Natural es
-            // de tamaño fijo). Ocultamos el selector de TAMAÑO en ese caso.
-            final bool isNaturalSelected = selectedSabor == 'Natural';
+            // Cuando se elige "Agua Natural", el tamaño no aplica (es de
+            // tamaño fijo). Ocultamos el selector de TAMAÑO en ese caso.
+            final bool isNaturalSelected = selectedSabor == 'Agua Natural';
 
             return AlertDialog(
               backgroundColor: const Color(0xFF1E293B),
