@@ -199,6 +199,9 @@ class _ComandasViewState extends State<ComandasView> {
   }
 
   List<Dish> get _filteredDishes {
+    // Sin categoría seleccionada y sin búsqueda: no mostrar tarjetas,
+    // solo la cuadrícula de categorías.
+    if (_selectedCategory == 'Todos' && _searchQuery.isEmpty) return [];
     // Gorditas: una sola tarjeta canónica. El diálogo permite elegir la base
     // (Maíz / Harina) — ver `_BaseChip` en dish_card.dart.
     const gorditaCanonica = {'gordita de maíz', 'gordita de maiz'};
@@ -1335,11 +1338,17 @@ class _ComandasViewState extends State<ComandasView> {
   List<Widget> _buildGroupedMenu(List<Dish> items, int crossAxisCount, bool isPhone, {bool isTablet = false}) {
     final isMobile = isPhone;
     if (items.isEmpty) {
+      final initial = _selectedCategory == 'Todos' && _searchQuery.isEmpty;
       return [
-        const SliverToBoxAdapter(
+        SliverToBoxAdapter(
           child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Center(child: Text('No hay coincidencias', style: TextStyle(color: Colors.grey))),
+            padding: const EdgeInsets.all(32.0),
+            child: Center(
+              child: Text(
+                initial ? 'Selecciona una categoría' : 'No hay coincidencias',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ),
           ),
         )
       ];
