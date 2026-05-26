@@ -5,6 +5,68 @@ import '../models/dish.dart';
 import '../providers/cart_provider.dart';
 import '../globals.dart';
 
+/// Categorías de bebida (no preparadas en cocina). El resto se considera
+/// "preparado" y permite comentarios adicionales (ej. "sin lechuga, sin chile").
+const _drinkCategories = {
+  'drink',
+  'bebidas',
+  'jugos',
+  'cafes',
+  'refrescos',
+  'aguas',
+  'alcohol',
+};
+
+bool _isPreparedDishes(Iterable<Dish> dishes) =>
+    dishes.any((d) => !_drinkCategories.contains(d.category.toLowerCase()));
+
+/// Sección reutilizable de comentarios libres para los diálogos de preparación.
+Widget _buildCommentField(TextEditingController controller) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const SizedBox(height: 12),
+      const Divider(color: Color(0xFF334155)),
+      const SizedBox(height: 8),
+      const Text('COMENTARIOS',
+          style: TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1)),
+      const SizedBox(height: 10),
+      TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        minLines: 1,
+        maxLines: 3,
+        textCapitalization: TextCapitalization.sentences,
+        decoration: InputDecoration(
+          hintText: 'Ej. sin lechuga, sin chile',
+          hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+          filled: true,
+          fillColor: const Color(0xFF0F172A),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: Color(0xFFFF6D00)),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
 /// Devuelve la imagen del platillo o un placeholder con el icono de la categoría.
 /// Si no hay URL válida muestra el icono grande de la categoría con un gradiente.
 Widget _dishImageOrIcon(Dish dish, {IconData? overrideIcon}) {
@@ -102,6 +164,142 @@ String _formatDrinkSizeLabel(String type) {
   if (RegExp(r'^\d+ml$').hasMatch(suffix)) return '${suffix.replaceAll('ml', '')} ml';
   if (RegExp(r'^\d+$').hasMatch(suffix)) return '$suffix ml';
   return suffix;
+}
+
+/// Diálogo mínimo para platillos preparados que se agregan directo (sin
+/// opciones de sabor/guisado, ej. arrachera, sopes, enchiladas): permite
+/// cantidad y un comentario libre antes de agregar a la orden.
+Future<void> _addPreparedDishWithComment(
+    BuildContext context, Dish dish) async {
+  final cart = context.read<CartProvider>();
+  final commentController = TextEditingController();
+  int dialogQty = 1;
+
+  await showDialog(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setDialogState) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        title: Text(dish.name,
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCommentField(commentController),
+                const SizedBox(height: 12),
+                const Divider(color: Color(0xFF334155)),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('CANTIDAD',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    Row(
+                      children: [
+                        InkWell(
+                          onTap: () => setDialogState(
+                              () { if (dialogQty > 1) dialogQty--; }),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(8),
+                              border:
+                                  Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: const Icon(Icons.remove,
+                                color: Colors.white70, size: 18),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          child: Text('$dialogQty',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                        InkWell(
+                          onTap: () => setDialogState(() => dialogQty++),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6D00)
+                                  .withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border:
+                                  Border.all(color: const Color(0xFFFF6D00)),
+                            ),
+                            child: const Icon(Icons.add,
+                                color: Color(0xFFFF6D00), size: 18),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Colors.white54)),
+          ),
+          SizedBox(
+            height: 44,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                final comment = commentController.text.trim();
+                cart.addItemWithGuisados(
+                  dish,
+                  [if (comment.isNotEmpty) comment],
+                  quantity: dialogQty,
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                        '${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} agregado'),
+                    duration: const Duration(milliseconds: 500),
+                    behavior: SnackBarBehavior.floating,
+                    width: 220,
+                  ));
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D00),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Agregar a la orden',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+  commentController.dispose();
 }
 
 Future<void> addDishToCart(BuildContext context, Dish dish) async {
@@ -441,21 +639,18 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   }
 
   if (isArrachera) {
-    cart.addItemWithGuisados(dish, []);
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('${dish.name} agregado'),
-        duration: const Duration(milliseconds: 500),
-        behavior: SnackBarBehavior.floating,
-        width: 200,
-      ));
-    }
+    await _addPreparedDishWithComment(context, dish);
     return;
   }
 
 
   if (!dish.requiresGuisado && !isChilaquil) {
+    // Platillos preparados que se agregan directo → permitir comentario.
+    // Bebidas (alcohol, etc.) se agregan sin diálogo.
+    if (_isPreparedDishes([dish])) {
+      await _addPreparedDishWithComment(context, dish);
+      return;
+    }
     cart.addItem(dish);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
@@ -545,6 +740,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   String? selectedSalsa; // solo para chilaquiles
   String? selectedTerminoHuevo; // solo para chilaquiles con huevo
   int dialogQty = 1;
+  // Comentarios libres para platillos preparados (chilaquiles, gorditas, tapas, guisados)
+  final allowsComment = _isPreparedDishes([dish]);
+  final commentController = TextEditingController();
 
   const salsasChilaquil = ['Roja', 'Verde', 'Ranchera'];
   const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
@@ -973,6 +1171,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       ),
                     ],
                   ),
+                  if (allowsComment) _buildCommentField(commentController),
                   // Total dinámico
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFF334155)),
@@ -1019,12 +1218,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     return;
                   }
                   Navigator.pop(ctx);
+                  final comment = commentController.text.trim();
                   final extras = [
                     if (isChilaquil && selectedSalsa != null) 'Salsa $selectedSalsa',
                     if (isChilaquil && conHuevo) 'Con huevo ${selectedTerminoHuevo != null ? "(${selectedTerminoHuevo})" : ""}',
                     if (!isChilaquil && conQueso) 'Con queso',
                     if (frita) 'Frita',
                     if (!isChilaquil) ...selected,
+                    if (allowsComment && comment.isNotEmpty) comment,
                   ];
                   final finalDish = (isTapa && conQueso)
                       ? activeDish.copyWith(price: activeDish.price + 25)
@@ -1057,6 +1258,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
       );
     },
   );
+  commentController.dispose();
 }
 
 class DishCard extends StatelessWidget {
@@ -1254,6 +1456,10 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
     if (!context.mounted) return;
   }
   List<String> selectedGuisados = [];
+
+  // Comentarios libres (ej. "sin lechuga, sin chile") para platillos preparados
+  final allowsComment = _isPreparedDishes(dishes);
+  final commentController = TextEditingController();
 
   await showDialog(
     context: context,
@@ -1698,6 +1904,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       )).toList(),
                     ),
                   ],
+                  if (allowsComment) _buildCommentField(commentController),
                   if (!isLoDulce) ...[
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFF334155)),
@@ -1783,6 +1990,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   ? null
                   : () {
                       Navigator.pop(ctx);
+                      final comment = commentController.text.trim();
                       for (final entry in matchedByFlavor.entries) {
                         final flavor = entry.key;
                         final dish = entry.value;
@@ -1801,6 +2009,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             selectedTiposCarne.join(', '),
                           if (isHuevoCategory && selectedTerminoHuevo != null)
                             selectedTerminoHuevo!,
+                          if (allowsComment && comment.isNotEmpty) comment,
                         ];
                         cart.addItemWithGuisados(dish, extras, quantity: effectiveQty);
                       }
@@ -1833,6 +2042,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
       },
     ),
   );
+  commentController.dispose();
 }
 
 class MultiFlavorVariantCard extends StatelessWidget {
@@ -1980,6 +2190,8 @@ Future<void> addOrdenVariantToCart(
     BuildContext context, Dish ordenDish, Dish mediaDish) async {
   final cart = context.read<CartProvider>();
   Dish? selected;
+  final allowsComment = _isPreparedDishes([ordenDish]);
+  final commentController = TextEditingController();
 
   await showDialog(
     context: context,
@@ -1990,40 +2202,43 @@ Future<void> addOrdenVariantToCart(
           _baseOrdenName(ordenDish.name),
           style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('TAMAÑO',
-                style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1)),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 10,
-              runSpacing: 8,
-              children: [
-                _ToggleOption(
-                  icon: Icons.restaurant,
-                  label: '1 Orden',
-                  price: '\$${ordenDish.price.toStringAsFixed(0)}',
-                  value: selected?.id == ordenDish.id,
-                  onChanged: (v) =>
-                      setDialogState(() => selected = v ? ordenDish : null),
-                ),
-                _ToggleOption(
-                  icon: Icons.content_cut,
-                  label: '1/2 Orden',
-                  price: '\$${mediaDish.price.toStringAsFixed(0)}',
-                  value: selected?.id == mediaDish.id,
-                  onChanged: (v) =>
-                      setDialogState(() => selected = v ? mediaDish : null),
-                ),
-              ],
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('TAMAÑO',
+                  style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1)),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 8,
+                children: [
+                  _ToggleOption(
+                    icon: Icons.restaurant,
+                    label: '1 Orden',
+                    price: '\$${ordenDish.price.toStringAsFixed(0)}',
+                    value: selected?.id == ordenDish.id,
+                    onChanged: (v) =>
+                        setDialogState(() => selected = v ? ordenDish : null),
+                  ),
+                  _ToggleOption(
+                    icon: Icons.content_cut,
+                    label: '1/2 Orden',
+                    price: '\$${mediaDish.price.toStringAsFixed(0)}',
+                    value: selected?.id == mediaDish.id,
+                    onChanged: (v) =>
+                        setDialogState(() => selected = v ? mediaDish : null),
+                  ),
+                ],
+              ),
+              if (allowsComment) _buildCommentField(commentController),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -2035,7 +2250,11 @@ Future<void> addOrdenVariantToCart(
                 ? null
                 : () {
                     Navigator.pop(ctx);
-                    cart.addItemWithGuisados(selected!, []);
+                    final comment = commentController.text.trim();
+                    cart.addItemWithGuisados(
+                      selected!,
+                      [if (allowsComment && comment.isNotEmpty) comment],
+                    );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -2059,6 +2278,7 @@ Future<void> addOrdenVariantToCart(
       ),
     ),
   );
+  commentController.dispose();
 }
 
 class OrdenVariantCard extends StatelessWidget {
