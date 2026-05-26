@@ -75,6 +75,14 @@ class _MenuBrowserState extends State<MenuBrowser> {
     return genericDrink.contains(d.category) ? _drinkSubcat(d.name) : d.category;
   }
 
+  // Categorías de bebida: NO se muestran como tarjetas (DishCard) en la lista.
+  // El chip de categoría y el submenú de bebidas se conservan.
+  static const _allDrinkCats = {
+    'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
+  };
+  static bool _isDrinkCategory(String category) =>
+      _allDrinkCats.contains(category.toLowerCase());
+
   List<Dish> get _filteredDishes {
     // Sin categoría seleccionada y sin búsqueda: no mostrar tarjetas,
     // solo la cuadrícula de categorías.
@@ -88,6 +96,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
     final result = <Dish>[];
     for (final dish in widget.dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
+      if (_isDrinkCategory(dish.category)) continue; // bebidas: sin tarjetas
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           const allDrinkCats = {
