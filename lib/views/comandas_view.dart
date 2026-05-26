@@ -210,6 +210,7 @@ class _ComandasViewState extends State<ComandasView> {
     final result = <Dish>[];
     for (final dish in _dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
+      if (_isDrinkCategory(dish.category)) continue; // bebidas: sin tarjetas
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           // Filtrar solo bebidas (cualquier categoría de bebida)
@@ -280,6 +281,14 @@ class _ComandasViewState extends State<ComandasView> {
     const genericDrink = {'drink', 'bebidas'};
     return genericDrink.contains(d.category) ? _drinkSubcat(d.name) : d.category;
   }
+
+  // Categorías de bebida: NO se muestran como tarjetas (DishCard) en la lista.
+  // El chip de categoría y el submenú de bebidas se conservan.
+  static const _allDrinkCats = {
+    'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
+  };
+  static bool _isDrinkCategory(String category) =>
+      _allDrinkCats.contains(category.toLowerCase());
 
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
