@@ -165,9 +165,26 @@ class _MenuBrowserState extends State<MenuBrowser> {
         .toList();
     if (items.isEmpty) return false;
 
-    // Bebidas (subcategoría como chip): abrir el diálogo consolidado directo
-    // para elegir la bebida específica (sin tarjetas individuales).
+    // Bebidas (subcategoría como chip).
     if (_isDrinkCategory(label)) {
+      // Refrescos, Jugos y Aguas tienen diálogo dedicado con SABORES y TAMAÑOS
+      // (cargados de la BD) — abrirlo vía addDishToCart con un platillo
+      // representativo de la subcategoría.
+      const dialogSubcats = {'refrescos', 'jugos', 'aguas'};
+      if (dialogSubcats.contains(label)) {
+        Dish rep = items.first;
+        if (label == 'aguas') {
+          // Preferir "Agua Fresca" (su diálogo incluye la opción "Natural").
+          rep = items.firstWhere((d) {
+            final n = d.name.toLowerCase();
+            return n.contains('agua fresca') ||
+                (n.startsWith('agua') && !n.contains('natural'));
+          }, orElse: () => items.first);
+        }
+        addDishToCart(context, rep);
+        return true;
+      }
+      // Cafés, Alcohol y demás: diálogo consolidado para elegir el tipo.
       final displayName = _translateCategory(label);
       addMultiFlavorVariantToCart(context, items, displayName, displayName);
       return true;
