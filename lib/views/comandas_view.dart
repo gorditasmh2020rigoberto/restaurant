@@ -89,6 +89,14 @@ class _ComandasViewState extends State<ComandasView> {
         .toList();
     if (items.isEmpty) return false;
 
+    // Bebidas (subcategoría como chip): abrir el diálogo consolidado directo
+    // para elegir la bebida específica (sin tarjetas individuales).
+    if (_isDrinkCategory(label)) {
+      final displayName = _translateCategory(label);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      return true;
+    }
+
     // Gorditas: una sola tarjeta canónica con selector de BASE en el diálogo.
     // Tapear "Gorditas" en la barra de categorías abre el diálogo directo,
     // sin pasar por la pantalla intermedia de la sección.
@@ -210,7 +218,6 @@ class _ComandasViewState extends State<ComandasView> {
     final result = <Dish>[];
     for (final dish in _dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
-      if (_isDrinkCategory(dish.category)) continue; // bebidas: sin tarjetas
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           // Filtrar solo bebidas (cualquier categoría de bebida)
@@ -293,18 +300,21 @@ class _ComandasViewState extends State<ComandasView> {
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
 
-    // Consolidar todas las categorías de bebidas en un solo chip 'drink'
-    const allDrinkCats = {'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol'};
-    if (rawCats.any(allDrinkCats.contains)) {
-      rawCats.removeAll(allDrinkCats);
-      rawCats.add('drink');
-    }
+    // Bebidas: mostrar cada subcategoría como chip propio (Aguas, Refrescos,
+    // Cafés, Jugos…) en vez de un solo chip "Bebidas".
+    final drinkSubcats = _dishes
+        .where((d) => _isDrinkCategory(d.category))
+        .map(_effectiveCat)
+        .where((c) => c != 'drink' && c != 'bebidas')
+        .toSet();
+    rawCats.removeAll(_allDrinkCats);
+    rawCats.addAll(drinkSubcats);
 
     rawCats.removeWhere(_isPlatillosCategory); // ocultar categoría Platillos (todas las variantes)
     // Orden fijo solicitado para las primeras categorías
     const pinned = [
       'gorditas',
-      'drink',
+      'refrescos', 'aguas', 'cafes', 'jugos', 'alcohol',
       'chilaquiles',
       'huevos',
       'molletes',
@@ -1454,6 +1464,22 @@ class _ComandasViewState extends State<ComandasView> {
     };
     const multiSelectCategories = {'arrachera', 'quesadillas'};
     final cat = items.first.category.toLowerCase();
+
+    // Bebidas: UNA sola tarjeta consolidada por subcategoría (Aguas, Cafés,
+    // Refrescos, Jugos) que abre el diálogo para elegir la bebida. Sin DishCards
+    // individuales.
+    if (_isDrinkCategory(cat)) {
+      final sub = _effectiveCat(items.first);
+      final displayName = _translateCategory(sub);
+      return [
+        MultiFlavorVariantCard(
+          dishes: items,
+          displayName: displayName,
+          categoryPrefix: displayName,
+        ),
+      ];
+    }
+
     if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
       final displayName = _translateCategory(cat);
       return [
