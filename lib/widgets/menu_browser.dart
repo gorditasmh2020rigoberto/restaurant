@@ -96,7 +96,6 @@ class _MenuBrowserState extends State<MenuBrowser> {
     final result = <Dish>[];
     for (final dish in widget.dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
-      if (_isDrinkCategory(dish.category)) continue; // bebidas: sin tarjetas
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           const allDrinkCats = {
@@ -131,23 +130,19 @@ class _MenuBrowserState extends State<MenuBrowser> {
 
   List<String> get _availableCategories {
     final rawCats = widget.dishes.map((d) => d.category).toSet();
-    const allDrinkCats = {
-      'drink',
-      'bebidas',
-      'jugos',
-      'cafes',
-      'refrescos',
-      'aguas',
-      'alcohol'
-    };
-    if (rawCats.any(allDrinkCats.contains)) {
-      rawCats.removeAll(allDrinkCats);
-      rawCats.add('drink');
-    }
+    // Bebidas: mostrar cada subcategoría como chip propio (Aguas, Refrescos,
+    // Cafés, Jugos…) en vez de un solo chip "Bebidas".
+    final drinkSubcats = widget.dishes
+        .where((d) => _isDrinkCategory(d.category))
+        .map(_effectiveCat)
+        .where((c) => c != 'drink' && c != 'bebidas')
+        .toSet();
+    rawCats.removeAll(_allDrinkCats);
+    rawCats.addAll(drinkSubcats);
     rawCats.removeWhere(_isPlatillosCategory);
     const pinned = [
       'gorditas',
-      'drink',
+      'refrescos', 'aguas', 'cafes', 'jugos', 'alcohol',
       'chilaquiles',
       'huevos',
       'molletes',
@@ -169,6 +164,14 @@ class _MenuBrowserState extends State<MenuBrowser> {
         .where((d) => _effectiveCat(d) == label)
         .toList();
     if (items.isEmpty) return false;
+
+    // Bebidas (subcategoría como chip): abrir el diálogo consolidado directo
+    // para elegir la bebida específica (sin tarjetas individuales).
+    if (_isDrinkCategory(label)) {
+      final displayName = _translateCategory(label);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      return true;
+    }
 
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
@@ -388,6 +391,21 @@ class _MenuBrowserState extends State<MenuBrowser> {
   List<Widget> _buildCategoryCards(List<Dish> items) {
     if (items.isEmpty) return [];
     final cat = items.first.category.toLowerCase();
+
+    // Bebidas: UNA sola tarjeta consolidada por subcategoría (Aguas, Cafés,
+    // Refrescos, Jugos) que abre el diálogo para elegir la bebida. Sin DishCards
+    // individuales.
+    if (_isDrinkCategory(cat)) {
+      final sub = _effectiveCat(items.first);
+      final displayName = _translateCategory(sub);
+      return [
+        MultiFlavorVariantCard(
+          dishes: items,
+          displayName: displayName,
+          categoryPrefix: displayName,
+        ),
+      ];
+    }
 
     // Menudo: variantes de tamaño separadas de las Cuajadillas (complemento independiente)
     if (cat == 'menudo' && items.length > 1) {
