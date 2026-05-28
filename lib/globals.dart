@@ -95,7 +95,7 @@ class Globals {
       'tapas': 'Tapas de guisado',
       'menudo': 'Menudo',
       'lo_dulce': 'Lo dulce',
-      'para_llevar': 'Para llevar',
+      'para_llevar': 'To Go',
       'extras': 'Órdenes extras',
       'bebidas': 'Bebidas',
       // Genéricas (compatibilidad)
