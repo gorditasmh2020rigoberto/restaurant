@@ -317,7 +317,7 @@ class _KitchenViewState extends State<KitchenView> {
                 const Icon(Icons.restaurant, color: Color(0xFFFF6D00), size: 40),
                 const SizedBox(height: 12),
                 Text(
-                  widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'To Go' : 'Cocina'),
+                  widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'Cocina To Go' : 'Cocina'),
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(Globals.currentBranch, style: const TextStyle(color: Colors.white70)),
@@ -326,7 +326,7 @@ class _KitchenViewState extends State<KitchenView> {
           ),
           _sidebarItem(context, Icons.kitchen, 'Línea de Producción', widget.isDrinksOnly == false && widget.isTakeoutOnly == false),
           _sidebarItem(context, Icons.local_bar, 'Bar de Bebidas', widget.isDrinksOnly),
-          _sidebarItem(context, Icons.takeout_dining, 'To Go / Uber', widget.isTakeoutOnly),
+          _sidebarItem(context, Icons.takeout_dining, 'Cocina To Go / Uber', widget.isTakeoutOnly),
           const Divider(color: Color(0xFF334155)),
           ListTile(
             leading: const Icon(Icons.arrow_back, color: Colors.white54),
