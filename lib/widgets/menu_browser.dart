@@ -231,14 +231,105 @@ class _MenuBrowserState extends State<MenuBrowser> {
   }
 
   void _onCategoryTap(String label) {
-    if (label != 'Todos' && label != 'drink') {
+    if (label == 'drink') {
+      _showDrinkPickerSheet(context);
+      return;
+    }
+    if (label != 'Todos') {
       if (_triggerSingleCardAction(context, label)) return;
     }
     setState(() {
       // Tocar la categoría activa la deselecciona (muestra todo)
       _selectedCategory = (_selectedCategory == label) ? 'Todos' : label;
-      if (label != 'drink') _selectedDrinkSubcat = null;
+      _selectedDrinkSubcat = null;
     });
+  }
+
+  void _showDrinkPickerSheet(BuildContext context) {
+    const subcats = [
+      ('aguas', 'Aguas', Icons.water_drop),
+      ('jugos', 'Jugos', Icons.local_drink),
+      ('refrescos', 'Refrescos', Icons.sports_bar),
+      ('cafes', 'Cafés', Icons.coffee),
+    ];
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF0F172A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF334155),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                child: Text(
+                  'Bebidas',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (final s in subcats) ...[
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(sheetCtx);
+                    _triggerSingleCardAction(context, s.$1);
+                  },
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                          color: const Color(0xFF334155), width: 1.5),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(s.$3, size: 28, color: const Color(0xFFFF6D00)),
+                        const SizedBox(width: 16),
+                        Text(
+                          s.$2,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.chevron_right,
+                            color: Colors.white54, size: 22),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildCategoryBlock(String label) {
@@ -284,59 +375,6 @@ class _MenuBrowserState extends State<MenuBrowser> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDrinkSubmenu() {
-    const subcats = [
-      ('aguas', 'Aguas', Icons.water_drop),
-      ('jugos', 'Jugos', Icons.local_drink),
-      ('refrescos', 'Refrescos', Icons.sports_bar),
-      ('cafes', 'Cafés', Icons.coffee),
-    ];
-    return Container(
-      color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      child: ListView.separated(
-        itemCount: subcats.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (_, i) {
-          final s = subcats[i];
-          final key = s.$1;
-          final label = s.$2;
-          final icon = s.$3;
-          return InkWell(
-            onTap: () => _triggerSingleCardAction(context, key),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFF334155), width: 1.5),
-              ),
-              child: Row(
-                children: [
-                  Icon(icon, size: 28, color: const Color(0xFFFF6D00)),
-                  const SizedBox(width: 16),
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.chevron_right,
-                      color: Colors.white54, size: 22),
-                ],
-              ),
-            ),
-          );
-        },
       ),
     );
   }
@@ -612,28 +650,26 @@ class _MenuBrowserState extends State<MenuBrowser> {
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
         Expanded(
-          child: _selectedCategory == 'drink'
-              ? _buildDrinkSubmenu()
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final realWidth = constraints.maxWidth;
-                    int cols;
-                    if (isPhone) {
-                      cols = realWidth < 400 ? 2 : 3;
-                    } else if (isTablet) {
-                      cols = (realWidth / 150).floor().clamp(2, 5);
-                    } else {
-                      cols = (realWidth / 180).floor().clamp(4, 8);
-                    }
-                    return CustomScrollView(
-                      slivers: [
-                        ..._buildGroupedMenu(filteredDishes, cols, isPhone,
-                            isTablet: isTablet),
-                        const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                      ],
-                    );
-                  },
-                ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final realWidth = constraints.maxWidth;
+              int cols;
+              if (isPhone) {
+                cols = realWidth < 400 ? 2 : 3;
+              } else if (isTablet) {
+                cols = (realWidth / 150).floor().clamp(2, 5);
+              } else {
+                cols = (realWidth / 180).floor().clamp(4, 8);
+              }
+              return CustomScrollView(
+                slivers: [
+                  ..._buildGroupedMenu(filteredDishes, cols, isPhone,
+                      isTablet: isTablet),
+                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                ],
+              );
+            },
+          ),
         ),
       ],
     );
