@@ -56,7 +56,7 @@ void main() async {
     {'name': 'Choco (600 ml)', 'price': 40, 'category': 'drink'},
     {'name': 'Té', 'price': 35, 'category': 'drink'},
 
-    // PARA LLEVAR
+    // TO GO
     {'name': '1/2 litro Guisado con carne', 'price': 120, 'category': 'mainCourse'},
     {'name': '1/2 litro Guisado sin carne', 'price': 80, 'category': 'mainCourse'},
     {'name': '1/2 litro Arroz o Frijoles', 'price': 40, 'category': 'mainCourse'},

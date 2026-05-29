@@ -220,7 +220,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               // Línea de Producción + Cocina
               _pinRow(
                 icon: Icons.soup_kitchen,
-                label: 'Línea de Producción / Cocina Para Llevar',
+                label: 'Línea de Producción / Cocina To Go',
                 controller: _kitchenPinController,
                 onSave: () => _savePin('kitchen_pin', _kitchenPinController.text),
               ),

@@ -754,7 +754,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             content: Text(
               widget.orderType == 'dine_in'
                   ? 'La comanda para la mesa ${widget.tableNumber} se envió a producción.'
-                  : 'La comanda para ${widget.customerName ?? 'Cliente'} (${widget.orderType == 'takeout' ? 'Para LLevar' : 'Delivery'}) se envió a producción.',
+                  : 'La comanda para ${widget.customerName ?? 'Cliente'} (${widget.orderType == 'takeout' ? 'To Go' : 'Delivery'}) se envió a producción.',
             ),
             actions: [
               TextButton(

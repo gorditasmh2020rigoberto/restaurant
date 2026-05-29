@@ -219,26 +219,26 @@ INSERT INTO dishes (name, description, price, cost, category, requires_guisado, 
  16, 0, 'side', false, 3),
 
 -- ─────────────────────────────────────────────
--- PARA LLEVAR
+-- TO GO
 -- ─────────────────────────────────────────────
 ('½ Litro Guisado con Carne',
- 'Para llevar',
+ 'To Go',
  120, 0, 'side', false, 10),
 
 ('½ Litro Guisado sin Carne',
- 'Para llevar',
+ 'To Go',
  80, 0, 'side', false, 10),
 
 ('½ Litro Arroz o Frijoles',
- 'Para llevar',
+ 'To Go',
  40, 0, 'side', false, 5),
 
 ('¼ Litro Salsa',
- 'Para llevar',
+ 'To Go',
  40, 0, 'side', false, 5),
 
 ('Chile Relleno con Salsa',
- 'Para llevar',
+ 'To Go',
  50, 0, 'side', false, 10),
 
 -- ─────────────────────────────────────────────

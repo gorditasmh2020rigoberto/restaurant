@@ -281,7 +281,7 @@ class _AdminViewState extends State<AdminView> {
                         SwitchListTile(
                           value: Globals.splitKitchenMode,
                           title: const Text('Cocina Especializada', style: TextStyle(color: Colors.white, fontSize: 13)),
-                          subtitle: const Text('Separa pedidos Para Llevar', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
+                          subtitle: const Text('Separa pedidos To Go', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
                           dense: true,
                           contentPadding: EdgeInsets.zero,
                           onChanged: (val) async {
@@ -494,7 +494,7 @@ class _AdminViewState extends State<AdminView> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Órdenes Para Llevar / Delivery Activas', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                                        const Text('Órdenes To Go / Delivery Activas', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 8),
                                         SizedBox(
                                           height: 130,
@@ -506,7 +506,7 @@ class _AdminViewState extends State<AdminView> {
                                               final order = nonTableOrders[index];
                                               final isSelected = _selectedOrderId == order['id'];
                                               final orderType = order['order_type'];
-                                              final orderTypeStr = orderType == 'takeout' ? 'Para Llevar' : 'Delivery';
+                                              final orderTypeStr = orderType == 'takeout' ? 'To Go' : 'Delivery';
                                                
                                                String? waiterName;
                                                if (order['waiter_id'] != null) {
@@ -1954,7 +1954,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
         final panelTitle = widget.tableId != null 
             ? 'Mesa ${widget.tableNumber}' 
             : (orders.isNotEmpty 
-                ? (orders.first['order_type'] == 'takeout' ? 'Para Llevar' : 'Delivery') 
+                ? (orders.first['order_type'] == 'takeout' ? 'To Go' : 'Delivery') 
                 : 'Orden');
 
         if (orders.isEmpty) {
@@ -2017,7 +2017,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                           border: Border.all(color: (orderType == 'takeout' ? Colors.orangeAccent : Colors.purpleAccent).withValues(alpha: 0.5)),
                         ),
                         child: Text(
-                          orderType == 'takeout' ? 'PEDIDO PARA LLEVAR' : 'ENTREGA A DOMICILIO',
+                          orderType == 'takeout' ? 'PEDIDO TO GO' : 'ENTREGA A DOMICILIO',
                           style: TextStyle(
                             color: orderType == 'takeout' ? Colors.orangeAccent : Colors.purpleAccent,
                             fontSize: 12,

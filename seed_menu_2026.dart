@@ -133,12 +133,12 @@ void main() async {
     {'name': 'Cuajadilla Chica', 'description': 'Tortilla tortillería', 'price': 40, 'category': 'side', 'requires_guisado': false, 'max_time': 8},
     {'name': 'Cuajadilla Grande', 'description': 'Tortilla hecha a mano', 'price': 80, 'category': 'side', 'requires_guisado': false, 'max_time': 8},
 
-    // PARA LLEVAR
-    {'name': '½ Litro Guisado con Carne', 'description': 'Para llevar', 'price': 140, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
-    {'name': '½ Litro Guisado sin Carne', 'description': 'Para llevar', 'price': 100, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
-    {'name': '½ Litro Arroz o Frijoles', 'description': 'Para llevar', 'price': 60, 'category': 'side', 'requires_guisado': false, 'max_time': 5},
-    {'name': '¼ Litro Salsa', 'description': 'Para llevar', 'price': 40, 'category': 'side', 'requires_guisado': false, 'max_time': 5},
-    {'name': 'Chile Relleno con Salsa (Para llevar)', 'description': 'Para llevar', 'price': 60, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
+    // TO GO
+    {'name': '½ Litro Guisado con Carne', 'description': 'To Go', 'price': 140, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
+    {'name': '½ Litro Guisado sin Carne', 'description': 'To Go', 'price': 100, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
+    {'name': '½ Litro Arroz o Frijoles', 'description': 'To Go', 'price': 60, 'category': 'side', 'requires_guisado': false, 'max_time': 5},
+    {'name': '¼ Litro Salsa', 'description': 'To Go', 'price': 40, 'category': 'side', 'requires_guisado': false, 'max_time': 5},
+    {'name': 'Chile Relleno con Salsa (To Go)', 'description': 'To Go', 'price': 60, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
 
     // ÓRDENES EXTRAS
     {'name': 'Tocino o Jamón (3 pzas.)', 'description': 'Orden extra', 'price': 30, 'category': 'side', 'requires_guisado': false, 'max_time': 5},

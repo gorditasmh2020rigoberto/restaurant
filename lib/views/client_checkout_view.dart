@@ -284,7 +284,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                 ? 'Tu orden para la mesa ${widget.tableNumber} ha sido enviada a producción.\n\nMétodo de pago: $_paymentMethod.'
                 : widget.orderType == 'delivery'
                   ? 'Tu pedido a domicilio está en camino de preparación.\n\nTotal a pagar (con envío): \$${finalTotal.toStringAsFixed(2)}.'
-                  : 'Tu pedido para llevar está en producción.\n\nMétodo de pago: $_paymentMethod.\nTotal a pagar: \$${finalTotal.toStringAsFixed(2)}',
+                  : 'Tu pedido To Go está en producción.\n\nMétodo de pago: $_paymentMethod.\nTotal a pagar: \$${finalTotal.toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 16),
             ),
             actions: [
