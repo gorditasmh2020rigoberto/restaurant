@@ -32,6 +32,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
   bool _clipDialogOpen = false;
   final String _paymentMethod = 'Clip'; // único método disponible
   final _addressController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final double _shippingCost = 35.0;
 
@@ -46,8 +47,12 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
   Future<void> _loadSavedDeliveryInfo() async {
     final prefs = await SharedPreferences.getInstance();
     final savedAddress = prefs.getString('delivery_address') ?? '';
+    final savedPhone = prefs.getString('delivery_phone') ?? '';
     if (savedAddress.isNotEmpty && _addressController.text.trim().isEmpty) {
       _addressController.text = savedAddress;
+    }
+    if (savedPhone.isNotEmpty && _phoneController.text.trim().isEmpty) {
+      _phoneController.text = savedPhone;
     }
   }
 
@@ -207,11 +212,20 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Create a combined name to store the payment method and address
+      // Create a combined name to store the payment method, address and phone
       String combinedCustomerName = widget.customerName ?? 'Cliente';
       combinedCustomerName += ' (Pago: $_paymentMethod)';
       if (widget.orderType == 'delivery') {
         combinedCustomerName += ' - DIR: ${_addressController.text.trim()}';
+        final phone = _phoneController.text.trim();
+        if (phone.isNotEmpty) {
+          combinedCustomerName += ' - TEL: $phone';
+        }
+        // Persistir los datos para próximas órdenes (por si se editaron aquí)
+        SharedPreferences.getInstance().then((prefs) {
+          prefs.setString('delivery_address', _addressController.text.trim());
+          prefs.setString('delivery_phone', phone);
+        });
       }
 
       String orderId;
@@ -404,6 +418,16 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                             decoration: InputDecoration(
                               hintText: 'Ej. Calle 5 de Mayo #123, Col. Centro',
                               prefixIcon: const Icon(Icons.location_on),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              hintText: 'Teléfono (opcional)',
+                              prefixIcon: const Icon(Icons.phone),
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                           ),
