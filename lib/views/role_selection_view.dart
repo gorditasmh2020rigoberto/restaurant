@@ -353,7 +353,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                   const SizedBox(height: 32),
                   _RoleCard(
                     title: 'Cliente / Menú Digital',
-                    subtitle: 'Escanear QR o para llevar',
+                    subtitle: 'Escanear QR o To Go',
                     icon: Icons.qr_code_2,
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClientHomeView())),
                   ),
@@ -392,8 +392,8 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                   ),
                   const SizedBox(height: 16),
                   _RoleCard(
-                    title: 'Cocina Para Llevar',
-                    subtitle: 'Solo pedidos para llevar/delivery',
+                    title: 'Cocina To Go',
+                    subtitle: 'Solo pedidos To Go/delivery',
                     icon: Icons.delivery_dining,
                     onTap: () {
                       _requirePin(context, () {

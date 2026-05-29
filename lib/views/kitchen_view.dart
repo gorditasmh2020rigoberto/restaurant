@@ -197,7 +197,7 @@ class _KitchenViewState extends State<KitchenView> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.isDrinksOnly ? 'Bar de Bebidas' : (widget.isTakeoutOnly ? 'Cocina Para Llevar' : 'Línea de Producción'), 
+            Text(widget.isDrinksOnly ? 'Bar de Bebidas' : (widget.isTakeoutOnly ? 'Cocina To Go' : 'Línea de Producción'), 
                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: isMobile ? 18 : 22)),
             Text('Sucursal: ${Globals.currentBranch}', style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
           ],
@@ -251,7 +251,7 @@ class _KitchenViewState extends State<KitchenView> {
                 }
 
                 if (widget.isTakeoutOnly) {
-                  // Vista especializada: Solo Para Llevar / Delivery
+                  // Vista especializada: Solo To Go / Delivery
                   return isPending && isBranch && (type == 'takeout' || type == 'delivery');
                 } else {
                   // Línea de Producción:
@@ -259,7 +259,7 @@ class _KitchenViewState extends State<KitchenView> {
                     // Modo Dividido: Solo Comensales (Mesa)
                     return isPending && isBranch && type == 'dine_in';
                   } else {
-                    // Modo Unificado: TODO (Para Llevar y Dine-In)
+                    // Modo Unificado: TODO (To Go y Dine-In)
                     return isPending && isBranch;
                   }
                 }
@@ -317,7 +317,7 @@ class _KitchenViewState extends State<KitchenView> {
                 const Icon(Icons.restaurant, color: Color(0xFFFF6D00), size: 40),
                 const SizedBox(height: 12),
                 Text(
-                  widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'Para Llevar' : 'Cocina'),
+                  widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'To Go' : 'Cocina'),
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(Globals.currentBranch, style: const TextStyle(color: Colors.white70)),
@@ -326,7 +326,7 @@ class _KitchenViewState extends State<KitchenView> {
           ),
           _sidebarItem(context, Icons.kitchen, 'Línea de Producción', widget.isDrinksOnly == false && widget.isTakeoutOnly == false),
           _sidebarItem(context, Icons.local_bar, 'Bar de Bebidas', widget.isDrinksOnly),
-          _sidebarItem(context, Icons.takeout_dining, 'Para Llevar / Uber', widget.isTakeoutOnly),
+          _sidebarItem(context, Icons.takeout_dining, 'To Go / Uber', widget.isTakeoutOnly),
           const Divider(color: Color(0xFF334155)),
           ListTile(
             leading: const Icon(Icons.arrow_back, color: Colors.white54),
@@ -453,7 +453,7 @@ class _OrderTicketState extends State<_OrderTicket> {
     } else {
       if (mounted) {
         setState(() {
-          _orderTypeStr = orderType == 'takeout' ? 'Para Llevar' : 'Delivery';
+          _orderTypeStr = orderType == 'takeout' ? 'To Go' : 'Delivery';
         });
       }
     }

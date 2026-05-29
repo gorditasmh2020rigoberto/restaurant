@@ -116,12 +116,12 @@ INSERT INTO dishes (name, description, price, cost, category, requires_guisado, 
 ('Cuajadilla Chica', 'Tortilla tortillería', 40, 0, 'side', false, 8),
 ('Cuajadilla Grande', 'Tortilla hecha a mano', 80, 0, 'side', false, 8),
 
--- ─── PARA LLEVAR ───
-('½ Litro Guisado con Carne', 'Para llevar', 140, 0, 'side', false, 10),
-('½ Litro Guisado sin Carne', 'Para llevar', 100, 0, 'side', false, 10),
-('½ Litro Arroz o Frijoles', 'Para llevar', 60, 0, 'side', false, 5),
-('¼ Litro Salsa', 'Para llevar', 40, 0, 'side', false, 5),
-('Chile Relleno con Salsa (Para llevar)', 'Para llevar', 60, 0, 'side', false, 10),
+-- ─── TO GO ───
+('½ Litro Guisado con Carne', 'To Go', 140, 0, 'side', false, 10),
+('½ Litro Guisado sin Carne', 'To Go', 100, 0, 'side', false, 10),
+('½ Litro Arroz o Frijoles', 'To Go', 60, 0, 'side', false, 5),
+('¼ Litro Salsa', 'To Go', 40, 0, 'side', false, 5),
+('Chile Relleno con Salsa (To Go)', 'To Go', 60, 0, 'side', false, 10),
 
 -- ─── ÓRDENES EXTRAS ───
 ('Tocino o Jamón (3 pzas.)', 'Orden extra', 30, 0, 'side', false, 5),

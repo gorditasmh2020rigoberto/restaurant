@@ -234,7 +234,7 @@ class _ReportsViewState extends State<ReportsView> {
       ).toLocal().toString().split('.').first;
       final tipo = o['order_type'] == 'dine_in'
           ? 'Local'
-          : (o['order_type'] == 'takeout' ? 'Para Llevar' : 'Delivery');
+          : (o['order_type'] == 'takeout' ? 'To Go' : 'Delivery');
       final mesaStr = o['restaurant_tables']?['table_number'] != null
           ? 'Mesa ${o['restaurant_tables']['table_number']}'
           : (o['customer_name'] ?? 'Cliente');
@@ -301,7 +301,7 @@ class _ReportsViewState extends State<ReportsView> {
                   final tipo = o['order_type'] == 'dine_in'
                       ? 'Local'
                       : (o['order_type'] == 'takeout'
-                            ? 'Para Llevar'
+                            ? 'To Go'
                             : 'Delivery');
                   final mesaStr =
                       o['restaurant_tables']?['table_number'] != null

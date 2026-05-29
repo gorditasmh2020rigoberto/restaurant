@@ -13,7 +13,7 @@ void main() async {
     // Bebidas (primero, por palabras como "Café", "Jugo", "Agua", etc.)
     {'pattern': r'^(Café|Jugo|Agua|Refresco|Vaso de Leche|Choco|Té)', 'category': 'bebidas'},
 
-    // Para llevar
+    // To Go
     {'pattern': r'(Para llevar|½ Litro|¼ Litro|1/2 [Ll]itro|1/4 [Ll]itro)', 'category': 'para_llevar'},
 
     // Extras

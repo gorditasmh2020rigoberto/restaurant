@@ -17,7 +17,7 @@ void main() async {
   final nuevos = [
     {
       'name': '1 Litro Arroz',
-      'description': 'Para llevar',
+      'description': 'To Go',
       'price': 60,
       'cost': 0,
       'category': 'para_llevar',
@@ -28,7 +28,7 @@ void main() async {
     },
     {
       'name': '1 Litro Frijoles',
-      'description': 'Para llevar',
+      'description': 'To Go',
       'price': 60,
       'cost': 0,
       'category': 'para_llevar',

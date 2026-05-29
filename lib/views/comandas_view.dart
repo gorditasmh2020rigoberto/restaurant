@@ -1002,7 +1002,7 @@ class _ComandasViewState extends State<ComandasView> {
     if (_selectedOrderType == 'dine_in' && _selectedTableNumber != null) {
       titleStr = isPhone ? 'Mesa $_selectedTableNumber' : 'Comandas - Mesa $_selectedTableNumber';
     } else if (_selectedOrderType != 'dine_in') {
-      final typeLabel = _selectedOrderType == 'takeout' ? 'Para Llevar' : 'Delivery';
+      final typeLabel = _selectedOrderType == 'takeout' ? 'To Go' : 'Delivery';
       titleStr = isPhone
           ? '$typeLabel (${_customerName ?? ""})'
           : 'Comandas - $typeLabel (${_customerName ?? ""})';
