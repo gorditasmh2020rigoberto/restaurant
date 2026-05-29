@@ -203,7 +203,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Pedido To Go',
+                  child: const Text('To Go',
                       style: TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
