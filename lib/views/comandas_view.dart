@@ -317,21 +317,18 @@ class _ComandasViewState extends State<ComandasView> {
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
 
-    // Bebidas: mostrar cada subcategoría como chip propio (Aguas, Refrescos,
-    // Cafés, Jugos…) en vez de un solo chip "Bebidas".
-    final drinkSubcats = _dishes
-        .where((d) => _isDrinkCategory(d.category))
-        .map(_effectiveCat)
-        .where((c) => c != 'drink' && c != 'bebidas')
-        .toSet();
-    rawCats.removeAll(_allDrinkCats);
-    rawCats.addAll(drinkSubcats);
+    // Consolidar todas las categorías de bebidas en un solo chip 'drink'.
+    // El submenú vertical (Aguas/Jugos/Refrescos/Cafés) aparece al tocarlo.
+    if (rawCats.any(_allDrinkCats.contains)) {
+      rawCats.removeAll(_allDrinkCats);
+      rawCats.add('drink');
+    }
 
     rawCats.removeWhere(_isPlatillosCategory); // ocultar categoría Platillos (todas las variantes)
     // Orden fijo solicitado para las primeras categorías
     const pinned = [
       'gorditas',
-      'refrescos', 'aguas', 'cafes', 'jugos', 'alcohol',
+      'drink',
       'chilaquiles',
       'huevos',
       'molletes',
@@ -1263,29 +1260,29 @@ class _ComandasViewState extends State<ComandasView> {
           ),
         ),
         const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
-        // ── Submenu de bebidas ──
-        if (_selectedCategory == 'drink') _buildDrinkSubmenu(),
-        // ── Grid de platillos (scrollable) ──
+        // ── Grid de platillos (scrollable) o lista vertical de bebidas ──
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final realWidth = constraints.maxWidth;
-              int cols;
-              if (isPhone) {
-                cols = realWidth < 400 ? 2 : (realWidth / 130).floor().clamp(2, 3);
-              } else if (isTablet) {
-                cols = (realWidth / 150).floor().clamp(2, 5);
-              } else {
-                cols = (realWidth / 180).floor().clamp(4, 8);
-              }
-              return CustomScrollView(
-                slivers: [
-                  ..._buildGroupedMenu(filteredDishes, cols, isPhone, isTablet: isTablet),
-                  const SliverToBoxAdapter(child: SizedBox(height: 40)),
-                ],
-              );
-            },
-          ),
+          child: _selectedCategory == 'drink'
+              ? _buildDrinkSubmenu()
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final realWidth = constraints.maxWidth;
+                    int cols;
+                    if (isPhone) {
+                      cols = realWidth < 400 ? 2 : (realWidth / 130).floor().clamp(2, 3);
+                    } else if (isTablet) {
+                      cols = (realWidth / 150).floor().clamp(2, 5);
+                    } else {
+                      cols = (realWidth / 180).floor().clamp(4, 8);
+                    }
+                    return CustomScrollView(
+                      slivers: [
+                        ..._buildGroupedMenu(filteredDishes, cols, isPhone, isTablet: isTablet),
+                        const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                      ],
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -1293,86 +1290,52 @@ class _ComandasViewState extends State<ComandasView> {
 
   Widget _buildDrinkSubmenu() {
     const subcats = [
-      ('refrescos', 'Refrescos',  Icons.sports_bar),
-      ('aguas',     'Aguas',      Icons.water_drop),
-      ('cafes',     'Cafés',      Icons.coffee),
-      ('jugos',     'Jugos',      Icons.local_drink),
-      (null,        'Todas',      Icons.grid_view),
+      ('aguas', 'Aguas', Icons.water_drop),
+      ('jugos', 'Jugos', Icons.local_drink),
+      ('refrescos', 'Refrescos', Icons.sports_bar),
+      ('cafes', 'Cafés', Icons.coffee),
     ];
-    const active = Color(0xFFE07A30);
     return Container(
       color: const Color(0xFF0F172A),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: subcats.map((s) {
-                final key = s.$1;
-                final label = s.$2;
-                final icon = s.$3;
-                final selected = _selectedDrinkSubcat == key;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: GestureDetector(
-                    onTap: () {
-                      if (key != null && _triggerSingleCardAction(context, key)) return;
-                      setState(() => _selectedDrinkSubcat = key);
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: selected ? active : const Color(0xFF1E293B),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: selected ? active : const Color(0xFF334155),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon, size: 16, color: selected ? Colors.white : Colors.white60),
-                          const SizedBox(width: 6),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              color: selected ? Colors.white : Colors.white70,
-                              fontSize: 13,
-                              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: ListView.separated(
+        itemCount: subcats.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        itemBuilder: (_, i) {
+          final s = subcats[i];
+          final key = s.$1;
+          final label = s.$2;
+          final icon = s.$3;
+          return InkWell(
+            onTap: () => _triggerSingleCardAction(context, key),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFF334155), width: 1.5),
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, size: 28, color: const Color(0xFFFF6D00)),
+                  const SizedBox(width: 16),
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
-          // Degradado derecho: indica que hay más chips al deslizar
-          Positioned(
-            right: 0, top: 0, bottom: 0,
-            child: IgnorePointer(
-              child: Container(
-                width: 32,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      const Color(0xFF0F172A).withValues(alpha: 0),
-                      const Color(0xFF0F172A),
-                    ],
-                  ),
-                ),
+                  const Spacer(),
+                  const Icon(Icons.chevron_right,
+                      color: Colors.white54, size: 22),
+                ],
               ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
