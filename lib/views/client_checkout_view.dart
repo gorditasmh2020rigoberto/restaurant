@@ -2,6 +2,7 @@
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../globals.dart';
@@ -33,6 +34,22 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
   final _addressController = TextEditingController();
   final _emailController = TextEditingController();
   final double _shippingCost = 35.0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.orderType == 'delivery') {
+      _loadSavedDeliveryInfo();
+    }
+  }
+
+  Future<void> _loadSavedDeliveryInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAddress = prefs.getString('delivery_address') ?? '';
+    if (savedAddress.isNotEmpty && _addressController.text.trim().isEmpty) {
+      _addressController.text = savedAddress;
+    }
+  }
 
   bool _isValidEmail(String s) {
     final r = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');

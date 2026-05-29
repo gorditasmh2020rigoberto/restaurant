@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
 import 'client_menu_view.dart';
@@ -150,6 +151,114 @@ class _ClientHomeViewState extends State<ClientHomeView> {
     );
   }
 
+  Future<void> _onDeliveryTap() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedName = prefs.getString('delivery_name') ?? '';
+    final savedAddress = prefs.getString('delivery_address') ?? '';
+    final savedPhone = prefs.getString('delivery_phone') ?? '';
+
+    final nameCtrl = TextEditingController(
+      text: nameController.text.trim().isNotEmpty
+          ? nameController.text.trim()
+          : savedName,
+    );
+    final addressCtrl = TextEditingController(text: savedAddress);
+    final phoneCtrl = TextEditingController(text: savedPhone);
+
+    if (!mounted) return;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Servicio a Domicilio'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Tus datos quedarán guardados para próximas órdenes.',
+                style: TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: nameCtrl,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Tu Nombre',
+                  prefixIcon: Icon(Icons.person),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: addressCtrl,
+                textCapitalization: TextCapitalization.sentences,
+                minLines: 1,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Dirección de entrega',
+                  prefixIcon: Icon(Icons.location_on),
+                  hintText: 'Calle, número, colonia, referencias',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Teléfono (opcional)',
+                  prefixIcon: Icon(Icons.phone),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final name = nameCtrl.text.trim();
+              final address = addressCtrl.text.trim();
+              final phone = phoneCtrl.text.trim();
+              if (name.isEmpty || address.isEmpty) {
+                ScaffoldMessenger.of(ctx).showSnackBar(
+                  const SnackBar(
+                    content: Text('Por favor llena nombre y dirección'),
+                  ),
+                );
+                return;
+              }
+              await prefs.setString('delivery_name', name);
+              await prefs.setString('delivery_address', address);
+              await prefs.setString('delivery_phone', phone);
+              if (!ctx.mounted) return;
+              Navigator.pop(ctx);
+              // Reflejar el nombre en el campo principal
+              nameController.text = name;
+              if (!mounted) return;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (c) => ClientMenuView(
+                    orderType: 'delivery',
+                    customerName: name,
+                  ),
+                ),
+              );
+            },
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+    nameCtrl.dispose();
+    addressCtrl.dispose();
+    phoneCtrl.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -222,6 +331,23 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                   child: const Text('Comer Aquí',
                       style: TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _onDeliveryTap,
+                  icon: const Icon(Icons.delivery_dining),
+                  label: const Text('Servicio a Domicilio',
+                      style: TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(56),
+                    side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2),
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                  ),
                 ),
               ],
             ),
