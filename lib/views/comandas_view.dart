@@ -114,6 +114,15 @@ class _ComandasViewState extends State<ComandasView> {
       return true;
     }
 
+    // Menudo / Lo dulce: abrir diálogo consolidado con todas las opciones
+    // (Menudo, Cuajadilla / Molletes, Churros, Hot Cakes).
+    // No mostrar tarjetas separadas en el cuerpo.
+    if (label == 'menudo' || label == 'lo_dulce' || label == 'dessert') {
+      final displayName = _translateCategory(label);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      return true;
+    }
+
     // Gorditas: una sola tarjeta canónica con selector de BASE en el diálogo.
     // Tapear "Gorditas" en la barra de categorías abre el diálogo directo,
     // sin pasar por la pantalla intermedia de la sección.
@@ -233,9 +242,12 @@ class _ComandasViewState extends State<ComandasView> {
     final result = <Dish>[];
     for (final dish in _dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
-      // Gorditas: no aparecen como tarjetas en el cuerpo.
-      // Solo se acceden tocando el chip "Gorditas" (abre el diálogo canónico).
-      if (dish.category == 'gorditas') continue;
+      // Gorditas / Menudo / Lo dulce: no aparecen como tarjetas en el cuerpo.
+      // Solo se acceden tocando el chip respectivo (abre el diálogo).
+      if (dish.category == 'gorditas' ||
+          dish.category == 'menudo' ||
+          dish.category == 'lo_dulce' ||
+          dish.category == 'dessert') continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           // Filtrar solo bebidas (cualquier categoría de bebida)
