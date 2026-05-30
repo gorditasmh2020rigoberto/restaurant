@@ -229,14 +229,13 @@ class _ComandasViewState extends State<ComandasView> {
     // Sin categoría seleccionada y sin búsqueda: no mostrar tarjetas,
     // solo la cuadrícula de categorías.
     if (_selectedCategory == 'Todos' && _searchQuery.isEmpty) return [];
-    // Gorditas: una sola tarjeta canónica. El diálogo permite elegir la base
-    // (Maíz / Harina) — ver `_BaseChip` en dish_card.dart.
-    const gorditaCanonica = {'gordita de maíz', 'gordita de maiz'};
-    bool gorditaYaIncluida = false;
 
     final result = <Dish>[];
     for (final dish in _dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
+      // Gorditas: no aparecen como tarjetas en el cuerpo.
+      // Solo se acceden tocando el chip "Gorditas" (abre el diálogo canónico).
+      if (dish.category == 'gorditas') continue;
       if (_selectedCategory != 'Todos') {
         if (_selectedCategory == 'drink') {
           // Filtrar solo bebidas (cualquier categoría de bebida)
@@ -247,20 +246,6 @@ class _ComandasViewState extends State<ComandasView> {
         } else {
           if (_effectiveCat(dish) != _selectedCategory) continue;
         }
-      }
-
-      // Gorditas: mostrar solo la variante de Maíz como tarjeta única.
-      // (La Harina se elige desde el diálogo, no como tarjeta separada.)
-      // Renombramos la tarjeta a "Gordita" porque ya no representa solo Maíz.
-      if (dish.category == 'gorditas') {
-        final n = dish.name.toLowerCase().trim();
-        if (!gorditaCanonica.contains(n)) continue;
-        if (gorditaYaIncluida) continue;
-        gorditaYaIncluida = true;
-        if (_searchQuery.isNotEmpty &&
-            !'gordita'.contains(_searchQuery.toLowerCase())) continue;
-        result.add(dish.copyWith(name: 'Gordita'));
-        continue;
       }
 
       if (_searchQuery.isNotEmpty &&
