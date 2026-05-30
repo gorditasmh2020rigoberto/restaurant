@@ -1227,13 +1227,12 @@ class _ComandasViewState extends State<ComandasView> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Fondo: foto de gorditas con overlay oscuro para legibilidad.
+        // Fondo: foto de gorditas (sin overlay — visible al 100%).
         Image.asset(
           'assets/images/gordita.jpg',
           fit: BoxFit.cover,
           alignment: Alignment.center,
         ),
-        Container(color: const Color(0xFF0F172A).withValues(alpha: 0.82)),
         Column(
           children: [
             // ── Búsqueda (fija) ──
