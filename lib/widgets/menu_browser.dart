@@ -187,6 +187,22 @@ class _MenuBrowserState extends State<MenuBrowser> {
       return true;
     }
 
+    // Gorditas: abrir el diálogo canónico directo (con selector de BASE
+    // Maíz/Harina adentro). No mostrar tarjetas separadas en el cuerpo.
+    if (label == 'gorditas') {
+      Dish? canonica;
+      for (final d in items) {
+        final n = d.name.toLowerCase().trim();
+        if (n == 'gordita de maíz' || n == 'gordita de maiz') {
+          canonica = d;
+          break;
+        }
+      }
+      canonica ??= items.first;
+      addDishToCart(context, canonica.copyWith(name: 'Gordita'));
+      return true;
+    }
+
     const skipMultiFlavor = {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol', 'gorditas',
       'menudo',   // needs separate Menudo + Cuajadilla cards
