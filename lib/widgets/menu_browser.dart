@@ -638,8 +638,18 @@ class _MenuBrowserState extends State<MenuBrowser> {
     final isDesktop = screenWidth >= 1024;
     final isTablet = !isPhone && !isDesktop;
 
-    return Column(
+    return Stack(
+      fit: StackFit.expand,
       children: [
+        // Fondo: foto de gorditas con overlay oscuro para legibilidad.
+        Image.asset(
+          'assets/images/gordita.jpg',
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+        ),
+        Container(color: const Color(0xFF0F172A).withValues(alpha: 0.82)),
+        Column(
+          children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
           child: SearchBar(
@@ -690,6 +700,8 @@ class _MenuBrowserState extends State<MenuBrowser> {
               );
             },
           ),
+        ),
+          ],
         ),
       ],
     );

@@ -1224,9 +1224,19 @@ class _ComandasViewState extends State<ComandasView> {
     final isTablet = !isPhone && !isDesktop;
     // isTablet se usa en _buildGroupedMenu via LayoutBuilder
 
-    return Column(
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        // ── Búsqueda (fija) ──
+        // Fondo: foto de gorditas con overlay oscuro para legibilidad.
+        Image.asset(
+          'assets/images/gordita.jpg',
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
+        ),
+        Container(color: const Color(0xFF0F172A).withValues(alpha: 0.82)),
+        Column(
+          children: [
+            // ── Búsqueda (fija) ──
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
           child: SearchBar(
@@ -1280,6 +1290,8 @@ class _ComandasViewState extends State<ComandasView> {
               );
             },
           ),
+        ),
+          ],
         ),
       ],
     );
