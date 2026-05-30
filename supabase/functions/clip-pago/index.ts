@@ -213,6 +213,18 @@ function renderTicketHtml(payload: any, restaurantName: string): string {
         </tr>`;
     })
     .join('');
+  // QR de Clip para este pago (Clip lo genera automáticamente por payment_id)
+  const qrUrl = paymentId && paymentId !== '—'
+      ? `https://qr.payclip.com/${encodeURIComponent(paymentId)}?version=v3`
+      : '';
+  const qrBlock = qrUrl
+      ? `
+      <div style="margin-top:24px;text-align:center;padding:20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0">
+        <p style="margin:0 0 12px 0;color:#475569;font-size:13px;font-weight:600">Comprobante de pago (QR)</p>
+        <img src="${qrUrl}" alt="QR de pago" style="width:180px;height:180px;display:block;margin:0 auto;background:#fff;padding:8px;border-radius:8px" />
+        <p style="margin:12px 0 0 0;color:#64748b;font-size:11px">Escanea con la app de Clip o cámara para verificar el pago.</p>
+      </div>`
+      : '';
   return `<!doctype html><html><body style="font-family:system-ui,sans-serif;background:#f4f4f4;padding:24px;color:#0f172a">
     <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:14px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,0.05)">
       <h2 style="margin:0 0 8px 0">${escapeHtml(restaurantName)}</h2>
@@ -230,7 +242,7 @@ function renderTicketHtml(payload: any, restaurantName: string): string {
       </table>
       <div style="text-align:right;margin-top:16px;font-size:18px;font-weight:bold">
         Total: $${total.toFixed(2)}
-      </div>
+      </div>${qrBlock}
       <p style="margin-top:24px;color:#64748b;font-size:12px">Gracias por tu compra. Conserva este ticket como comprobante.</p>
     </div>
   </body></html>`;
