@@ -53,8 +53,8 @@ class ClipService {
   }
 
   /// Crea un link de Checkout Redireccionado de Clip.
-  /// Retorna la URL a abrir en el navegador, o null si falla.
-  static Future<String?> crearLinkPago({
+  /// Retorna { url, paymentId } o null si falla.
+  static Future<ClipLinkResult?> crearLinkPago({
     required double amount,
     required String description,
     String? redirectUrl,
@@ -66,8 +66,25 @@ class ClipService {
       if (redirectUrl != null) 'redirect_url': redirectUrl,
     });
     if (json['ok'] != true) return null;
-    final url = json['url']?.toString();
-    return (url != null && url.isNotEmpty) ? url : null;
+    final url = json['url']?.toString() ?? '';
+    final paymentId = json['payment_id']?.toString() ?? '';
+    if (url.isEmpty || paymentId.isEmpty) return null;
+    return ClipLinkResult(url: url, paymentId: paymentId);
+  }
+
+  /// Consulta el status actual de un payment link.
+  /// Devuelve el status (CHECKOUT_CREATED, CHECKOUT_COMPLETED, etc.) o null si falla.
+  static Future<String?> checkStatus({required String paymentId}) async {
+    try {
+      final json = await _call({
+        'action': 'check_status',
+        'payment_id': paymentId,
+      });
+      if (json['ok'] != true) return null;
+      return json['status']?.toString();
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Envía el ticket por email después de un pago exitoso.
@@ -85,6 +102,12 @@ class ClipService {
       'items': items,
     });
   }
+}
+
+class ClipLinkResult {
+  final String url;
+  final String paymentId;
+  const ClipLinkResult({required this.url, required this.paymentId});
 }
 
 class ClipResult {
