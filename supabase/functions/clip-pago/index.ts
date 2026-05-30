@@ -113,12 +113,18 @@ async function procesarPagoClip(body: any) {
   });
 }
 
-// Obtiene un OAuth token de Clip usando client_id + client_secret
+// Obtiene un OAuth token de Clip usando client_id + client_secret.
+// Clip requiere autenticación HTTP Basic en el header Authorization, NO en el body.
 async function getClipToken(clipApiUrl: string, clientId: string, clientSecret: string): Promise<string> {
+  const basic = btoa(`${clientId}:${clientSecret}`);
   const resp = await fetch(`${clipApiUrl}/oauth/token`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `grant_type=client_credentials&client_id=${encodeURIComponent(clientId)}&client_secret=${encodeURIComponent(clientSecret)}`,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${basic}`,
+      'Accept': 'application/json',
+    },
+    body: 'grant_type=client_credentials',
   });
   const text = await resp.text();
   let data: any = {};
