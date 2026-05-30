@@ -113,30 +113,10 @@ async function procesarPagoClip(body: any) {
   });
 }
 
-// Obtiene un OAuth token de Clip usando client_id + client_secret.
-// Clip requiere autenticación HTTP Basic en el header Authorization, NO en el body.
-async function getClipToken(clipApiUrl: string, clientId: string, clientSecret: string): Promise<string> {
-  const basic = btoa(`${clientId}:${clientSecret}`);
-  const resp = await fetch(`${clipApiUrl}/oauth/token`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${basic}`,
-      'Accept': 'application/json',
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const text = await resp.text();
-  let data: any = {};
-  try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
-  if (!resp.ok) throw new Error(`Clip auth falló HTTP ${resp.status}: ${text}`);
-  if (!data.access_token) throw new Error(`Clip no devolvió access_token: ${text}`);
-  return String(data.access_token);
-}
-
 // Crea un Payment Link de Clip y devuelve la URL para redirigir al cliente.
+// Clip NO usa OAuth (no hay /oauth/token). La auth es Basic base64(api_key:secret_key)
+// directo sobre el endpoint del recurso /v2/checkout.
 async function crearLinkPago(body: any) {
-  // PASO 1: cargar config
   let cfg: Record<string, string>;
   try {
     cfg = await loadConfig();
@@ -151,28 +131,23 @@ async function crearLinkPago(body: any) {
     return json({ ok: false, message: 'Monto inválido' }, 400);
   }
 
-  const clipApiKey = cfg.clip_api_key ?? cfg.clip_secret_key ?? '';
+  const clipApiKey = cfg.clip_api_key ?? '';
   const clipSecretKey = cfg.clip_secret_key ?? '';
   const clipApiUrl = cfg.clip_api_url || 'https://api.payclip.com';
 
-  if (!clipApiKey) return json({ ok: false, message: 'clip_api_key no configurada' }, 500);
-
-  // PASO 2: obtener OAuth token
-  let accessToken: string;
-  try {
-    accessToken = await getClipToken(clipApiUrl, clipApiKey, clipSecretKey);
-  } catch (e: any) {
-    return json({ ok: false, step: 'get_token', detail: String(e?.message ?? e) }, 500);
+  if (!clipApiKey || !clipSecretKey) {
+    return json({ ok: false, message: 'clip_api_key / clip_secret_key no configuradas' }, 500);
   }
 
-  // PASO 3: crear payment link
+  const basic = btoa(`${clipApiKey}:${clipSecretKey}`);
+
   let resp: Response;
   try {
-    resp = await fetch(`${clipApiUrl}/checkout`, {
+    resp = await fetch(`${clipApiUrl}/v2/checkout`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+        'Authorization': `Basic ${basic}`,
       },
       body: JSON.stringify({
         amount,
@@ -189,7 +164,6 @@ async function crearLinkPago(body: any) {
     return json({ ok: false, step: 'fetch_clip', detail: String(e?.message ?? e) }, 500);
   }
 
-  // PASO 4: leer respuesta
   let text = '';
   try {
     text = await resp.text();
@@ -212,7 +186,7 @@ async function crearLinkPago(body: any) {
 
   return json({
     ok: true,
-    payment_id: data.id ?? data.payment_request_id ?? null,
+    payment_id: data.payment_request_id ?? data.id ?? null,
     url: data.payment_request_url ?? data.url ?? data.checkout_url ?? null,
     raw: data,
   });
