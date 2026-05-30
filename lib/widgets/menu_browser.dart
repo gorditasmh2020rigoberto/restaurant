@@ -108,9 +108,12 @@ class _MenuBrowserState extends State<MenuBrowser> {
           if (_effectiveCat(dish) != _selectedCategory) continue;
         }
       }
-      // Gorditas: no aparecen como tarjetas en el cuerpo.
-      // Solo se acceden tocando el chip "Gorditas" (abre el diálogo canónico).
-      if (dish.category == 'gorditas') continue;
+      // Gorditas / Menudo / Lo dulce: no aparecen como tarjetas en el cuerpo.
+      // Solo se acceden tocando el chip respectivo (abre el diálogo).
+      if (dish.category == 'gorditas' ||
+          dish.category == 'menudo' ||
+          dish.category == 'lo_dulce' ||
+          dish.category == 'dessert') continue;
       if (_searchQuery.isNotEmpty &&
           !dish.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
         continue;
@@ -174,6 +177,15 @@ class _MenuBrowserState extends State<MenuBrowser> {
         return true;
       }
       // Cafés, Alcohol y demás: diálogo consolidado para elegir el tipo.
+      final displayName = _translateCategory(label);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      return true;
+    }
+
+    // Menudo / Lo dulce: abrir un diálogo consolidado con todas las
+    // opciones (Menudo, Cuajadilla / Molletes, Churros, Hot Cakes).
+    // No mostrar tarjetas separadas en el cuerpo.
+    if (label == 'menudo' || label == 'lo_dulce' || label == 'dessert') {
       final displayName = _translateCategory(label);
       addMultiFlavorVariantToCart(context, items, displayName, displayName);
       return true;
