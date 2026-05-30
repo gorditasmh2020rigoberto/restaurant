@@ -292,6 +292,55 @@ async function enviarTicket(body: any) {
   return json({ ok: true });
 }
 
+// Consulta el status actual de un payment link por su id (polling).
+// Devuelve { ok, status, message, raw } — status es CHECKOUT_CREATED |
+// CHECKOUT_PENDING | CHECKOUT_COMPLETED | CHECKOUT_CANCELLED | CHECKOUT_EXPIRED.
+async function checkStatus(body: any) {
+  let cfg: Record<string, string>;
+  try {
+    cfg = await loadConfig();
+  } catch (e: any) {
+    return json({ ok: false, step: 'loadConfig', detail: String(e?.message ?? e) }, 500);
+  }
+
+  const paymentId = String(body.payment_id ?? '').trim();
+  if (!paymentId) return json({ ok: false, message: 'Falta payment_id' }, 400);
+
+  const clipApiKey = cfg.clip_api_key ?? '';
+  const clipSecretKey = cfg.clip_secret_key ?? '';
+  const clipApiUrl = cfg.clip_api_url || 'https://api.payclip.com';
+  if (!clipApiKey || !clipSecretKey) {
+    return json({ ok: false, message: 'clip credentials no configuradas' }, 500);
+  }
+
+  const basic = btoa(`${clipApiKey}:${clipSecretKey}`);
+  let resp: Response;
+  try {
+    resp = await fetch(`${clipApiUrl}/v2/checkout/${encodeURIComponent(paymentId)}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Basic ${basic}` },
+    });
+  } catch (e: any) {
+    return json({ ok: false, step: 'fetch_clip', detail: String(e?.message ?? e) }, 500);
+  }
+
+  const text = await resp.text();
+  let data: any = {};
+  try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
+
+  if (!resp.ok) {
+    return json({ ok: false, http_status: resp.status, detail: data }, resp.status);
+  }
+
+  return json({
+    ok: true,
+    payment_id: paymentId,
+    status: String(data.status ?? ''),
+    message: String(data.last_status_message ?? ''),
+    raw: data,
+  });
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: CORS_HEADERS });
@@ -310,6 +359,7 @@ serve(async (req: Request) => {
     if (action === 'clip') return await procesarPagoClip(body);
     if (action === 'ticket') return await enviarTicket(body);
     if (action === 'create_link') return await crearLinkPago(body);
+    if (action === 'check_status') return await checkStatus(body);
     return json({ ok: false, message: `Acción desconocida: ${action}` }, 400);
   } catch (e: any) {
     return json(

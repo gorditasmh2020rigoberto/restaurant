@@ -1,4 +1,5 @@
 // ignore_for_file: avoid_web_libraries_in_flutter
+import 'dart:async';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -85,10 +86,10 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
         .toList();
 
     setState(() => _isSubmitting = true);
-    String? linkUrl;
+    ClipLinkResult? link;
     String? errorMsg;
     try {
-      linkUrl = await ClipService.crearLinkPago(
+      link = await ClipService.crearLinkPago(
         amount: finalTotal,
         description: 'Pedido ${widget.customerName ?? "Cliente"}',
         redirectUrl: html.window.location.origin,
@@ -98,69 +99,106 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
     }
     if (!mounted) return;
     setState(() => _isSubmitting = false);
-    if (linkUrl == null) {
+    if (link == null) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('No se pudo crear el link de Clip: ${errorMsg ?? "error desconocido"}')));
       return;
     }
+
+    final linkUrl = link.url;
+    final clipPaymentId = link.paymentId;
 
     // Abrir el link en una nueva pestaña
     html.window.open(linkUrl, '_blank');
 
     setState(() => _clipDialogOpen = true);
     bool paid = false;
+    bool autoDetected = false;
+
+    // Polling automático: cada 3 segundos consulta el status del pago en Clip.
+    // En cuanto detecta CHECKOUT_COMPLETED, cierra el diálogo y dispara el flujo.
+    Timer? pollTimer;
+    void Function()? dismissDialog;
+    pollTimer = Timer.periodic(const Duration(seconds: 3), (t) async {
+      final status = await ClipService.checkStatus(paymentId: clipPaymentId);
+      if (status == 'CHECKOUT_COMPLETED') {
+        paid = true;
+        autoDetected = true;
+        t.cancel();
+        dismissDialog?.call();
+      } else if (status == 'CHECKOUT_CANCELLED' || status == 'CHECKOUT_EXPIRED') {
+        t.cancel();
+        // No cerramos diálogo automáticamente — el usuario decide.
+      }
+    });
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Pago con Clip'),
-        content: SizedBox(
-          width: 420,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Total: \$${finalTotal.toStringAsFixed(2)}',
+      builder: (ctx) {
+        dismissDialog = () { if (Navigator.canPop(ctx)) Navigator.pop(ctx); };
+        return AlertDialog(
+          title: const Text('Pago con Clip'),
+          content: SizedBox(
+            width: 420,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Total: \$${finalTotal.toStringAsFixed(2)}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                const Text(
+                  'Se abrió una pestaña con la página de pago de Clip.\n\n'
+                  'Cuando termines, tu pago se detectará automáticamente y '
+                  'recibirás el ticket por correo. No cierres esta pantalla.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              const Text(
-                'Se abrió una pestaña con la página de pago de Clip. Completa tu pago ahí y regresa aquí.',
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () => html.window.open(linkUrl!, '_blank'),
-                icon: const Icon(Icons.open_in_new),
-                label: const Text('Volver a abrir página de pago'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              paid = true;
-              Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFC4C02),
-              foregroundColor: Colors.white,
+                ),
+                const SizedBox(height: 12),
+                const LinearProgressIndicator(),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => html.window.open(linkUrl, '_blank'),
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Volver a abrir página de pago'),
+                ),
+              ],
             ),
-            child: const Text('Ya completé el pago'),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar'),
+            ),
+            // Botón manual como respaldo por si la detección automática tarda.
+            ElevatedButton(
+              onPressed: () {
+                paid = true;
+                Navigator.pop(ctx);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFC4C02),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Ya completé el pago'),
+            ),
+          ],
+        );
+      },
     );
+    pollTimer.cancel();
     if (mounted) setState(() => _clipDialogOpen = false);
     if (!paid) return;
 
-    final paymentId = 'CLIP-${DateTime.now().millisecondsSinceEpoch}';
+    if (autoDetected && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('✅ Pago detectado automáticamente. Procesando…'),
+        duration: Duration(seconds: 2),
+      ));
+    }
+
     await _createOrderAndNotify(
       cart: cart,
       finalTotal: finalTotal,
@@ -169,7 +207,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
         try {
           await ClipService.enviarTicket(
             email: email,
-            paymentId: paymentId,
+            paymentId: clipPaymentId,
             total: finalTotal,
             items: items,
           );
