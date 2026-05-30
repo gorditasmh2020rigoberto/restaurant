@@ -87,12 +87,6 @@ class _MenuBrowserState extends State<MenuBrowser> {
     // Sin categoría seleccionada y sin búsqueda: no mostrar tarjetas,
     // solo la cuadrícula de categorías.
     if (_selectedCategory == 'Todos' && _searchQuery.isEmpty) return [];
-    const gordtasPermitidas = {
-      'gordita de maíz',
-      'gordita de maiz',
-      'gordita de harina'
-    };
-    final seenNames = <String>{};
     final result = <Dish>[];
     for (final dish in widget.dishes) {
       if (_isPlatillosCategory(dish.category)) continue;
@@ -114,11 +108,9 @@ class _MenuBrowserState extends State<MenuBrowser> {
           if (_effectiveCat(dish) != _selectedCategory) continue;
         }
       }
-      if (dish.category == 'gorditas') {
-        final n = dish.name.toLowerCase().trim();
-        if (!gordtasPermitidas.contains(n)) continue;
-        if (!seenNames.add(n)) continue;
-      }
+      // Gorditas: no aparecen como tarjetas en el cuerpo.
+      // Solo se acceden tocando el chip "Gorditas" (abre el diálogo canónico).
+      if (dish.category == 'gorditas') continue;
       if (_searchQuery.isNotEmpty &&
           !dish.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
         continue;
