@@ -136,7 +136,6 @@ void main() async {
     // TO GO
     {'name': '½ Litro Guisado con Carne', 'description': 'To Go', 'price': 140, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
     {'name': '½ Litro Guisado sin Carne', 'description': 'To Go', 'price': 100, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
-    {'name': '½ Litro Arroz o Frijoles', 'description': 'To Go', 'price': 60, 'category': 'side', 'requires_guisado': false, 'max_time': 5},
     {'name': '¼ Litro Salsa', 'description': 'To Go', 'price': 40, 'category': 'side', 'requires_guisado': false, 'max_time': 5},
     {'name': 'Chile Relleno con Salsa (To Go)', 'description': 'To Go', 'price': 60, 'category': 'side', 'requires_guisado': false, 'max_time': 10},
 
