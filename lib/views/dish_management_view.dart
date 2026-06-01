@@ -128,7 +128,7 @@ class _DishManagementViewState extends State<DishManagementView> {
                       DropdownMenuItem(value: 'tapas',          child: Text('Tapas de guisado')),
                       DropdownMenuItem(value: 'menudo',         child: Text('Menudo')),
                       DropdownMenuItem(value: 'lo_dulce',       child: Text('Lo dulce')),
-                      DropdownMenuItem(value: 'para_llevar',    child: Text('To Go')),
+                      DropdownMenuItem(value: 'para_llevar',    child: Text('Para llevar')),
                       DropdownMenuItem(value: 'extras',         child: Text('Órdenes extras')),
                       DropdownMenuItem(value: 'jugos',          child: Text('Jugos')),
                       DropdownMenuItem(value: 'cafes',          child: Text('Cafés')),
