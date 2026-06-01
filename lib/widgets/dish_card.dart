@@ -737,7 +737,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   bool conQueso = false;
   bool conHuevo = false; // solo para chilaquiles
   bool frita = false;
-  String? selectedSalsa; // solo para chilaquiles
+  final Set<String> selectedSalsas = {}; // multi-selección (máx 2) para chilaquiles
   String? selectedTerminoHuevo; // solo para chilaquiles con huevo
   int dialogQty = 1;
   // Comentarios libres para platillos preparados (chilaquiles, gorditas, tapas, guisados)
@@ -934,10 +934,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const Divider(color: Color(0xFF334155)),
                   ],
 
-                  // Selector de salsa para chilaquiles
+                  // Selector de salsa para chilaquiles (multi, máx 2)
                   if (isChilaquil) ...[
                     const Text(
-                      'SALSA',
+                      'SALSA (máx. 2)',
                       style: TextStyle(
                           color: Colors.white70,
                           fontSize: 11,
@@ -945,14 +945,22 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           letterSpacing: 1),
                     ),
                     const SizedBox(height: 10),
-                    Row(
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
                       children: salsasChilaquil.map((salsa) {
-                        final isSelected = selectedSalsa == salsa;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: InkWell(
+                        final isSelected = selectedSalsas.contains(salsa);
+                        final canAddMore = selectedSalsas.length < 2;
+                        return InkWell(
                             borderRadius: BorderRadius.circular(12),
-                            onTap: () => setDialogState(() => selectedSalsa = salsa),
+                            onTap: () => setDialogState(() {
+                              if (isSelected) {
+                                selectedSalsas.remove(salsa);
+                              } else if (canAddMore) {
+                                selectedSalsas.add(salsa);
+                              }
+                              // Si no está seleccionado y ya hay 2, se ignora.
+                            }),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -986,7 +994,6 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 ],
                               ),
                             ),
-                          ),
                         );
                       }).toList(),
                     ),
@@ -1198,11 +1205,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 height: 44,
                 child: ElevatedButton(
                 onPressed: () {
-                  // Chilaquiles requieren salsa seleccionada
-                  if (isChilaquil && selectedSalsa == null) {
+                  // Chilaquiles requieren al menos 1 salsa (máx 2)
+                  if (isChilaquil && selectedSalsas.isEmpty) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       const SnackBar(
-                        content: Text('Selecciona la salsa (Roja, Verde o Ranchera)'),
+                        content: Text('Selecciona al menos una salsa (máximo 2)'),
                         duration: Duration(seconds: 2),
                       ),
                     );
@@ -1220,7 +1227,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   Navigator.pop(ctx);
                   final comment = commentController.text.trim();
                   final extras = [
-                    if (isChilaquil && selectedSalsa != null) 'Salsa $selectedSalsa',
+                    if (isChilaquil && selectedSalsas.isNotEmpty) 'Salsa ${selectedSalsas.join(" + ")}',
                     if (isChilaquil && conHuevo) 'Con huevo ${selectedTerminoHuevo != null ? "(${selectedTerminoHuevo})" : ""}',
                     if (!isChilaquil && conQueso) 'Con queso',
                     if (frita) 'Frita',
