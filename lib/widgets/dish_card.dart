@@ -572,6 +572,104 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
   commentController.dispose();
 }
 
+/// Carga los items de la categoría "extras" (Órdenes Extras) desde Supabase.
+/// Se usan como toggles en los diálogos de chilaquiles / huevos / enchiladas
+/// para agregar acompañamientos como tocino, huevo extra, bolillo, etc.
+Future<List<Dish>> _loadExtras() async {
+  try {
+    final supabase = Supabase.instance.client;
+    final rows = await supabase
+        .from('dishes')
+        .select()
+        .eq('category', 'extras')
+        .order('name');
+    return (rows as List)
+        .cast<Map<String, dynamic>>()
+        .map(Dish.fromJson)
+        .where((d) => d.isSale)
+        .toList();
+  } catch (_) {
+    return [];
+  }
+}
+
+/// Widget reutilizable que muestra una sección "ÓRDENES EXTRAS" con los
+/// items toggleables. Recibe la lista de extras y el set de ids seleccionados.
+Widget _buildExtrasSection({
+  required List<Dish> extras,
+  required Set<String> selectedIds,
+  required void Function(String id) onToggle,
+}) {
+  if (extras.isEmpty) return const SizedBox.shrink();
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const SizedBox(height: 12),
+      const Divider(color: Color(0xFF334155)),
+      const SizedBox(height: 8),
+      const Text('ÓRDENES EXTRAS',
+          style: TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1)),
+      const SizedBox(height: 10),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: extras.map((e) {
+          final selected = selectedIds.contains(e.id);
+          return InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => onToggle(e.id),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: selected
+                    ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
+                    : const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: selected
+                      ? const Color(0xFFFF6D00)
+                      : const Color(0xFF334155),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    selected
+                        ? Icons.check_circle
+                        : Icons.add_circle_outline,
+                    size: 16,
+                    color: selected
+                        ? const Color(0xFFFF6D00)
+                        : Colors.white54,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${e.name}  \$${e.price.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      color: selected ? Colors.white : Colors.white70,
+                      fontSize: 13,
+                      fontWeight:
+                          selected ? FontWeight.w700 : FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    ],
+  );
+}
+
 Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final cart = context.read<CartProvider>();
   final nameLower = dish.name.toLowerCase();
@@ -962,6 +1060,16 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool isTapa = dish.category == 'tapas' ||
       dish.name.toLowerCase().contains('tapa');
   final bool showOptions = isGordita || isTapa || isChilaquil;
+
+  // Cargar ÓRDENES EXTRAS si aplica (chilaquiles, huevos, enchiladas).
+  // Los seleccionados se agregan al carrito como items independientes.
+  List<Dish> extrasDisponibles = [];
+  final bool showExtras = isChilaquil;
+  if (showExtras) {
+    extrasDisponibles = await _loadExtras();
+    if (!context.mounted) return;
+  }
+  final Set<String> selectedExtraIds = {};
 
   // Cargar ambas variantes de gordita (Maíz / Harina) si aplica, para que el
   // diálogo permita cambiar la base sin cerrarse.
@@ -1449,12 +1557,24 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     ],
                   ),
                   if (allowsComment) _buildCommentField(commentController),
+                  if (showExtras)
+                    _buildExtrasSection(
+                      extras: extrasDisponibles,
+                      selectedIds: selectedExtraIds,
+                      onToggle: (id) => setDialogState(() {
+                        if (selectedExtraIds.contains(id)) {
+                          selectedExtraIds.remove(id);
+                        } else {
+                          selectedExtraIds.add(id);
+                        }
+                      }),
+                    ),
                   // Total dinámico
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: \$${(((isTapa && conQueso) ? activeDish.price + 25 : activeDish.price) * dialogQty).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
+                    'Total: \$${(((isTapa && conQueso) ? activeDish.price + 25 : activeDish.price) * dialogQty + extrasDisponibles.where((e) => selectedExtraIds.contains(e.id)).fold<double>(0, (s, e) => s + e.price)).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
                     style: const TextStyle(
                       color: Color(0xFFFF6D00),
                       fontSize: 15,
@@ -1508,6 +1628,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       ? activeDish.copyWith(price: activeDish.price + 25)
                       : activeDish;
                   cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
+                  // Agregar las órdenes extras seleccionadas como items
+                  // independientes en el carrito (1 cada uno).
+                  for (final extraId in selectedExtraIds) {
+                    final extra = extrasDisponibles
+                        .firstWhere((e) => e.id == extraId);
+                    cart.addItemWithGuisados(extra, const []);
+                  }
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1737,6 +1864,20 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   // Comentarios libres (ej. "sin lechuga, sin chile") para platillos preparados
   final allowsComment = _isPreparedDishes(dishes);
   final commentController = TextEditingController();
+
+  // ÓRDENES EXTRAS: solo aplica para huevos y enchiladas.
+  final bool showExtras = dishes.any((d) {
+        final c = d.category.toLowerCase();
+        return c == 'huevos' || c == 'enchiladas';
+      }) ||
+      categoryPrefix.toLowerCase() == 'huevos' ||
+      categoryPrefix.toLowerCase() == 'enchiladas';
+  List<Dish> extrasDisponibles = [];
+  if (showExtras) {
+    extrasDisponibles = await _loadExtras();
+    if (!context.mounted) return;
+  }
+  final Set<String> selectedExtraIds = {};
 
   await showDialog(
     context: context,
@@ -2185,6 +2326,18 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     ),
                   ],
                   if (allowsComment) _buildCommentField(commentController),
+                  if (showExtras)
+                    _buildExtrasSection(
+                      extras: extrasDisponibles,
+                      selectedIds: selectedExtraIds,
+                      onToggle: (id) => setDialogState(() {
+                        if (selectedExtraIds.contains(id)) {
+                          selectedExtraIds.remove(id);
+                        } else {
+                          selectedExtraIds.add(id);
+                        }
+                      }),
+                    ),
                   // CANTIDAD: siempre visible (incluyendo lo dulce), igual que
                   // en todos los demás productos.
                   const SizedBox(height: 12),
@@ -2293,6 +2446,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           if (allowsComment && comment.isNotEmpty) comment,
                         ];
                         cart.addItemWithGuisados(dish, extras, quantity: effectiveQty);
+                      }
+                      // Agregar las ÓRDENES EXTRAS seleccionadas como items
+                      // independientes (1 cada uno).
+                      for (final extraId in selectedExtraIds) {
+                        final extra = extrasDisponibles
+                            .firstWhere((e) => e.id == extraId);
+                        cart.addItemWithGuisados(extra, const []);
                       }
                       if (context.mounted) {
                         final names = matchedByFlavor.values
