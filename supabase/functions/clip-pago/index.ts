@@ -62,21 +62,25 @@ async function procesarPagoClip(body: any) {
   if (!amount || amount <= 0) {
     return json({ ok: false, message: 'Monto inválido' }, 400);
   }
-  const clipSecret = cfg.clip_secret_key;
-  if (!clipSecret) {
+  const clipApiKey = cfg.clip_api_key ?? '';
+  const clipSecret = cfg.clip_secret_key ?? '';
+  if (!clipApiKey || !clipSecret) {
     return json(
-      { ok: false, message: 'clip_secret_key no configurada en app_config' },
+      { ok: false, message: 'credenciales de Clip no configuradas' },
       500,
     );
   }
   const clipApiUrl = cfg.clip_api_url || 'https://api.payclip.com';
   const restaurantName = cfg.restaurant_name || 'Restaurante';
 
+  // Clip usa Basic auth con api_key:secret_key (igual que /v2/checkout).
+  const basic = btoa(`${clipApiKey}:${clipSecret}`);
+
   const resp = await fetch(`${clipApiUrl}/payments`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${clipSecret}`,
+      'Authorization': `Basic ${basic}`,
     },
     body: JSON.stringify({
       amount,
