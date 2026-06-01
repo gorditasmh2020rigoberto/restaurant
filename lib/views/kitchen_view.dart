@@ -375,6 +375,8 @@ class _OrderTicketState extends State<_OrderTicket> {
   String? _tableNumber;
   String _orderTypeStr = '...';
   String? _customerName;
+  String _deliveryAddress = '';
+  String _deliveryPhone = '';
   String? _waiterName;
   Timer? _elapsedTimer;
   Duration _elapsed = Duration.zero;
@@ -439,6 +441,17 @@ class _OrderTicketState extends State<_OrderTicket> {
     final orderId = widget.order['id'];
     final orderType = widget.order['order_type'] ?? 'dine_in';
     _customerName = widget.order['customer_name'];
+
+    // Para órdenes de delivery, extraer la dirección y el teléfono del
+    // customer_name (formato: "Nombre (Pago: X) - DIR: ... - TEL: ...").
+    if (orderType == 'delivery' && _customerName != null) {
+      final dirMatch = RegExp(r'-\s*DIR:\s*([^-]+?)(?:\s*-\s*TEL:|$)')
+          .firstMatch(_customerName!);
+      final telMatch = RegExp(r'-\s*TEL:\s*(.+?)(?:\s*-\s*|$)')
+          .firstMatch(_customerName!);
+      _deliveryAddress = dirMatch?.group(1)?.trim() ?? '';
+      _deliveryPhone = telMatch?.group(1)?.trim() ?? '';
+    }
     
     // Load table number asynchronously if dine_in
     if (orderType == 'dine_in' && widget.order['table_id'] != null) {
@@ -637,6 +650,80 @@ class _OrderTicketState extends State<_OrderTicket> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        // Datos de entrega visibles cuando es delivery, para
+                        // que cocina/línea pueda pedir transporte (Uber, etc.).
+                        if ((widget.order['order_type'] ?? '') == 'delivery')
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF6D00).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(0xFFFF6D00).withValues(alpha: 0.5),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Row(
+                                    children: [
+                                      Icon(Icons.delivery_dining,
+                                          size: 16, color: Color(0xFFFF6D00)),
+                                      SizedBox(width: 6),
+                                      Text('ENTREGA A DOMICILIO',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1,
+                                            color: Color(0xFFFF6D00),
+                                          )),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  if (_deliveryAddress.isNotEmpty)
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(Icons.location_on,
+                                            size: 14, color: Colors.white70),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: SelectableText(
+                                            _deliveryAddress,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  if (_deliveryPhone.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.phone,
+                                            size: 14, color: Colors.white70),
+                                        const SizedBox(width: 4),
+                                        SelectableText(
+                                          _deliveryPhone,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
