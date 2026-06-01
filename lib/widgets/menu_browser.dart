@@ -418,10 +418,9 @@ class _MenuBrowserState extends State<MenuBrowser> {
   };
 
   /// Categorías donde se puede elegir MÁS DE UN sabor/producto a la vez
-  static const _multiSelectCategories = {
-    'arrachera',
-    'quesadillas',
-  };
+  // Categorías con multi-selección de sabor en el diálogo. Vacío = todas
+  // las categorías son single-select (solo se puede elegir 1 sabor a la vez).
+  static const _multiSelectCategories = <String>{};
 
   List<Widget> _buildCategoryCards(List<Dish> items) {
     if (items.isEmpty) return [];
