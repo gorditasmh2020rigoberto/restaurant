@@ -114,12 +114,16 @@ class _ComandasViewState extends State<ComandasView> {
       return true;
     }
 
-    // Menudo / Lo dulce: abrir diálogo consolidado con todas las opciones
-    // (Menudo, Cuajadilla / Molletes, Churros, Hot Cakes).
-    // No mostrar tarjetas separadas en el cuerpo.
-    if (label == 'menudo' || label == 'lo_dulce' || label == 'dessert') {
+    // Menudo: abrir diálogo consolidado con todas las opciones.
+    if (label == 'menudo') {
       final displayName = _translateCategory(label);
       addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      return true;
+    }
+    // Lo dulce: bottom sheet con Molletes / Hot Cakes / Churros (cada uno
+    // con su selector apropiado).
+    if (label == 'lo_dulce' || label == 'dessert') {
+      showLoDulcePickerSheet(context, items);
       return true;
     }
 

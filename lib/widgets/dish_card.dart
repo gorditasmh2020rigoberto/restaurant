@@ -302,6 +302,276 @@ Future<void> _addPreparedDishWithComment(
   commentController.dispose();
 }
 
+/// Bottom sheet para "Lo dulce": separa Molletes / Hot Cakes / Churros en
+/// 3 opciones, cada una con su selector apropiado.
+void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
+  Dish? findFirst(bool Function(Dish) test) {
+    for (final d in items) {
+      if (test(d)) return d;
+    }
+    return null;
+  }
+
+  final molletes = findFirst((d) => d.name.toLowerCase().contains('mollete'));
+  final hotCakes = items.where((d) => d.name.toLowerCase().contains('hot cake')).toList();
+  final churros = findFirst((d) => d.name.toLowerCase().contains('churro'));
+
+  final options = <(String, IconData, VoidCallback)>[
+    if (molletes != null)
+      ('Molletes Dulces', Icons.breakfast_dining, () {
+        _showMolletesDulcesDialog(context, molletes);
+      }),
+    if (hotCakes.isNotEmpty)
+      ('Hot Cakes', Icons.cake, () {
+        addMultiFlavorVariantToCart(context, hotCakes, 'Hot Cakes', 'Hot Cakes');
+      }),
+    if (churros != null)
+      ('Churros', Icons.bakery_dining, () {
+        _addPreparedDishWithComment(context, churros);
+      }),
+  ];
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: const Color(0xFF0F172A),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (sheetCtx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF334155),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              child: Text('Lo dulce',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 8),
+            for (final opt in options) ...[
+              InkWell(
+                onTap: () {
+                  Navigator.pop(sheetCtx);
+                  opt.$3();
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFF334155), width: 1.5),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(opt.$2, size: 28, color: const Color(0xFFFF6D00)),
+                      const SizedBox(width: 16),
+                      Text(opt.$1,
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
+                      const Spacer(),
+                      const Icon(Icons.chevron_right,
+                          color: Colors.white54, size: 22),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Diálogo específico para Molletes Dulces con selector de "1 Orden" /
+/// "1/2 Orden" (la 1/2 orden se calcula a la mitad del precio base).
+Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
+  final cart = context.read<CartProvider>();
+  final commentController = TextEditingController();
+  String selectedSize = 'orden'; // 'orden' o 'media'
+  int dialogQty = 1;
+  final double precioOrden = dish.price;
+  final double precioMedia = (dish.price / 2).roundToDouble();
+
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setDialogState) {
+        final unitPrice = selectedSize == 'orden' ? precioOrden : precioMedia;
+        final total = unitPrice * dialogQty;
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text('Molletes Dulces',
+              style: TextStyle(color: Colors.white)),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('TAMAÑO',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1)),
+                  const SizedBox(height: 10),
+                  Wrap(spacing: 10, runSpacing: 8, children: [
+                    _ToggleOption(
+                      icon: Icons.restaurant,
+                      label: '1 Orden',
+                      price: '\$${precioOrden.toStringAsFixed(0)}',
+                      value: selectedSize == 'orden',
+                      onChanged: (v) =>
+                          setDialogState(() => selectedSize = 'orden'),
+                    ),
+                    _ToggleOption(
+                      icon: Icons.content_cut,
+                      label: '1/2 Orden',
+                      price: '\$${precioMedia.toStringAsFixed(0)}',
+                      value: selectedSize == 'media',
+                      onChanged: (v) =>
+                          setDialogState(() => selectedSize = 'media'),
+                    ),
+                  ]),
+                  _buildCommentField(commentController),
+                  const SizedBox(height: 12),
+                  const Divider(color: Color(0xFF334155)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('CANTIDAD',
+                          style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1)),
+                      Row(children: [
+                        InkWell(
+                          onTap: () => setDialogState(
+                              () { if (dialogQty > 1) dialogQty--; }),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFF334155)),
+                            ),
+                            child: const Icon(Icons.remove,
+                                color: Colors.white70, size: 18),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          child: Text('$dialogQty',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700)),
+                        ),
+                        InkWell(
+                          onTap: () => setDialogState(() => dialogQty++),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6D00).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFFF6D00)),
+                            ),
+                            child: const Icon(Icons.add,
+                                color: Color(0xFFFF6D00), size: 18),
+                          ),
+                        ),
+                      ]),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text('Total: \$${total.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                          color: Color(0xFFFF6D00),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Colors.white54)),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                final comment = commentController.text.trim();
+                final isMedia = selectedSize == 'media';
+                final dishToAdd = isMedia
+                    ? dish.copyWith(
+                        price: precioMedia,
+                        name: '${dish.name} (1/2 Orden)',
+                      )
+                    : dish;
+                cart.addItemWithGuisados(
+                  dishToAdd,
+                  [if (comment.isNotEmpty) comment],
+                  quantity: dialogQty,
+                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                        '${dialogQty > 1 ? '$dialogQty × ' : ''}${dishToAdd.name} agregado'),
+                    duration: const Duration(milliseconds: 600),
+                    behavior: SnackBarBehavior.floating,
+                    width: 260,
+                  ));
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D00),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Agregar a la orden',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+  commentController.dispose();
+}
+
 Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final cart = context.read<CartProvider>();
   final nameLower = dish.name.toLowerCase();
