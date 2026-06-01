@@ -165,7 +165,7 @@ class _ComandasViewState extends State<ComandasView> {
     };
     final cat = items.first.category.toLowerCase();
 
-    const multiSelectCategories = {'arrachera', 'quesadillas'};
+    const multiSelectCategories = <String>{};
     // Múltiples platillos en categoría no-skip → siempre 1 MultiFlavorVariantCard
     if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
       final displayName = _translateCategory(cat);
@@ -1483,7 +1483,7 @@ class _ComandasViewState extends State<ComandasView> {
       'drink', 'bebidas', 'jugos', 'cafes', 'refrescos', 'aguas', 'alcohol',
       'gorditas',
     };
-    const multiSelectCategories = {'arrachera', 'quesadillas'};
+    const multiSelectCategories = <String>{};
     final cat = items.first.category.toLowerCase();
 
     // Bebidas: UNA sola tarjeta consolidada por subcategoría (Aguas, Cafés,
