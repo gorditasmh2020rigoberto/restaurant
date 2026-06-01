@@ -353,17 +353,17 @@ class _MenuBrowserState extends State<MenuBrowser> {
   }
 
   Widget _buildCategoryBlock(String label) {
-    final selected = _selectedCategory == label;
+    final bool selected = _selectedCategory == label;
     const activeColor = Color(0xFFE07A30);
     return GestureDetector(
       onTap: () => _onCategoryTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 68,
-        height: 62,
+        width: 80,
+        height: 72,
         decoration: BoxDecoration(
           color: selected ? activeColor : const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: selected ? activeColor : const Color(0xFF334155),
             width: 1.5,
@@ -374,19 +374,19 @@ class _MenuBrowserState extends State<MenuBrowser> {
           children: [
             Icon(
               Globals.categoryIcon(label),
-              size: 20,
+              size: 26,
               color: selected ? Colors.white : Colors.white60,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: Text(
                 _translateCategory(label),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   height: 1.1,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                   color: selected ? Colors.white : Colors.white60,
@@ -658,22 +658,25 @@ class _MenuBrowserState extends State<MenuBrowser> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        SizedBox(
-          height: 4 * 68 + 3 * 6 + 8,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-            child: Wrap(
-              direction: Axis.vertical,
-              spacing: 6,
-              runSpacing: 8,
-              children: _availableCategories
-                  .map((cat) => SizedBox(
-                        width: 68,
-                        height: 68,
-                        child: _buildCategoryBlock(cat),
-                      ))
-                  .toList(),
+        // Categorías: cuadrícula vertical de 3 columnas (mismo layout que Comandas).
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  mainAxisExtent: 76,
+                ),
+                itemCount: _availableCategories.length,
+                itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
+              ),
             ),
           ),
         ),
