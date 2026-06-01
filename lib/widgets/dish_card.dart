@@ -1807,10 +1807,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
           return selectedPiezasLoDulce ?? 1;
         }
 
-        // Sumar el subtotal real respetando la cantidad por-platillo
+        // Sumar el subtotal real respetando la cantidad por-platillo.
+        // Para lo_dulce: multiplicamos también por dialogQty (cantidad general)
+        // para que se pueda pedir N veces el mismo postre.
         final double totalPrice = isLoDulce
             ? matchedByFlavor.entries.fold<double>(0, (s, e) =>
-                s + e.value.price * qtyForLoDulceDish(e.value, e.key))
+                s + e.value.price * qtyForLoDulceDish(e.value, e.key)) *
+                dialogQty
             : matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
                 dialogQty;
 
@@ -2182,7 +2185,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     ),
                   ],
                   if (allowsComment) _buildCommentField(commentController),
-                  if (!isLoDulce) ...[
+                  // CANTIDAD: siempre visible (incluyendo lo dulce), igual que
+                  // en todos los demás productos.
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 8),
@@ -2239,7 +2243,6 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       ),
                     ],
                   ),
-                  ], // end if (!isLoDulce) CANTIDAD block
                   if (canAdd) ...[
                     const SizedBox(height: 14),
                     Text(
@@ -2274,9 +2277,10 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         // Cantidad por-platillo:
                         // - Lo dulce: Molletes=1, Hot Cakes (con qty en BD)=1,
                         //   Churros (sin qty)=selectedPiezasLoDulce
+                        //   …multiplicado por dialogQty (cantidad general).
                         // - Resto: dialogQty
                         final effectiveQty = isLoDulce
-                            ? qtyForLoDulceDish(dish, flavor)
+                            ? qtyForLoDulceDish(dish, flavor) * dialogQty
                             : dialogQty;
                         final extras = [
                           if (dish.requiresGuisado) ...selectedGuisados,
