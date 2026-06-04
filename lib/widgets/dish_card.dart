@@ -1470,6 +1470,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             SizedBox(
                               height: 340,
                               child: SingleChildScrollView(
+                                physics: const ClampingScrollPhysics(),
                                 child: Wrap(
                                   spacing: 6,
                                   runSpacing: 6,
@@ -2232,6 +2233,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     SizedBox(
                       height: 260,
                       child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
                         child: Wrap(
                           spacing: 6,
                           runSpacing: 6,
