@@ -1858,7 +1858,24 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
       dishes.map((d) => _extractQuantity(d.name)).whereType<int>().toSet();
   final flavors =
       dishes.map((d) => _extractFlavor(d.name, categoryPrefix)).toSet();
-  final sortedFlavors = flavors.toList()..sort();
+  // Orden custom para Menudo: Chico → Mediano → Grande → resto alfabético
+  // (p.ej. las cuajadillas quedan al final, no entremezcladas).
+  const menudoSizeOrder = ['chico', 'mediano', 'grande'];
+  int menudoRank(String s) {
+    final n = s.toLowerCase().trim();
+    final i = menudoSizeOrder.indexWhere((k) => n == k);
+    return i == -1 ? menudoSizeOrder.length : i;
+  }
+  final isMenudoCategory = categoryPrefix.toLowerCase() == 'menudo';
+  final sortedFlavors = flavors.toList()
+    ..sort((a, b) {
+      if (isMenudoCategory) {
+        final ra = menudoRank(a);
+        final rb = menudoRank(b);
+        if (ra != rb) return ra.compareTo(rb);
+      }
+      return a.toLowerCase().compareTo(b.toLowerCase());
+    });
   final sortedQty = quantities.toList()..sort();
 
   final showSize = sizes.length > 1;
