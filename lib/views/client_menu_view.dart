@@ -43,7 +43,10 @@ class _ClientMenuViewState extends State<ClientMenuView> {
   Future<void> _fetchDishes() async {
     try {
       final response = await _supabase.from('dishes').select();
-      final dishes = (response as List).map((data) => Dish.fromJson(data)).toList();
+      final dishes = (response as List)
+          .map((data) => Dish.fromJson(data))
+          .where((d) => d.isSale)
+          .toList();
       if (mounted) {
         setState(() {
           _dishes = dishes;
