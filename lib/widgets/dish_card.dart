@@ -2171,7 +2171,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     Wrap(
                       spacing: 10,
                       runSpacing: 8,
-                      children: sortedFlavors.map((fl) {
+                      children: sortedFlavors
+                          // En Menudo, las cuajadillas se renderizan abajo en
+                          // su propia sección, no aquí en TAMAÑO.
+                          .where((fl) =>
+                              !(isMenudo &&
+                                  fl.toLowerCase().contains('cuajadilla')))
+                          .map((fl) {
                         Dish? matchDish;
                         for (final d in dishes) {
                           if (_extractFlavor(d.name, categoryPrefix) != fl) continue;
@@ -2642,6 +2648,63 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         ),
                       ),
                     ),
+                  ],
+                  // CUAJADILLA: en Menudo se muestra al final como sección
+                  // aparte. Elegir un tamaño aquí reemplaza la selección de
+                  // TAMAÑO (Chico/Mediano/Grande) y viceversa.
+                  if (isMenudo) ...[
+                    Builder(builder: (_) {
+                      final cuajadillaFlavors = sortedFlavors
+                          .where((f) => f.toLowerCase().contains('cuajadilla'))
+                          .toList();
+                      if (cuajadillaFlavors.isEmpty) return const SizedBox.shrink();
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const SizedBox(height: 12),
+                          const Divider(color: Color(0xFF334155)),
+                          const SizedBox(height: 8),
+                          const Text('CUAJADILLA',
+                              style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1)),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 8,
+                            children: cuajadillaFlavors.map((fl) {
+                              Dish? matchDish;
+                              for (final d in dishes) {
+                                if (_extractFlavor(d.name, categoryPrefix) != fl) continue;
+                                matchDish = d;
+                                break;
+                              }
+                              final priceStr = matchDish != null
+                                  ? '\$${matchDish.price.toStringAsFixed(0)}'
+                                  : null;
+                              // Etiqueta corta: "Chica" / "Mediana" / "Grande"
+                              final shortLabel = fl
+                                  .replaceAll(RegExp(r'^cuajadilla\s+', caseSensitive: false), '')
+                                  .replaceAll(RegExp(r'\s*\(.*\)\s*'), '')
+                                  .trim();
+                              return _ToggleOption(
+                                icon: Icons.local_pizza,
+                                label: shortLabel.isEmpty ? fl : shortLabel,
+                                price: priceStr,
+                                value: selectedFlavors.contains(fl),
+                                onChanged: (v) => setDialogState(() {
+                                  selectedFlavors.clear();
+                                  if (v) selectedFlavors.add(fl);
+                                }),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    }),
                   ],
                   // CANTIDAD: siempre visible (incluyendo lo dulce), igual que
                   // en todos los demás productos.
