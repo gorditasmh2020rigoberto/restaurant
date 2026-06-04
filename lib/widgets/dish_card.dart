@@ -1872,9 +1872,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
       .map((d) => _extractFlavor(d.name, categoryPrefix))
       .toSet();
 
-  // Cargar guisados si algún platillo de esta categoría los requiere
+  // Cargar guisados si algún platillo de la categoría los requiere o si
+  // alguna ÓRDEN EXTRA es de guisado (en ese caso al togglearla el
+  // mesero podrá elegir cuál guisado lleva el extra).
   List<Map<String, dynamic>> guisados = [];
-  if (dishes.any((d) => d.requiresGuisado)) {
+  Future<void> loadGuisados() async {
     try {
       final supabase = Supabase.instance.client;
       final rows = await supabase
@@ -1891,9 +1893,15 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
     } catch (e) {
       debugPrint('Error cargando guisados: $e');
     }
+  }
+  if (dishes.any((d) => d.requiresGuisado)) {
+    await loadGuisados();
     if (!context.mounted) return;
   }
   List<String> selectedGuisados = [];
+  // Guisado asociado a la ÓRDEN EXTRA de guisado (al toggle aparece el
+  // sub-selector). Sólo un guisado por extra.
+  String? selectedGuisadoForExtra;
 
   // Salsa para chilaquiles (también aplica cuando el sabor "Chilaquiles" se
   // selecciona dentro de un mixto, p.ej. Molletes → Chilaquiles).
@@ -1917,6 +1925,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
     if (!context.mounted) return;
   }
   final Set<String> selectedExtraIds = {};
+  // Detecta si un dish-extra es del tipo "guisado" (Orden Extra - Guisado,
+  // Guisado Extra, etc.) — al togglearlo se abre el sub-selector de guisados.
+  bool isGuisadoExtra(Dish d) =>
+      d.name.toLowerCase().contains('guisado');
+  final bool hasGuisadoExtra =
+      extrasDisponibles.any(isGuisadoExtra);
+  if (hasGuisadoExtra && guisados.isEmpty) {
+    await loadGuisados();
+    if (!context.mounted) return;
+  }
 
   await showDialog(
     context: context,
@@ -1981,7 +1999,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
             (!needsPiezas || selectedPiezasLoDulce != null) &&
             (!anyRequiresGuisado || selectedGuisados.isNotEmpty) &&
-            (!hasChilaquilFlavor || selectedSalsasChilaquil.isNotEmpty);
+            (!hasChilaquilFlavor || selectedSalsasChilaquil.isNotEmpty) &&
+            // Si seleccionaron un extra de guisado, deben elegir cuál.
+            (!extrasDisponibles.any((e) =>
+                    isGuisadoExtra(e) && selectedExtraIds.contains(e.id)) ||
+                selectedGuisadoForExtra != null);
 
         // Para lo_dulce: la cantidad efectiva se calcula por-platillo.
         // - Molletes Dulces → 1 (una orden, sin multiplicar)
@@ -2473,11 +2495,111 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       onToggle: (id) => setDialogState(() {
                         if (selectedExtraIds.contains(id)) {
                           selectedExtraIds.remove(id);
+                          final d = extrasDisponibles
+                              .firstWhere((e) => e.id == id);
+                          if (isGuisadoExtra(d)) {
+                            selectedGuisadoForExtra = null;
+                          }
                         } else {
                           selectedExtraIds.add(id);
                         }
                       }),
                     ),
+                  // Sub-selector: cuando se elige una ÓRDEN EXTRA de guisado,
+                  // pedir cuál guisado lleva.
+                  if (showExtras &&
+                      hasGuisadoExtra &&
+                      guisados.isNotEmpty &&
+                      extrasDisponibles.any((e) =>
+                          isGuisadoExtra(e) &&
+                          selectedExtraIds.contains(e.id))) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    const Text('GUISADO DEL EXTRA',
+                        style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 220,
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: guisados.map((g) {
+                            final name = g['name'] as String;
+                            final isSel =
+                                selectedGuisadoForExtra == name;
+                            final itemW =
+                                (MediaQuery.of(ctx).size.width - 100) / 3;
+                            return SizedBox(
+                              width: itemW,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () => setDialogState(() {
+                                  selectedGuisadoForExtra =
+                                      isSel ? null : name;
+                                }),
+                                child: AnimatedContainer(
+                                  duration:
+                                      const Duration(milliseconds: 150),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isSel
+                                        ? const Color(0xFFFF6D00)
+                                            .withValues(alpha: 0.15)
+                                        : const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isSel
+                                          ? const Color(0xFFFF6D00)
+                                          : const Color(0xFF334155),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        isSel
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        size: 14,
+                                        color: isSel
+                                            ? const Color(0xFFFF6D00)
+                                            : const Color(0xFF64748B),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        name,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: isSel
+                                              ? Colors.white
+                                              : Colors.white70,
+                                          fontSize: 11,
+                                          fontWeight: isSel
+                                              ? FontWeight.w700
+                                              : FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
                   // CANTIDAD: siempre visible (incluyendo lo dulce), igual que
                   // en todos los demás productos.
                   const SizedBox(height: 12),
@@ -2596,10 +2718,19 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       // addItem para consolidar repeticiones del mismo
                       // extra (mismo cliente) en una sola fila con
                       // cantidad incrementada en vez de duplicarlas.
+                      // Excepción: el extra de guisado lleva el nombre del
+                      // guisado elegido, así que se agrega con
+                      // addItemWithGuisados (fila propia).
                       for (final extraId in selectedExtraIds) {
                         final extra = extrasDisponibles
                             .firstWhere((e) => e.id == extraId);
-                        cart.addItem(extra);
+                        if (isGuisadoExtra(extra) &&
+                            selectedGuisadoForExtra != null) {
+                          cart.addItemWithGuisados(
+                              extra, [selectedGuisadoForExtra!]);
+                        } else {
+                          cart.addItem(extra);
+                        }
                       }
                       if (context.mounted) {
                         final names = matchedByFlavor.values
