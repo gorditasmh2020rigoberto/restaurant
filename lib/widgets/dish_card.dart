@@ -583,11 +583,42 @@ Future<List<Dish>> _loadExtras() async {
         .select()
         .eq('category', 'extras')
         .order('name');
-    return (rows as List)
+    final all = (rows as List)
         .cast<Map<String, dynamic>>()
         .map(Dish.fromJson)
         .where((d) => d.isSale)
         .toList();
+    // Deduplicar: en la BD hay variantes del mismo extra (p.ej. "Tocino o
+    // Jamón" y "Orden Extra - Tocino o jamón"). Las colapsamos a una sola
+    // entrada por nombre normalizado, prefiriendo la versión más limpia
+    // (sin el prefijo "Orden Extra -" / sufijo " Extra").
+    String normalize(String s) {
+      var n = s.toLowerCase().trim();
+      n = n.replaceAll(RegExp(r'^orden\s+extra\s*-\s*'), '');
+      n = n.replaceAll(RegExp(r'\s+extra$'), '');
+      n = n.replaceAll(RegExp(r'\s+'), ' ');
+      return n;
+    }
+    bool isPrefixed(String s) {
+      final n = s.toLowerCase().trim();
+      return n.startsWith('orden extra') || n.endsWith(' extra');
+    }
+    final Map<String, Dish> byKey = {};
+    for (final d in all) {
+      final key = normalize(d.name);
+      final existing = byKey[key];
+      if (existing == null) {
+        byKey[key] = d;
+      } else {
+        // Si la nueva es "limpia" y la existente está prefijada, reemplazar.
+        if (isPrefixed(existing.name) && !isPrefixed(d.name)) {
+          byKey[key] = d;
+        }
+      }
+    }
+    final deduped = byKey.values.toList()
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return deduped;
   } catch (_) {
     return [];
   }
