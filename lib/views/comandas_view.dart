@@ -425,30 +425,32 @@ class _ComandasViewState extends State<ComandasView> {
 
   Widget _buildCategoryBlock(String label) {
     final bool selected = _selectedCategory == label;
-    const activeColor = Color(0xFFE07A30);
+    const orange = Color(0xFFFF6D00);
+    const cream = Color(0xFFFAF1DE);
     return GestureDetector(
       onTap: () => _onCategoryTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 80,
-        height: 72,
         decoration: BoxDecoration(
-          color: selected ? activeColor : const Color(0xFF1E293B),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? activeColor : const Color(0xFF334155),
-            width: 1.5,
-          ),
+          color: selected ? orange : cream,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.10),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Globals.categoryIcon(label),
-              size: 26,
-              color: selected ? Colors.white : Colors.white60,
+              size: 28,
+              color: selected ? Colors.white : orange,
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: Text(
@@ -457,10 +459,10 @@ class _ComandasViewState extends State<ComandasView> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 12,
                   height: 1.1,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color: selected ? Colors.white : Colors.white60,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : orange,
                 ),
               ),
             ),
@@ -1255,29 +1257,28 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: cuadrícula vertical de 3 columnas (≈6 filas) ──
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  mainAxisExtent: 76,
+        // ── Categorías: 2 columnas con scroll si no caben todas ──
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: GridView.builder(
+                  padding: EdgeInsets.zero,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    mainAxisExtent: 78,
+                  ),
+                  itemCount: _availableCategories.length,
+                  itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
                 ),
-                itemCount: _availableCategories.length,
-                itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
               ),
             ),
           ),
         ),
-        const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
         // ── Grid de platillos (scrollable) ──
         Expanded(
           child: LayoutBuilder(
