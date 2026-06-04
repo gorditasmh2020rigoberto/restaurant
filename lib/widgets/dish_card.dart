@@ -1496,16 +1496,51 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             ),
                           );
                         }
+                        // Separar en dos grupos: CON CARNE y SIN CARNE.
+                        final conCarne = guisados
+                            .where((g) => (g['with_meat'] as bool? ?? true))
+                            .toList();
+                        final sinCarne = guisados
+                            .where((g) => !(g['with_meat'] as bool? ?? true))
+                            .toList();
+                        Widget groupHeader(String label) => Padding(
+                              padding: const EdgeInsets.only(top: 6, bottom: 6),
+                              child: Text(
+                                label,
+                                style: const TextStyle(
+                                    color: Color(0xFFFF6D00),
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1),
+                              ),
+                            );
                         return Stack(
                           children: [
                             SizedBox(
                               height: 340,
                               child: SingleChildScrollView(
                                 physics: const ClampingScrollPhysics(),
-                                child: Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: guisados.map(buildItem).toList(),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (conCarne.isNotEmpty) ...[
+                                      groupHeader('CON CARNE'),
+                                      Wrap(
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        children: conCarne.map(buildItem).toList(),
+                                      ),
+                                    ],
+                                    if (sinCarne.isNotEmpty) ...[
+                                      groupHeader('SIN CARNE'),
+                                      Wrap(
+                                        spacing: 6,
+                                        runSpacing: 6,
+                                        children: sinCarne.map(buildItem).toList(),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             ),
@@ -2499,13 +2534,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       height: 260,
                       child: SingleChildScrollView(
                         physics: const ClampingScrollPhysics(),
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: guisados.map((g) {
+                        child: Builder(builder: (innerCtx) {
+                          final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
+                          Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
                             final isChecked = selectedGuisados.contains(name);
-                            final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
                             return SizedBox(
                               width: itemW,
                               child: InkWell(
@@ -2563,8 +2596,47 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                 ),
                               ),
                             );
-                          }).toList(),
-                        ),
+                          }
+                          final conCarne = guisados
+                              .where((g) => (g['with_meat'] as bool? ?? true))
+                              .toList();
+                          final sinCarne = guisados
+                              .where((g) => !(g['with_meat'] as bool? ?? true))
+                              .toList();
+                          Widget header(String label) => Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 6),
+                                child: Text(
+                                  label,
+                                  style: const TextStyle(
+                                      color: Color(0xFFFF6D00),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1),
+                                ),
+                              );
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (conCarne.isNotEmpty) ...[
+                                header('CON CARNE'),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: conCarne.map(buildItem).toList(),
+                                ),
+                              ],
+                              if (sinCarne.isNotEmpty) ...[
+                                header('SIN CARNE'),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: sinCarne.map(buildItem).toList(),
+                                ),
+                              ],
+                            ],
+                          );
+                        }),
                       ),
                     ),
                   ],
@@ -2632,15 +2704,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       height: 220,
                       child: SingleChildScrollView(
                         physics: const ClampingScrollPhysics(),
-                        child: Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: guisados.map((g) {
+                        child: Builder(builder: (_) {
+                          final itemW =
+                              (MediaQuery.of(ctx).size.width - 100) / 3;
+                          Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
                             final isSel =
                                 selectedGuisadoForExtra == name;
-                            final itemW =
-                                (MediaQuery.of(ctx).size.width - 100) / 3;
                             return SizedBox(
                               width: itemW,
                               child: InkWell(
@@ -2700,8 +2770,47 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                 ),
                               ),
                             );
-                          }).toList(),
-                        ),
+                          }
+                          final conCarne = guisados
+                              .where((g) => (g['with_meat'] as bool? ?? true))
+                              .toList();
+                          final sinCarne = guisados
+                              .where((g) => !(g['with_meat'] as bool? ?? true))
+                              .toList();
+                          Widget header(String label) => Padding(
+                                padding: const EdgeInsets.only(top: 4, bottom: 6),
+                                child: Text(
+                                  label,
+                                  style: const TextStyle(
+                                      color: Color(0xFFFF6D00),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1),
+                                ),
+                              );
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (conCarne.isNotEmpty) ...[
+                                header('CON CARNE'),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: conCarne.map(buildItem).toList(),
+                                ),
+                              ],
+                              if (sinCarne.isNotEmpty) ...[
+                                header('SIN CARNE'),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: sinCarne.map(buildItem).toList(),
+                                ),
+                              ],
+                            ],
+                          );
+                        }),
                       ),
                     ),
                   ],
