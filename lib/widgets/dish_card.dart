@@ -1630,11 +1630,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       : activeDish;
                   cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                   // Agregar las órdenes extras seleccionadas como items
-                  // independientes en el carrito (1 cada uno).
+                  // del carrito; usamos addItem para que si el mismo
+                  // extra ya existe (mismo cliente) incremente la
+                  // cantidad en vez de crear una nueva fila repetida.
                   for (final extraId in selectedExtraIds) {
                     final extra = extrasDisponibles
                         .firstWhere((e) => e.id == extraId);
-                    cart.addItemWithGuisados(extra, const []);
+                    cart.addItem(extra);
                   }
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -2449,12 +2451,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         ];
                         cart.addItemWithGuisados(dish, extras, quantity: effectiveQty);
                       }
-                      // Agregar las ÓRDENES EXTRAS seleccionadas como items
-                      // independientes (1 cada uno).
+                      // Agregar las ÓRDENES EXTRAS seleccionadas; usamos
+                      // addItem para consolidar repeticiones del mismo
+                      // extra (mismo cliente) en una sola fila con
+                      // cantidad incrementada en vez de duplicarlas.
                       for (final extraId in selectedExtraIds) {
                         final extra = extrasDisponibles
                             .firstWhere((e) => e.id == extraId);
-                        cart.addItemWithGuisados(extra, const []);
+                        cart.addItem(extra);
                       }
                       if (context.mounted) {
                         final names = matchedByFlavor.values
