@@ -751,7 +751,10 @@ class _ComandasViewState extends State<ComandasView> {
         .stream(primaryKey: ['id'])
         .listen((data) {
           if (mounted) {
-            final dishes = data.map((d) => Dish.fromJson(d)).toList();
+            final dishes = data
+                .map((d) => Dish.fromJson(d))
+                .where((d) => d.isSale)
+                .toList();
             setState(() {
               _dishes = dishes;
               _isLoading = false;
@@ -762,7 +765,10 @@ class _ComandasViewState extends State<ComandasView> {
           try {
             final rows = await _supabase.from('dishes').select();
             if (mounted) {
-              final dishes = (rows as List).map((d) => Dish.fromJson(d)).toList();
+              final dishes = (rows as List)
+                  .map((d) => Dish.fromJson(d))
+                  .where((d) => d.isSale)
+                  .toList();
               setState(() {
                 _dishes = dishes;
                 _isLoading = false;
