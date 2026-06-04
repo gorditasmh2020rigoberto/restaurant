@@ -497,7 +497,7 @@ class _AdminViewState extends State<AdminView> {
                                         const Text('Órdenes To Go / Delivery Activas', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 8),
                                         SizedBox(
-                                          height: 130,
+                                          height: 170,
                                           child: ListView.separated(
                                             scrollDirection: Axis.horizontal,
                                             itemCount: nonTableOrders.length,
@@ -507,7 +507,7 @@ class _AdminViewState extends State<AdminView> {
                                               final isSelected = _selectedOrderId == order['id'];
                                               final orderType = order['order_type'];
                                               final orderTypeStr = orderType == 'takeout' ? 'To Go' : 'Delivery';
-                                               
+
                                                String? waiterName;
                                                if (order['waiter_id'] != null) {
                                                  try {
@@ -516,16 +516,41 @@ class _AdminViewState extends State<AdminView> {
                                                  } catch (_) {}
                                                }
 
+                                              // Para delivery: extraer la dirección del customer_name
+                                              // (formato "Nombre (Pago: X) - DIR: ... - TEL: ...").
+                                              String? cleanName = order['customer_name'] as String?;
+                                              String? deliveryAddress;
+                                              String? deliveryPhone;
+                                              if (orderType == 'delivery' && cleanName != null) {
+                                                final dirMatch = RegExp(r'-\s*DIR:\s*([^-]+?)(?:\s*-\s*TEL:|$)')
+                                                    .firstMatch(cleanName);
+                                                final telMatch = RegExp(r'-\s*TEL:\s*(.+?)(?:\s*-\s*|$)')
+                                                    .firstMatch(cleanName);
+                                                deliveryAddress = dirMatch?.group(1)?.trim();
+                                                deliveryPhone = telMatch?.group(1)?.trim();
+                                                // Nombre visible: quitar DIR / TEL del subtitle.
+                                                cleanName = cleanName
+                                                    .replaceAll(RegExp(r'\s*-\s*DIR:.*'), '')
+                                                    .trim();
+                                              }
+                                              final extraInfo = [
+                                                if (deliveryAddress != null && deliveryAddress.isNotEmpty)
+                                                  deliveryAddress,
+                                                if (deliveryPhone != null && deliveryPhone.isNotEmpty)
+                                                  '☎ $deliveryPhone',
+                                              ].join('\n');
+
                                               return SizedBox(
-                                                width: 160,
+                                                width: 180,
                                                 child: _TableCard(
                                                   title: orderTypeStr,
-                                                  subtitle: order['customer_name'] ?? 'Cliente',
+                                                  subtitle: cleanName ?? 'Cliente',
                                                   icon: orderType == 'takeout' ? Icons.takeout_dining : Icons.delivery_dining,
                                                   color: orderType == 'takeout' ? Colors.orangeAccent : Colors.purpleAccent,
                                                   waiterName: waiterName,
                                                   isOccupied: true, // It's an active order
                                                   isSelected: isSelected,
+                                                  extraInfo: extraInfo.isEmpty ? null : extraInfo,
                                                   onTap: () {
                                                     setState(() {
                                                       _selectedOrderId = order['id'] as String;
@@ -677,6 +702,9 @@ class _TableCard extends StatelessWidget {
   final VoidCallback onTap;
   final Color? color;
   final String? waiterName;
+  /// Texto opcional (p.ej. dirección de entrega) que se muestra debajo
+  /// del chip de subtitle en hasta 2 líneas.
+  final String? extraInfo;
 
   const _TableCard({
     required this.title,
@@ -687,6 +715,7 @@ class _TableCard extends StatelessWidget {
     required this.onTap,
     this.color,
     this.waiterName,
+    this.extraInfo,
   });
 
   @override
@@ -762,6 +791,32 @@ class _TableCard extends StatelessWidget {
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            if (extraInfo != null && extraInfo!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on,
+                        size: 11, color: Color(0xFF94A3B8)),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                        extraInfo!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFFCBD5E1),
+                          height: 1.2,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],
