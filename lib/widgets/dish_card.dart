@@ -1895,6 +1895,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   }
   List<String> selectedGuisados = [];
 
+  // Salsa para chilaquiles (también aplica cuando el sabor "Chilaquiles" se
+  // selecciona dentro de un mixto, p.ej. Molletes → Chilaquiles).
+  final Set<String> selectedSalsasChilaquil = {};
+  const salsasChilaquilOptions = ['Roja', 'Verde', 'Ranchera'];
+
   // Comentarios libres (ej. "sin lechuga, sin chile") para platillos preparados
   final allowsComment = _isPreparedDishes(dishes);
   final commentController = TextEditingController();
@@ -1955,6 +1960,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         final anyRequiresGuisado =
             matchedByFlavor.values.any((d) => d.requiresGuisado);
 
+        // El sabor "Chilaquiles" (p.ej. dentro de Molletes) exige elegir
+        // salsa: 1 obligatoria, máx. 2.
+        final hasChilaquilFlavor = selectedFlavors
+            .any((f) => f.toLowerCase().contains('chilaquil'));
+
         // Lo dulce: el selector PIEZAS solo aplica a sabores que se venden por
         // unidad (Churros, Hot Cakes). Los Molletes se cobran por orden, así
         // que cuando solo hay Molletes seleccionados ocultamos el selector.
@@ -1970,7 +1980,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
             (!needsPiezas || selectedPiezasLoDulce != null) &&
-            (!anyRequiresGuisado || selectedGuisados.isNotEmpty);
+            (!anyRequiresGuisado || selectedGuisados.isNotEmpty) &&
+            (!hasChilaquilFlavor || selectedSalsasChilaquil.isNotEmpty);
 
         // Para lo_dulce: la cantidad efectiva se calcula por-platillo.
         // - Molletes Dulces → 1 (una orden, sin multiplicar)
@@ -2236,6 +2247,100 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       )).toList(),
                     ),
                   ],
+                  // Salsa para sabor Chilaquiles (mismo selector que el
+                  // diálogo de chilaquiles puros): 3 opciones, máx. 2.
+                  if (hasChilaquilFlavor) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFF334155)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('SALSA (máx. 2)',
+                            style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1)),
+                        Text(
+                          '${selectedSalsasChilaquil.length}/2',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: selectedSalsasChilaquil.length >= 2
+                                ? const Color(0xFFFF6D00)
+                                : Colors.white38,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: salsasChilaquilOptions.map((salsa) {
+                        final isSelected =
+                            selectedSalsasChilaquil.contains(salsa);
+                        final canAddMore =
+                            selectedSalsasChilaquil.length < 2;
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () => setDialogState(() {
+                            if (isSelected) {
+                              selectedSalsasChilaquil.remove(salsa);
+                            } else if (canAddMore) {
+                              selectedSalsasChilaquil.add(salsa);
+                            }
+                          }),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFFFF6D00)
+                                      .withValues(alpha: 0.15)
+                                  : const Color(0xFF0F172A),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFFFF6D00)
+                                    : const Color(0xFF334155),
+                                width: 2,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  isSelected
+                                      ? Icons.check_circle
+                                      : Icons.radio_button_unchecked,
+                                  size: 16,
+                                  color: isSelected
+                                      ? const Color(0xFFFF6D00)
+                                      : const Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  salsa,
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.white60,
+                                    fontSize: 13,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                   // Guisado: aparece cuando algún platillo seleccionado lo requiere
                   if (anyRequiresGuisado && guisados.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -2470,6 +2575,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         final effectiveQty = isLoDulce
                             ? qtyForLoDulceDish(dish, flavor) * dialogQty
                             : dialogQty;
+                        final isChilaquilFl =
+                            flavor.toLowerCase().contains('chilaquil');
                         final extras = [
                           if (dish.requiresGuisado) ...selectedGuisados,
                           if (selectedIsEnmolada && selectedEnmolQty != null)
@@ -2478,6 +2585,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             selectedTiposCarne.join(', '),
                           if (isHuevoCategory && selectedTerminoHuevo != null)
                             selectedTerminoHuevo!,
+                          if (isChilaquilFl &&
+                              selectedSalsasChilaquil.isNotEmpty)
+                            'Salsa ${selectedSalsasChilaquil.join(" + ")}',
                           if (allowsComment && comment.isNotEmpty) comment,
                         ];
                         cart.addItemWithGuisados(dish, extras, quantity: effectiveQty);
