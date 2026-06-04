@@ -1826,6 +1826,32 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
     {bool multiSelectFlavors = false}) async {
   final cart = context.read<CartProvider>();
 
+  // Deduplicar variantes equivalentes con / sin prefijo 'Orden Extra - '
+  // o sufijo ' Extra' (p.ej. 'Tocino o Jamón' y 'Orden Extra - Tocino o
+  // jamón' apuntan al mismo producto). Preferimos la versión más limpia.
+  String normalizeDishName(String s) {
+    var n = s.toLowerCase().trim();
+    n = n.replaceAll(RegExp(r'^orden\s+extra\s*-\s*'), '');
+    n = n.replaceAll(RegExp(r'\s+extra$'), '');
+    n = n.replaceAll(RegExp(r'\s+'), ' ');
+    return n;
+  }
+  bool isPrefixedDishName(String s) {
+    final n = s.toLowerCase().trim();
+    return n.startsWith('orden extra') || n.endsWith(' extra');
+  }
+  final Map<String, Dish> dedupByKey = {};
+  for (final d in dishes) {
+    final key = normalizeDishName(d.name);
+    final existing = dedupByKey[key];
+    if (existing == null) {
+      dedupByKey[key] = d;
+    } else if (isPrefixedDishName(existing.name) && !isPrefixedDishName(d.name)) {
+      dedupByKey[key] = d;
+    }
+  }
+  dishes = dedupByKey.values.toList();
+
   // Detectar qué dimensiones tienen variación real
   final sizes = dishes.map((d) => _extractSize(d.name)).toSet();
   final quantities =
