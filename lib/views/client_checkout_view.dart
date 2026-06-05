@@ -100,9 +100,9 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) => AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFFFAF1DE),
             title: const Text('Pago con Clip',
-                style: TextStyle(color: Colors.white)),
+                style: TextStyle(color: Color(0xFF3D2E1A))),
             content: SizedBox(
               width: 420,
               child: Column(
@@ -114,7 +114,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                       style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white)),
+                          color: Color(0xFFFAF1DE))),
                   const SizedBox(height: 12),
                   ClipBrickWidget(
                     amount: finalTotal,
@@ -163,7 +163,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           Expanded(
                             child: Text(errorMsg!,
                                 style: const TextStyle(
-                                    color: Colors.white, fontSize: 13)),
+                                    color: Color(0xFFFAF1DE), fontSize: 13)),
                           ),
                         ],
                       ),
@@ -179,7 +179,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                   Navigator.pop(ctx);
                 },
                 child: const Text('Cancelar',
-                    style: TextStyle(color: Colors.white54)),
+                    style: TextStyle(color: Color(0xFFA08F70))),
               ),
             ],
           ),
@@ -443,7 +443,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B), // Slate-800
+                    color: const Color(0xFFFAF1DE), // Slate-800
                     boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, -5))],
                   ),
                   child: SafeArea(
@@ -478,7 +478,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Subtotal:', style: TextStyle(color: Colors.grey)),
-                            Text('\$${cart.totalAmount.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white)),
+                            Text('\$${cart.totalAmount.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A))),
                           ],
                         ),
                         if (widget.orderType == 'delivery') ...[
@@ -495,7 +495,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Total a Pagar:', style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                            Text('Total a Pagar:', style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
                             Text(
                               '\$${finalTotal.toStringAsFixed(2)}',
                               style: TextStyle(
@@ -543,16 +543,16 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           ElevatedButton.icon(
                             onPressed: _isSubmitting ? null : () => _submitOrder(cart),
                             icon: _isSubmitting
-                                ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                : const Icon(Icons.contactless, color: Colors.white),
+                                ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(color: Color(0xFFFAF1DE), strokeWidth: 2))
+                                : const Icon(Icons.contactless, color: Color(0xFFFAF1DE)),
                             label: Text(
                               _isSubmitting ? 'Procesando...' : 'Pagar con Clip',
-                              style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                             ),
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size.fromHeight(56),
                               backgroundColor: const Color(0xFFFC4C02),
-                              foregroundColor: Colors.white,
+                              foregroundColor: Color(0xFFFAF1DE),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             ),
                           ),

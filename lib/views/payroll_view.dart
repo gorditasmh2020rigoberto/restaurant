@@ -29,7 +29,7 @@ class _PayrollViewState extends State<PayrollView> {
         children: [
           _buildHeader(),
           _buildMobileWaiterDropdown(),
-          const Divider(height: 1, color: Color(0xFF334155)),
+          const Divider(height: 1, color: Color(0xFFE5DCC4)),
           Expanded(
             child: _selectedWaiterId == null
                 ? _buildEmptyState()
@@ -45,7 +45,7 @@ class _PayrollViewState extends State<PayrollView> {
           child: Row(
             children: [
               _buildWaiterList(),
-              const VerticalDivider(width: 1, thickness: 1, color: Color(0xFF334155)),
+              const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE5DCC4)),
               Expanded(
                 child: _selectedWaiterId == null
                     ? _buildEmptyState()
@@ -60,7 +60,7 @@ class _PayrollViewState extends State<PayrollView> {
 
   Widget _buildMobileWaiterDropdown() {
     return Container(
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFFFAF1DE),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _supabase.from('waiters').stream(primaryKey: ['id']).eq('branch_name', Globals.currentBranch).order('name', ascending: true),
@@ -70,19 +70,19 @@ class _PayrollViewState extends State<PayrollView> {
           if (waiters.isEmpty) return const SizedBox.shrink();
           return DropdownButtonFormField<String>(
             value: _selectedWaiterId,
-            dropdownColor: const Color(0xFF1E293B),
-            style: const TextStyle(color: Colors.white),
+            dropdownColor: const Color(0xFFFAF1DE),
+            style: const TextStyle(color: Color(0xFF3D2E1A)),
             decoration: InputDecoration(
               labelText: 'Seleccionar mesero',
-              labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
+              labelStyle: const TextStyle(color: Color(0xFFA08F70)),
               prefixIcon: const Icon(Icons.person, color: Color(0xFFFF6D00)),
               filled: true,
-              fillColor: const Color(0xFF1E293B),
+              fillColor: const Color(0xFFFAF1DE),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             ),
             items: waiters.map((w) => DropdownMenuItem<String>(
               value: w['id'] as String,
-              child: Text(w['name'] as String, style: const TextStyle(color: Colors.white)),
+              child: Text(w['name'] as String, style: const TextStyle(color: Color(0xFF3D2E1A))),
             )).toList(),
             onChanged: (val) {
               final waiter = waiters.firstWhere((w) => w['id'] == val);
@@ -102,7 +102,7 @@ class _PayrollViewState extends State<PayrollView> {
     final isMobile = MediaQuery.of(context).size.width < 700;
     return Container(
       padding: EdgeInsets.all(isMobile ? 16 : 24),
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFFFAF1DE),
       child: isMobile
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,11 +111,11 @@ class _PayrollViewState extends State<PayrollView> {
                   children: [
                     Icon(Icons.account_balance_wallet, color: Color(0xFFFF6D00), size: 28),
                     SizedBox(width: 12),
-                    Text('Nómina y Pagos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('Nómina y Pagos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text('Gestión de sueldos, préstamos y propinas', style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                const Text('Gestión de sueldos, préstamos y propinas', style: TextStyle(fontSize: 12, color: Color(0xFFA08F70))),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -125,9 +125,9 @@ class _PayrollViewState extends State<PayrollView> {
                         icon: const Icon(Icons.print, size: 16),
                         label: const Text('Reporte Semanal', style: TextStyle(fontSize: 13)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E293B),
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Color(0xFF334155)),
+                          backgroundColor: const Color(0xFFFAF1DE),
+                          foregroundColor: Color(0xFFFAF1DE),
+                          side: const BorderSide(color: Color(0xFFE5DCC4)),
                         ),
                       ),
                     ),
@@ -140,7 +140,7 @@ class _PayrollViewState extends State<PayrollView> {
                           label: const Text('Nuevo Movimiento', style: TextStyle(fontSize: 13)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF6D00),
-                            foregroundColor: Colors.white,
+                            foregroundColor: Color(0xFFFAF1DE),
                           ),
                         ),
                       ),
@@ -156,8 +156,8 @@ class _PayrollViewState extends State<PayrollView> {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Nómina y Pagos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-                    Text('Gestión de sueldos, préstamos y propinas para meseros', style: TextStyle(fontSize: 14, color: Color(0xFF94A3B8))),
+                    Text('Nómina y Pagos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
+                    Text('Gestión de sueldos, préstamos y propinas para meseros', style: TextStyle(fontSize: 14, color: Color(0xFFA08F70))),
                   ],
                 ),
                 const Spacer(),
@@ -167,10 +167,10 @@ class _PayrollViewState extends State<PayrollView> {
                   icon: const Icon(Icons.print),
                   label: const Text('Reporte Semanal'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E293B),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFFAF1DE),
+                    foregroundColor: Color(0xFFFAF1DE),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    side: const BorderSide(color: Color(0xFF334155)),
+                    side: const BorderSide(color: Color(0xFFE5DCC4)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -181,7 +181,7 @@ class _PayrollViewState extends State<PayrollView> {
                     label: const Text('Nuevo Movimiento'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
+                      foregroundColor: Color(0xFFFAF1DE),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     ),
                   ),
@@ -193,7 +193,7 @@ class _PayrollViewState extends State<PayrollView> {
   Widget _buildWaiterList() {
     return Container(
       width: 300,
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFFFAF1DE),
       child: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _supabase.from('waiters').stream(primaryKey: ['id']).eq('branch_name', Globals.currentBranch).order('name', ascending: true),
         builder: (context, snapshot) {
@@ -204,7 +204,7 @@ class _PayrollViewState extends State<PayrollView> {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
-                child: Text('No hay meseros registrados', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
+                child: Text('No hay meseros registrados', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFFA08F70))),
               ),
             );
           }
@@ -219,10 +219,10 @@ class _PayrollViewState extends State<PayrollView> {
                 selected: isSelected,
                 selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                 leading: CircleAvatar(
-                  backgroundColor: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
-                  child: Text(waiter['name'][0].toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  backgroundColor: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                  child: Text(waiter['name'][0].toUpperCase(), style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                 ),
-                title: Text(waiter['name'], style: TextStyle(color: isSelected ? Colors.white : const Color(0xFF94A3B8), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                title: Text(waiter['name'], style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                 onTap: () {
                   setState(() {
                     _selectedWaiterId = waiter['id'];
@@ -243,11 +243,11 @@ class _PayrollViewState extends State<PayrollView> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.person_search, size: 64, color: Color(0xFF334155)),
+          Icon(Icons.person_search, size: 64, color: Color(0xFFE5DCC4)),
           SizedBox(height: 16),
           Text(
             'Selecciona un mesero para ver su historial',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16),
+            style: TextStyle(color: Color(0xFFA08F70), fontSize: 16),
           ),
         ],
       ),
@@ -305,7 +305,7 @@ class _PayrollViewState extends State<PayrollView> {
           child: _isLoadingLedger
               ? const Center(child: CircularProgressIndicator())
               : _ledger.isEmpty
-                  ? const Center(child: Text('No hay movimientos registrados', style: TextStyle(color: Colors.white54)))
+                  ? const Center(child: Text('No hay movimientos registrados', style: TextStyle(color: Color(0xFFA08F70))))
                   : _buildLedgerTable(),
         ),
       ],
@@ -351,7 +351,7 @@ class _PayrollViewState extends State<PayrollView> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFFFAF1DE),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
         ),
@@ -361,12 +361,12 @@ class _PayrollViewState extends State<PayrollView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(title, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.bold)),
+                Text(title, style: const TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold)),
                 Icon(icon, color: color, size: 20),
               ],
             ),
             const SizedBox(height: 12),
-            Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(value, style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 24, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -377,12 +377,12 @@ class _PayrollViewState extends State<PayrollView> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListView.separated(
         itemCount: _ledger.length,
-        separatorBuilder: (context, index) => const Divider(color: Color(0xFF334155), height: 1),
+        separatorBuilder: (context, index) => const Divider(color: Color(0xFFE5DCC4), height: 1),
         itemBuilder: (context, index) {
           final row = _ledger[index];
           final type = row['type'];
@@ -442,10 +442,10 @@ class _PayrollViewState extends State<PayrollView> {
               decoration: BoxDecoration(color: typeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
               child: Icon(typeIcon, color: typeColor, size: 20),
             ),
-            title: Text(typeLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            title: Text(typeLabel, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
             subtitle: Text(
               '${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.parse(row['created_at']))}${row['description'] != null ? ' - ${row['description']}' : ''}',
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+              style: const TextStyle(color: Color(0xFFA08F70), fontSize: 13),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -491,12 +491,12 @@ class _PayrollViewState extends State<PayrollView> {
             String weekRange = '${DateFormat('dd/MM').format(startOfWeek)} al ${DateFormat('dd/MM/yyyy').format(endOfWeek)}';
             
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: const Color(0xFFFAF1DE),
               title: Row(
                 children: [
                    const Icon(Icons.summarize, color: Color(0xFFFF6D00)),
                    const SizedBox(width: 12),
-                   const Text('Reporte Semanal', style: TextStyle(color: Colors.white)),
+                   const Text('Reporte Semanal', style: TextStyle(color: Color(0xFF3D2E1A))),
                 ],
               ),
               content: Column(
@@ -504,7 +504,7 @@ class _PayrollViewState extends State<PayrollView> {
                 children: [
                   const Text(
                     'Seleccione la semana para generar el reporte:',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                    style: TextStyle(color: Color(0xFFA08F70), fontSize: 14),
                   ),
                   const SizedBox(height: 16),
                   InkWell(
@@ -526,14 +526,14 @@ class _PayrollViewState extends State<PayrollView> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0F172A),
+                        color: const Color(0xFFFAF1DE),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: const Color(0xFFE5DCC4)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(weekRange, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          Text(weekRange, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                           const Icon(Icons.calendar_month, color: Color(0xFFFF6D00)),
                         ],
                       ),
@@ -548,8 +548,8 @@ class _PayrollViewState extends State<PayrollView> {
                   icon: const Icon(Icons.person),
                   label: const Text('Solo Mesero Actual'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF334155),
-                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFE5DCC4),
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                 ),
                 ElevatedButton.icon(
@@ -558,7 +558,7 @@ class _PayrollViewState extends State<PayrollView> {
                   label: const Text('Todos los Meseros'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                 ),
               ],
@@ -776,15 +776,15 @@ class _PayrollViewState extends State<PayrollView> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E293B),
-              title: const Text('Registrar Movimiento', style: TextStyle(color: Colors.white)),
+              backgroundColor: const Color(0xFFFAF1DE),
+              title: const Text('Registrar Movimiento', style: TextStyle(color: Color(0xFF3D2E1A))),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
                     value: type,
-                    dropdownColor: const Color(0xFF0F172A),
-                    style: const TextStyle(color: Colors.white),
+                    dropdownColor: const Color(0xFFFAF1DE),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     decoration: const InputDecoration(labelText: 'Tipo de Movimiento', labelStyle: TextStyle(color: Colors.grey)),
                     items: const [
                       DropdownMenuItem(value: 'salary', child: Text('Sueldo / Jornada')),
@@ -798,14 +798,14 @@ class _PayrollViewState extends State<PayrollView> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: amountController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Monto (\$)', labelStyle: TextStyle(color: Colors.grey)),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: descriptionController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     decoration: const InputDecoration(labelText: 'Descripción / Comentario', labelStyle: TextStyle(color: Colors.grey)),
                   ),
                 ],
@@ -832,7 +832,7 @@ class _PayrollViewState extends State<PayrollView> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                   child: const Text('Guardar'),
                 ),

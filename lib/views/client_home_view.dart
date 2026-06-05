@@ -308,7 +308,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(56),
                     backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                   ),
