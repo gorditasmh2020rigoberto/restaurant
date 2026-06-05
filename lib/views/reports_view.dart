@@ -338,7 +338,7 @@ class _ReportsViewState extends State<ReportsView> {
     final isSmall = screenWidth < 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -362,7 +362,7 @@ class _ReportsViewState extends State<ReportsView> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Color(0xFFFAF1DE),
                             ),
                           ),
                           SizedBox(width: isSmall ? 0 : 24, height: isSmall ? 16 : 0),
@@ -372,7 +372,7 @@ class _ReportsViewState extends State<ReportsView> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFFFAF1DE),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: DropdownButtonHideUnderline(
@@ -380,11 +380,11 @@ class _ReportsViewState extends State<ReportsView> {
                                 value: _timeFilter == 'exact_date'
                                     ? 'custom'
                                     : _timeFilter,
-                                dropdownColor: const Color(0xFF1E293B),
-                                style: const TextStyle(color: Colors.white70),
+                                dropdownColor: const Color(0xFFFAF1DE),
+                                style: const TextStyle(color: Color(0xFF7A6E5A)),
                                 icon: const Icon(
                                   Icons.calendar_today,
-                                  color: Colors.white54,
+                                  color: Color(0xFFA08F70),
                                   size: 16,
                                 ),
                                 items: [
@@ -462,17 +462,17 @@ class _ReportsViewState extends State<ReportsView> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFFFAF1DE),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: _branchFilter,
-                                dropdownColor: const Color(0xFF1E293B),
-                                style: const TextStyle(color: Colors.white70),
+                                dropdownColor: const Color(0xFFFAF1DE),
+                                style: const TextStyle(color: Color(0xFF7A6E5A)),
                                 icon: const Icon(
                                   Icons.store,
-                                  color: Colors.white54,
+                                  color: Color(0xFFA08F70),
                                   size: 16,
                                 ),
                                 items: [
@@ -518,8 +518,8 @@ class _ReportsViewState extends State<ReportsView> {
                                 ),
                               );
                             },
-                            icon: const Icon(Icons.point_of_sale, color: Colors.white, size: 18),
-                            label: const Text('Cortes y Movimientos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            icon: const Icon(Icons.point_of_sale, color: Color(0xFFFAF1DE), size: 18),
+                            label: const Text('Cortes y Movimientos', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green[600],
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -532,7 +532,7 @@ class _ReportsViewState extends State<ReportsView> {
                             children: [
                               const Icon(
                                 Icons.notifications,
-                                color: Colors.white54,
+                                color: Color(0xFFA08F70),
                               ),
                               const SizedBox(width: 16),
                               PopupMenuButton<String>(
@@ -564,13 +564,13 @@ class _ReportsViewState extends State<ReportsView> {
                                       Icon(
                                         Icons.file_download,
                                         size: 18,
-                                        color: Colors.white,
+                                        color: Color(0xFFFAF1DE),
                                       ),
                                       SizedBox(width: 8),
                                       Text(
                                         'Exportar',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Color(0xFFFAF1DE),
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -649,9 +649,9 @@ class _ReportsViewState extends State<ReportsView> {
                   // Data Table
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFFE5DCC4)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -683,10 +683,10 @@ class _ReportsViewState extends State<ReportsView> {
                                     Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: const BoxDecoration(
-                                        color: Color(0xFF0F172A),
+                                        color: Color(0xFFFAF1DE),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(Icons.filter_list, color: Colors.white54, size: 20),
+                                      child: const Icon(Icons.filter_list, color: Color(0xFFA08F70), size: 20),
                                     ),
                                   ],
                                 ),
@@ -705,20 +705,20 @@ class _ReportsViewState extends State<ReportsView> {
                             children: [
                               Text(
                                 'Mostrando 1-${_filteredOrders.length} de $_totalOrders órdenes',
-                                style: const TextStyle(color: Colors.white54, fontSize: 12),
+                                style: const TextStyle(color: Color(0xFFA08F70), fontSize: 12),
                               ),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Text('Anterior', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                                  const Text('Anterior', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12)),
                                   const SizedBox(width: 12),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(color: const Color(0xFFFF6D00), borderRadius: BorderRadius.circular(6)),
-                                    child: const Text('1', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                    child: const Text('1', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 12, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(width: 12),
-                                  const Text('Siguiente', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                                  const Text('Siguiente', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12)),
                                 ],
                               ),
                             ],
@@ -735,18 +735,18 @@ class _ReportsViewState extends State<ReportsView> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFFFAF1DE),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: const Color(0xFFE5DCC4)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(children: const [
-                            Icon(Icons.star, color: Colors.white54, size: 18),
+                            Icon(Icons.star, color: Color(0xFFA08F70), size: 18),
                             SizedBox(width: 8),
-                            Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
+                            Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 12)),
                           ]),
                           const SizedBox(height: 16),
                           _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
@@ -761,18 +761,18 @@ class _ReportsViewState extends State<ReportsView> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFFFAF1DE),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFF334155)),
+                        border: Border.all(color: const Color(0xFFE5DCC4)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Row(children: const [
-                            Icon(Icons.payments, color: Colors.white54, size: 18),
+                            Icon(Icons.payments, color: Color(0xFFA08F70), size: 18),
                             SizedBox(width: 8),
-                            Text('MÉTODOS DE PAGO', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
+                            Text('MÉTODOS DE PAGO', style: TextStyle(color: Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 12)),
                           ]),
                           const SizedBox(height: 24),
                           _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
@@ -786,8 +786,8 @@ class _ReportsViewState extends State<ReportsView> {
                           ElevatedButton(
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF334155),
-                              foregroundColor: Colors.white,
+                              backgroundColor: const Color(0xFFE5DCC4),
+                              foregroundColor: Color(0xFFFAF1DE),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
@@ -805,18 +805,18 @@ class _ReportsViewState extends State<ReportsView> {
                           child: Container(
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFFFAF1DE),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFF334155)),
+                              border: Border.all(color: const Color(0xFFE5DCC4)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Row(children: const [
-                                  Icon(Icons.star, color: Colors.white54, size: 18),
+                                  Icon(Icons.star, color: Color(0xFFA08F70), size: 18),
                                   SizedBox(width: 8),
-                                  Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
+                                  Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 12)),
                                 ]),
                                 const SizedBox(height: 16),
                                 _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
@@ -834,18 +834,18 @@ class _ReportsViewState extends State<ReportsView> {
                           child: Container(
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E293B),
+                              color: const Color(0xFFFAF1DE),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: const Color(0xFF334155)),
+                              border: Border.all(color: const Color(0xFFE5DCC4)),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Row(children: const [
-                                  Icon(Icons.payments, color: Colors.white54, size: 18),
+                                  Icon(Icons.payments, color: Color(0xFFA08F70), size: 18),
                                   SizedBox(width: 8),
-                                  Text('MÉTODOS DE PAGO', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12)),
+                                  Text('MÉTODOS DE PAGO', style: TextStyle(color: Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 12)),
                                 ]),
                                 const SizedBox(height: 24),
                                 _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
@@ -857,8 +857,8 @@ class _ReportsViewState extends State<ReportsView> {
                                 ElevatedButton(
                                   onPressed: () {},
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF334155),
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: const Color(0xFFE5DCC4),
+                                    foregroundColor: Color(0xFFFAF1DE),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
@@ -884,17 +884,17 @@ class _ReportsViewState extends State<ReportsView> {
       },
       decoration: InputDecoration(
         hintText: 'Buscar...',
-        hintStyle: const TextStyle(color: Colors.white54),
-        prefixIcon: const Icon(Icons.search, color: Colors.white54),
+        hintStyle: const TextStyle(color: Color(0xFFA08F70)),
+        prefixIcon: const Icon(Icons.search, color: Color(0xFFA08F70)),
         filled: true,
-        fillColor: const Color(0xFF0F172A),
+        fillColor: const Color(0xFFFAF1DE),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
       ),
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFF3D2E1A)),
     );
   }
 
@@ -902,15 +902,15 @@ class _ReportsViewState extends State<ReportsView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(20),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _waitersList.any((w) => w['id'] == _waiterFilter) ? _waiterFilter : 'Todos',
           isExpanded: true,
-          dropdownColor: const Color(0xFF1E293B),
-          style: const TextStyle(color: Colors.white54),
+          dropdownColor: const Color(0xFFFAF1DE),
+          style: const TextStyle(color: Color(0xFFA08F70)),
           items: [
             const DropdownMenuItem(value: 'Todos', child: Text('Todos los Meseros')),
             ..._waitersList.map((w) => DropdownMenuItem(value: w['id'], child: Text(w['name']))),
@@ -930,15 +930,15 @@ class _ReportsViewState extends State<ReportsView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(20),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _paymentFilter,
           isExpanded: true,
-          dropdownColor: const Color(0xFF1E293B),
-          style: const TextStyle(color: Colors.white54),
+          dropdownColor: const Color(0xFFFAF1DE),
+          style: const TextStyle(color: Color(0xFFA08F70)),
           items: const [
             DropdownMenuItem(value: 'Todos', child: Text('Pago: Todos')),
             DropdownMenuItem(value: 'EFECTIVO', child: Text('Efectivo')),
@@ -971,7 +971,7 @@ class _ReportsViewState extends State<ReportsView> {
         alignment: Alignment.center,
         child: Text(
           _isLoading ? 'Cargando datos...' : 'No hay datos registrados',
-          style: const TextStyle(color: Colors.white54),
+          style: const TextStyle(color: Color(0xFFA08F70)),
         ),
       );
     }
@@ -980,15 +980,15 @@ class _ReportsViewState extends State<ReportsView> {
 
     // Encabezado
     filas.add(Container(
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFFFAF1DE),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(children: const [
-        Expanded(flex: 2, child: Text('ID ORDEN', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold))),
-        Expanded(flex: 2, child: Text('HORA', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold))),
-        Expanded(flex: 3, child: Text('MESA / CLIENTE', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold))),
-        Expanded(flex: 2, child: Text('PAGO', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold))),
-        Expanded(flex: 2, child: Text('MESERO', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold))),
-        Expanded(flex: 2, child: Text('TOTAL', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+        Expanded(flex: 2, child: Text('ID ORDEN', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text('HORA', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
+        Expanded(flex: 3, child: Text('MESA / CLIENTE', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text('PAGO', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text('MESERO', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text('TOTAL', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
       ]),
     ));
 
@@ -1010,14 +1010,14 @@ class _ReportsViewState extends State<ReportsView> {
 
       filas.add(Container(
         decoration: BoxDecoration(
-          color: i.isEven ? const Color(0xFF263148) : const Color(0xFF1E293B),
-          border: const Border(top: BorderSide(color: Color(0xFF334155), width: 0.5)),
+          color: i.isEven ? const Color(0xFF263148) : const Color(0xFFFAF1DE),
+          border: const Border(top: BorderSide(color: Color(0xFFE5DCC4), width: 0.5)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(children: [
-          Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
-          Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Colors.white70, fontSize: 13), overflow: TextOverflow.ellipsis)),
-          Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Colors.white, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(
             flex: 2,
             child: Container(
@@ -1030,13 +1030,13 @@ class _ReportsViewState extends State<ReportsView> {
               child: Text(method, style: TextStyle(color: methodColor, fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
             ),
           ),
-          Expanded(flex: 2, child: Text(o['waiters']?['name'] ?? 'N/A', style: const TextStyle(color: Colors.white70, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text(o['waiters']?['name'] ?? 'N/A', style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(
             flex: 2,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('\$${o['total_amount']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                Text('\$${o['total_amount']}', style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13)),
                 const SizedBox(width: 6),
                 InkWell(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
@@ -1062,7 +1062,7 @@ class _ReportsViewState extends State<ReportsView> {
       child: Text(
         text,
         style: TextStyle(
-          color: isHeader ? Colors.white54 : Colors.white,
+          color: isHeader ? Color(0xFFA08F70) : Color(0xFFFAF1DE),
           fontSize: isHeader ? 11 : 13,
           fontWeight: (isHeader || bold) ? FontWeight.bold : FontWeight.normal,
           letterSpacing: isHeader ? 0.5 : 0,
@@ -1080,7 +1080,7 @@ class _ReportsViewState extends State<ReportsView> {
         Container(
           height: 200,
           alignment: Alignment.center,
-          child: const Text('No hay datos para este período', style: TextStyle(color: Colors.white54)),
+          child: const Text('No hay datos para este período', style: TextStyle(color: Color(0xFFA08F70))),
         ),
       ];
     }
@@ -1088,15 +1088,15 @@ class _ReportsViewState extends State<ReportsView> {
       // Header
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        color: const Color(0xFF0F172A).withValues(alpha: 0.5),
+        color: const Color(0xFFFAF1DE).withValues(alpha: 0.5),
         child: const Row(
           children: [
-            Expanded(flex: 3, child: Text('FECHA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
-            Expanded(flex: 2, child: Text('ÓRDENES', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
-            Expanded(flex: 2, child: Text('EFECTIVO', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
-            Expanded(flex: 2, child: Text('TARJETA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
-            Expanded(flex: 2, child: Text('TRANSFERENCIA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold))),
-            Expanded(flex: 2, child: Text('TOTAL DÍA', style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
+            Expanded(flex: 3, child: Text('FECHA', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('ÓRDENES', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('EFECTIVO', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('TARJETA', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('TRANSFERENCIA', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold))),
+            Expanded(flex: 2, child: Text('TOTAL DÍA', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold), textAlign: TextAlign.right)),
           ],
         ),
       ),
@@ -1104,7 +1104,7 @@ class _ReportsViewState extends State<ReportsView> {
       ...cuts.map((c) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Divider(color: Color(0xFF334155), height: 1),
+          const Divider(color: Color(0xFFE5DCC4), height: 1),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             child: Row(
@@ -1122,7 +1122,7 @@ class _ReportsViewState extends State<ReportsView> {
                         child: const Icon(Icons.calendar_today, color: Color(0xFFFF6D00), size: 14),
                       ),
                       const SizedBox(width: 10),
-                      Text(c['label'] as String, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text(c['label'] as String, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1144,7 +1144,7 @@ class _ReportsViewState extends State<ReportsView> {
                   flex: 2,
                   child: Text(
                     '\$${(c['total'] as double).toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15),
+                    style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w900, fontSize: 15),
                     textAlign: TextAlign.right,
                   ),
                 ),
@@ -1195,18 +1195,18 @@ class _ReportsViewState extends State<ReportsView> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF1E293B),
+          color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFFAF1DE),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+            color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: isSelected ? Colors.white : Colors.white54),
+            Icon(icon, size: 16, color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70)),
             const SizedBox(width: 8),
-            Text(label, style: TextStyle(color: isSelected ? Colors.white : Colors.white54, fontWeight: FontWeight.bold, fontSize: 13)),
+            Text(label, style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 13)),
           ],
         ),
       ),
@@ -1218,7 +1218,7 @@ class _ReportsViewState extends State<ReportsView> {
       flex: flex,
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Color(0xFFA08F70), fontSize: 12, fontWeight: FontWeight.bold),
         textAlign: textAlign,
       ),
     );
@@ -1230,7 +1230,7 @@ class _ReportsViewState extends State<ReportsView> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F172A),
+            color: const Color(0xFFFAF1DE),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: const Color(0xFFFF6D00), size: 20),
@@ -1246,20 +1246,20 @@ class _ReportsViewState extends State<ReportsView> {
                   Text(
                     name,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     '$qty unidades',
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               LinearProgressIndicator(
                 value: qty / maxQty,
-                backgroundColor: const Color(0xFF0F172A),
+                backgroundColor: const Color(0xFFFAF1DE),
                 color: const Color(0xFFFF6D00),
                 minHeight: 6,
                 borderRadius: BorderRadius.circular(4),
@@ -1285,19 +1285,19 @@ class _ReportsViewState extends State<ReportsView> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
+                color: const Color(0xFFFAF1DE),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: color, size: 16),
             ),
             const SizedBox(width: 12),
-            Text(name, style: const TextStyle(color: Colors.white)),
+            Text(name, style: const TextStyle(color: Color(0xFF3D2E1A))),
           ],
         ),
         Text(
           '\$${amount.toStringAsFixed(2)}',
           style: const TextStyle(
-            color: Colors.white,
+            color: Color(0xFFFAF1DE),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -1314,9 +1314,9 @@ class _ReportsViewState extends State<ReportsView> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFFE5DCC4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1324,7 +1324,7 @@ class _ReportsViewState extends State<ReportsView> {
           Text(
             title,
             style: const TextStyle(
-              color: Colors.white54,
+              color: Color(0xFFA08F70),
               fontSize: 11,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.1,
@@ -1338,7 +1338,7 @@ class _ReportsViewState extends State<ReportsView> {
                 child: Text(
                   value,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                     fontSize: 24, // Reducido para evitar overflows
                     fontWeight: FontWeight.w900,
                   ),

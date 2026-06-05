@@ -95,7 +95,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 600;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -117,7 +117,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white),
+                      color: Color(0xFFFAF1DE)),
                 ),
                 const SizedBox(height: 6),
                 // Sucursal leída de la URL (o del dispositivo)
@@ -129,7 +129,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                     Text(
                       Globals.currentBranch,
                       style: const TextStyle(
-                          color: Color(0xFF94A3B8), fontSize: 14),
+                          color: Color(0xFFA08F70), fontSize: 14),
                     ),
                   ],
                 ),
@@ -144,16 +144,16 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   maxLength: 4,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 30, letterSpacing: 18, color: Colors.white),
+                      fontSize: 30, letterSpacing: 18, color: Color(0xFFFAF1DE)),
                   decoration: InputDecoration(
                     hintText: '● ● ● ●',
                     hintStyle:
-                        const TextStyle(color: Color(0xFF334155), fontSize: 22),
+                        const TextStyle(color: Color(0xFFE5DCC4), fontSize: 22),
                     labelText: 'PIN de Mesero',
-                    labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                    labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                     counterText: '',
                     filled: true,
-                    fillColor: const Color(0xFF1E293B),
+                    fillColor: const Color(0xFFFAF1DE),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -175,7 +175,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                     onPressed: _loading ? null : _enter,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
+                      foregroundColor: Color(0xFFFAF1DE),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                     ),
@@ -184,7 +184,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2.5))
+                                color: Color(0xFFFAF1DE), strokeWidth: 2.5))
                         : const Text('Entrar',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),

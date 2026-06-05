@@ -46,10 +46,10 @@ class UpdateAppButton extends StatelessWidget {
       return TextButton.icon(
         onPressed: () => forceAppUpdate(context),
         icon: const Icon(Icons.system_update_alt,
-            size: 15, color: Color(0xFF64748B)),
+            size: 15, color: Color(0xFFA08F70)),
         label: const Text(
           'Actualizar versión',
-          style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
+          style: TextStyle(color: Color(0xFFA08F70), fontSize: 12),
         ),
       );
     }
@@ -58,8 +58,8 @@ class UpdateAppButton extends StatelessWidget {
       icon: const Icon(Icons.system_update_alt, size: 16),
       label: const Text('Actualizar App', style: TextStyle(fontSize: 12)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF1E293B),
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFAF1DE),
+        foregroundColor: Color(0xFFFAF1DE),
         minimumSize: const Size.fromHeight(36),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

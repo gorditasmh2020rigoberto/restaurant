@@ -278,7 +278,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
     ];
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -295,7 +295,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
+                    color: const Color(0xFFE5DCC4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -305,7 +305,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                 child: Text(
                   'Bebidas',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -323,10 +323,10 @@ class _MenuBrowserState extends State<MenuBrowser> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 18),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                          color: const Color(0xFF334155), width: 1.5),
+                          color: const Color(0xFFE5DCC4), width: 1.5),
                     ),
                     child: Row(
                       children: [
@@ -335,14 +335,14 @@ class _MenuBrowserState extends State<MenuBrowser> {
                         Text(
                           s.$2,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFFFAF1DE),
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const Spacer(),
                         const Icon(Icons.chevron_right,
-                            color: Colors.white54, size: 22),
+                            color: Color(0xFFA08F70), size: 22),
                       ],
                     ),
                   ),
@@ -366,10 +366,10 @@ class _MenuBrowserState extends State<MenuBrowser> {
         width: 80,
         height: 72,
         decoration: BoxDecoration(
-          color: selected ? activeColor : const Color(0xFF1E293B),
+          color: selected ? activeColor : const Color(0xFFFAF1DE),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? activeColor : const Color(0xFF334155),
+            color: selected ? activeColor : const Color(0xFFE5DCC4),
             width: 1.5,
           ),
         ),
@@ -379,7 +379,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
             Icon(
               Globals.categoryIcon(label),
               size: 26,
-              color: selected ? Colors.white : Colors.white60,
+              color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
             ),
             const SizedBox(height: 6),
             Padding(
@@ -393,7 +393,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                   fontSize: 11,
                   height: 1.1,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color: selected ? Colors.white : Colors.white60,
+                  color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                 ),
               ),
             ),
@@ -597,14 +597,14 @@ class _MenuBrowserState extends State<MenuBrowser> {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   '(${cards.length})',
                   style:
-                      const TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
+                      const TextStyle(fontSize: 14, color: Color(0xFFA08F70)),
                 ),
               ],
             ),
@@ -683,7 +683,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
             ),
           ),
         ),
-        const Divider(height: 1, thickness: 1, color: Color(0xFF1E293B)),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFFAF1DE)),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
