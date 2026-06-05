@@ -117,7 +117,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white),
+                      color: Color(0xFFFAF1DE)),
                 ),
                 const SizedBox(height: 6),
                 // Sucursal leída de la URL (o del dispositivo)
@@ -144,7 +144,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   maxLength: 4,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 30, letterSpacing: 18, color: Colors.white),
+                      fontSize: 30, letterSpacing: 18, color: Color(0xFFFAF1DE)),
                   decoration: InputDecoration(
                     hintText: '● ● ● ●',
                     hintStyle:
@@ -175,7 +175,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                     onPressed: _loading ? null : _enter,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
+                      foregroundColor: Color(0xFFFAF1DE),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)),
                     ),
@@ -184,7 +184,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                             width: 24,
                             height: 24,
                             child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2.5))
+                                color: Color(0xFFFAF1DE), strokeWidth: 2.5))
                         : const Text('Entrar',
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),

@@ -85,7 +85,7 @@ class DishDetailView extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(56),
               backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: Color(0xFFFAF1DE),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             child: const Text('Añadir al Pedido', style: TextStyle(fontSize: 18)),

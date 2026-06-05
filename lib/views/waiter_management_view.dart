@@ -41,7 +41,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
         backgroundColor: const Color(0xFFFAF1DE),
         title: Text(
           'QR Meseros · $slug',
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFFFAF1DE)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -52,7 +52,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                 data: url,
                 version: QrVersions.auto,
                 size: 240,
-                backgroundColor: Colors.white,
+                backgroundColor: Color(0xFFFAF1DE),
                 errorCorrectionLevel: QrErrorCorrectLevel.H,
               ),
             ),
@@ -97,7 +97,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                 data: url,
                 version: QrVersions.auto,
                 size: 88,
-                backgroundColor: Colors.white,
+                backgroundColor: Color(0xFFFAF1DE),
                 errorCorrectionLevel: QrErrorCorrectLevel.M,
               ),
             ),
@@ -137,7 +137,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     _LinkBtn(
                       icon: Icons.copy,
                       label: 'Copiar enlace',
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       borderColor: const Color(0xFFD8CBA8),
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: url));
@@ -180,13 +180,13 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
         return AlertDialog(
           backgroundColor: const Color(0xFFFAF1DE),
           title: Text(isEditing ? 'Editar Mesero' : 'Nuevo Mesero',
-              style: const TextStyle(color: Colors.white)),
+              style: const TextStyle(color: Color(0xFFFAF1DE))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFFFAF1DE)),
                 decoration: InputDecoration(
                   labelText: 'Nombre Completo',
                   labelStyle: const TextStyle(color: Colors.grey),
@@ -199,7 +199,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
               const SizedBox(height: 16),
               TextField(
                 controller: pinController,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFFFAF1DE)),
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 decoration: InputDecoration(
@@ -279,7 +279,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00)),
               child: const Text('Guardar',
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Color(0xFFFAF1DE))),
             ),
           ],
         );
@@ -294,7 +294,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar Mesero?',
-            style: TextStyle(color: Colors.white)),
+            style: TextStyle(color: Color(0xFFFAF1DE))),
         content: const Text('Esta acción no se puede deshacer.',
             style: TextStyle(color: Colors.grey)),
         actions: [
@@ -376,7 +376,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     style: TextStyle(
                         fontSize: isMobile ? 24 : 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                        color: Color(0xFFFAF1DE)),
                   ),
                   if (isMobile) const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -385,7 +385,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     label: const Text('Nuevo Mesero'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
+                      foregroundColor: Color(0xFFFAF1DE),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -441,7 +441,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                  color: Color(0xFFFAF1DE)),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

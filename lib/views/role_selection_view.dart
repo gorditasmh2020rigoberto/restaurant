@@ -281,7 +281,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                 Text(
                   'Gorditas Mis Hermanas',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5),
+                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Color(0xFFFAF1DE), letterSpacing: -0.5),
                 ),
                 const SizedBox(height: 32),
                 
@@ -323,7 +323,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                       onPressed: () => setState(() => _entered = true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF6D00),
-                        foregroundColor: Colors.white,
+                        foregroundColor: Color(0xFFFAF1DE),
                         minimumSize: const Size(double.infinity, 64),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 12,
@@ -340,7 +340,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                     children: [
                       const Icon(Icons.store, color: Color(0xFFFF6D00), size: 16),
                       const SizedBox(width: 8),
-                      Text(Globals.currentBranch, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 18)),
                       const SizedBox(width: 16),
                       TextButton(
                         onPressed: () => setState(() {
@@ -425,7 +425,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                color: Colors.white,
+                                color: Color(0xFFFAF1DE),
                                 padding: const EdgeInsets.all(16),
                                 child: Image.network('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=$encodedUrl', width: 250, height: 250),
                               ),
@@ -475,7 +475,7 @@ class _BranchButton extends StatelessWidget {
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
           maxLines: 2,
-          style: TextStyle(color: isSelected ? Colors.white : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 14),
+          style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 14),
         ),
       ),
     );
@@ -517,7 +517,7 @@ class _RoleCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis),
+                      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)), overflow: TextOverflow.ellipsis),
                       Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFFA08F70)), overflow: TextOverflow.ellipsis),
                     ],
                   ),

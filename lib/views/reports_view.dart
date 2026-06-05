@@ -362,7 +362,7 @@ class _ReportsViewState extends State<ReportsView> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Color(0xFFFAF1DE),
                             ),
                           ),
                           SizedBox(width: isSmall ? 0 : 24, height: isSmall ? 16 : 0),
@@ -518,8 +518,8 @@ class _ReportsViewState extends State<ReportsView> {
                                 ),
                               );
                             },
-                            icon: const Icon(Icons.point_of_sale, color: Colors.white, size: 18),
-                            label: const Text('Cortes y Movimientos', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            icon: const Icon(Icons.point_of_sale, color: Color(0xFFFAF1DE), size: 18),
+                            label: const Text('Cortes y Movimientos', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green[600],
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -564,13 +564,13 @@ class _ReportsViewState extends State<ReportsView> {
                                       Icon(
                                         Icons.file_download,
                                         size: 18,
-                                        color: Colors.white,
+                                        color: Color(0xFFFAF1DE),
                                       ),
                                       SizedBox(width: 8),
                                       Text(
                                         'Exportar',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Color(0xFFFAF1DE),
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -715,7 +715,7 @@ class _ReportsViewState extends State<ReportsView> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(color: const Color(0xFFFF6D00), borderRadius: BorderRadius.circular(6)),
-                                    child: const Text('1', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                    child: const Text('1', style: TextStyle(color: Color(0xFFFAF1DE), fontSize: 12, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(width: 12),
                                   const Text('Siguiente', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12)),
@@ -787,7 +787,7 @@ class _ReportsViewState extends State<ReportsView> {
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFFE5DCC4),
-                              foregroundColor: Colors.white,
+                              foregroundColor: Color(0xFFFAF1DE),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               padding: const EdgeInsets.symmetric(vertical: 16),
                             ),
@@ -858,7 +858,7 @@ class _ReportsViewState extends State<ReportsView> {
                                   onPressed: () {},
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFFE5DCC4),
-                                    foregroundColor: Colors.white,
+                                    foregroundColor: Color(0xFFFAF1DE),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                   ),
@@ -894,7 +894,7 @@ class _ReportsViewState extends State<ReportsView> {
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
       ),
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFFFAF1DE)),
     );
   }
 
@@ -1015,9 +1015,9 @@ class _ReportsViewState extends State<ReportsView> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(children: [
-          Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13), overflow: TextOverflow.ellipsis)),
-          Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Colors.white, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(
             flex: 2,
             child: Container(
@@ -1036,7 +1036,7 @@ class _ReportsViewState extends State<ReportsView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('\$${o['total_amount']}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                Text('\$${o['total_amount']}', style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 13)),
                 const SizedBox(width: 6),
                 InkWell(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
@@ -1062,7 +1062,7 @@ class _ReportsViewState extends State<ReportsView> {
       child: Text(
         text,
         style: TextStyle(
-          color: isHeader ? Color(0xFFA08F70) : Colors.white,
+          color: isHeader ? Color(0xFFA08F70) : Color(0xFFFAF1DE),
           fontSize: isHeader ? 11 : 13,
           fontWeight: (isHeader || bold) ? FontWeight.bold : FontWeight.normal,
           letterSpacing: isHeader ? 0.5 : 0,
@@ -1122,7 +1122,7 @@ class _ReportsViewState extends State<ReportsView> {
                         child: const Icon(Icons.calendar_today, color: Color(0xFFFF6D00), size: 14),
                       ),
                       const SizedBox(width: 10),
-                      Text(c['label'] as String, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      Text(c['label'] as String, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1144,7 +1144,7 @@ class _ReportsViewState extends State<ReportsView> {
                   flex: 2,
                   child: Text(
                     '\$${(c['total'] as double).toStringAsFixed(2)}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15),
+                    style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.w900, fontSize: 15),
                     textAlign: TextAlign.right,
                   ),
                 ),
@@ -1204,9 +1204,9 @@ class _ReportsViewState extends State<ReportsView> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: isSelected ? Colors.white : Color(0xFFA08F70)),
+            Icon(icon, size: 16, color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70)),
             const SizedBox(width: 8),
-            Text(label, style: TextStyle(color: isSelected ? Colors.white : Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 13)),
+            Text(label, style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 13)),
           ],
         ),
       ),
@@ -1246,13 +1246,13 @@ class _ReportsViewState extends State<ReportsView> {
                   Text(
                     name,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     '$qty unidades',
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFFFAF1DE)),
                   ),
                 ],
               ),
@@ -1291,13 +1291,13 @@ class _ReportsViewState extends State<ReportsView> {
               child: Icon(icon, color: color, size: 16),
             ),
             const SizedBox(width: 12),
-            Text(name, style: const TextStyle(color: Colors.white)),
+            Text(name, style: const TextStyle(color: Color(0xFFFAF1DE))),
           ],
         ),
         Text(
           '\$${amount.toStringAsFixed(2)}',
           style: const TextStyle(
-            color: Colors.white,
+            color: Color(0xFFFAF1DE),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -1338,7 +1338,7 @@ class _ReportsViewState extends State<ReportsView> {
                 child: Text(
                   value,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                     fontSize: 24, // Reducido para evitar overflows
                     fontWeight: FontWeight.w900,
                   ),

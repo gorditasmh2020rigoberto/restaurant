@@ -121,9 +121,9 @@ class _ClientMenuViewState extends State<ClientMenuView> {
                         isMobile
                             ? 'Carrito (${cart.itemCount}) · \$${cart.totalAmount.toStringAsFixed(2)}'
                             : 'Ver Carrito (${cart.itemCount}) - \$${cart.totalAmount.toStringAsFixed(2)}',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: isMobile ? 14 : 16),
+                        style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: isMobile ? 14 : 16),
                       ),
-                      icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                      icon: const Icon(Icons.shopping_cart, color: Color(0xFFFAF1DE)),
                     ),
                   ),
                 );

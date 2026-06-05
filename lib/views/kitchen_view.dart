@@ -72,7 +72,7 @@ class _KitchenViewState extends State<KitchenView> {
                       Text(
                         'Guisados disponibles hoy',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFFFAF1DE),
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -141,7 +141,7 @@ class _KitchenViewState extends State<KitchenView> {
                               title: Text(
                                 g['name'] as String,
                                 style: TextStyle(
-                                  color: available ? Colors.white : Color(0xFFB6A88A),
+                                  color: available ? Color(0xFFFAF1DE) : Color(0xFFB6A88A),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -318,7 +318,7 @@ class _KitchenViewState extends State<KitchenView> {
                 const SizedBox(height: 12),
                 Text(
                   widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'Cocina To Go' : 'Cocina'),
-                  style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFF7A6E5A))),
               ],
@@ -341,7 +341,7 @@ class _KitchenViewState extends State<KitchenView> {
   Widget _sidebarItem(BuildContext context, IconData icon, String title, bool isSelected) {
     return ListTile(
       leading: Icon(icon, color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFA08F70)),
-      title: Text(title, style: TextStyle(color: isSelected ? Colors.white : Color(0xFF7A6E5A), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      title: Text(title, style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
       selected: isSelected,
       selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
       onTap: () {
@@ -610,7 +610,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                   '¡URGENTE! TIEMPO EXCEDIDO',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2.0,
                     fontSize: 14,
@@ -630,7 +630,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                       children: [
                         Text(
                           _orderTypeStr,
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
                         ),
                         const SizedBox(height: 4),
                         Row(
@@ -700,7 +700,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                             _deliveryAddress,
                                             style: const TextStyle(
                                               fontSize: 15,
-                                              color: Colors.white,
+                                              color: Color(0xFFFAF1DE),
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
@@ -718,7 +718,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                           _deliveryPhone,
                                           style: const TextStyle(
                                             fontSize: 15,
-                                            color: Colors.white,
+                                            color: Color(0xFFFAF1DE),
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -747,12 +747,12 @@ class _OrderTicketState extends State<_OrderTicket> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(isOverTime ? Icons.warning_amber_rounded : Icons.schedule, 
-                             color: isOverTime ? Colors.white : const Color(0xFFFF6D00), size: 18),
+                             color: isOverTime ? Color(0xFFFAF1DE) : const Color(0xFFFF6D00), size: 18),
                         const SizedBox(width: 6),
                         Text(
                           _formattedElapsed,
                           style: TextStyle(
-                            color: isOverTime ? Colors.white : const Color(0xFFFF6D00),
+                            color: isOverTime ? Color(0xFFFAF1DE) : const Color(0xFFFF6D00),
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
@@ -808,7 +808,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
-                                    color: isReady ? Colors.green : Colors.white,
+                                    color: isReady ? Colors.green : Color(0xFFFAF1DE),
                                   ),
                                 ),
                                 Expanded(
@@ -820,7 +820,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500,
-                                          color: isReady ? Colors.grey : Colors.white,
+                                          color: isReady ? Colors.grey : Color(0xFFFAF1DE),
                                           decoration: isReady ? TextDecoration.lineThrough : null,
                                         ),
                                       ),
@@ -882,7 +882,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             children: [
                               Icon(Icons.warning, color: Colors.orange),
                               SizedBox(width: 8),
-                              Text('¿Orden Incompleta?', style: TextStyle(color: Colors.white)),
+                              Text('¿Orden Incompleta?', style: TextStyle(color: Color(0xFFFAF1DE))),
                             ],
                           ),
                           content: const Text(
@@ -897,7 +897,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context, true),
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                              child: const Text('Avisar Platillo Agotado', style: TextStyle(color: Colors.white)),
+                              child: const Text('Avisar Platillo Agotado', style: TextStyle(color: Color(0xFFFAF1DE))),
                             ),
                           ],
                         ),
@@ -978,7 +978,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                   label: Text(isAllStationReady ? 'Comanda Lista' : 'Avisar Agotado'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isAllStationReady ? Colors.green : const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),

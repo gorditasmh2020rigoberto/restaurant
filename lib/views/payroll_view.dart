@@ -71,7 +71,7 @@ class _PayrollViewState extends State<PayrollView> {
           return DropdownButtonFormField<String>(
             value: _selectedWaiterId,
             dropdownColor: const Color(0xFFFAF1DE),
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFFFAF1DE)),
             decoration: InputDecoration(
               labelText: 'Seleccionar mesero',
               labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -82,7 +82,7 @@ class _PayrollViewState extends State<PayrollView> {
             ),
             items: waiters.map((w) => DropdownMenuItem<String>(
               value: w['id'] as String,
-              child: Text(w['name'] as String, style: const TextStyle(color: Colors.white)),
+              child: Text(w['name'] as String, style: const TextStyle(color: Color(0xFFFAF1DE))),
             )).toList(),
             onChanged: (val) {
               final waiter = waiters.firstWhere((w) => w['id'] == val);
@@ -111,7 +111,7 @@ class _PayrollViewState extends State<PayrollView> {
                   children: [
                     Icon(Icons.account_balance_wallet, color: Color(0xFFFF6D00), size: 28),
                     SizedBox(width: 12),
-                    Text('Nómina y Pagos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('Nómina y Pagos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -126,7 +126,7 @@ class _PayrollViewState extends State<PayrollView> {
                         label: const Text('Reporte Semanal', style: TextStyle(fontSize: 13)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFAF1DE),
-                          foregroundColor: Colors.white,
+                          foregroundColor: Color(0xFFFAF1DE),
                           side: const BorderSide(color: Color(0xFFE5DCC4)),
                         ),
                       ),
@@ -140,7 +140,7 @@ class _PayrollViewState extends State<PayrollView> {
                           label: const Text('Nuevo Movimiento', style: TextStyle(fontSize: 13)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFF6D00),
-                            foregroundColor: Colors.white,
+                            foregroundColor: Color(0xFFFAF1DE),
                           ),
                         ),
                       ),
@@ -156,7 +156,7 @@ class _PayrollViewState extends State<PayrollView> {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Nómina y Pagos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text('Nómina y Pagos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
                     Text('Gestión de sueldos, préstamos y propinas para meseros', style: TextStyle(fontSize: 14, color: Color(0xFFA08F70))),
                   ],
                 ),
@@ -168,7 +168,7 @@ class _PayrollViewState extends State<PayrollView> {
                   label: const Text('Reporte Semanal'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFAF1DE),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     side: const BorderSide(color: Color(0xFFE5DCC4)),
                   ),
@@ -181,7 +181,7 @@ class _PayrollViewState extends State<PayrollView> {
                     label: const Text('Nuevo Movimiento'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
+                      foregroundColor: Color(0xFFFAF1DE),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     ),
                   ),
@@ -220,9 +220,9 @@ class _PayrollViewState extends State<PayrollView> {
                 selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                 leading: CircleAvatar(
                   backgroundColor: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
-                  child: Text(waiter['name'][0].toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(waiter['name'][0].toUpperCase(), style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
                 ),
-                title: Text(waiter['name'], style: TextStyle(color: isSelected ? Colors.white : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                title: Text(waiter['name'], style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                 onTap: () {
                   setState(() {
                     _selectedWaiterId = waiter['id'];
@@ -366,7 +366,7 @@ class _PayrollViewState extends State<PayrollView> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(value, style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 24, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -442,7 +442,7 @@ class _PayrollViewState extends State<PayrollView> {
               decoration: BoxDecoration(color: typeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
               child: Icon(typeIcon, color: typeColor, size: 20),
             ),
-            title: Text(typeLabel, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            title: Text(typeLabel, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
             subtitle: Text(
               '${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.parse(row['created_at']))}${row['description'] != null ? ' - ${row['description']}' : ''}',
               style: const TextStyle(color: Color(0xFFA08F70), fontSize: 13),
@@ -496,7 +496,7 @@ class _PayrollViewState extends State<PayrollView> {
                 children: [
                    const Icon(Icons.summarize, color: Color(0xFFFF6D00)),
                    const SizedBox(width: 12),
-                   const Text('Reporte Semanal', style: TextStyle(color: Colors.white)),
+                   const Text('Reporte Semanal', style: TextStyle(color: Color(0xFFFAF1DE))),
                 ],
               ),
               content: Column(
@@ -533,7 +533,7 @@ class _PayrollViewState extends State<PayrollView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(weekRange, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          Text(weekRange, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
                           const Icon(Icons.calendar_month, color: Color(0xFFFF6D00)),
                         ],
                       ),
@@ -549,7 +549,7 @@ class _PayrollViewState extends State<PayrollView> {
                   label: const Text('Solo Mesero Actual'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE5DCC4),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                 ),
                 ElevatedButton.icon(
@@ -558,7 +558,7 @@ class _PayrollViewState extends State<PayrollView> {
                   label: const Text('Todos los Meseros'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                 ),
               ],
@@ -777,14 +777,14 @@ class _PayrollViewState extends State<PayrollView> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: const Color(0xFFFAF1DE),
-              title: const Text('Registrar Movimiento', style: TextStyle(color: Colors.white)),
+              title: const Text('Registrar Movimiento', style: TextStyle(color: Color(0xFFFAF1DE))),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
                     value: type,
                     dropdownColor: const Color(0xFFFAF1DE),
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFFFAF1DE)),
                     decoration: const InputDecoration(labelText: 'Tipo de Movimiento', labelStyle: TextStyle(color: Colors.grey)),
                     items: const [
                       DropdownMenuItem(value: 'salary', child: Text('Sueldo / Jornada')),
@@ -798,14 +798,14 @@ class _PayrollViewState extends State<PayrollView> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: amountController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFFFAF1DE)),
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Monto (\$)', labelStyle: TextStyle(color: Colors.grey)),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: descriptionController,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: Color(0xFFFAF1DE)),
                     decoration: const InputDecoration(labelText: 'Descripción / Comentario', labelStyle: TextStyle(color: Colors.grey)),
                   ),
                 ],
@@ -832,7 +832,7 @@ class _PayrollViewState extends State<PayrollView> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                   child: const Text('Guardar'),
                 ),

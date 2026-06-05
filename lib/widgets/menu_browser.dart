@@ -305,7 +305,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                 child: Text(
                   'Bebidas',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -335,7 +335,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                         Text(
                           s.$2,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFFFAF1DE),
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
@@ -379,7 +379,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
             Icon(
               Globals.categoryIcon(label),
               size: 26,
-              color: selected ? Colors.white : Color(0xFFA08F70),
+              color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
             ),
             const SizedBox(height: 6),
             Padding(
@@ -393,7 +393,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                   fontSize: 11,
                   height: 1.1,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color: selected ? Colors.white : Color(0xFFA08F70),
+                  color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                 ),
               ),
             ),
@@ -597,7 +597,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
-                    color: Colors.white,
+                    color: Color(0xFFFAF1DE),
                   ),
                 ),
                 const SizedBox(width: 8),

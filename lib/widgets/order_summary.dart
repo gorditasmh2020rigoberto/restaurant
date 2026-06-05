@@ -106,7 +106,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: active
-                              ? Colors.white
+                              ? Color(0xFFFAF1DE)
                               : const Color(0xFFA08F70),
                           fontWeight: FontWeight.bold,
                           fontSize: 15)),
@@ -126,7 +126,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 SizedBox(width: 12),
                 Text('¿Desea dejar propina?',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
               ],
             ),
             content: Column(
@@ -145,7 +145,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               color: Color(0xFFA08F70), fontSize: 15)),
                       Text('\$${total.toStringAsFixed(2)}',
                           style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFFFAF1DE),
                               fontSize: 22,
                               fontWeight: FontWeight.bold)),
                     ],
@@ -164,7 +164,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
@@ -221,12 +221,12 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                             children: [
                               const Text('TOTAL A COBRAR:',
                                   style: TextStyle(
-                                      color: Colors.white,
+                                      color: Color(0xFFFAF1DE),
                                       fontWeight: FontWeight.w900,
                                       fontSize: 16)),
                               Text('\$${totalFinal.toStringAsFixed(2)}',
                                   style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Color(0xFFFAF1DE),
                                       fontSize: 26,
                                       fontWeight: FontWeight.w900)),
                             ]),
@@ -239,12 +239,12 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                       children: [
                         const Text('TOTAL A COBRAR:',
                             style: TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFFFAF1DE),
                                 fontWeight: FontWeight.w900,
                                 fontSize: 16)),
                         Text('\$${totalFinal.toStringAsFixed(2)}',
                             style: const TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFFFAF1DE),
                                 fontSize: 26,
                                 fontWeight: FontWeight.w900)),
                       ]),
@@ -264,7 +264,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
+                  foregroundColor: Color(0xFFFAF1DE),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                   padding: const EdgeInsets.symmetric(
@@ -294,7 +294,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             SizedBox(width: 12),
             Text('Método de Pago',
                 style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+                    color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -313,7 +313,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                           TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
                   Text('\$${total.toStringAsFixed(2)}',
                       style: const TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFFFAF1DE),
                           fontSize: 24,
                           fontWeight: FontWeight.bold)),
                 ],
@@ -328,7 +328,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
                 backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
               ),
@@ -342,7 +342,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
                 backgroundColor: Colors.blueAccent,
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
               ),
@@ -356,7 +356,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14)),
               ),
@@ -392,7 +392,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 SizedBox(width: 12),
                 Text('Cobro en Efectivo',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold)),
+                        color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
               ],
             ),
             content: Column(
@@ -411,7 +411,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               color: Color(0xFFA08F70), fontSize: 16)),
                       Text('\$${total.toStringAsFixed(2)}',
                           style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFFFAF1DE),
                               fontSize: 24,
                               fontWeight: FontWeight.bold)),
                     ],
@@ -518,7 +518,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                           },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Color(0xFFFAF1DE),
                   minimumSize: const Size(150, 50),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -579,7 +579,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Quitar elemento?', style: TextStyle(color: Colors.white)),
+        title: const Text('¿Quitar elemento?', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: Text('¿Deseas eliminar "${item['name']}" de la cuenta?', style: const TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70)))),
@@ -826,7 +826,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               backgroundColor: const Color(0xFFFAF1DE),
               title: Text(
                 '¿Qué guisado lleva el ${dish.name}?',
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16),
               ),
               content: guisados.isEmpty
                   ? const Text(
@@ -854,8 +854,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                             },
                             title: Text(name,
                                 style: const TextStyle(
-                                    color: Colors.white, fontSize: 14)),
-                            checkColor: Colors.white,
+                                    color: Color(0xFFFAF1DE), fontSize: 14)),
+                            checkColor: Color(0xFFFAF1DE),
                             activeColor: const Color(0xFFFF6D00),
                             side: const BorderSide(color: Color(0xFFA08F70)),
                           );
@@ -895,11 +895,11 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('Nuevo cliente', style: TextStyle(color: Colors.white)),
+        title: const Text('Nuevo cliente', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFFFAF1DE)),
           decoration: InputDecoration(
             hintText: 'Nombre del cliente',
             hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
@@ -940,7 +940,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Eliminar cliente?', style: TextStyle(color: Colors.white)),
+        title: const Text('¿Eliminar cliente?', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: Text(
           'Se eliminarán "$clientName" y todos sus platillos.',
           style: const TextStyle(color: Color(0xFF7A6E5A)),
@@ -969,11 +969,11 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('Editar nombre', style: TextStyle(color: Colors.white)),
+        title: const Text('Editar nombre', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFFFAF1DE)),
           decoration: const InputDecoration(
             hintText: 'Nombre del cliente',
             hintStyle: TextStyle(color: Color(0xFFB6A88A)),
@@ -1228,7 +1228,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                         title: Text(
                           entry.value.dish.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFFAF1DE)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1252,7 +1252,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               padding: const EdgeInsets.symmetric(horizontal: 2),
                               child: Text(
                                 '${entry.value.quantity}',
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
                               ),
                             ),
                             IconButton(
@@ -1321,7 +1321,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size.fromHeight(btnHeight),
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
@@ -1337,7 +1337,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                         height: isCompact ? 16 : 20,
                         width: isCompact ? 16 : 20,
                         child: const CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2))
+                            color: Color(0xFFFAF1DE), strokeWidth: 2))
                     : Icon(Icons.send, size: isCompact ? 18 : 22),
                 label: Text(
                   widget.waiterId == null
@@ -1348,7 +1348,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size.fromHeight(btnHeight),
                   backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.white,
+                  foregroundColor: Color(0xFFFAF1DE),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
