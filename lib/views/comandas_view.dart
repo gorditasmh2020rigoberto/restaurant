@@ -1267,10 +1267,10 @@ class _ComandasViewState extends State<ComandasView> {
                 child: GridView.builder(
                   padding: EdgeInsets.zero,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    mainAxisExtent: 78,
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    mainAxisExtent: 68,
                   ),
                   itemCount: _availableCategories.length,
                   itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
