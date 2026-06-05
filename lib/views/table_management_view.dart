@@ -135,7 +135,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                               fontWeight: FontWeight.bold,
                               color: Colors.white)),
                       const Text('Administra las mesas de tu restaurante',
-                          style: TextStyle(fontSize: 16, color: Color(0xFF94A3B8))),
+                          style: TextStyle(fontSize: 16, color: Color(0xFFA08F70))),
                     ],
                   ),
                   if (screenWidth < 800) const SizedBox(height: 16),
@@ -175,10 +175,10 @@ class _TableManagementViewState extends State<TableManagementView> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF1E293B),
+                                  color: const Color(0xFFFAF1DE),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: isOccupied ? Colors.red[700]! : const Color(0xFF334155),
+                                    color: isOccupied ? Colors.red[700]! : const Color(0xFFE5DCC4),
                                     width: isOccupied ? 2 : 1,
                                   ),
                                 ),
@@ -189,7 +189,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                                       Icon(
                                         Icons.table_restaurant,
                                         size: 36,
-                                        color: isOccupied ? Colors.red[400] : const Color(0xFF94A3B8),
+                                        color: isOccupied ? Colors.red[400] : const Color(0xFFA08F70),
                                       ),
                                       const SizedBox(height: 8),
                                       Text(

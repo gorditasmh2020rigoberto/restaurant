@@ -265,7 +265,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -287,14 +287,14 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                 
                 // PHASE 1: SELECT BRANCH
                 if (!_entered) ...[
-                  Text('¿En qué sucursal te encuentras?', style: TextStyle(color: const Color(0xFF94A3B8), fontSize: isMobile ? 14 : 16)),
+                  Text('¿En qué sucursal te encuentras?', style: TextStyle(color: const Color(0xFFA08F70), fontSize: isMobile ? 14 : 16)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF334155), width: 1.5),
+                      border: Border.all(color: const Color(0xFFE5DCC4), width: 1.5),
                     ),
                     child: Row(
                       children: Globals.branches.asMap().entries.map((entry) {
@@ -437,8 +437,8 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.qr_code, color: Color(0xFF94A3B8)),
-                    label: const Text('Mostrar QR de la App', style: TextStyle(color: Color(0xFF94A3B8))),
+                    icon: const Icon(Icons.qr_code, color: Color(0xFFA08F70)),
+                    label: const Text('Mostrar QR de la App', style: TextStyle(color: Color(0xFFA08F70))),
                   ),
                   const SizedBox(height: 8),
                   const UpdateAppButton(compact: true),
@@ -475,7 +475,7 @@ class _BranchButton extends StatelessWidget {
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
           maxLines: 2,
-          style: TextStyle(color: isSelected ? Colors.white : const Color(0xFF94A3B8), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 14),
+          style: TextStyle(color: isSelected ? Colors.white : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 14),
         ),
       ),
     );
@@ -494,9 +494,9 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFFE5DCC4)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -509,7 +509,7 @@ class _RoleCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: const Color(0xFFFAF1DE), borderRadius: BorderRadius.circular(12)),
                   child: Icon(icon, color: const Color(0xFFFF6D00), size: 28),
                 ),
                 const SizedBox(width: 20),
@@ -518,11 +518,11 @@ class _RoleCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis),
-                      Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)), overflow: TextOverflow.ellipsis),
+                      Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFFA08F70)), overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Color(0xFF475569)),
+                const Icon(Icons.chevron_right, color: Color(0xFFD8CBA8)),
               ],
             ),
           ),

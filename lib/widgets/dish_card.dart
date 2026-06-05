@@ -680,13 +680,13 @@ Widget _buildExtrasSection({
                     size: 16,
                     color: selected
                         ? const Color(0xFFFF6D00)
-                        : Colors.white54,
+                        : Color(0xFFA08F70),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${e.name}  \$${e.price.toStringAsFixed(0)}',
                     style: TextStyle(
-                      color: selected ? Colors.white : Colors.white70,
+                      color: selected ? Colors.white : Color(0xFF7A6E5A),
                       fontSize: 13,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w400,
@@ -876,7 +876,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     child: Text(
                                       sabor,
                                       style: TextStyle(
-                                        color: isSelected ? Colors.white : Colors.white70,
+                                        color: isSelected ? Colors.white : Color(0xFF7A6E5A),
                                         fontSize: 11,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                                       ),
@@ -1328,7 +1328,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Text(
                                     termino,
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.white60,
+                                      color: isSelected ? Colors.white : Color(0xFFA08F70),
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1396,7 +1396,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Text(
                                     salsa,
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : Colors.white60,
+                                      color: isSelected ? Colors.white : Color(0xFFA08F70),
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1434,7 +1434,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             fontWeight: FontWeight.w600,
                             color: selected.length >= 5
                                 ? const Color(0xFFFF6D00)
-                                : Colors.white38,
+                                : Color(0xFFB6A88A),
                           ),
                         ),
                       ],
@@ -1486,7 +1486,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        color: isChecked ? Colors.white : Colors.white70,
+                                        color: isChecked ? Colors.white : Color(0xFF7A6E5A),
                                         fontSize: 11,
                                         fontWeight: isChecked ? FontWeight.w600 : FontWeight.w400,
                                       ),
@@ -2432,7 +2432,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             fontWeight: FontWeight.w600,
                             color: selectedSalsasChilaquil.length >= 2
                                 ? const Color(0xFFFF6D00)
-                                : Colors.white38,
+                                : Color(0xFFB6A88A),
                           ),
                         ),
                       ],
@@ -2490,7 +2490,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   style: TextStyle(
                                     color: isSelected
                                         ? Colors.white
-                                        : Colors.white60,
+                                        : Color(0xFFA08F70),
                                     fontSize: 13,
                                     fontWeight: isSelected
                                         ? FontWeight.w700
@@ -2525,7 +2525,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             fontWeight: FontWeight.w600,
                             color: selectedGuisados.length >= 5
                                 ? const Color(0xFFFF6D00)
-                                : Colors.white38,
+                                : Color(0xFFB6A88A),
                           ),
                         ),
                       ],
@@ -2585,7 +2585,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: isChecked ? Colors.white : Colors.white70,
+                                          color: isChecked ? Colors.white : Color(0xFF7A6E5A),
                                           fontSize: 11,
                                           fontWeight: isChecked
                                               ? FontWeight.w600
@@ -2759,7 +2759,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                         style: TextStyle(
                                           color: isSel
                                               ? Colors.white
-                                              : Colors.white70,
+                                              : Color(0xFF7A6E5A),
                                           fontSize: 11,
                                           fontWeight: isSel
                                               ? FontWeight.w700
@@ -3461,7 +3461,7 @@ class _BaseChip extends StatelessWidget {
                       fontSize: 14,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected ? Colors.white : Colors.white60,
+                      color: selected ? Colors.white : Color(0xFFA08F70),
                     ),
                   ),
                   Text(
@@ -3469,7 +3469,7 @@ class _BaseChip extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: selected ? Colors.white70 : const Color(0xFFA08F70),
+                      color: selected ? Color(0xFF7A6E5A) : const Color(0xFFA08F70),
                     ),
                   ),
                 ],

@@ -40,7 +40,7 @@ class _KitchenViewState extends State<KitchenView> {
   void _showGuisadosSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: const Color(0xFFFAF1DE),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -59,7 +59,7 @@ class _KitchenViewState extends State<KitchenView> {
                   margin: const EdgeInsets.only(top: 12, bottom: 8),
                   width: 40, height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white24,
+                    color: Color(0xFFCFC7B2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -84,10 +84,10 @@ class _KitchenViewState extends State<KitchenView> {
                   padding: EdgeInsets.only(left: 20, right: 20, bottom: 8),
                   child: Text(
                     'Desactiva los que ya no hay para que no se puedan ordenar.',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                    style: TextStyle(color: Color(0xFFA08F70), fontSize: 12),
                   ),
                 ),
-                const Divider(color: Color(0xFF334155)),
+                const Divider(color: Color(0xFFE5DCC4)),
                 Expanded(
                   child: StreamBuilder<List<Map<String, dynamic>>>(
                     stream: _supabase
@@ -108,7 +108,7 @@ class _KitchenViewState extends State<KitchenView> {
                       if (guisados.isEmpty) {
                         return const Center(
                           child: Text('No hay guisados registrados.',
-                              style: TextStyle(color: Colors.white54)),
+                              style: TextStyle(color: Color(0xFFA08F70))),
                         );
                       }
 
@@ -122,26 +122,26 @@ class _KitchenViewState extends State<KitchenView> {
                           return Container(
                             margin: const EdgeInsets.symmetric(vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F172A),
+                              color: const Color(0xFFFAF1DE),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: ListTile(
                               leading: CircleAvatar(
                                 backgroundColor: available
                                     ? const Color(0xFFFF6D00).withOpacity(0.15)
-                                    : const Color(0xFF334155),
+                                    : const Color(0xFFE5DCC4),
                                 child: Icon(
                                   Icons.lunch_dining,
                                   color: available
                                       ? const Color(0xFFFF6D00)
-                                      : Colors.white38,
+                                      : Color(0xFFB6A88A),
                                   size: 20,
                                 ),
                               ),
                               title: Text(
                                 g['name'] as String,
                                 style: TextStyle(
-                                  color: available ? Colors.white : Colors.white38,
+                                  color: available ? Colors.white : Color(0xFFB6A88A),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -163,8 +163,8 @@ class _KitchenViewState extends State<KitchenView> {
                                       .eq('id', g['id']);
                                 },
                                 activeColor: const Color(0xFFFF6D00),
-                                inactiveThumbColor: Colors.white38,
-                                inactiveTrackColor: const Color(0xFF334155),
+                                inactiveThumbColor: Color(0xFFB6A88A),
+                                inactiveTrackColor: const Color(0xFFE5DCC4),
                               ),
                             ),
                           );
@@ -199,7 +199,7 @@ class _KitchenViewState extends State<KitchenView> {
           children: [
             Text(widget.isDrinksOnly ? 'Bar de Bebidas' : (widget.isTakeoutOnly ? 'Cocina To Go' : 'Línea de Producción'), 
                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: isMobile ? 18 : 22)),
-            Text('Sucursal: ${Globals.currentBranch}', style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+            Text('Sucursal: ${Globals.currentBranch}', style: const TextStyle(fontSize: 12, color: Color(0xFFA08F70))),
           ],
         ),
         actions: [
@@ -305,12 +305,12 @@ class _KitchenViewState extends State<KitchenView> {
 
   Widget _buildSidebar(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: Color(0xFF1E293B)),
+            decoration: const BoxDecoration(color: Color(0xFFFAF1DE)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -320,17 +320,17 @@ class _KitchenViewState extends State<KitchenView> {
                   widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'Cocina To Go' : 'Cocina'),
                   style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-                Text(Globals.currentBranch, style: const TextStyle(color: Colors.white70)),
+                Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFF7A6E5A))),
               ],
             ),
           ),
           _sidebarItem(context, Icons.kitchen, 'Línea de Producción', widget.isDrinksOnly == false && widget.isTakeoutOnly == false),
           _sidebarItem(context, Icons.local_bar, 'Bar de Bebidas', widget.isDrinksOnly),
           _sidebarItem(context, Icons.takeout_dining, 'Cocina To Go / Uber', widget.isTakeoutOnly),
-          const Divider(color: Color(0xFF334155)),
+          const Divider(color: Color(0xFFE5DCC4)),
           ListTile(
-            leading: const Icon(Icons.arrow_back, color: Colors.white54),
-            title: const Text('Volver al Menú Principal', style: TextStyle(color: Colors.white70)),
+            leading: const Icon(Icons.arrow_back, color: Color(0xFFA08F70)),
+            title: const Text('Volver al Menú Principal', style: TextStyle(color: Color(0xFF7A6E5A))),
             onTap: () => Navigator.pop(context),
           ),
         ],
@@ -340,8 +340,8 @@ class _KitchenViewState extends State<KitchenView> {
 
   Widget _sidebarItem(BuildContext context, IconData icon, String title, bool isSelected) {
     return ListTile(
-      leading: Icon(icon, color: isSelected ? const Color(0xFFFF6D00) : Colors.white54),
-      title: Text(title, style: TextStyle(color: isSelected ? Colors.white : Colors.white70, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+      leading: Icon(icon, color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFA08F70)),
+      title: Text(title, style: TextStyle(color: isSelected ? Colors.white : Color(0xFF7A6E5A), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
       selected: isSelected,
       selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
       onTap: () {
@@ -575,7 +575,7 @@ class _OrderTicketState extends State<_OrderTicket> {
       duration: const Duration(milliseconds: 500),
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: isOverTime ? warningColor.withValues(alpha: 0.15) : const Color(0xFF1E293B),
+        color: isOverTime ? warningColor.withValues(alpha: 0.15) : const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isOverTime ? warningColor : Colors.transparent,
@@ -639,19 +639,19 @@ class _OrderTicketState extends State<_OrderTicket> {
                               'Folio #${widget.order['daily_folio'] ?? '---'}',
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                             ),
-                            const Text(' • ', style: TextStyle(color: Color(0xFF94A3B8))),
+                            const Text(' • ', style: TextStyle(color: Color(0xFFA08F70))),
                             Text(
                               widget.order['created_at'] != null 
                                 ? widget.order['created_at'].toString().substring(0, 10).split('-').reversed.join('/')
                                 : '',
-                              style: const TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
+                              style: const TextStyle(fontSize: 14, color: Color(0xFFA08F70)),
                             ),
                           ],
                         ),
                         const SizedBox(height: 2),
                         Text(
                           'Servidor: ${_waiterName ?? 'Caja'}${_customerName != null && _customerName!.isNotEmpty ? ' • $_customerName' : ''}',
-                          style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                          style: const TextStyle(fontSize: 13, color: Color(0xFFA08F70)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -764,7 +764,7 @@ class _OrderTicketState extends State<_OrderTicket> {
               ),
             ),
             
-            const Divider(color: Color(0xFF334155), height: 1, thickness: 1),
+            const Divider(color: Color(0xFFE5DCC4), height: 1, thickness: 1),
           
             // Items list
             Expanded(
@@ -843,7 +843,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                           subtitleLine2,
                                           style: TextStyle(
                                             fontSize: 12,
-                                            color: isReady ? Colors.grey : Colors.white54,
+                                            color: isReady ? Colors.grey : Color(0xFFA08F70),
                                           ),
                                         ),
                                     ],
@@ -877,7 +877,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                       bool? confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          backgroundColor: const Color(0xFF1E293B),
+                          backgroundColor: const Color(0xFFFAF1DE),
                           title: const Row(
                             children: [
                               Icon(Icons.warning, color: Colors.orange),
@@ -887,7 +887,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                           ),
                           content: const Text(
                             'Faltan platillos por marcar como listos.\n\nSi continúas, le avisaremos al mesero que faltan platillos (agotados).',
-                            style: TextStyle(color: Colors.white70),
+                            style: TextStyle(color: Color(0xFF7A6E5A)),
                           ),
                           actions: [
                             TextButton(

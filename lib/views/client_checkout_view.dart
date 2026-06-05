@@ -100,7 +100,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) => AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFFFAF1DE),
             title: const Text('Pago con Clip',
                 style: TextStyle(color: Colors.white)),
             content: SizedBox(
@@ -179,7 +179,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                   Navigator.pop(ctx);
                 },
                 child: const Text('Cancelar',
-                    style: TextStyle(color: Colors.white54)),
+                    style: TextStyle(color: Color(0xFFA08F70))),
               ),
             ],
           ),
@@ -443,7 +443,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B), // Slate-800
+                    color: const Color(0xFFFAF1DE), // Slate-800
                     boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, -5))],
                   ),
                   child: SafeArea(
