@@ -385,7 +385,7 @@ class _ComandasViewState extends State<ComandasView> {
                     Icon(
                       Globals.categoryIcon(label),
                       size: 20,
-                      color: selected ? Colors.white : Colors.white70,
+                      color: selected ? Colors.white : Color(0xFF7A6E5A),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -393,7 +393,7 @@ class _ComandasViewState extends State<ComandasView> {
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                        color: selected ? Colors.white : Colors.white60,
+                        color: selected ? Colors.white : Color(0xFFA08F70),
                         height: 1.0,
                       ),
                     ),
@@ -405,7 +405,7 @@ class _ComandasViewState extends State<ComandasView> {
                     Icon(
                       Globals.categoryIcon(label),
                       size: 16,
-                      color: selected ? Colors.white : Colors.white70,
+                      color: selected ? Colors.white : Color(0xFF7A6E5A),
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -413,7 +413,7 @@ class _ComandasViewState extends State<ComandasView> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                        color: selected ? Colors.white : Colors.white70,
+                        color: selected ? Colors.white : Color(0xFF7A6E5A),
                       ),
                     ),
                   ],
@@ -477,7 +477,7 @@ class _ComandasViewState extends State<ComandasView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('Nuevo cliente', style: TextStyle(color: Colors.white)),
         content: TextField(
           controller: controller,
@@ -485,13 +485,13 @@ class _ComandasViewState extends State<ComandasView> {
           style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
             hintText: 'Nombre del cliente',
-            hintStyle: TextStyle(color: Colors.white38),
+            hintStyle: TextStyle(color: Color(0xFFB6A88A)),
             enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
             focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70)))),
           TextButton(
             onPressed: () {
               final name = controller.text.trim();
@@ -617,7 +617,7 @@ class _ComandasViewState extends State<ComandasView> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: Row(
           children: [
             Icon(
@@ -640,14 +640,14 @@ class _ComandasViewState extends State<ComandasView> {
               isDrinks
                   ? 'Las bebidas de $location ya están listas en el bar.'
                   : 'Los alimentos de $location ya están listos en cocina.',
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 18),
+              style: const TextStyle(color: Color(0xFFA08F70), fontSize: 18),
             ),
             const SizedBox(height: 12),
             Text(
               isDrinks
                   ? 'Pasa por las bebidas para llevarlas a la mesa.'
                   : 'Pasa por los alimentos para llevarlos a la mesa.',
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Color(0xFF7A6E5A)),
             ),
           ],
         ),
@@ -702,7 +702,7 @@ class _ComandasViewState extends State<ComandasView> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: Row(
           children: [
             Icon(isIncomplete ? Icons.warning_amber_rounded : Icons.restaurant, 
@@ -720,14 +720,14 @@ class _ComandasViewState extends State<ComandasView> {
               isIncomplete 
                   ? 'La orden para $location tiene platillos que están AGOTADOS o faltantes.'
                   : 'La orden para $location ya está lista en producción.',
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 18),
+              style: const TextStyle(color: Color(0xFFA08F70), fontSize: 18),
             ),
             const SizedBox(height: 16),
             Text(
               isIncomplete 
                   ? 'Ve a producción para revisar la orden y notificar al cliente.'
                   : 'Por favor, ve por ella para entregarla al cliente.',
-              style: const TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Color(0xFF7A6E5A)),
             ),
           ],
         ),
@@ -879,7 +879,7 @@ class _ComandasViewState extends State<ComandasView> {
                                             final table = tables[index];
                                             final isOccupied = occupiedTableIds.contains(table['id']);
                                             return Material(
-                                              color: isOccupied ? const Color(0xFF331515) : const Color(0xFF1E293B),
+                                              color: isOccupied ? const Color(0xFF331515) : const Color(0xFFFAF1DE),
                                               borderRadius: BorderRadius.circular(12),
                                               child: InkWell(
                                                 onTap: () {
@@ -896,7 +896,7 @@ class _ComandasViewState extends State<ComandasView> {
                                                   decoration: BoxDecoration(
                                                     borderRadius: BorderRadius.circular(12),
                                                     border: Border.all(
-                                                      color: isOccupied ? Colors.red[800]! : const Color(0xFF334155),
+                                                      color: isOccupied ? Colors.red[800]! : const Color(0xFFE5DCC4),
                                                       width: 1.5,
                                                     ),
                                                   ),
@@ -904,7 +904,7 @@ class _ComandasViewState extends State<ComandasView> {
                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                     children: [
                                                       Icon(Icons.table_restaurant, size: 20,
-                                                          color: isOccupied ? Colors.red[300] : const Color(0xFF94A3B8)),
+                                                          color: isOccupied ? Colors.red[300] : const Color(0xFFA08F70)),
                                                       const SizedBox(height: 2),
                                                       Text('Mesa ${table['table_number']}',
                                                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold,
@@ -1025,7 +1025,7 @@ class _ComandasViewState extends State<ComandasView> {
                 overflow: TextOverflow.ellipsis),
             if (!isPhone)
               Text('Sucursal: ${Globals.currentBranch}',
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8))),
+                  style: const TextStyle(fontSize: 12, color: Color(0xFFA08F70))),
           ],
         ),
         actions: [
@@ -1164,7 +1164,7 @@ class _ComandasViewState extends State<ComandasView> {
       children: [
         Expanded(child: _buildMenuContent(context)),
         if (_carritoVisible) ...[
-          const VerticalDivider(width: 1, thickness: 1, color: Color(0xFF334155)),
+          const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE5DCC4)),
           SizedBox(
             width: sidebarWidth,
             child: _buildOrderSummaryContent(),
@@ -1180,9 +1180,9 @@ class _ComandasViewState extends State<ComandasView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.table_restaurant, size: 64, color: Color(0xFF334155)),
+                        const Icon(Icons.table_restaurant, size: 64, color: Color(0xFFE5DCC4)),
                         const SizedBox(height: 16),
-                        const Text('Selecciona una mesa primero', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16)),
+                        const Text('Selecciona una mesa primero', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
                         const SizedBox(height: 24),
                         ElevatedButton.icon(
                           onPressed: _showTableSelectionDialog,
@@ -1316,7 +1316,7 @@ class _ComandasViewState extends State<ComandasView> {
     ];
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -1333,7 +1333,7 @@ class _ComandasViewState extends State<ComandasView> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
+                    color: const Color(0xFFE5DCC4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1360,9 +1360,9 @@ class _ComandasViewState extends State<ComandasView> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFF334155), width: 1.5),
+                      border: Border.all(color: const Color(0xFFE5DCC4), width: 1.5),
                     ),
                     child: Row(
                       children: [
@@ -1378,7 +1378,7 @@ class _ComandasViewState extends State<ComandasView> {
                         ),
                         const Spacer(),
                         const Icon(Icons.chevron_right,
-                            color: Colors.white54, size: 22),
+                            color: Color(0xFFA08F70), size: 22),
                       ],
                     ),
                   ),
@@ -1454,7 +1454,7 @@ class _ComandasViewState extends State<ComandasView> {
                 const SizedBox(width: 8),
                 Text(
                   '(${cards.length})',
-                  style: const TextStyle(fontSize: 14, color: Color(0xFF94A3B8)),
+                  style: const TextStyle(fontSize: 14, color: Color(0xFFA08F70)),
                 ),
               ],
             ),

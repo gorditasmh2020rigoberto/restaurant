@@ -159,7 +159,7 @@ class _BillingViewState extends State<BillingView> {
     final isMobile = screenWidth < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFF3D2E1A),
       appBar: AppBar(
         title: const Text(
           'Facturación (CFDI 4.0)',
@@ -979,7 +979,7 @@ class _BillingViewState extends State<BillingView> {
       text,
       style: const TextStyle(
         fontWeight: FontWeight.w800,
-        color: Color(0xFF64748B),
+        color: Color(0xFFA08F70),
         fontSize: 12,
         letterSpacing: 1.2,
       ),
@@ -1004,7 +1004,7 @@ class _BillingViewState extends State<BillingView> {
           isExpanded: true,
           dropdownColor: Colors.white,
           style: TextStyle(
-            color: onChanged == null ? Colors.black54 : const Color(0xFF1E293B),
+            color: onChanged == null ? Colors.black54 : const Color(0xFFFAF1DE),
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -1060,7 +1060,7 @@ class _BillingViewState extends State<BillingView> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: Color(0xFFFAF1DE),
               ),
             ),
             const SizedBox(height: 4),
@@ -1095,7 +1095,7 @@ class _BillingViewState extends State<BillingView> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: Color(0xFFFAF1DE),
               ),
             ),
           ),
@@ -1140,7 +1140,7 @@ class _BillingViewState extends State<BillingView> {
           style: TextStyle(
             fontSize: isBold ? 20 : 15,
             fontWeight: isBold ? FontWeight.w900 : FontWeight.w500,
-            color: isBold ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+            color: isBold ? const Color(0xFFFAF1DE) : const Color(0xFFA08F70),
           ),
         ),
         const SizedBox(width: 32),
@@ -1152,7 +1152,7 @@ class _BillingViewState extends State<BillingView> {
             style: TextStyle(
               fontSize: isBold ? 22 : 15,
               fontWeight: isBold ? FontWeight.w900 : FontWeight.w700,
-              color: isBold ? const Color(0xFF1E3A8A) : const Color(0xFF1E293B),
+              color: isBold ? const Color(0xFF1E3A8A) : const Color(0xFFFAF1DE),
             ),
           ),
         ),

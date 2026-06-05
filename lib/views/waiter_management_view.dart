@@ -38,7 +38,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: Text(
           'QR Meseros · $slug',
           style: const TextStyle(color: Colors.white),
@@ -59,7 +59,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
             const SizedBox(height: 12),
             Text(
               url,
-              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+              style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
               textAlign: TextAlign.center,
             ),
           ],
@@ -81,7 +81,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFF6D00).withValues(alpha: 0.45)),
       ),
@@ -124,7 +124,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                 // URL
                 Text(
                   url,
-                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
+                  style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -138,7 +138,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                       icon: Icons.copy,
                       label: 'Copiar enlace',
                       color: Colors.white,
-                      borderColor: const Color(0xFF475569),
+                      borderColor: const Color(0xFFD8CBA8),
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: url));
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,7 +178,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFFFAF1DE),
           title: Text(isEditing ? 'Editar Mesero' : 'Nuevo Mesero',
               style: const TextStyle(color: Colors.white)),
           content: Column(
@@ -191,7 +191,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                   labelText: 'Nombre Completo',
                   labelStyle: const TextStyle(color: Colors.grey),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFFFAF1DE),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -206,7 +206,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                   labelText: 'Contraseña / PIN (Ej. 1234)',
                   labelStyle: const TextStyle(color: Colors.grey),
                   filled: true,
-                  fillColor: const Color(0xFF0F172A),
+                  fillColor: const Color(0xFFFAF1DE),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -292,7 +292,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
     await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar Mesero?',
             style: TextStyle(color: Colors.white)),
         content: const Text('Esta acción no se puede deshacer.',
@@ -414,10 +414,10 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFFFAF1DE),
                         borderRadius: BorderRadius.circular(16),
                         border:
-                            Border.all(color: const Color(0xFF334155)),
+                            Border.all(color: const Color(0xFFE5DCC4)),
                       ),
                       child: Row(
                         children: [

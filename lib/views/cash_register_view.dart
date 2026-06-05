@@ -140,7 +140,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
             }
 
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: const Color(0xFFFAF1DE),
               title: const Text('Registrar Movimiento de Caja', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: Column(
@@ -179,13 +179,13 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     // Categoría
                     DropdownButtonFormField<String>(
                       initialValue: _selectedCategory,
-                      dropdownColor: const Color(0xFF0F172A),
+                      dropdownColor: const Color(0xFFFAF1DE),
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Categoría',
-                        labelStyle: const TextStyle(color: Colors.white54),
+                        labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFFFAF1DE),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       items: validCategories.map((c) => DropdownMenuItem(value: c, child: Text(c.toUpperCase()))).toList(),
@@ -197,13 +197,13 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     if (_selectedType == 'salida') ...[
                       DropdownButtonFormField<String>(
                         initialValue: _selectedRecipient,
-                        dropdownColor: const Color(0xFF0F172A),
+                        dropdownColor: const Color(0xFFFAF1DE),
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: 'Dirigido a / Destinatario',
-                          labelStyle: const TextStyle(color: Colors.white54),
+                          labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                           filled: true,
-                          fillColor: const Color(0xFF0F172A),
+                          fillColor: const Color(0xFFFAF1DE),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         items: _recipientOptions.map((c) => DropdownMenuItem(value: c, child: Text(c.toUpperCase()))).toList(),
@@ -219,10 +219,10 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Monto (\$)',
-                        labelStyle: const TextStyle(color: Colors.white54),
-                        prefixIcon: const Icon(Icons.attach_money, color: Colors.white54),
+                        labelStyle: const TextStyle(color: Color(0xFFA08F70)),
+                        prefixIcon: const Icon(Icons.attach_money, color: Color(0xFFA08F70)),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFFFAF1DE),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -231,13 +231,13 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     // Método de pago
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
-                      dropdownColor: const Color(0xFF0F172A),
+                      dropdownColor: const Color(0xFFFAF1DE),
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         labelText: 'Medio de Pago',
-                        labelStyle: const TextStyle(color: Colors.white54),
+                        labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFFFAF1DE),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       items: ['EFECTIVO', 'TARJETA', 'CLIP', 'TRANSFERENCIA']
@@ -254,9 +254,9 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                       maxLines: 2,
                       decoration: InputDecoration(
                         labelText: 'Concepto / Descripción detallada (opcional)',
-                        labelStyle: const TextStyle(color: Colors.white54),
+                        labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                         filled: true,
-                        fillColor: const Color(0xFF0F172A),
+                        fillColor: const Color(0xFFFAF1DE),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -266,7 +266,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+                  child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6D00)),
@@ -302,10 +302,10 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       appBar: AppBar(
         title: const Text('Cortes y Movimientos de Caja', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -337,7 +337,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     Text(
                       _tableError!,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white70, fontSize: 16),
+                      style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 16),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
@@ -372,10 +372,10 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                 // Lista de movimientos
                 Expanded(
                   child: _movements.isEmpty 
-                    ? const Center(child: Text('No hay movimientos registrados.', style: TextStyle(color: Colors.white54, fontSize: 16)))
+                    ? const Center(child: Text('No hay movimientos registrados.', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)))
                     : ListView.separated(
                         itemCount: _movements.length,
-                        separatorBuilder: (_,_) => const Divider(color: Color(0xFF334155)),
+                        separatorBuilder: (_,_) => const Divider(color: Color(0xFFE5DCC4)),
                         itemBuilder: (context, index) {
                           final movement = _movements[index];
                           final isEntrada = movement['type'] == 'entrada';
@@ -396,7 +396,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                             ),
                             subtitle: Text(
                               '$dateStr\n${(movement['recipient'] != null && movement['recipient'] != 'N/A') ? 'Destinatario: ${movement['recipient']} - ' : ''}${movement['description'] ?? 'Sin descripción'}',
-                              style: const TextStyle(color: Colors.white70),
+                              style: const TextStyle(color: Color(0xFF7A6E5A)),
                             ),
                             trailing: Text(
                               '${isEntrada ? '+' : '-'}\$${amount.toStringAsFixed(2)}',
@@ -422,14 +422,14 @@ class _CashRegisterViewState extends State<CashRegisterView> {
       constraints: BoxConstraints(minWidth: isMobile ? 150 : 200),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF334155)),
+        border: Border.all(color: const Color(0xFFE5DCC4)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(title, style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 12, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Text(value, style: TextStyle(color: accentColor, fontSize: 24, fontWeight: FontWeight.bold)),
         ],

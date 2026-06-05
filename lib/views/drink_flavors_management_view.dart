@@ -153,7 +153,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       case 'jugo_1litro':  return const Color(0xFFFBBF24);
       case 'agua_600':     return const Color(0xFF67E8F9);
       case 'agua_1litro':  return const Color(0xFF6EE7B7);
-      default:             return const Color(0xFF94A3B8);
+      default:             return const Color(0xFFA08F70);
     }
   }
 
@@ -161,13 +161,13 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar sabor?', style: TextStyle(color: Colors.white)),
-        content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Colors.white70)),
+        content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -221,7 +221,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFFFAF1DE),
           title: Text(
             isEditing ? 'Editar sabor' : 'Nuevo sabor',
             style: const TextStyle(color: Colors.white),
@@ -242,7 +242,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                       : selectedCategory == 'jugo'
                           ? 'Ej. Naranja, Verde...'
                           : 'Ej. Coca-Cola, Sprite...',
-                  hintStyle: const TextStyle(color: Colors.white38),
+                  hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
                   enabledBorder: const UnderlineInputBorder(
                       borderSide: BorderSide(color: Color(0xFFFF6D00))),
                   focusedBorder: const UnderlineInputBorder(
@@ -251,7 +251,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               ),
               const SizedBox(height: 20),
               const Text('Categoría',
-                  style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 1)),
+                  style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, letterSpacing: 1)),
               const SizedBox(height: 8),
               ...typeOptions.map((opt) {
                 final isSelected = selectedCategory == opt.$1;
@@ -264,10 +264,10 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                          : const Color(0xFF0F172A),
+                          : const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
                         width: 1.5,
                       ),
                     ),
@@ -276,16 +276,16 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                         Icon(
                           isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                           size: 18,
-                          color: isSelected ? const Color(0xFFFF6D00) : Colors.white38,
+                          color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFB6A88A),
                         ),
                         const SizedBox(width: 10),
                         Icon(opt.$3, size: 16,
-                            color: isSelected ? const Color(0xFFFF6D00) : Colors.white38),
+                            color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFB6A88A)),
                         const SizedBox(width: 8),
                         Text(
                           opt.$2,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.white60,
+                            color: isSelected ? Colors.white : Color(0xFFA08F70),
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                           ),
                         ),
@@ -299,7 +299,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+              child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
             ),
             TextButton(
               onPressed: nameController.text.trim().isNotEmpty
@@ -377,13 +377,13 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar tamaño?', style: TextStyle(color: Colors.white)),
-        content: Text('Se eliminará el precio para "$type".', style: const TextStyle(color: Colors.white70)),
+        content: Text('Se eliminará el precio para "$type".', style: const TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -417,13 +417,13 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: const Color(0xFFFAF1DE),
           title: const Text('Nuevo tamaño', style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Categoría', style: TextStyle(color: Colors.white54, fontSize: 12, letterSpacing: 1)),
+              const Text('Categoría', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, letterSpacing: 1)),
               const SizedBox(height: 8),
               ...categoryOptions.map((opt) {
                 final isSelected = category == opt.$1;
@@ -434,22 +434,22 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                      color: isSelected ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
                         width: 1.5,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                            size: 18, color: isSelected ? const Color(0xFFFF6D00) : Colors.white38),
+                            size: 18, color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFB6A88A)),
                         const SizedBox(width: 10),
-                        Icon(opt.$3, size: 16, color: isSelected ? const Color(0xFFFF6D00) : Colors.white38),
+                        Icon(opt.$3, size: 16, color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFB6A88A)),
                         const SizedBox(width: 8),
                         Text(opt.$2, style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.white60,
+                          color: isSelected ? Colors.white : Color(0xFFA08F70),
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                         )),
                       ],
@@ -466,9 +466,9 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Tamaño',
-                        labelStyle: TextStyle(color: Colors.white54),
+                        labelStyle: TextStyle(color: Color(0xFFA08F70)),
                         hintText: 'Ej. 500 ml',
-                        hintStyle: TextStyle(color: Colors.white38),
+                        hintStyle: TextStyle(color: Color(0xFFB6A88A)),
                         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
                         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
                       ),
@@ -483,11 +483,11 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                       style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         labelText: 'Precio',
-                        labelStyle: TextStyle(color: Colors.white54),
+                        labelStyle: TextStyle(color: Color(0xFFA08F70)),
                         prefixText: '\$',
                         prefixStyle: TextStyle(color: Color(0xFFFF6D00)),
                         hintText: '0',
-                        hintStyle: TextStyle(color: Colors.white38),
+                        hintStyle: TextStyle(color: Color(0xFFB6A88A)),
                         enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
                         focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
                       ),
@@ -500,7 +500,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+              child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
             ),
             TextButton(
               onPressed: () async {
@@ -540,7 +540,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: Text('Precio $label', style: const TextStyle(color: Colors.white)),
         content: TextField(
           controller: ctrl,
@@ -551,7 +551,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
             prefixText: '\$',
             prefixStyle: TextStyle(color: color),
             hintText: '0',
-            hintStyle: const TextStyle(color: Colors.white38),
+            hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
             enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: color)),
             focusedBorder:
                 UnderlineInputBorder(borderSide: BorderSide(color: color, width: 2)),
@@ -560,7 +560,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
           ),
           TextButton(
             onPressed: () async {
@@ -601,7 +601,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -620,7 +620,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           Text(
             price != null ? '\$${price.toStringAsFixed(0)}' : 'Sin precio',
             style: TextStyle(
-              color: price != null ? Colors.white : Colors.white38,
+              color: price != null ? Colors.white : Color(0xFFB6A88A),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -647,14 +647,14 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       children: [
         Text(title,
             style: const TextStyle(
-                color: Colors.white70,
+                color: Color(0xFF7A6E5A),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1)),
         const SizedBox(height: 8),
         ...prices.keys.map((type) => _buildPriceRow(type: type, prices: prices)),
         const SizedBox(height: 16),
-        const Divider(color: Color(0xFF334155)),
+        const Divider(color: Color(0xFFE5DCC4)),
         const SizedBox(height: 16),
       ],
     );
@@ -671,7 +671,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           const Center(
             child: Text('Sin precios configurados.\nPresiona + para agregar un tamaño.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 15)),
+                style: TextStyle(color: Color(0xFFA08F70), fontSize: 15)),
           ),
       ],
     );
@@ -686,14 +686,14 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
         child: Text(
           'No hay sabores registrados.\nPresiona + para agregar uno.',
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 15),
+          style: const TextStyle(color: Color(0xFFA08F70), fontSize: 15),
         ),
       );
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 80),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(color: Color(0xFF334155)),
+      separatorBuilder: (_, __) => const Divider(color: Color(0xFFE5DCC4)),
       itemBuilder: (context, index) {
         final f = items[index];
         final available = f['available'] as bool? ?? true;
@@ -706,7 +706,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                 : Icons.local_drink;
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
+            color: const Color(0xFFFAF1DE),
             borderRadius: BorderRadius.circular(10),
           ),
           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -714,10 +714,10 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
             leading: CircleAvatar(
               backgroundColor: available
                   ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                  : const Color(0xFF334155),
+                  : const Color(0xFFE5DCC4),
               child: Icon(
                 icon,
-                color: available ? const Color(0xFFFF6D00) : Colors.white38,
+                color: available ? const Color(0xFFFF6D00) : Color(0xFFB6A88A),
                 size: 20,
               ),
             ),
@@ -727,7 +727,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   child: Text(
                     f['name'] as String,
                     style: TextStyle(
-                      color: available ? Colors.white : Colors.white38,
+                      color: available ? Colors.white : Color(0xFFB6A88A),
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),
@@ -768,8 +768,8 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   value: available,
                   onChanged: (_) => _toggleAvailable(f),
                   activeColor: const Color(0xFFFF6D00),
-                  inactiveThumbColor: Colors.white38,
-                  inactiveTrackColor: const Color(0xFF334155),
+                  inactiveThumbColor: Color(0xFFB6A88A),
+                  inactiveTrackColor: const Color(0xFFE5DCC4),
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, color: Colors.blueAccent, size: 20),
@@ -794,7 +794,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     const tabTypes = ['refresco', 'agua_fresca', 'jugo', 'precios'];
     final currentType = tabTypes[_tabController.index];
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       floatingActionButton: FloatingActionButton(
         onPressed: _tabController.index == 3
             ? _showAddSizeDialog
@@ -817,7 +817,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.refresh, color: Color(0xFF94A3B8)),
+                  icon: const Icon(Icons.refresh, color: Color(0xFFA08F70)),
                   tooltip: 'Actualizar',
                   onPressed: _fetchFlavors,
                 ),
@@ -828,14 +828,14 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
             padding: EdgeInsets.fromLTRB(24, 0, 24, 12),
             child: Text(
               'Administra los sabores y precios por tamaño para bebidas.',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+              style: TextStyle(color: Color(0xFFA08F70), fontSize: 13),
             ),
           ),
           TabBar(
             controller: _tabController,
             indicatorColor: const Color(0xFFFF6D00),
             labelColor: Colors.white,
-            unselectedLabelColor: const Color(0xFF94A3B8),
+            unselectedLabelColor: const Color(0xFFA08F70),
             onTap: (_) => setState(() {}),
             tabs: const [
               Tab(icon: Icon(Icons.local_drink, size: 18), child: Text('Refrescos')),

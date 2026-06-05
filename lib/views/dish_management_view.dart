@@ -88,7 +88,7 @@ class _DishManagementViewState extends State<DishManagementView> {
                         icon: const Icon(Icons.photo_library),
                         label: const Text('Elegir Imagen'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E293B),
+                          backgroundColor: const Color(0xFFFAF1DE),
                           foregroundColor: Colors.white,
                         ),
                       ),
@@ -328,7 +328,7 @@ class _DishManagementViewState extends State<DishManagementView> {
               return ListView.separated(
                 padding: EdgeInsets.all(isMobile ? 16 : 24),
                 itemCount: dishes.length,
-                separatorBuilder: (context, index) => const Divider(color: Color(0xFF334155)),
+                separatorBuilder: (context, index) => const Divider(color: Color(0xFFE5DCC4)),
                 itemBuilder: (context, index) {
                   final dish = dishes[index];
                   return ListTile(

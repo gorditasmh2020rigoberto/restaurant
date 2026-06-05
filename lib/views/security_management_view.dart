@@ -58,7 +58,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
           }
 
           return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFFFAF1DE),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Text(
               'Nuevo Usuario Admin',
@@ -82,19 +82,19 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                     obscure: true,
                   ),
                   const SizedBox(height: 16),
-                  const Text('Rol', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+                  const Text('Rol', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
                   const SizedBox(height: 6),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFFE5DCC4)),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: selectedRole,
-                        dropdownColor: const Color(0xFF1E293B),
+                        dropdownColor: const Color(0xFFFAF1DE),
                         style: const TextStyle(color: Colors.white, fontSize: 16),
                         isExpanded: true,
                         items: const [
@@ -108,19 +108,19 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Sucursal', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13)),
+                  const Text('Sucursal', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
                   const SizedBox(height: 6),
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      border: Border.all(color: const Color(0xFFE5DCC4)),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String?>(
                         value: selectedBranch,
-                        dropdownColor: const Color(0xFF1E293B),
+                        dropdownColor: const Color(0xFFFAF1DE),
                         style: const TextStyle(color: Colors.white, fontSize: 16),
                         isExpanded: true,
                         items: [
@@ -143,7 +143,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF94A3B8))),
+                child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
               ),
               ElevatedButton(
                 onPressed: isSaving ? null : save,
@@ -183,17 +183,17 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Confirmar eliminación', style: TextStyle(color: Colors.white)),
         content: Text(
           '¿Eliminar al usuario "${user['username']}"? Esta acción no se puede deshacer.',
-          style: const TextStyle(color: Color(0xFF94A3B8)),
+          style: const TextStyle(color: Color(0xFFA08F70)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF94A3B8))),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -238,17 +238,17 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF94A3B8)),
-        prefixIcon: Icon(icon, color: const Color(0xFF94A3B8)),
+        labelStyle: const TextStyle(color: Color(0xFFA08F70)),
+        prefixIcon: Icon(icon, color: const Color(0xFFA08F70)),
         filled: true,
-        fillColor: const Color(0xFF0F172A),
+        fillColor: const Color(0xFFFAF1DE),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: const BorderSide(color: Color(0xFFE5DCC4)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: const BorderSide(color: Color(0xFFE5DCC4)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -265,16 +265,16 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
       decoration: BoxDecoration(
         color: isSuperAdmin
             ? const Color(0xFFFF6D00).withOpacity(0.15)
-            : const Color(0xFF334155),
+            : const Color(0xFFE5DCC4),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isSuperAdmin ? const Color(0xFFFF6D00) : const Color(0xFF475569),
+          color: isSuperAdmin ? const Color(0xFFFF6D00) : const Color(0xFFD8CBA8),
         ),
       ),
       child: Text(
         isSuperAdmin ? 'Superadmin' : 'Admin',
         style: TextStyle(
-          color: isSuperAdmin ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8),
+          color: isSuperAdmin ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),
@@ -285,9 +285,9 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: const Color(0xFFFAF1DE),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: const Color(0xFFFAF1DE),
         foregroundColor: Colors.white,
         title: const Text(
           'Usuarios Administradores',
@@ -295,7 +295,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFF334155)),
+          child: Container(height: 1, color: const Color(0xFFE5DCC4)),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -324,7 +324,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                   Text(
                     'Error al cargar usuarios:\n${snapshot.error}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Color(0xFF94A3B8)),
+                    style: const TextStyle(color: Color(0xFFA08F70)),
                   ),
                 ],
               ),
@@ -338,11 +338,11 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.people_outline, color: Color(0xFF475569), size: 64),
+                  Icon(Icons.people_outline, color: Color(0xFFD8CBA8), size: 64),
                   SizedBox(height: 16),
                   Text(
                     'No hay usuarios registrados',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16),
+                    style: TextStyle(color: Color(0xFFA08F70), fontSize: 16),
                   ),
                 ],
               ),
@@ -363,21 +363,21 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFFFAF1DE),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  border: Border.all(color: const Color(0xFFE5DCC4)),
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   leading: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       isSuperAdmin ? Icons.admin_panel_settings : Icons.person,
-                      color: isSuperAdmin ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8),
+                      color: isSuperAdmin ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
                       size: 24,
                     ),
                   ),
@@ -397,7 +397,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                         const SizedBox(width: 8),
                         Icon(
                           branch == null ? Icons.store : Icons.storefront,
-                          color: const Color(0xFF475569),
+                          color: const Color(0xFFD8CBA8),
                           size: 14,
                         ),
                         const SizedBox(width: 4),
@@ -405,7 +405,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                           child: Text(
                             branch ?? 'Todas las sucursales',
                             style: const TextStyle(
-                              color: Color(0xFF64748B),
+                              color: Color(0xFFA08F70),
                               fontSize: 12,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -417,7 +417,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                   trailing: isLastSuperAdmin
                       ? Tooltip(
                           message: 'No se puede eliminar el único superadmin',
-                          child: Icon(Icons.lock, color: const Color(0xFF475569), size: 20),
+                          child: Icon(Icons.lock, color: const Color(0xFFD8CBA8), size: 20),
                         )
                       : IconButton(
                           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),

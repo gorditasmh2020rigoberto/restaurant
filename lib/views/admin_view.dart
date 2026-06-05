@@ -60,8 +60,8 @@ class _AdminViewState extends State<AdminView> {
     return ListTile(
       dense: true,
       contentPadding: const EdgeInsets.only(left: 32),
-      leading: Icon(icon, size: 20, color: selected ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-      title: Text(label, style: TextStyle(fontSize: 13, color: selected ? Colors.white : const Color(0xFF94A3B8), fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+      leading: Icon(icon, size: 20, color: selected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+      title: Text(label, style: TextStyle(fontSize: 13, color: selected ? Colors.white : const Color(0xFFA08F70), fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
       selected: selected,
       selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
       onTap: () {
@@ -74,7 +74,7 @@ class _AdminViewState extends State<AdminView> {
   Widget _buildSidebar(bool isDrawer) {
     return Container(
       width: isDrawer ? null : 250,
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFFFAF1DE),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -93,7 +93,7 @@ class _AdminViewState extends State<AdminView> {
                       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFFFAF1DE),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFFFF6D00).withValues(alpha: 0.3)),
                       ),
@@ -105,7 +105,7 @@ class _AdminViewState extends State<AdminView> {
                           Row(
                             children: [
                               Expanded(child: Text(Globals.currentBranch, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14))),
-                              const Icon(Icons.edit, color: Colors.white54, size: 16),
+                              const Icon(Icons.edit, color: Color(0xFFA08F70), size: 16),
                             ],
                           ),
                         ],
@@ -114,8 +114,8 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   const SizedBox(height: 16),
                   ListTile(
-                    leading: Icon(Icons.dashboard, color: _selectedIndex == 0 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Mesas Activas', style: TextStyle(color: _selectedIndex == 0 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.dashboard, color: _selectedIndex == 0 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Mesas Activas', style: TextStyle(color: _selectedIndex == 0 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 0,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -124,8 +124,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.restaurant_menu, color: _selectedIndex == 1 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Gestión de Menú', style: TextStyle(color: _selectedIndex == 1 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.restaurant_menu, color: _selectedIndex == 1 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Gestión de Menú', style: TextStyle(color: _selectedIndex == 1 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 1,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -134,8 +134,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.soup_kitchen, color: _selectedIndex == 10 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Guisados', style: TextStyle(color: _selectedIndex == 10 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 10 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.soup_kitchen, color: _selectedIndex == 10 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Guisados', style: TextStyle(color: _selectedIndex == 10 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 10 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 10,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -144,8 +144,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.local_drink, color: _selectedIndex == 11 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Sabores de Bebidas', style: TextStyle(color: _selectedIndex == 11 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 11 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.local_drink, color: _selectedIndex == 11 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Sabores de Bebidas', style: TextStyle(color: _selectedIndex == 11 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 11 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 11,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -154,8 +154,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.people, color: _selectedIndex == 2 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Gestión de Meseros', style: TextStyle(color: _selectedIndex == 2 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.people, color: _selectedIndex == 2 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Gestión de Meseros', style: TextStyle(color: _selectedIndex == 2 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 2,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -164,8 +164,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.grid_view, color: _selectedIndex == 3 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Gestión de Mesas', style: TextStyle(color: _selectedIndex == 3 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 3 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.grid_view, color: _selectedIndex == 3 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Gestión de Mesas', style: TextStyle(color: _selectedIndex == 3 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 3 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 3,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -174,8 +174,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.insert_chart, color: _selectedIndex == 5 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Reportes de Ventas', style: TextStyle(color: _selectedIndex == 5 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 5 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.insert_chart, color: _selectedIndex == 5 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Reportes de Ventas', style: TextStyle(color: _selectedIndex == 5 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 5 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 5,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -184,8 +184,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.manage_accounts, color: _selectedIndex == 6 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Gestión de Acceso', style: TextStyle(color: _selectedIndex == 6 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 6 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.manage_accounts, color: _selectedIndex == 6 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Gestión de Acceso', style: TextStyle(color: _selectedIndex == 6 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 6 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 6,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -194,8 +194,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.receipt_long, color: _selectedIndex == 7 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Facturación CFDI', style: TextStyle(color: _selectedIndex == 7 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 7 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.receipt_long, color: _selectedIndex == 7 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Facturación CFDI', style: TextStyle(color: _selectedIndex == 7 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 7 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 7,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -204,8 +204,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.people_alt, color: _selectedIndex == 8 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Gestión de Clientes', style: TextStyle(color: _selectedIndex == 8 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 8 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.people_alt, color: _selectedIndex == 8 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Gestión de Clientes', style: TextStyle(color: _selectedIndex == 8 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 8 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 8,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -214,8 +214,8 @@ class _AdminViewState extends State<AdminView> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.account_balance_wallet, color: _selectedIndex == 9 ? const Color(0xFFFF6D00) : const Color(0xFF94A3B8)),
-                    title: Text('Nómina', style: TextStyle(color: _selectedIndex == 9 ? Colors.white : const Color(0xFF94A3B8), fontWeight: _selectedIndex == 9 ? FontWeight.bold : FontWeight.normal)),
+                    leading: Icon(Icons.account_balance_wallet, color: _selectedIndex == 9 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Nómina', style: TextStyle(color: _selectedIndex == 9 ? Colors.white : const Color(0xFFA08F70), fontWeight: _selectedIndex == 9 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 9,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -223,7 +223,7 @@ class _AdminViewState extends State<AdminView> {
                       if (isDrawer) Navigator.pop(context);
                     },
                   ),
-                  const Divider(color: Color(0xFF334155)),
+                  const Divider(color: Color(0xFFE5DCC4)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
@@ -231,7 +231,7 @@ class _AdminViewState extends State<AdminView> {
                       children: [
                         const Text('CONFIGURACIÓN', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 10, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        const Text('Sucursal de este dispositivo', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
+                        const Text('Sucursal de este dispositivo', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11)),
                         const SizedBox(height: 6),
                         ...Globals.branches.map((branch) {
                           final selected = Globals.currentBranch == branch;
@@ -245,10 +245,10 @@ class _AdminViewState extends State<AdminView> {
                               margin: const EdgeInsets.only(bottom: 4),
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                               decoration: BoxDecoration(
-                                color: selected ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                                color: selected ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFFFAF1DE),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: selected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+                                  color: selected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
                                   width: 1.2,
                                 ),
                               ),
@@ -257,14 +257,14 @@ class _AdminViewState extends State<AdminView> {
                                   Icon(
                                     selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                                     size: 14,
-                                    color: selected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
+                                    color: selected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       branch,
                                       style: TextStyle(
-                                        color: selected ? Colors.white : const Color(0xFF94A3B8),
+                                        color: selected ? Colors.white : const Color(0xFFA08F70),
                                         fontSize: 12,
                                         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                                       ),
@@ -276,12 +276,12 @@ class _AdminViewState extends State<AdminView> {
                           );
                         }),
                         const SizedBox(height: 8),
-                        const Divider(color: Color(0xFF1E293B)),
+                        const Divider(color: Color(0xFFFAF1DE)),
                         const SizedBox(height: 4),
                         SwitchListTile(
                           value: Globals.splitKitchenMode,
                           title: const Text('Cocina Especializada', style: TextStyle(color: Colors.white, fontSize: 13)),
-                          subtitle: const Text('Separa pedidos To Go', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11)),
+                          subtitle: const Text('Separa pedidos To Go', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11)),
                           dense: true,
                           contentPadding: EdgeInsets.zero,
                           onChanged: (val) async {
@@ -292,14 +292,14 @@ class _AdminViewState extends State<AdminView> {
                       ],
                     ),
                   ),
-                  const Divider(color: Color(0xFF334155)),
+                  const Divider(color: Color(0xFFE5DCC4)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text('SISTEMA', style: TextStyle(color: Color(0xFFFF6D00), fontSize: 10, fontWeight: FontWeight.bold)),
-                        const Text('Versión: 1.0.12', style: TextStyle(color: Colors.white54, fontSize: 11)),
+                        const Text('Versión: 1.0.12', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11)),
                         const SizedBox(height: 8),
                         const UpdateAppButton(),
                       ],
@@ -310,10 +310,10 @@ class _AdminViewState extends State<AdminView> {
               ),
             ),
           ),
-          const Divider(color: Color(0xFF334155)),
+          const Divider(color: Color(0xFFE5DCC4)),
           ListTile(
-            leading: const Icon(Icons.logout, color: Color(0xFF94A3B8)),
-            title: const Text('Salir al menú', style: TextStyle(color: Color(0xFF94A3B8))),
+            leading: const Icon(Icons.logout, color: Color(0xFFA08F70)),
+            title: const Text('Salir al menú', style: TextStyle(color: Color(0xFFA08F70))),
             onTap: () => Navigator.pop(context),
           ),
           const SizedBox(height: 16),
@@ -348,7 +348,7 @@ class _AdminViewState extends State<AdminView> {
       key: _scaffoldKey,
       appBar: isMobile
           ? AppBar(
-              backgroundColor: const Color(0xFF0F172A),
+              backgroundColor: const Color(0xFFFAF1DE),
               foregroundColor: Colors.white,
               leading: IconButton(
                 icon: const Icon(Icons.menu),
@@ -357,7 +357,7 @@ class _AdminViewState extends State<AdminView> {
               title: Text(_currentSectionTitle, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.logout, color: Color(0xFF94A3B8)),
+                  icon: const Icon(Icons.logout, color: Color(0xFFA08F70)),
                   tooltip: 'Salir al menú',
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -370,7 +370,7 @@ class _AdminViewState extends State<AdminView> {
           // Left Sidebar: Navigation (Only for Desktop)
           if (!isMobile) _buildSidebar(false),
 
-          if (!isMobile) const VerticalDivider(width: 1, thickness: 1, color: Color(0xFF334155)),
+          if (!isMobile) const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE5DCC4)),
 
           // Main Content Section
           Expanded(
@@ -391,7 +391,7 @@ class _AdminViewState extends State<AdminView> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Escribe el nuevo nombre de la sucursal activa. Los datos existentes también se actualizarán de forma automática.', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              const Text('Escribe el nuevo nombre de la sucursal activa. Los datos existentes también se actualizarán de forma automática.', style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 13)),
               const SizedBox(height: 16),
               TextField(
                 controller: controller,
@@ -490,11 +490,11 @@ class _AdminViewState extends State<AdminView> {
                                 if (nonTableOrders.isNotEmpty)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                    color: const Color(0xFF1E293B),
+                                    color: const Color(0xFFFAF1DE),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        const Text('Órdenes To Go / Delivery Activas', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                                        const Text('Órdenes To Go / Delivery Activas', style: TextStyle(color: Color(0xFF7A6E5A), fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 8),
                                         SizedBox(
                                           height: 170,
@@ -618,12 +618,12 @@ class _AdminViewState extends State<AdminView> {
                 ],
               ),
             ),
-            if (!isMobile) const VerticalDivider(width: 1, thickness: 1, color: Color(0xFF334155)),
+            if (!isMobile) const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE5DCC4)),
             // Right Section: Order detail for selected table (Only for Desktop)
             if (!isMobile)
               Container(
                 width: 350,
-                color: const Color(0xFF0F172A),
+                color: const Color(0xFFFAF1DE),
                 child: (_selectedTableId == null && _selectedOrderId == null)
                     ? const Center(
                         child: Text('Selecciona una mesa u orden', style: TextStyle(color: Colors.grey)),
@@ -657,7 +657,7 @@ class _AdminViewState extends State<AdminView> {
                   child: Container(
                     width: screenWidth * 0.85,
                     constraints: const BoxConstraints(maxWidth: 400),
-                    color: const Color(0xFF0F172A),
+                    color: const Color(0xFFFAF1DE),
                     child: Stack(
                       children: [
                         _TableDetailPanel(
@@ -720,8 +720,8 @@ class _TableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayColor = color ?? (isOccupied ? Colors.red[400]! : const Color(0xFF94A3B8));
-    final borderColor = isSelected ? const Color(0xFFFF6D00) : (color ?? (isOccupied ? Colors.red.withValues(alpha: 0.5) : const Color(0xFF334155)));
+    final displayColor = color ?? (isOccupied ? Colors.red[400]! : const Color(0xFFA08F70));
+    final borderColor = isSelected ? const Color(0xFFFF6D00) : (color ?? (isOccupied ? Colors.red.withValues(alpha: 0.5) : const Color(0xFFE5DCC4)));
 
     return InkWell(
       onTap: onTap,
@@ -732,7 +732,7 @@ class _TableCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected 
               ? (color ?? const Color(0xFFFF6D00)).withValues(alpha: 0.1) 
-              : const Color(0xFF1E293B),
+              : const Color(0xFFFAF1DE),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: borderColor,
@@ -801,7 +801,7 @@ class _TableCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Icon(Icons.location_on,
-                        size: 11, color: Color(0xFF94A3B8)),
+                        size: 11, color: Color(0xFFA08F70)),
                     const SizedBox(width: 3),
                     Flexible(
                       child: Text(
@@ -809,7 +809,7 @@ class _TableCard extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 10,
-                          color: Color(0xFFCBD5E1),
+                          color: Color(0xFF7A6E5A),
                           height: 1.2,
                         ),
                         maxLines: 2,
@@ -888,7 +888,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             // Vista de personalización
             final requiresGuisado = selectedDish!['requires_guisado'] as bool? ?? false;
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: const Color(0xFFFAF1DE),
               title: Text(selectedDish!['name'] as String,
                   style: const TextStyle(color: Colors.white, fontSize: 16)),
               content: requiresGuisado && guisados.isNotEmpty
@@ -898,7 +898,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('GUISADO', style: TextStyle(color: Colors.white70, fontSize: 11,
+                          const Text('GUISADO', style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 11,
                               fontWeight: FontWeight.w600, letterSpacing: 1)),
                           const SizedBox(height: 8),
                           ConstrainedBox(
@@ -920,16 +920,16 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                     duration: const Duration(milliseconds: 120),
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: checked ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFF0F172A),
+                                      color: checked ? const Color(0xFFFF6D00).withValues(alpha: 0.15) : const Color(0xFFFAF1DE),
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: checked ? const Color(0xFFFF6D00) : const Color(0xFF334155), width: 1.5),
+                                      border: Border.all(color: checked ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4), width: 1.5),
                                     ),
                                     child: Row(children: [
                                       Icon(checked ? Icons.check_circle : Icons.radio_button_unchecked,
-                                          size: 13, color: checked ? const Color(0xFFFF6D00) : const Color(0xFF64748B)),
+                                          size: 13, color: checked ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
                                       const SizedBox(width: 4),
                                       Expanded(child: Text(name,
-                                          style: TextStyle(color: checked ? Colors.white : Colors.white70, fontSize: 10),
+                                          style: TextStyle(color: checked ? Colors.white : Color(0xFF7A6E5A), fontSize: 10),
                                           maxLines: 2, overflow: TextOverflow.ellipsis)),
                                     ]),
                                   ),
@@ -943,7 +943,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   : const SizedBox.shrink(),
               actions: [
                 TextButton(onPressed: () => setS(() { selectedDish = null; selectedGuisados = []; }),
-                    child: const Text('Atrás', style: TextStyle(color: Colors.white54))),
+                    child: const Text('Atrás', style: TextStyle(color: Color(0xFFA08F70)))),
                 TextButton(
                   onPressed: requiresGuisado && selectedGuisados.isEmpty ? null : () async {
                     Navigator.pop(ctx);
@@ -978,7 +978,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
 
           // Vista de búsqueda de platillos
           return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
+            backgroundColor: const Color(0xFFFAF1DE),
             title: const Text('Agregar artículo', style: TextStyle(color: Colors.white)),
             content: SizedBox(
               width: 420,
@@ -992,8 +992,8 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
                       hintText: 'Buscar platillo...',
-                      hintStyle: TextStyle(color: Colors.white38),
-                      prefixIcon: Icon(Icons.search, color: Colors.white38),
+                      hintStyle: TextStyle(color: Color(0xFFB6A88A)),
+                      prefixIcon: Icon(Icons.search, color: Color(0xFFB6A88A)),
                       enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00))),
                       focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2)),
                     ),
@@ -1015,7 +1015,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   Expanded(
                     child: ListView.separated(
                       itemCount: filtered.length,
-                      separatorBuilder: (_, __) => const Divider(color: Color(0xFF334155), height: 1),
+                      separatorBuilder: (_, __) => const Divider(color: Color(0xFFE5DCC4), height: 1),
                       itemBuilder: (_, i) {
                         final d = filtered[i];
                         return ListTile(
@@ -1023,7 +1023,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                           title: Text(d['name'] as String,
                               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                           subtitle: Text(d['category'] as String? ?? '',
-                              style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                              style: const TextStyle(color: Color(0xFFB6A88A), fontSize: 11)),
                           trailing: Text('\$${(d['price'] as num).toStringAsFixed(0)}',
                               style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                           onTap: () => setS(() { selectedDish = d; selectedGuisados = []; }),
@@ -1036,7 +1036,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             ),
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.white54))),
+                  child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70)))),
             ],
           );
         },
@@ -1078,12 +1078,12 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   decoration: BoxDecoration(
-                    color: active ? const Color(0xFFFF6D00) : const Color(0xFF1E293B),
+                    color: active ? const Color(0xFFFF6D00) : const Color(0xFFFAF1DE),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: active ? const Color(0xFFFF6D00) : const Color(0xFF334155), width: 1.5),
+                    border: Border.all(color: active ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4), width: 1.5),
                   ),
                   child: Text(label, textAlign: TextAlign.center,
-                    style: TextStyle(color: active ? Colors.white : const Color(0xFF94A3B8), fontWeight: FontWeight.bold, fontSize: 15)),
+                    style: TextStyle(color: active ? Colors.white : const Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 15)),
                 ),
               ),
             );
@@ -1091,7 +1091,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
 
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            backgroundColor: const Color(0xFF0F172A),
+            backgroundColor: const Color(0xFFFAF1DE),
             title: const Row(
               children: [
                 Icon(Icons.volunteer_activism, color: Color(0xFFFF6D00), size: 28),
@@ -1105,11 +1105,11 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                 // Total base
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: const Color(0xFF1E293B), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: const Color(0xFFFAF1DE), borderRadius: BorderRadius.circular(16)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total de la cuenta:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 15)),
+                      const Text('Total de la cuenta:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 15)),
                       Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                     ],
                   ),
@@ -1130,14 +1130,14 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
                     labelText: 'Monto personalizado',
-                    labelStyle: const TextStyle(color: Colors.white54),
+                    labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                     hintText: '0.00',
                     hintStyle: const TextStyle(color: Colors.white30),
                     prefixIcon: const Icon(Icons.edit, color: Color(0xFFFF6D00)),
                     prefixText: '\$  ',
                     prefixStyle: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
                     filled: true,
-                    fillColor: const Color(0xFF1E293B),
+                    fillColor: const Color(0xFFFAF1DE),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onChanged: (_) => setS(() { selectedPct = 0; recalc(); }),
@@ -1178,7 +1178,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, null),
-                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF94A3B8))),
+                child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
               ),
               ElevatedButton.icon(
                 onPressed: () => Navigator.pop(ctx, totalFinal),
@@ -1208,7 +1208,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: const Color(0xFFFAF1DE),
           title: Row(
             children: [
               const Icon(Icons.payments, color: Colors.green, size: 28),
@@ -1222,13 +1222,13 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFFFAF1DE),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Total a Cobrar:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16)),
+                    const Text('Total a Cobrar:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
                     Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -1275,7 +1275,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
+                  color: const Color(0xFFFAF1DE),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
                 ),
@@ -1300,7 +1300,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancelar', style: TextStyle(color: Color(0xFF94A3B8))),
+              child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
             ),
             ElevatedButton(
               onPressed: (double.tryParse(cashController.text) ?? 0) < total
@@ -1364,7 +1364,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
 
           return AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            backgroundColor: const Color(0xFF0F172A),
+            backgroundColor: const Color(0xFFFAF1DE),
             title: const Row(
               children: [
                 Icon(Icons.pie_chart, color: Colors.orangeAccent, size: 28),
@@ -1379,13 +1379,13 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Total:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 16)),
+                        const Text('Total:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
                         Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -1400,9 +1400,9 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             labelText: 'Tarjeta (\$)',
-                            labelStyle: const TextStyle(color: Colors.white54),
+                            labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                             filled: true,
-                            fillColor: const Color(0xFF1E293B),
+                            fillColor: const Color(0xFFFAF1DE),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             prefixIcon: const Icon(Icons.credit_card, color: Colors.blueAccent),
                           ),
@@ -1425,9 +1425,9 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
                             labelText: 'Efectivo (\$)',
-                            labelStyle: const TextStyle(color: Colors.white54),
+                            labelStyle: const TextStyle(color: Color(0xFFA08F70)),
                             filled: true,
-                            fillColor: const Color(0xFF1E293B),
+                            fillColor: const Color(0xFFFAF1DE),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                             prefixIcon: const Icon(Icons.payments, color: Colors.greenAccent),
                           ),
@@ -1447,7 +1447,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
+                      color: const Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
                     ),
@@ -1494,11 +1494,11 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                       labelStyle: const TextStyle(color: Colors.orangeAccent, fontSize: 13, fontWeight: FontWeight.bold),
                       prefixIcon: const Icon(Icons.money, color: Colors.green),
                       filled: true,
-                      fillColor: const Color(0xFF1E293B),
+                      fillColor: const Color(0xFFFAF1DE),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                       focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.orangeAccent, width: 2)),
                       hintText: '0.00',
-                      hintStyle: const TextStyle(color: Colors.white24),
+                      hintStyle: const TextStyle(color: Color(0xFFCFC7B2)),
                     ),
                     onChanged: (val) {
                       double received = double.tryParse(val) ?? 0.0;
@@ -1824,7 +1824,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
       context: context,
       barrierDismissible: false,
       builder: (_) => const AlertDialog(
-        backgroundColor: Color(0xFF1E293B),
+        backgroundColor: Color(0xFFFAF1DE),
         title: Row(children: [
           SizedBox(width: 8),
           Text('Generando link...', style: TextStyle(color: Colors.white)),
@@ -1832,7 +1832,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           CircularProgressIndicator(color: Color(0xFFFF6D00)),
           SizedBox(height: 16),
-          Text('Contactando Clip...', style: TextStyle(color: Colors.white70)),
+          Text('Contactando Clip...', style: TextStyle(color: Color(0xFF7A6E5A))),
         ]),
       ),
     );
@@ -1901,7 +1901,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: const Color(0xFFFAF1DE),
         title: const Row(children: [
           Icon(Icons.credit_card, color: Color(0xFFFF6D00), size: 28),
           SizedBox(width: 12),
@@ -1913,11 +1913,11 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
+                color: const Color(0xFFFAF1DE),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(children: [
-                const Text('Total a cobrar:', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14)),
+                const Text('Total a cobrar:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 14)),
                 const SizedBox(height: 4),
                 Text('\$${amount.toStringAsFixed(2)}',
                     style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
@@ -1929,20 +1929,20 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             const Text(
               'Se abrió la página de pago de Clip en una nueva pestaña.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70),
+              style: TextStyle(color: Color(0xFF7A6E5A)),
             ),
             const SizedBox(height: 8),
             const Text(
               'Cuando el cliente haya pagado, presiona "Confirmar pago".',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+              style: TextStyle(color: Color(0xFFA08F70), fontSize: 12),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF94A3B8))),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
@@ -2016,7 +2016,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.receipt_long, size: 64, color: Color(0xFF334155)),
+              const Icon(Icons.receipt_long, size: 64, color: Color(0xFFE5DCC4)),
               const SizedBox(height: 16),
               Text('$panelTitle libre', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
@@ -2086,16 +2086,16 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Row(
                         children: [
-                          const Icon(Icons.person_outline, size: 16, color: Colors.white54),
+                          const Icon(Icons.person_outline, size: 16, color: Color(0xFFA08F70)),
                           const SizedBox(width: 4),
-                          Text('Mesero: $waiterName', style: const TextStyle(color: Colors.white54, fontSize: 14)),
+                          Text('Mesero: $waiterName', style: const TextStyle(color: Color(0xFFA08F70), fontSize: 14)),
                         ],
                       ),
                     ),
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xFF334155)),
+            const Divider(height: 1, color: Color(0xFFE5DCC4)),
             
             Expanded(
               child: StreamBuilder<List<Map<String, dynamic>>>(
@@ -2131,7 +2131,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                          child: ListView.separated(
                             padding: const EdgeInsets.all(24),
                             itemCount: items.length,
-                            separatorBuilder: (context, index) => const Divider(color: Color(0xFF334155)),
+                            separatorBuilder: (context, index) => const Divider(color: Color(0xFFE5DCC4)),
                             itemBuilder: (context, index) {
                               final item = items[index];
                               final dishName = item['dishes']['name'];
@@ -2216,7 +2216,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                        ),
                        Container(
                         padding: const EdgeInsets.all(24),
-                        color: const Color(0xFF1E293B),
+                        color: const Color(0xFFFAF1DE),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -2224,7 +2224,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Añadir descuento:', style: TextStyle(color: Colors.white70, fontSize: 14)),
+                                const Text('Añadir descuento:', style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 14)),
                                 SizedBox(
                                   width: 120,
                                   height: 40,
@@ -2240,7 +2240,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                       suffixStyle: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
                                       contentPadding: EdgeInsets.zero,
                                       filled: true,
-                                      fillColor: const Color(0xFF0F172A),
+                                      fillColor: const Color(0xFFFAF1DE),
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                     ),
                                     onChanged: (val) {
@@ -2369,16 +2369,16 @@ class _CatChip extends StatelessWidget {
         margin: const EdgeInsets.only(right: 6),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFFF6D00) : const Color(0xFF0F172A),
+          color: selected ? const Color(0xFFFF6D00) : const Color(0xFFFAF1DE),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
+            color: selected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: selected ? Colors.white : Colors.white54,
+            color: selected ? Colors.white : Color(0xFFA08F70),
             fontSize: 12,
             fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           ),
