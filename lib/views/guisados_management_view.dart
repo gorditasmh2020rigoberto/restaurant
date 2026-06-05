@@ -78,15 +78,15 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
+        backgroundColor: const Color(0xFF1E293B),
         title: const Text('¿Eliminar guisado?',
-            style: TextStyle(color: Color(0xFF3D2E1A))),
+            style: TextStyle(color: Colors.white)),
         content: const Text('Esta acción no se puede deshacer.',
-            style: TextStyle(color: Color(0xFF7A6E5A))),
+            style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -124,19 +124,19 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
     await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
+        backgroundColor: const Color(0xFF1E293B),
         title: Text(
           isEditing ? 'Editar Guisado' : 'Nuevo Guisado',
-          style: const TextStyle(color: Color(0xFF3D2E1A)),
+          style: const TextStyle(color: Colors.white),
         ),
         content: TextField(
           controller: nameController,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFF3D2E1A)),
+          style: const TextStyle(color: Colors.white),
           textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
             hintText: isEditing ? guisado['name'] as String : 'Nombre del guisado (ej. Picadillo)',
-            hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
+            hintStyle: const TextStyle(color: Colors.white38),
             enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Color(0xFFFF6D00)),
             ),
@@ -148,7 +148,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
           ),
           TextButton(
             onPressed: () async {
@@ -203,11 +203,11 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF1DE),
+      backgroundColor: const Color(0xFF0F172A),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showGuisadoDialog(),
         backgroundColor: const Color(0xFFFF6D00),
-        child: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,11 +219,11 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                 const Expanded(
                   child: Text(
                     'Gestión de Guisados',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.refresh, color: Color(0xFFA08F70)),
+                  icon: const Icon(Icons.refresh, color: Color(0xFF94A3B8)),
                   tooltip: 'Actualizar',
                   onPressed: _fetchGuisados,
                 ),
@@ -234,7 +234,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
             padding: EdgeInsets.fromLTRB(24, 0, 24, 16),
             child: Text(
               'Administra los rellenos disponibles para gorditas, tamales y más.',
-              style: TextStyle(color: Color(0xFFA08F70), fontSize: 13),
+              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
             ),
           ),
           Expanded(
@@ -245,20 +245,20 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                         child: Text(
                           'No hay guisados registrados.\nPresiona + para agregar uno.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Color(0xFFA08F70), fontSize: 15),
+                          style: TextStyle(color: Color(0xFF94A3B8), fontSize: 15),
                         ),
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(24, 0, 24, 80),
                         itemCount: _guisados.length,
-                        separatorBuilder: (_, __) => const Divider(color: Color(0xFFE5DCC4)),
+                        separatorBuilder: (_, __) => const Divider(color: Color(0xFF334155)),
                         itemBuilder: (context, index) {
                           final g = _guisados[index];
                           final available = g['available'] as bool? ?? true;
 
                           return Container(
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFAF1DE),
+                              color: const Color(0xFF1E293B),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             margin: const EdgeInsets.symmetric(vertical: 4),
@@ -266,17 +266,17 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                               leading: CircleAvatar(
                                 backgroundColor: available
                                     ? const Color(0xFFFF6D00).withOpacity(0.15)
-                                    : const Color(0xFFE5DCC4),
+                                    : const Color(0xFF334155),
                                 child: Icon(
                                   Icons.lunch_dining,
-                                  color: available ? const Color(0xFFFF6D00) : Color(0xFFB6A88A),
+                                  color: available ? const Color(0xFFFF6D00) : Colors.white38,
                                   size: 20,
                                 ),
                               ),
                               title: Text(
                                 g['name'] as String,
                                 style: TextStyle(
-                                  color: available ? Color(0xFFFAF1DE) : Color(0xFFB6A88A),
+                                  color: available ? Colors.white : Colors.white38,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                 ),
@@ -295,8 +295,8 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                                     value: available,
                                     onChanged: (_) => _toggleAvailable(g),
                                     activeColor: const Color(0xFFFF6D00),
-                                    inactiveThumbColor: Color(0xFFB6A88A),
-                                    inactiveTrackColor: const Color(0xFFE5DCC4),
+                                    inactiveThumbColor: Colors.white38,
+                                    inactiveTrackColor: const Color(0xFF334155),
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.edit_outlined, color: Colors.blueAccent, size: 20),

@@ -94,8 +94,8 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
                             icon: const Icon(Icons.photo_library),
                             label: const Text('Elegir Imagen'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFAF1DE),
-                              foregroundColor: Color(0xFFFAF1DE),
+                              backgroundColor: const Color(0xFF1E293B),
+                              foregroundColor: Colors.white,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -182,10 +182,10 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Color(0xFFFAF1DE),
+                    foregroundColor: Colors.white,
                   ),
                   child: isUploading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFFFAF1DE), strokeWidth: 2))
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : const Text('Guardar'),
                 ),
               ],
@@ -263,7 +263,7 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
                 label: Text('Nuevo en ${widget.title}'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Color(0xFFFAF1DE),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
               ),
@@ -290,7 +290,7 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.local_drink, size: 64, color: Color(0xFFE5DCC4)),
+                      Icon(Icons.local_drink, size: 64, color: Color(0xFF334155)),
                       SizedBox(height: 16),
                       Text('No hay bebidas registradas', style: TextStyle(color: Colors.grey, fontSize: 16)),
                       SizedBox(height: 8),
@@ -303,7 +303,7 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
               return ListView.separated(
                 padding: EdgeInsets.all(isMobile ? 16 : 24),
                 itemCount: drinks.length,
-                separatorBuilder: (context, index) => const Divider(color: Color(0xFFE5DCC4)),
+                separatorBuilder: (context, index) => const Divider(color: Color(0xFF334155)),
                 itemBuilder: (context, index) {
                   final drink = drinks[index];
                   return ListTile(
