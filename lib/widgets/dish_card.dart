@@ -1087,6 +1087,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   if (!context.mounted) return;
 
   List<String> selected = [];
+  // Filtro CON CARNE / SIN CARNE para el selector de guisado del
+  // diálogo single-dish.
+  bool guisadoMeatFilter = true;
   final bool isGordita = dish.category == 'gorditas' ||
       dish.name.toLowerCase().contains('gordita');
   final bool isTapa = dish.category == 'tapas' ||
@@ -1499,52 +1502,78 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             ),
                           );
                         }
-                        // Separar en dos grupos: CON CARNE y SIN CARNE.
-                        final conCarne = guisados
-                            .where((g) => (g['with_meat'] as bool? ?? true))
+                        // Filtrar por CON CARNE / SIN CARNE — el usuario
+                        // alterna con dos botones arriba; sólo se muestra
+                        // el grupo seleccionado a la vez.
+                        final activeList = guisados
+                            .where((g) =>
+                                (g['with_meat'] as bool? ?? true) ==
+                                guisadoMeatFilter)
                             .toList();
-                        final sinCarne = guisados
-                            .where((g) => !(g['with_meat'] as bool? ?? true))
-                            .toList();
-                        Widget groupHeader(String label) => Padding(
-                              padding: const EdgeInsets.only(top: 6, bottom: 6),
-                              child: Text(
-                                label,
-                                style: const TextStyle(
-                                    color: Color(0xFFFF6D00),
-                                    fontSize: 10,
+                        Widget filterTab(String label, bool value) {
+                          final isActive = guisadoMeatFilter == value;
+                          return Expanded(
+                            child: InkWell(
+                              onTap: () => setDialogState(() {
+                                guisadoMeatFilter = value;
+                              }),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? const Color(0xFFFF6D00)
+                                      : const Color(0xFF0F172A),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isActive
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFF334155),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  label,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: isActive
+                                        ? const Color(0xFFFAF1DE)
+                                        : Colors.white70,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w700,
-                                    letterSpacing: 1),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
                               ),
-                            );
+                            ),
+                          );
+                        }
                         return Stack(
                           children: [
                             SizedBox(
                               height: 340,
-                              child: SingleChildScrollView(
-                                physics: const ClampingScrollPhysics(),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (conCarne.isNotEmpty) ...[
-                                      groupHeader('CON CARNE'),
-                                      Wrap(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      filterTab('CON CARNE', true),
+                                      const SizedBox(width: 8),
+                                      filterTab('SIN CARNE', false),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Expanded(
+                                    child: SingleChildScrollView(
+                                      physics: const ClampingScrollPhysics(),
+                                      child: Wrap(
                                         spacing: 6,
                                         runSpacing: 6,
-                                        children: conCarne.map(buildItem).toList(),
+                                        children: activeList.map(buildItem).toList(),
                                       ),
-                                    ],
-                                    if (sinCarne.isNotEmpty) ...[
-                                      groupHeader('SIN CARNE'),
-                                      Wrap(
-                                        spacing: 6,
-                                        runSpacing: 6,
-                                        children: sinCarne.map(buildItem).toList(),
-                                      ),
-                                    ],
-                                  ],
-                                ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             // Degradado inferior indicando que hay más contenido
@@ -1980,6 +2009,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
     if (!context.mounted) return;
   }
   List<String> selectedGuisados = [];
+  // Filtro CON CARNE / SIN CARNE compartido por los selectores de
+  // guisado del diálogo mixto y del sub-selector de extra-guisado.
+  bool mixedGuisadoMeatFilter = true;
   // Guisado asociado a la ÓRDEN EXTRA de guisado (al toggle aparece el
   // sub-selector). Sólo un guisado por extra.
   String? selectedGuisadoForExtra;
@@ -2598,43 +2630,66 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               ),
                             );
                           }
-                          final conCarne = guisados
-                              .where((g) => (g['with_meat'] as bool? ?? true))
+                          final activeList = guisados
+                              .where((g) =>
+                                  (g['with_meat'] as bool? ?? true) ==
+                                  mixedGuisadoMeatFilter)
                               .toList();
-                          final sinCarne = guisados
-                              .where((g) => !(g['with_meat'] as bool? ?? true))
-                              .toList();
-                          Widget header(String label) => Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 6),
-                                child: Text(
-                                  label,
-                                  style: const TextStyle(
-                                      color: Color(0xFFFF6D00),
-                                      fontSize: 10,
+                          Widget filterTab(String label, bool value) {
+                            final isActive = mixedGuisadoMeatFilter == value;
+                            return Expanded(
+                              child: InkWell(
+                                onTap: () => setDialogState(() {
+                                  mixedGuisadoMeatFilter = value;
+                                }),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: isActive
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isActive
+                                          ? const Color(0xFFFF6D00)
+                                          : const Color(0xFF334155),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: isActive
+                                          ? const Color(0xFFFAF1DE)
+                                          : Colors.white70,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      letterSpacing: 1),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
                                 ),
-                              );
+                              ),
+                            );
+                          }
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (conCarne.isNotEmpty) ...[
-                                header('CON CARNE'),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: conCarne.map(buildItem).toList(),
-                                ),
-                              ],
-                              if (sinCarne.isNotEmpty) ...[
-                                header('SIN CARNE'),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: sinCarne.map(buildItem).toList(),
-                                ),
-                              ],
+                              Row(
+                                children: [
+                                  filterTab('CON CARNE', true),
+                                  const SizedBox(width: 8),
+                                  filterTab('SIN CARNE', false),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: activeList.map(buildItem).toList(),
+                              ),
                             ],
                           );
                         }),
@@ -2769,43 +2824,66 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               ),
                             );
                           }
-                          final conCarne = guisados
-                              .where((g) => (g['with_meat'] as bool? ?? true))
+                          final activeList = guisados
+                              .where((g) =>
+                                  (g['with_meat'] as bool? ?? true) ==
+                                  mixedGuisadoMeatFilter)
                               .toList();
-                          final sinCarne = guisados
-                              .where((g) => !(g['with_meat'] as bool? ?? true))
-                              .toList();
-                          Widget header(String label) => Padding(
-                                padding: const EdgeInsets.only(top: 4, bottom: 6),
-                                child: Text(
-                                  label,
-                                  style: const TextStyle(
-                                      color: Color(0xFFFF6D00),
-                                      fontSize: 10,
+                          Widget filterTab(String label, bool value) {
+                            final isActive = mixedGuisadoMeatFilter == value;
+                            return Expanded(
+                              child: InkWell(
+                                onTap: () => setDialogState(() {
+                                  mixedGuisadoMeatFilter = value;
+                                }),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: isActive
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFF0F172A),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isActive
+                                          ? const Color(0xFFFF6D00)
+                                          : const Color(0xFF334155),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: isActive
+                                          ? const Color(0xFFFAF1DE)
+                                          : Colors.white70,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      letterSpacing: 1),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
                                 ),
-                              );
+                              ),
+                            );
+                          }
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (conCarne.isNotEmpty) ...[
-                                header('CON CARNE'),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: conCarne.map(buildItem).toList(),
-                                ),
-                              ],
-                              if (sinCarne.isNotEmpty) ...[
-                                header('SIN CARNE'),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: sinCarne.map(buildItem).toList(),
-                                ),
-                              ],
+                              Row(
+                                children: [
+                                  filterTab('CON CARNE', true),
+                                  const SizedBox(width: 8),
+                                  filterTab('SIN CARNE', false),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: activeList.map(buildItem).toList(),
+                              ),
                             ],
                           );
                         }),
