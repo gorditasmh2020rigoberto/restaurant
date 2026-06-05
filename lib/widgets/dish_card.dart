@@ -27,35 +27,35 @@ Widget _buildCommentField(TextEditingController controller) {
     mainAxisSize: MainAxisSize.min,
     children: [
       const SizedBox(height: 12),
-      const Divider(color: Color(0xFFE5DCC4)),
+      const Divider(color: Color(0xFF334155)),
       const SizedBox(height: 8),
       const Text('COMENTARIOS',
           style: TextStyle(
-              color: const Color(0xFF7A6E5A),
+              color: Colors.white70,
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 1)),
       const SizedBox(height: 10),
       TextField(
         controller: controller,
-        style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 14, fontWeight: FontWeight.w600),
+        style: const TextStyle(color: Colors.white, fontSize: 14),
         minLines: 1,
         maxLines: 3,
         textCapitalization: TextCapitalization.sentences,
         decoration: InputDecoration(
           hintText: 'Ej. sin lechuga, sin chile',
-          hintStyle: const TextStyle(color: Color(0xFFA08F70), fontSize: 13),
+          hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
           filled: true,
-          fillColor: const Color(0xFFFAF1DE),
+          fillColor: const Color(0xFF0F172A),
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE5DCC4)),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE5DCC4)),
+            borderSide: const BorderSide(color: Color(0xFF334155)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -179,11 +179,10 @@ Future<void> _addPreparedDishWithComment(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDialogState) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
+        backgroundColor: const Color(0xFF1E293B),
         title: Text(dish.name,
             style: TextStyle(
-                color: const Color(0xFF3D2E1A),
-                fontWeight: FontWeight.w700,
+                color: Colors.white,
                 fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
         content: SizedBox(
           width: double.maxFinite,
@@ -194,14 +193,14 @@ Future<void> _addPreparedDishWithComment(
               children: [
                 _buildCommentField(commentController),
                 const SizedBox(height: 12),
-                const Divider(color: Color(0xFFE5DCC4)),
+                const Divider(color: Color(0xFF334155)),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('CANTIDAD',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -215,13 +214,13 @@ Future<void> _addPreparedDishWithComment(
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFAF1DE),
+                              color: const Color(0xFF0F172A),
                               borderRadius: BorderRadius.circular(8),
                               border:
-                                  Border.all(color: const Color(0xFFE5DCC4)),
+                                  Border.all(color: const Color(0xFF334155)),
                             ),
                             child: const Icon(Icons.remove,
-                                color: const Color(0xFF7A6E5A), size: 18),
+                                color: Colors.white70, size: 18),
                           ),
                         ),
                         SizedBox(
@@ -229,7 +228,7 @@ Future<void> _addPreparedDishWithComment(
                           child: Text('$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Color(0xFFFAF1DE),
+                                  color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -262,7 +261,7 @@ Future<void> _addPreparedDishWithComment(
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancelar',
-                style: TextStyle(color: const Color(0xFFA08F70))),
+                style: TextStyle(color: Colors.white54)),
           ),
           SizedBox(
             height: 44,
@@ -288,7 +287,7 @@ Future<void> _addPreparedDishWithComment(
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Color(0xFFFAF1DE),
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -334,7 +333,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
 
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: const Color(0xFFFAF1DE),
+    backgroundColor: const Color(0xFF0F172A),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
@@ -351,7 +350,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE5DCC4),
+                  color: const Color(0xFF334155),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -360,7 +359,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Text('Lo dulce',
                   style: TextStyle(
-                      color: Color(0xFFFAF1DE),
+                      color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold)),
             ),
@@ -375,9 +374,9 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFAF1DE),
+                    color: const Color(0xFF1E293B),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE5DCC4), width: 1.5),
+                    border: Border.all(color: const Color(0xFF334155), width: 1.5),
                   ),
                   child: Row(
                     children: [
@@ -385,12 +384,12 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
                       const SizedBox(width: 16),
                       Text(opt.$1,
                           style: const TextStyle(
-                              color: Color(0xFFFAF1DE),
+                              color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w600)),
                       const Spacer(),
                       const Icon(Icons.chevron_right,
-                          color: const Color(0xFFA08F70), size: 22),
+                          color: Colors.white54, size: 22),
                     ],
                   ),
                 ),
@@ -421,9 +420,9 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
         final unitPrice = selectedSize == 'orden' ? precioOrden : precioMedia;
         final total = unitPrice * dialogQty;
         return AlertDialog(
-          backgroundColor: const Color(0xFFFAF1DE),
+          backgroundColor: const Color(0xFF1E293B),
           title: const Text('Molletes Dulces',
-              style: TextStyle(color: Color(0xFF3D2E1A), fontWeight: FontWeight.w700)),
+              style: TextStyle(color: Colors.white)),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -433,7 +432,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                 children: [
                   const Text('TAMAÑO',
                       style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
+                          color: Colors.white70,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1)),
@@ -458,14 +457,14 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                   ]),
                   _buildCommentField(commentController),
                   const SizedBox(height: 12),
-                  const Divider(color: Color(0xFFE5DCC4)),
+                  const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('CANTIDAD',
                           style: TextStyle(
-                              color: const Color(0xFF7A6E5A),
+                              color: Colors.white70,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1)),
@@ -478,12 +477,12 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFFAF1DE),
+                              color: const Color(0xFF0F172A),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE5DCC4)),
+                              border: Border.all(color: const Color(0xFF334155)),
                             ),
                             child: const Icon(Icons.remove,
-                                color: const Color(0xFF7A6E5A), size: 18),
+                                color: Colors.white70, size: 18),
                           ),
                         ),
                         SizedBox(
@@ -491,7 +490,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                           child: Text('$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Color(0xFFFAF1DE),
+                                  color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -527,7 +526,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancelar',
-                  style: TextStyle(color: const Color(0xFFA08F70))),
+                  style: TextStyle(color: Colors.white54)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -558,7 +557,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Color(0xFFFAF1DE),
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -638,11 +637,11 @@ Widget _buildExtrasSection({
     mainAxisSize: MainAxisSize.min,
     children: [
       const SizedBox(height: 12),
-      const Divider(color: Color(0xFFE5DCC4)),
+      const Divider(color: Color(0xFF334155)),
       const SizedBox(height: 8),
       const Text('ÓRDENES EXTRAS',
           style: TextStyle(
-              color: const Color(0xFF7A6E5A),
+              color: Colors.white70,
               fontSize: 11,
               fontWeight: FontWeight.w600,
               letterSpacing: 1)),
@@ -661,12 +660,12 @@ Widget _buildExtrasSection({
               decoration: BoxDecoration(
                 color: selected
                     ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
-                    : const Color(0xFFFAF1DE),
+                    : const Color(0xFF0F172A),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: selected
                       ? const Color(0xFFFF6D00)
-                      : const Color(0xFFE5DCC4),
+                      : const Color(0xFF334155),
                   width: 1.5,
                 ),
               ),
@@ -680,13 +679,13 @@ Widget _buildExtrasSection({
                     size: 16,
                     color: selected
                         ? const Color(0xFFFF6D00)
-                        : Color(0xFFA08F70),
+                        : Colors.white54,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '${e.name}  \$${e.price.toStringAsFixed(0)}',
                     style: TextStyle(
-                      color: selected ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A),
+                      color: selected ? Colors.white : Colors.white70,
                       fontSize: 13,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w400,
@@ -783,10 +782,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
             final bool isNaturalSelected = selectedSabor == 'Agua Natural';
 
             return AlertDialog(
-              backgroundColor: const Color(0xFFFAF1DE),
+              backgroundColor: const Color(0xFF1E293B),
               title: Text(
                 isRefresco ? '¿De qué sabor/marca?' : isJugo ? '¿Qué jugo?' : '¿De qué sabor?',
-                style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
+                style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
               ),
               content: SizedBox(
                 width: double.maxFinite,
@@ -797,7 +796,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     children: [
                       if (drinkSizes.isNotEmpty && !isNaturalSelected) ...[
                         const Text('TAMAÑO',
-                            style: TextStyle(color: const Color(0xFF7A6E5A), fontSize: 11,
+                            style: TextStyle(color: Colors.white70, fontSize: 11,
                                 fontWeight: FontWeight.w600, letterSpacing: 1)),
                         const SizedBox(height: 10),
                         Wrap(
@@ -828,11 +827,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           }).toList(),
                         ),
                         const SizedBox(height: 12),
-                        const Divider(color: Color(0xFFE5DCC4)),
+                        const Divider(color: Color(0xFF334155)),
                         const SizedBox(height: 8),
                       ],
                       const Text('SABOR',
-                          style: TextStyle(color: const Color(0xFF7A6E5A), fontSize: 11,
+                          style: TextStyle(color: Colors.white70, fontSize: 11,
                               fontWeight: FontWeight.w600, letterSpacing: 1)),
                       const SizedBox(height: 8),
                       GridView.builder(
@@ -857,10 +856,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                                    : const Color(0xFFFAF1DE),
+                                    : const Color(0xFF1E293B),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
                                   width: 1.5,
                                 ),
                               ),
@@ -869,14 +868,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Icon(
                                     isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
                                     size: 14,
-                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
+                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
                                   ),
                                   const SizedBox(width: 5),
                                   Expanded(
                                     child: Text(
                                       sabor,
                                       style: TextStyle(
-                                        color: isSelected ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A),
+                                        color: isSelected ? Colors.white : Colors.white70,
                                         fontSize: 11,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                                       ),
@@ -891,13 +890,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                         },
                       ),
                       const SizedBox(height: 12),
-                      const Divider(color: Color(0xFFE5DCC4)),
+                      const Divider(color: Color(0xFF334155)),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('CANTIDAD',
-                              style: TextStyle(color: const Color(0xFF7A6E5A), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
                           Row(
                             children: [
                               InkWell(
@@ -906,11 +905,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 child: Container(
                                   width: 36, height: 36,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFFFAF1DE),
+                                    color: const Color(0xFF0F172A),
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: const Color(0xFFE5DCC4)),
+                                    border: Border.all(color: const Color(0xFF334155)),
                                   ),
-                                  child: const Icon(Icons.remove, color: const Color(0xFF7A6E5A), size: 18),
+                                  child: const Icon(Icons.remove, color: Colors.white70, size: 18),
                                 ),
                               ),
                               SizedBox(
@@ -918,7 +917,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 child: Text(
                                   '$dialogQty',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
                                 ),
                               ),
                               InkWell(
@@ -945,7 +944,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancelar', style: TextStyle(color: const Color(0xFFA08F70))),
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
                 ),
                 TextButton(
                   onPressed: selectedSabor == null ? null : () async {
@@ -995,8 +994,8 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Color(0xFFFAF1DE),
-                    disabledBackgroundColor: const Color(0xFFE5DCC4),
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: const Color(0xFF334155),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     minimumSize: const Size(0, 44),
                   ),
@@ -1167,7 +1166,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
           final bool canBeFrita =
               isGordita && !(selectedBase == 'harina');
           return AlertDialog(
-            backgroundColor: const Color(0xFFFAF1DE),
+            backgroundColor: const Color(0xFF1E293B),
             title: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -1178,7 +1177,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       : (isGordita
                           ? '¿Qué Gordita?'
                           : '¿Qué guisado lleva el ${activeDish.name}?'),
-                  style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
+                  style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -1199,7 +1198,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const Text(
                       'BASE',
                       style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
+                          color: Colors.white70,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1),
@@ -1229,7 +1228,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                   ],
 
@@ -1238,7 +1237,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const Text(
                       'Opciones',
                       style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
+                          color: Colors.white70,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1),
@@ -1279,7 +1278,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                   ],
 
@@ -1289,7 +1288,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const Text(
                       'TÉRMINO DEL HUEVO',
                       style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
+                          color: Colors.white70,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1),
@@ -1309,10 +1308,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                                    : const Color(0xFFFAF1DE),
+                                    : const Color(0xFF0F172A),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
                                   width: 2,
                                 ),
                               ),
@@ -1322,13 +1321,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Icon(
                                     isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
                                     size: 16,
-                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
+                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     termino,
                                     style: TextStyle(
-                                      color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                                      color: isSelected ? Colors.white : Colors.white60,
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1341,7 +1340,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       }).toList(),
                     ),
                     const SizedBox(height: 16),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                   ],
 
                   // Selector de salsa para chilaquiles (multi, máx 2)
@@ -1349,7 +1348,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     const Text(
                       'SALSA (máx. 2)',
                       style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
+                          color: Colors.white70,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1),
@@ -1377,10 +1376,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
-                                    : const Color(0xFFFAF1DE),
+                                    : const Color(0xFF0F172A),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                                  color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF334155),
                                   width: 2,
                                 ),
                               ),
@@ -1390,13 +1389,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Icon(
                                     isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
                                     size: 16,
-                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
+                                    color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     salsa,
                                     style: TextStyle(
-                                      color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                                      color: isSelected ? Colors.white : Colors.white60,
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1413,7 +1412,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   else if (guisados.isEmpty)
                     const Text(
                       'No hay guisados disponibles.',
-                      style: TextStyle(color: const Color(0xFF7A6E5A)),
+                      style: TextStyle(color: Colors.white70),
                     )
                   else ...[
                     Row(
@@ -1422,7 +1421,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                         const Text(
                           'GUISADO',
                           style: TextStyle(
-                              color: const Color(0xFF7A6E5A),
+                              color: Colors.white70,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1),
@@ -1434,7 +1433,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             fontWeight: FontWeight.w600,
                             color: selected.length >= 5
                                 ? const Color(0xFFFF6D00)
-                                : Color(0xFFB6A88A),
+                                : Colors.white38,
                           ),
                         ),
                       ],
@@ -1463,13 +1462,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: isChecked
-                                      ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
-                                      : const Color(0xFFFAF1DE),
+                                      ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                      : const Color(0xFF1E293B),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isChecked
-                                        ? const Color(0xFFFF6D00)
-                                        : const Color(0xFFFF6D00).withValues(alpha: 0.35),
+                                    color: isChecked ? const Color(0xFFFF6D00) : const Color(0xFF334155),
                                     width: 1.5,
                                   ),
                                 ),
@@ -1479,7 +1476,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     Icon(
                                       isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
                                       size: 14,
-                                      color: const Color(0xFFFF6D00),
+                                      color: isChecked ? const Color(0xFFFF6D00) : const Color(0xFF64748B),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
@@ -1488,9 +1485,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        color: const Color(0xFFFF6D00),
+                                        color: isChecked ? Colors.white : Colors.white70,
                                         fontSize: 11,
-                                        fontWeight: isChecked ? FontWeight.w700 : FontWeight.w600,
+                                        fontWeight: isChecked ? FontWeight.w600 : FontWeight.w400,
                                       ),
                                     ),
                                   ],
@@ -1560,14 +1557,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                        const Color(0xFFFAF1DE).withValues(alpha: 0),
-                                        const Color(0xFFFAF1DE).withValues(alpha: 0.9),
+                                        const Color(0xFF1E293B).withValues(alpha: 0),
+                                        const Color(0xFF1E293B).withValues(alpha: 0.9),
                                       ],
                                     ),
                                   ),
                                   child: const Center(
                                     child: Icon(Icons.keyboard_arrow_down,
-                                        color: const Color(0xFFA08F70), size: 20),
+                                        color: Colors.white54, size: 20),
                                   ),
                                 ),
                               ),
@@ -1579,13 +1576,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   ],
                   // Selector de cantidad
                   const SizedBox(height: 12),
-                  const Divider(color: Color(0xFFE5DCC4)),
+                  const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('CANTIDAD',
-                          style: TextStyle(color: const Color(0xFF7A6E5A), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                          style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
                       Row(
                         children: [
                           InkWell(
@@ -1594,11 +1591,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             child: Container(
                               width: 36, height: 36,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFAF1DE),
+                                color: const Color(0xFF0F172A),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE5DCC4)),
+                                border: Border.all(color: const Color(0xFF334155)),
                               ),
-                              child: const Icon(Icons.remove, color: const Color(0xFF7A6E5A), size: 18),
+                              child: const Icon(Icons.remove, color: Colors.white70, size: 18),
                             ),
                           ),
                           SizedBox(
@@ -1606,7 +1603,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             child: Text(
                               '$dialogQty',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.w700),
+                              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
                             ),
                           ),
                           InkWell(
@@ -1641,7 +1638,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     ),
                   // Total dinámico
                   const SizedBox(height: 12),
-                  const Divider(color: Color(0xFFE5DCC4)),
+                  const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 4),
                   Text(
                     'Total: \$${(((isTapa && conQueso) ? activeDish.price + 25 : activeDish.price) * dialogQty + extrasDisponibles.where((e) => selectedExtraIds.contains(e.id)).fold<double>(0, (s, e) => s + e.price)).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
@@ -1659,7 +1656,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text('Cancelar',
-                    style: TextStyle(color: const Color(0xFFA08F70))),
+                    style: TextStyle(color: Colors.white54)),
               ),
               SizedBox(
                 height: 44,
@@ -1721,8 +1718,8 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Color(0xFFFAF1DE),
-                  disabledBackgroundColor: const Color(0xFFE5DCC4),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: const Color(0xFF334155),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 child: const Text('Agregar a la orden', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -2107,9 +2104,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                 dialogQty;
 
         return AlertDialog(
-          backgroundColor: const Color(0xFFFAF1DE),
+          backgroundColor: const Color(0xFF1E293B),
           title: Text(displayName,
-              style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
+              style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -2120,7 +2117,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   if (showSize && !isLoDulce) ...[
                     const Text('TAMAÑO',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2170,13 +2167,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                   ],
                   if (effectiveShowQty) ...[
                     const Text('PIEZAS',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2195,13 +2192,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           .toList(),
                     ),
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                   ],
                   if (showFlavor) ...[
                     Text(isMenudo ? 'TAMAÑO' : isHuevoCategory ? 'TIPO DE HUEVO' : 'SABOR',
                         style: const TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2256,13 +2253,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // Tipo de carne: solo para Menudo
                   if (isMenudo) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         const Text('TIPO DE CARNE',
                             style: TextStyle(
-                                color: const Color(0xFF7A6E5A),
+                                color: Colors.white70,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -2273,7 +2270,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               : selectedTiposCarne.join(', '),
                           style: TextStyle(
                             color: selectedTiposCarne.isEmpty
-                                ? const Color(0xFFA08F70)
+                                ? const Color(0xFF64748B)
                                 : const Color(0xFFFF6D00),
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
@@ -2320,11 +2317,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 12),
-                          const Divider(color: Color(0xFFE5DCC4)),
+                          const Divider(color: Color(0xFF334155)),
                           const SizedBox(height: 8),
                           const Text('CUAJADILLA',
                               style: TextStyle(
-                                  color: const Color(0xFF7A6E5A),
+                                  color: Colors.white70,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   letterSpacing: 1)),
@@ -2365,11 +2362,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // Término del huevo: solo para categoría huevos
                   if (isHuevoCategory) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     const Text('TÉRMINO DEL HUEVO',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2391,11 +2388,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // que se cobran por orden)
                   if (needsPiezas) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     const Text('PIEZAS',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2416,14 +2413,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // diálogo de chilaquiles puros): 3 opciones, máx. 2.
                   if (hasChilaquilFlavor) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('SALSA (máx. 2)',
                             style: TextStyle(
-                                color: const Color(0xFF7A6E5A),
+                                color: Colors.white70,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -2434,7 +2431,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             fontWeight: FontWeight.w600,
                             color: selectedSalsasChilaquil.length >= 2
                                 ? const Color(0xFFFF6D00)
-                                : Color(0xFFB6A88A),
+                                : Colors.white38,
                           ),
                         ),
                       ],
@@ -2465,12 +2462,12 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               color: isSelected
                                   ? const Color(0xFFFF6D00)
                                       .withValues(alpha: 0.15)
-                                  : const Color(0xFFFAF1DE),
+                                  : const Color(0xFF0F172A),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
                                     ? const Color(0xFFFF6D00)
-                                    : const Color(0xFFE5DCC4),
+                                    : const Color(0xFF334155),
                                 width: 2,
                               ),
                             ),
@@ -2484,15 +2481,15 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   size: 16,
                                   color: isSelected
                                       ? const Color(0xFFFF6D00)
-                                      : const Color(0xFFA08F70),
+                                      : const Color(0xFF64748B),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   salsa,
                                   style: TextStyle(
                                     color: isSelected
-                                        ? Color(0xFFFAF1DE)
-                                        : Color(0xFFA08F70),
+                                        ? Colors.white
+                                        : Colors.white60,
                                     fontSize: 13,
                                     fontWeight: isSelected
                                         ? FontWeight.w700
@@ -2509,14 +2506,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // Guisado: aparece cuando algún platillo seleccionado lo requiere
                   if (anyRequiresGuisado && guisados.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('GUISADO',
                             style: TextStyle(
-                                color: const Color(0xFF7A6E5A),
+                                color: Colors.white70,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 1)),
@@ -2527,7 +2524,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             fontWeight: FontWeight.w600,
                             color: selectedGuisados.length >= 5
                                 ? const Color(0xFFFF6D00)
-                                : Color(0xFFB6A88A),
+                                : Colors.white38,
                           ),
                         ),
                       ],
@@ -2558,13 +2555,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: isChecked
-                                        ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
-                                        : const Color(0xFFFAF1DE),
+                                        ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                        : const Color(0xFF0F172A),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: isChecked
                                           ? const Color(0xFFFF6D00)
-                                          : const Color(0xFFFF6D00).withValues(alpha: 0.35),
+                                          : const Color(0xFF334155),
                                       width: 1.5,
                                     ),
                                   ),
@@ -2576,7 +2573,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                             ? Icons.check_circle
                                             : Icons.radio_button_unchecked,
                                         size: 14,
-                                        color: const Color(0xFFFF6D00),
+                                        color: isChecked
+                                            ? const Color(0xFFFF6D00)
+                                            : const Color(0xFF64748B),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -2585,11 +2584,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: const Color(0xFFFF6D00),
+                                          color: isChecked ? Colors.white : Colors.white70,
                                           fontSize: 11,
                                           fontWeight: isChecked
-                                              ? FontWeight.w700
-                                              : FontWeight.w600,
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
                                         ),
                                       ),
                                     ],
@@ -2644,11 +2643,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // Cantidad de piezas: solo para enmoladas seleccionadas en solitario
                   if (selectedIsEnmolada) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     const Text('PIEZAS',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2692,11 +2691,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           isGuisadoExtra(e) &&
                           selectedExtraIds.contains(e.id))) ...[
                     const SizedBox(height: 12),
-                    const Divider(color: Color(0xFFE5DCC4)),
+                    const Divider(color: Color(0xFF334155)),
                     const SizedBox(height: 8),
                     const Text('GUISADO DEL EXTRA',
                         style: TextStyle(
-                            color: const Color(0xFF7A6E5A),
+                            color: Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
@@ -2728,14 +2727,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   decoration: BoxDecoration(
                                     color: isSel
                                         ? const Color(0xFFFF6D00)
-                                            .withValues(alpha: 0.18)
-                                        : const Color(0xFFFAF1DE),
+                                            .withValues(alpha: 0.15)
+                                        : const Color(0xFF0F172A),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: isSel
                                           ? const Color(0xFFFF6D00)
-                                          : const Color(0xFFFF6D00)
-                                              .withValues(alpha: 0.35),
+                                          : const Color(0xFF334155),
                                       width: 1.5,
                                     ),
                                   ),
@@ -2747,7 +2745,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                             ? Icons.check_circle
                                             : Icons.radio_button_unchecked,
                                         size: 14,
-                                        color: const Color(0xFFFF6D00),
+                                        color: isSel
+                                            ? const Color(0xFFFF6D00)
+                                            : const Color(0xFF64748B),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -2756,11 +2756,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: const Color(0xFFFF6D00),
+                                          color: isSel
+                                              ? Colors.white
+                                              : Colors.white70,
                                           fontSize: 11,
                                           fontWeight: isSel
                                               ? FontWeight.w700
-                                              : FontWeight.w600,
+                                              : FontWeight.w400,
                                         ),
                                       ),
                                     ],
@@ -2815,14 +2817,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                   // CANTIDAD: siempre visible (incluyendo lo dulce), igual que
                   // en todos los demás productos.
                   const SizedBox(height: 12),
-                  const Divider(color: Color(0xFFE5DCC4)),
+                  const Divider(color: Color(0xFF334155)),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('CANTIDAD',
                           style: TextStyle(
-                              color: const Color(0xFF7A6E5A),
+                              color: Colors.white70,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1)),
@@ -2835,11 +2837,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             child: Container(
                               width: 36, height: 36,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFAF1DE),
+                                color: const Color(0xFF0F172A),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xFFE5DCC4)),
+                                border: Border.all(color: const Color(0xFF334155)),
                               ),
-                              child: const Icon(Icons.remove, color: const Color(0xFF7A6E5A), size: 18),
+                              child: const Icon(Icons.remove, color: Colors.white70, size: 18),
                             ),
                           ),
                           SizedBox(
@@ -2848,7 +2850,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               '$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Color(0xFFFAF1DE),
+                                  color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700),
                             ),
@@ -2888,7 +2890,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancelar',
-                  style: TextStyle(color: const Color(0xFFA08F70))),
+                  style: TextStyle(color: Colors.white54)),
             ),
             SizedBox(
               height: 44,
@@ -2960,8 +2962,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Color(0xFFFAF1DE),
-                disabledBackgroundColor: const Color(0xFFE5DCC4),
+                foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFF334155),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: const Text('Agregar a la orden',
@@ -3041,7 +3043,7 @@ class MultiFlavorVariantCard extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: const TextStyle(
-                        color: Color(0xFFA08F70),
+                        color: Color(0xFF64748B),
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),
@@ -3128,10 +3130,10 @@ Future<void> addOrdenVariantToCart(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setDialogState) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
+        backgroundColor: const Color(0xFF1E293B),
         title: Text(
           _baseOrdenName(ordenDish.name),
-          style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
+          style: TextStyle(color: Colors.white, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -3140,7 +3142,7 @@ Future<void> addOrdenVariantToCart(
             children: [
               const Text('TAMAÑO',
                   style: TextStyle(
-                      color: const Color(0xFF7A6E5A),
+                      color: Colors.white70,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1)),
@@ -3174,7 +3176,7 @@ Future<void> addOrdenVariantToCart(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: const Color(0xFFA08F70))),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
           ),
           TextButton(
             onPressed: selected == null
@@ -3198,8 +3200,8 @@ Future<void> addOrdenVariantToCart(
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFF6D00),
-              foregroundColor: Color(0xFFFAF1DE),
-              disabledBackgroundColor: const Color(0xFFE5DCC4),
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: const Color(0xFF334155),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(0, 44),
             ),
@@ -3277,7 +3279,7 @@ class OrdenVariantCard extends StatelessWidget {
                               Text(
                                 '1/2: \$${mediaDish.price.toStringAsFixed(0)}',
                                 style: const TextStyle(
-                                    color: const Color(0xFFA08F70), fontSize: 10),
+                                    color: Colors.white54, fontSize: 10),
                               ),
                             ],
                           ),
@@ -3336,20 +3338,19 @@ class _ToggleOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const orange = Color(0xFFFF6D00);
-    const cream = Color(0xFFFAF1DE);
+    const activeColor = Color(0xFFFF6D00);
     final effectiveColor = enabled
-        ? (value ? orange : cream)
-        : const Color(0xFFEDE3CE);
+        ? (value ? activeColor : const Color(0xFF334155))
+        : const Color(0xFF1E293B);
     final borderColor = enabled
-        ? (value ? orange : orange.withValues(alpha: 0.35))
-        : const Color(0xFFCFC7B2);
+        ? (value ? activeColor : const Color(0xFF475569))
+        : const Color(0xFF2D3748);
     final contentColor = enabled
-        ? (value ? Color(0xFFFAF1DE) : orange)
-        : const Color(0xFFB0A992);
+        ? (value ? Colors.white : Colors.white54)
+        : Colors.white24;
     final priceColor = enabled
-        ? (value ? Color(0xFFFAF1DE).withValues(alpha: 0.9) : orange.withValues(alpha: 0.75))
-        : const Color(0xFFB0A992);
+        ? (value ? Colors.white70 : const Color(0xFF64748B))
+        : Colors.white24;
 
     return GestureDetector(
       onTap: enabled ? () => onChanged(!value) : null,
@@ -3375,7 +3376,7 @@ class _ToggleOption extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: value ? FontWeight.w700 : FontWeight.w600,
+                    fontWeight: value ? FontWeight.w700 : FontWeight.w400,
                     color: contentColor,
                   ),
                 ),
@@ -3392,7 +3393,7 @@ class _ToggleOption extends StatelessWidget {
             ),
             if (!enabled) ...[
               const SizedBox(width: 6),
-              Icon(Icons.block, size: 14, color: const Color(0xFFB0A992)),
+              Icon(Icons.block, size: 14, color: Colors.white24),
             ],
           ],
         ),
@@ -3429,10 +3430,10 @@ class _BaseChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: selected
                 ? activeColor.withValues(alpha: 0.15)
-                : const Color(0xFFFAF1DE),
+                : const Color(0xFF0F172A),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: selected ? activeColor : const Color(0xFFE5DCC4),
+              color: selected ? activeColor : const Color(0xFF334155),
               width: 2,
             ),
           ),
@@ -3445,7 +3446,7 @@ class _BaseChip extends StatelessWidget {
                     ? Icons.check_circle
                     : Icons.radio_button_unchecked,
                 size: 16,
-                color: selected ? activeColor : const Color(0xFFA08F70),
+                color: selected ? activeColor : const Color(0xFF64748B),
               ),
               const SizedBox(width: 8),
               Column(
@@ -3458,7 +3459,7 @@ class _BaseChip extends StatelessWidget {
                       fontSize: 14,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                      color: selected ? Colors.white : Colors.white60,
                     ),
                   ),
                   Text(
@@ -3466,7 +3467,7 @@ class _BaseChip extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: selected ? Color(0xFF7A6E5A) : const Color(0xFFA08F70),
+                      color: selected ? Colors.white70 : const Color(0xFF64748B),
                     ),
                   ),
                 ],

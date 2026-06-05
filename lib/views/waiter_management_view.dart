@@ -38,10 +38,10 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
+        backgroundColor: const Color(0xFF1E293B),
         title: Text(
           'QR Meseros · $slug',
-          style: const TextStyle(color: Color(0xFF3D2E1A)),
+          style: const TextStyle(color: Colors.white),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -52,14 +52,14 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                 data: url,
                 version: QrVersions.auto,
                 size: 240,
-                backgroundColor: Color(0xFFFAF1DE),
+                backgroundColor: Colors.white,
                 errorCorrectionLevel: QrErrorCorrectLevel.H,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               url,
-              style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
               textAlign: TextAlign.center,
             ),
           ],
@@ -81,7 +81,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFAF1DE),
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFF6D00).withValues(alpha: 0.45)),
       ),
@@ -97,7 +97,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                 data: url,
                 version: QrVersions.auto,
                 size: 88,
-                backgroundColor: Color(0xFFFAF1DE),
+                backgroundColor: Colors.white,
                 errorCorrectionLevel: QrErrorCorrectLevel.M,
               ),
             ),
@@ -124,7 +124,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                 // URL
                 Text(
                   url,
-                  style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
+                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -137,8 +137,8 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     _LinkBtn(
                       icon: Icons.copy,
                       label: 'Copiar enlace',
-                      color: Color(0xFFFAF1DE),
-                      borderColor: const Color(0xFFD8CBA8),
+                      color: Colors.white,
+                      borderColor: const Color(0xFF475569),
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: url));
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,20 +178,20 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFFFAF1DE),
+          backgroundColor: const Color(0xFF1E293B),
           title: Text(isEditing ? 'Editar Mesero' : 'Nuevo Mesero',
-              style: const TextStyle(color: Color(0xFF3D2E1A))),
+              style: const TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: Color(0xFF3D2E1A)),
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   labelText: 'Nombre Completo',
                   labelStyle: const TextStyle(color: Colors.grey),
                   filled: true,
-                  fillColor: const Color(0xFFFAF1DE),
+                  fillColor: const Color(0xFF0F172A),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -199,14 +199,14 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
               const SizedBox(height: 16),
               TextField(
                 controller: pinController,
-                style: const TextStyle(color: Color(0xFF3D2E1A)),
+                style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Contraseña / PIN (Ej. 1234)',
                   labelStyle: const TextStyle(color: Colors.grey),
                   filled: true,
-                  fillColor: const Color(0xFFFAF1DE),
+                  fillColor: const Color(0xFF0F172A),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
@@ -279,7 +279,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00)),
               child: const Text('Guardar',
-                  style: TextStyle(color: Color(0xFF3D2E1A))),
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -292,9 +292,9 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
     await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
+        backgroundColor: const Color(0xFF1E293B),
         title: const Text('¿Eliminar Mesero?',
-            style: TextStyle(color: Color(0xFF3D2E1A))),
+            style: TextStyle(color: Colors.white)),
         content: const Text('Esta acción no se puede deshacer.',
             style: TextStyle(color: Colors.grey)),
         actions: [
@@ -376,7 +376,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     style: TextStyle(
                         fontSize: isMobile ? 24 : 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFFFAF1DE)),
+                        color: Colors.white),
                   ),
                   if (isMobile) const SizedBox(height: 16),
                   ElevatedButton.icon(
@@ -385,7 +385,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     label: const Text('Nuevo Mesero'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Color(0xFFFAF1DE),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -414,10 +414,10 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                     return Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFAF1DE),
+                        color: const Color(0xFF1E293B),
                         borderRadius: BorderRadius.circular(16),
                         border:
-                            Border.all(color: const Color(0xFFE5DCC4)),
+                            Border.all(color: const Color(0xFF334155)),
                       ),
                       child: Row(
                         children: [
@@ -441,7 +441,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFFAF1DE)),
+                                  color: Colors.white),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

@@ -90,7 +90,7 @@ class _ClipBrickWidgetState extends State<ClipBrickWidget> {
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Center(
               child: Text('Cargando Clip…',
-                  style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
+                  style: TextStyle(color: Colors.white54, fontSize: 13)),
             ),
           )
         else

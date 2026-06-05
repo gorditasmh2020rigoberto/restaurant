@@ -40,40 +40,36 @@ class RestaurantApp extends StatelessWidget {
       title: 'Gorditas Mis Hermanas',
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.light,
+        brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFFF6D00), // Gorditas Orange
-          brightness: Brightness.light,
-          surface: const Color(0xFFFAF1DE), // Cream
-          onSurface: const Color(0xFF3D2E1A), // Dark brown
+          brightness: Brightness.dark,
+          surface: const Color(0xFF0F172A), // Deep Navy
+          onSurface: const Color(0xFFF8FAFC),
           primary: const Color(0xFFFF6D00),
         ),
-        scaffoldBackgroundColor: const Color(0xFFFAF1DE),
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
         cardTheme: CardThemeData(
-          color: const Color(0xFFFAF1DE),
+          color: const Color(0xFF1E293B), // Slate-800
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFFAF1DE),
-          foregroundColor: Color(0xFFFF6D00),
+          backgroundColor: Color(0xFF0F172A),
           centerTitle: false,
           elevation: 0,
           titleTextStyle: TextStyle(
-            color: Color(0xFFFF6D00),
+            color: Color(0xFFF8FAFC),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
-          iconTheme: IconThemeData(color: Color(0xFFFF6D00)),
         ),
         textTheme: const TextTheme(
-          displayLarge: TextStyle(color: Color(0xFF3D2E1A), fontWeight: FontWeight.bold),
-          bodyLarge: TextStyle(color: Color(0xFF7A6E5A)),
+          displayLarge: TextStyle(color: Color(0xFFF8FAFC), fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: Color(0xFF94A3B8)), // Slate-400
         ),
-        dividerColor: const Color(0xFFE5DCC4),
-        iconTheme: const IconThemeData(color: Color(0xFFFF6D00)),
       ),
       initialRoute: '/',
       routes: {

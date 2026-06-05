@@ -265,7 +265,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF1DE),
+      backgroundColor: const Color(0xFF0F172A),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -281,20 +281,20 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                 Text(
                   'Gorditas Mis Hermanas',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Color(0xFFFF6D00), letterSpacing: -0.5),
+                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5),
                 ),
                 const SizedBox(height: 32),
                 
                 // PHASE 1: SELECT BRANCH
                 if (!_entered) ...[
-                  Text('¿En qué sucursal te encuentras?', style: TextStyle(color: const Color(0xFFA08F70), fontSize: isMobile ? 14 : 16)),
+                  Text('¿En qué sucursal te encuentras?', style: TextStyle(color: const Color(0xFF94A3B8), fontSize: isMobile ? 14 : 16)),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFAF1DE),
+                      color: const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE5DCC4), width: 1.5),
+                      border: Border.all(color: const Color(0xFF334155), width: 1.5),
                     ),
                     child: Row(
                       children: Globals.branches.asMap().entries.map((entry) {
@@ -323,7 +323,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                       onPressed: () => setState(() => _entered = true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFF6D00),
-                        foregroundColor: Color(0xFFFAF1DE),
+                        foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 64),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         elevation: 12,
@@ -340,7 +340,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                     children: [
                       const Icon(Icons.store, color: Color(0xFFFF6D00), size: 16),
                       const SizedBox(width: 8),
-                      Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(Globals.currentBranch, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                       const SizedBox(width: 16),
                       TextButton(
                         onPressed: () => setState(() {
@@ -425,7 +425,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                color: Color(0xFFFAF1DE),
+                                color: Colors.white,
                                 padding: const EdgeInsets.all(16),
                                 child: Image.network('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=$encodedUrl', width: 250, height: 250),
                               ),
@@ -437,8 +437,8 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                         ),
                       );
                     },
-                    icon: const Icon(Icons.qr_code, color: Color(0xFFA08F70)),
-                    label: const Text('Mostrar QR de la App', style: TextStyle(color: Color(0xFFA08F70))),
+                    icon: const Icon(Icons.qr_code, color: Color(0xFF94A3B8)),
+                    label: const Text('Mostrar QR de la App', style: TextStyle(color: Color(0xFF94A3B8))),
                   ),
                   const SizedBox(height: 8),
                   const UpdateAppButton(compact: true),
@@ -475,7 +475,7 @@ class _BranchButton extends StatelessWidget {
           textAlign: TextAlign.center,
           overflow: TextOverflow.ellipsis,
           maxLines: 2,
-          style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 14),
+          style: TextStyle(color: isSelected ? Colors.white : const Color(0xFF94A3B8), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, fontSize: 14),
         ),
       ),
     );
@@ -494,9 +494,9 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFAF1DE),
+        color: const Color(0xFF1E293B),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5DCC4)),
+        border: Border.all(color: const Color(0xFF334155)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -509,7 +509,7 @@ class _RoleCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: const Color(0xFFFAF1DE), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: const Color(0xFF0F172A), borderRadius: BorderRadius.circular(12)),
                   child: Icon(icon, color: const Color(0xFFFF6D00), size: 28),
                 ),
                 const SizedBox(width: 20),
@@ -517,12 +517,12 @@ class _RoleCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)), overflow: TextOverflow.ellipsis),
-                      Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFFA08F70)), overflow: TextOverflow.ellipsis),
+                      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white), overflow: TextOverflow.ellipsis),
+                      Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)), overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: Color(0xFFD8CBA8)),
+                const Icon(Icons.chevron_right, color: Color(0xFF475569)),
               ],
             ),
           ),

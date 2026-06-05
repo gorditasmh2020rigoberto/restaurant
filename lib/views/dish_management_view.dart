@@ -88,8 +88,8 @@ class _DishManagementViewState extends State<DishManagementView> {
                         icon: const Icon(Icons.photo_library),
                         label: const Text('Elegir Imagen'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFAF1DE),
-                          foregroundColor: Color(0xFFFAF1DE),
+                          backgroundColor: const Color(0xFF1E293B),
+                          foregroundColor: Colors.white,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -234,10 +234,10 @@ class _DishManagementViewState extends State<DishManagementView> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Color(0xFFFAF1DE),
+                    foregroundColor: Colors.white,
                   ),
                   child: isUploading 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFFFAF1DE), strokeWidth: 2))
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : const Text('Guardar'),
                 ),
               ],
@@ -308,7 +308,7 @@ class _DishManagementViewState extends State<DishManagementView> {
                 label: const Text('Nuevo Platillo'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Color(0xFFFAF1DE),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
               ),
@@ -328,7 +328,7 @@ class _DishManagementViewState extends State<DishManagementView> {
               return ListView.separated(
                 padding: EdgeInsets.all(isMobile ? 16 : 24),
                 itemCount: dishes.length,
-                separatorBuilder: (context, index) => const Divider(color: Color(0xFFE5DCC4)),
+                separatorBuilder: (context, index) => const Divider(color: Color(0xFF334155)),
                 itemBuilder: (context, index) {
                   final dish = dishes[index];
                   return ListTile(
