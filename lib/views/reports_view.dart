@@ -715,7 +715,7 @@ class _ReportsViewState extends State<ReportsView> {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(color: const Color(0xFFFF6D00), borderRadius: BorderRadius.circular(6)),
-                                    child: const Text('1', style: TextStyle(color: Color(0xFFFAF1DE), fontSize: 12, fontWeight: FontWeight.bold)),
+                                    child: const Text('1', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 12, fontWeight: FontWeight.bold)),
                                   ),
                                   const SizedBox(width: 12),
                                   const Text('Siguiente', style: TextStyle(color: Color(0xFFA08F70), fontSize: 12)),
@@ -894,7 +894,7 @@ class _ReportsViewState extends State<ReportsView> {
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 0),
       ),
-      style: const TextStyle(color: Color(0xFFFAF1DE)),
+      style: const TextStyle(color: Color(0xFF3D2E1A)),
     );
   }
 
@@ -1017,7 +1017,7 @@ class _ReportsViewState extends State<ReportsView> {
         child: Row(children: [
           Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13), overflow: TextOverflow.ellipsis)),
-          Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(
             flex: 2,
             child: Container(
@@ -1252,7 +1252,7 @@ class _ReportsViewState extends State<ReportsView> {
                   ),
                   Text(
                     '$qty unidades',
-                    style: const TextStyle(color: Color(0xFFFAF1DE)),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                   ),
                 ],
               ),
@@ -1291,7 +1291,7 @@ class _ReportsViewState extends State<ReportsView> {
               child: Icon(icon, color: color, size: 16),
             ),
             const SizedBox(width: 12),
-            Text(name, style: const TextStyle(color: Color(0xFFFAF1DE))),
+            Text(name, style: const TextStyle(color: Color(0xFF3D2E1A))),
           ],
         ),
         Text(

@@ -80,7 +80,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar guisado?',
-            style: TextStyle(color: Color(0xFFFAF1DE))),
+            style: TextStyle(color: Color(0xFF3D2E1A))),
         content: const Text('Esta acción no se puede deshacer.',
             style: TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
@@ -127,12 +127,12 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
         backgroundColor: const Color(0xFFFAF1DE),
         title: Text(
           isEditing ? 'Editar Guisado' : 'Nuevo Guisado',
-          style: const TextStyle(color: Color(0xFFFAF1DE)),
+          style: const TextStyle(color: Color(0xFF3D2E1A)),
         ),
         content: TextField(
           controller: nameController,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFFFAF1DE)),
+          style: const TextStyle(color: Color(0xFF3D2E1A)),
           textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
             hintText: isEditing ? guisado['name'] as String : 'Nombre del guisado (ej. Picadillo)',

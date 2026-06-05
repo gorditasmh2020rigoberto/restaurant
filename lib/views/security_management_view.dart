@@ -95,7 +95,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                       child: DropdownButton<String>(
                         value: selectedRole,
                         dropdownColor: const Color(0xFFFAF1DE),
-                        style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16),
+                        style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 16),
                         isExpanded: true,
                         items: const [
                           DropdownMenuItem(value: 'admin', child: Text('Admin')),
@@ -121,7 +121,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                       child: DropdownButton<String?>(
                         value: selectedBranch,
                         dropdownColor: const Color(0xFFFAF1DE),
-                        style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16),
+                        style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 16),
                         isExpanded: true,
                         items: [
                           const DropdownMenuItem<String?>(
@@ -185,7 +185,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Confirmar eliminación', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('Confirmar eliminación', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: Text(
           '¿Eliminar al usuario "${user['username']}"? Esta acción no se puede deshacer.',
           style: const TextStyle(color: Color(0xFFA08F70)),
@@ -235,7 +235,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(color: Color(0xFFFAF1DE)),
+      style: const TextStyle(color: Color(0xFF3D2E1A)),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Color(0xFFA08F70)),

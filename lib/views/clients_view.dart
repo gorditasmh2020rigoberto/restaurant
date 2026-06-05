@@ -265,7 +265,7 @@ class _ClientsViewState extends State<ClientsView> {
         icon: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
         label: const Text(
           'NUEVO CLIENTE',
-          style: TextStyle(color: Color(0xFFFAF1DE)),
+          style: TextStyle(color: Color(0xFF3D2E1A)),
         ),
       ),
     );

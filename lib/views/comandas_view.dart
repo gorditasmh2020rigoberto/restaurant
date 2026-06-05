@@ -478,11 +478,11 @@ class _ComandasViewState extends State<ComandasView> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('Nuevo cliente', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('Nuevo cliente', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFFFAF1DE)),
+          style: const TextStyle(color: Color(0xFF3D2E1A)),
           decoration: const InputDecoration(
             hintText: 'Nombre del cliente',
             hintStyle: TextStyle(color: Color(0xFFB6A88A)),
@@ -908,7 +908,7 @@ class _ComandasViewState extends State<ComandasView> {
                                                       const SizedBox(height: 2),
                                                       Text('Mesa ${table['table_number']}',
                                                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold,
-                                                              color: isOccupied ? Colors.red[100] : Color(0xFFFAF1DE))),
+                                                              color: isOccupied ? Colors.red[100] : const Color(0xFF3D2E1A))),
                                                       const SizedBox(height: 2),
                                                       Container(
                                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),

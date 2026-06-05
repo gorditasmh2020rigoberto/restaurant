@@ -41,7 +41,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
         backgroundColor: const Color(0xFFFAF1DE),
         title: Text(
           'QR Meseros · $slug',
-          style: const TextStyle(color: Color(0xFFFAF1DE)),
+          style: const TextStyle(color: Color(0xFF3D2E1A)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -180,13 +180,13 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
         return AlertDialog(
           backgroundColor: const Color(0xFFFAF1DE),
           title: Text(isEditing ? 'Editar Mesero' : 'Nuevo Mesero',
-              style: const TextStyle(color: Color(0xFFFAF1DE))),
+              style: const TextStyle(color: Color(0xFF3D2E1A))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                style: const TextStyle(color: Color(0xFFFAF1DE)),
+                style: const TextStyle(color: Color(0xFF3D2E1A)),
                 decoration: InputDecoration(
                   labelText: 'Nombre Completo',
                   labelStyle: const TextStyle(color: Colors.grey),
@@ -199,7 +199,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
               const SizedBox(height: 16),
               TextField(
                 controller: pinController,
-                style: const TextStyle(color: Color(0xFFFAF1DE)),
+                style: const TextStyle(color: Color(0xFF3D2E1A)),
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 decoration: InputDecoration(
@@ -279,7 +279,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00)),
               child: const Text('Guardar',
-                  style: TextStyle(color: Color(0xFFFAF1DE))),
+                  style: TextStyle(color: Color(0xFF3D2E1A))),
             ),
           ],
         );
@@ -294,7 +294,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar Mesero?',
-            style: TextStyle(color: Color(0xFFFAF1DE))),
+            style: TextStyle(color: Color(0xFF3D2E1A))),
         content: const Text('Esta acción no se puede deshacer.',
             style: TextStyle(color: Colors.grey)),
         actions: [

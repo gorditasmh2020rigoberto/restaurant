@@ -295,7 +295,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               counterText: '',
               prefixIcon: const Icon(Icons.pin, color: Color(0xFFA08F70)),
             ),
-            style: const TextStyle(color: Color(0xFFFAF1DE), letterSpacing: 4, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Color(0xFF3D2E1A), letterSpacing: 4, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: 12),
