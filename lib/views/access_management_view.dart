@@ -86,7 +86,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
       children: [
         Text(
           'Gestión de Accesos (Cajeros y Admin)',
-          style: TextStyle(fontSize: isMobile ? 20 : 28, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+          style: TextStyle(fontSize: isMobile ? 20 : 28, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
         ),
         const SizedBox(height: 8),
         Text('Administra quién puede entrar al panel de administración de ${Globals.currentBranch}', style: const TextStyle(color: Color(0xFFA08F70))),
@@ -99,7 +99,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Agregar Nuevo Acceso a Caja', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+              const Text('Agregar Nuevo Acceso a Caja', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
               const SizedBox(height: 16),
               if (isMobile) ...[
                 TextField(
@@ -183,7 +183,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0xFFE5DCC4))),
                     child: ListTile(
                       leading: const CircleAvatar(backgroundColor: Color(0xFFFF6D00), child: Icon(Icons.point_of_sale, color: Color(0xFFFAF1DE))),
-                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
                       subtitle: Text('PIN: ${access['pin']}', style: const TextStyle(color: Color(0xFFA08F70))),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -212,7 +212,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               const Row(children: [
                 Icon(Icons.lock_outline, color: Color(0xFFFF6D00)),
                 SizedBox(width: 10),
-                Text('Claves de Acceso por Rol', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+                Text('Claves de Acceso por Rol', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
               ]),
               const SizedBox(height: 6),
               const Text('Cambia el PIN de cada vista de trabajo', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
@@ -244,7 +244,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Personalizar Nombre de Sucursal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+              const Text('Personalizar Nombre de Sucursal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
               const SizedBox(height: 8),
               const Text('Cambia el nombre de esta sucursal (ej: Sucursal 1 -> Matriz Central)', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
               const SizedBox(height: 16),

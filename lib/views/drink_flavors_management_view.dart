@@ -813,7 +813,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   child: Text(
                     'Sabores de Bebidas',
                     style: TextStyle(
-                        fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                        fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                   ),
                 ),
                 IconButton(

@@ -141,7 +141,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
 
             return AlertDialog(
               backgroundColor: const Color(0xFFFAF1DE),
-              title: const Text('Registrar Movimiento de Caja', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+              title: const Text('Registrar Movimiento de Caja', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -274,7 +274,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     Navigator.pop(ctx);
                     _addMovement();
                   },
-                  child: const Text('Guardar Movimiento', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                  child: const Text('Guardar Movimiento', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                 )
               ],
             );
@@ -304,7 +304,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF1DE),
       appBar: AppBar(
-        title: const Text('Cortes y Movimientos de Caja', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+        title: const Text('Cortes y Movimientos de Caja', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
         backgroundColor: const Color(0xFFFAF1DE),
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFFFAF1DE)),
@@ -314,7 +314,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
             child: ElevatedButton.icon(
               onPressed: _showNewMovementDialog,
               icon: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
-              label: const Text('Nuevo Movimiento', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+              label: const Text('Nuevo Movimiento', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -392,7 +392,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                             ),
                             title: Text(
                               '${movement['category'].toString().toUpperCase()} - ${movement['payment_method']}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                             ),
                             subtitle: Text(
                               '$dateStr\n${(movement['recipient'] != null && movement['recipient'] != 'N/A') ? 'Destinatario: ${movement['recipient']} - ' : ''}${movement['description'] ?? 'Sin descripción'}',

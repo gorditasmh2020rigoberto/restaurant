@@ -495,7 +495,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Total a Pagar:', style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+                            Text('Total a Pagar:', style: TextStyle(fontSize: isMobile ? 15 : 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
                             Text(
                               '\$${finalTotal.toStringAsFixed(2)}',
                               style: TextStyle(
@@ -547,7 +547,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                                 : const Icon(Icons.contactless, color: Color(0xFFFAF1DE)),
                             label: Text(
                               _isSubmitting ? 'Procesando...' : 'Pagar con Clip',
-                              style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                              style: TextStyle(fontSize: isMobile ? 16 : 18, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                             ),
                             style: ElevatedButton.styleFrom(
                               minimumSize: const Size.fromHeight(56),

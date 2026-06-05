@@ -281,7 +281,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                 Text(
                   'Gorditas Mis Hermanas',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Color(0xFFFAF1DE), letterSpacing: -0.5),
+                  style: TextStyle(fontSize: isMobile ? 24 : 32, fontWeight: FontWeight.w900, color: Color(0xFFFF6D00), letterSpacing: -0.5),
                 ),
                 const SizedBox(height: 32),
                 
@@ -340,7 +340,7 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                     children: [
                       const Icon(Icons.store, color: Color(0xFFFF6D00), size: 16),
                       const SizedBox(width: 8),
-                      Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 18)),
                       const SizedBox(width: 16),
                       TextButton(
                         onPressed: () => setState(() {
@@ -517,7 +517,7 @@ class _RoleCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)), overflow: TextOverflow.ellipsis),
+                      Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)), overflow: TextOverflow.ellipsis),
                       Text(subtitle, style: const TextStyle(fontSize: 12, color: Color(0xFFA08F70)), overflow: TextOverflow.ellipsis),
                     ],
                   ),

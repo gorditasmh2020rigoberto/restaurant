@@ -62,7 +62,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Text(
               'Nuevo Usuario Admin',
-              style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
+              style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
             ),
             content: SingleChildScrollView(
               child: Column(

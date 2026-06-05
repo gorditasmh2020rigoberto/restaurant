@@ -195,7 +195,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                                       Text(
                                         'Mesa $number',
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                                            fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                                       ),
                                       const SizedBox(height: 4),
                                       Container(

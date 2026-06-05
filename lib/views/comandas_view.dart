@@ -628,7 +628,7 @@ class _ComandasViewState extends State<ComandasView> {
             const SizedBox(width: 12),
             Text(
               isDrinks ? '¡Bebidas Listas!' : '¡Alimentos Listos!',
-              style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
+              style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -709,7 +709,7 @@ class _ComandasViewState extends State<ComandasView> {
                  color: isIncomplete ? Colors.orange : Colors.green, size: 32),
             const SizedBox(width: 12),
             Text(isIncomplete ? '¡Alimento Agotado!' : '¡Orden Lista!', 
-                 style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                 style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -1124,7 +1124,7 @@ class _ComandasViewState extends State<ComandasView> {
                     (w) => w['id'] == _selectedWaiterId,
                     orElse: () => {'name': '...'}
                   )['name'],
-                  style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
                 ),
                 backgroundColor: const Color(0xFFFF6D00),
                 side: BorderSide.none,
