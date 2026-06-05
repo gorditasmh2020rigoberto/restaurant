@@ -165,7 +165,7 @@ class _BillingViewState extends State<BillingView> {
           'Facturación (CFDI 4.0)',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFFAF1DE),
         foregroundColor: Colors.black87,
         elevation: 1,
         actions: [
@@ -275,7 +275,7 @@ class _BillingViewState extends State<BillingView> {
                             DropdownButtonFormField<String>(
                               decoration: InputDecoration(
                                 filled: true,
-                                fillColor: Colors.white,
+                                fillColor: Color(0xFFFAF1DE),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               ),
                               hint: const Text('Selecciona un pedido...'),
@@ -326,7 +326,7 @@ class _BillingViewState extends State<BillingView> {
                                   inputDecorationTheme: InputDecorationTheme(
                                     isDense: true,
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: Color(0xFFFAF1DE),
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),
                                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -523,7 +523,7 @@ class _BillingViewState extends State<BillingView> {
                   // Items Table
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -679,7 +679,7 @@ class _BillingViewState extends State<BillingView> {
                         label: const Text('TIMBRAR E IMPRIMIR CFDI 4.0'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.indigo[900],
-                          foregroundColor: Colors.white,
+                          foregroundColor: Color(0xFFFAF1DE),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 32,
                             vertical: 24,
@@ -750,7 +750,7 @@ class _BillingViewState extends State<BillingView> {
                   child: pw.Text(
                     'Factura',
                     style: pw.TextStyle(
-                      color: PdfColors.white,
+                      color: PdfColor.fromInt(0xFFFAF1DE),
                       fontSize: 16,
                       fontWeight: pw.FontWeight.bold,
                     ),
@@ -851,7 +851,7 @@ class _BillingViewState extends State<BillingView> {
                   headerStyle: pw.TextStyle(
                     fontSize: 9,
                     fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.white,
+                    color: PdfColor.fromInt(0xFFFAF1DE),
                   ),
                   headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xff000099)),
                   cellStyle: const pw.TextStyle(fontSize: 9),
@@ -994,7 +994,7 @@ class _BillingViewState extends State<BillingView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: onChanged == null ? Colors.grey[200] : Colors.white,
+        color: onChanged == null ? Colors.grey[200] : Color(0xFFFAF1DE),
         border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -1002,7 +1002,7 @@ class _BillingViewState extends State<BillingView> {
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          dropdownColor: Colors.white,
+          dropdownColor: Color(0xFFFAF1DE),
           style: TextStyle(
             color: onChanged == null ? Colors.black54 : const Color(0xFFFAF1DE),
             fontSize: 13,

@@ -162,7 +162,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Eliminar sabor?', style: TextStyle(color: Colors.white)),
+        title: const Text('¿Eliminar sabor?', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(
@@ -224,7 +224,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           backgroundColor: const Color(0xFFFAF1DE),
           title: Text(
             isEditing ? 'Editar sabor' : 'Nuevo sabor',
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: Color(0xFFFAF1DE)),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -233,7 +233,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               TextField(
                 controller: nameController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Color(0xFFFAF1DE)),
                 textCapitalization: TextCapitalization.sentences,
                 onChanged: (_) => setDlgState(() {}),
                 decoration: InputDecoration(
@@ -285,7 +285,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                         Text(
                           opt.$2,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Color(0xFFA08F70),
+                            color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                           ),
                         ),
@@ -378,7 +378,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Eliminar tamaño?', style: TextStyle(color: Colors.white)),
+        title: const Text('¿Eliminar tamaño?', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: Text('Se eliminará el precio para "$type".', style: const TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(
@@ -418,7 +418,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
           backgroundColor: const Color(0xFFFAF1DE),
-          title: const Text('Nuevo tamaño', style: TextStyle(color: Colors.white)),
+          title: const Text('Nuevo tamaño', style: TextStyle(color: Color(0xFFFAF1DE))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,7 +449,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                         Icon(opt.$3, size: 16, color: isSelected ? const Color(0xFFFF6D00) : Color(0xFFB6A88A)),
                         const SizedBox(width: 8),
                         Text(opt.$2, style: TextStyle(
-                          color: isSelected ? Colors.white : Color(0xFFA08F70),
+                          color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                         )),
                       ],
@@ -463,7 +463,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   Expanded(
                     child: TextField(
                       controller: labelCtrl,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFFFAF1DE)),
                       decoration: const InputDecoration(
                         labelText: 'Tamaño',
                         labelStyle: TextStyle(color: Color(0xFFA08F70)),
@@ -480,7 +480,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     child: TextField(
                       controller: priceCtrl,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Color(0xFFFAF1DE)),
                       decoration: const InputDecoration(
                         labelText: 'Precio',
                         labelStyle: TextStyle(color: Color(0xFFA08F70)),
@@ -541,12 +541,12 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: Text('Precio $label', style: const TextStyle(color: Colors.white)),
+        title: Text('Precio $label', style: const TextStyle(color: Color(0xFFFAF1DE))),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           keyboardType: TextInputType.number,
-          style: const TextStyle(color: Colors.white, fontSize: 18),
+          style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 18),
           decoration: InputDecoration(
             prefixText: '\$',
             prefixStyle: TextStyle(color: color),
@@ -620,7 +620,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           Text(
             price != null ? '\$${price.toStringAsFixed(0)}' : 'Sin precio',
             style: TextStyle(
-              color: price != null ? Colors.white : Color(0xFFB6A88A),
+              color: price != null ? Color(0xFFFAF1DE) : Color(0xFFB6A88A),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -727,7 +727,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   child: Text(
                     f['name'] as String,
                     style: TextStyle(
-                      color: available ? Colors.white : Color(0xFFB6A88A),
+                      color: available ? Color(0xFFFAF1DE) : Color(0xFFB6A88A),
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
                     ),
@@ -800,7 +800,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
             ? _showAddSizeDialog
             : () => _showFlavorDialog(type: currentType),
         backgroundColor: const Color(0xFFFF6D00),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -813,7 +813,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   child: Text(
                     'Sabores de Bebidas',
                     style: TextStyle(
-                        fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                        fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
                   ),
                 ),
                 IconButton(
@@ -834,7 +834,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           TabBar(
             controller: _tabController,
             indicatorColor: const Color(0xFFFF6D00),
-            labelColor: Colors.white,
+            labelColor: Color(0xFFFAF1DE),
             unselectedLabelColor: const Color(0xFFA08F70),
             onTap: (_) => setState(() {}),
             tabs: const [

@@ -59,7 +59,7 @@ class UpdateAppButton extends StatelessWidget {
       label: const Text('Actualizar App', style: TextStyle(fontSize: 12)),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFFAF1DE),
-        foregroundColor: Colors.white,
+        foregroundColor: Color(0xFFFAF1DE),
         minimumSize: const Size.fromHeight(36),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

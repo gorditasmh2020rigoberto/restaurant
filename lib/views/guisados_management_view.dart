@@ -80,7 +80,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
         title: const Text('¿Eliminar guisado?',
-            style: TextStyle(color: Colors.white)),
+            style: TextStyle(color: Color(0xFFFAF1DE))),
         content: const Text('Esta acción no se puede deshacer.',
             style: TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
@@ -127,12 +127,12 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
         backgroundColor: const Color(0xFFFAF1DE),
         title: Text(
           isEditing ? 'Editar Guisado' : 'Nuevo Guisado',
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFFFAF1DE)),
         ),
         content: TextField(
           controller: nameController,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Color(0xFFFAF1DE)),
           textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
             hintText: isEditing ? guisado['name'] as String : 'Nombre del guisado (ej. Picadillo)',
@@ -207,7 +207,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showGuisadoDialog(),
         backgroundColor: const Color(0xFFFF6D00),
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +219,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                 const Expanded(
                   child: Text(
                     'Gestión de Guisados',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
                   ),
                 ),
                 IconButton(
@@ -276,7 +276,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                               title: Text(
                                 g['name'] as String,
                                 style: TextStyle(
-                                  color: available ? Colors.white : Color(0xFFB6A88A),
+                                  color: available ? Color(0xFFFAF1DE) : Color(0xFFB6A88A),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                 ),

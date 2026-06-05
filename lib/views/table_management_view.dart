@@ -133,7 +133,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                           style: TextStyle(
                               fontSize: screenWidth < 800 ? 24 : 32,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white)),
+                              color: Color(0xFFFAF1DE))),
                       const Text('Administra las mesas de tu restaurante',
                           style: TextStyle(fontSize: 16, color: Color(0xFFA08F70))),
                     ],
@@ -145,7 +145,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                     label: const Text('Nueva Mesa'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF6D00),
-                      foregroundColor: Colors.white,
+                      foregroundColor: Color(0xFFFAF1DE),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -195,7 +195,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                                       Text(
                                         'Mesa $number',
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.bold, color: Colors.white),
+                                            fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
                                       ),
                                       const SizedBox(height: 4),
                                       Container(

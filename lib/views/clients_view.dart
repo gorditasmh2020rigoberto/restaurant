@@ -178,7 +178,7 @@ class _ClientsViewState extends State<ClientsView> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1E3A8A),
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
               ),
               onPressed: () async {
                 final clientData = {
@@ -222,7 +222,7 @@ class _ClientsViewState extends State<ClientsView> {
           'Gestión de Clientes',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFFAF1DE),
         foregroundColor: Colors.black87,
         elevation: 1,
       ),
@@ -242,7 +242,7 @@ class _ClientsViewState extends State<ClientsView> {
                   child: ListTile(
                     leading: const CircleAvatar(
                       backgroundColor: Color(0xFF1E3A8A),
-                      child: Icon(Icons.person, color: Colors.white),
+                      child: Icon(Icons.person, color: Color(0xFFFAF1DE)),
                     ),
                     title: Text(
                       c['name'],
@@ -262,10 +262,10 @@ class _ClientsViewState extends State<ClientsView> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _addOrEditClient(),
         backgroundColor: const Color(0xFF1E3A8A),
-        icon: const Icon(Icons.add, color: Colors.white),
+        icon: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
         label: const Text(
           'NUEVO CLIENTE',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Color(0xFFFAF1DE)),
         ),
       ),
     );

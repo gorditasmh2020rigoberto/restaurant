@@ -229,7 +229,7 @@ Future<void> _addPreparedDishWithComment(
                           child: Text('$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFFFAF1DE),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -288,7 +288,7 @@ Future<void> _addPreparedDishWithComment(
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -360,7 +360,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Text('Lo dulce',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       fontSize: 20,
                       fontWeight: FontWeight.bold)),
             ),
@@ -385,7 +385,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
                       const SizedBox(width: 16),
                       Text(opt.$1,
                           style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFFFAF1DE),
                               fontSize: 18,
                               fontWeight: FontWeight.w600)),
                       const Spacer(),
@@ -491,7 +491,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                           child: Text('$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFFFAF1DE),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -558,7 +558,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -686,7 +686,7 @@ Widget _buildExtrasSection({
                   Text(
                     '${e.name}  \$${e.price.toStringAsFixed(0)}',
                     style: TextStyle(
-                      color: selected ? Colors.white : Color(0xFF7A6E5A),
+                      color: selected ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A),
                       fontSize: 13,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w400,
@@ -876,7 +876,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     child: Text(
                                       sabor,
                                       style: TextStyle(
-                                        color: isSelected ? Colors.white : Color(0xFF7A6E5A),
+                                        color: isSelected ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A),
                                         fontSize: 11,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                                       ),
@@ -918,7 +918,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 child: Text(
                                   '$dialogQty',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 18, fontWeight: FontWeight.w700),
                                 ),
                               ),
                               InkWell(
@@ -995,7 +995,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                     disabledBackgroundColor: const Color(0xFFE5DCC4),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     minimumSize: const Size(0, 44),
@@ -1328,7 +1328,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Text(
                                     termino,
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : Color(0xFFA08F70),
+                                      color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1396,7 +1396,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Text(
                                     salsa,
                                     style: TextStyle(
-                                      color: isSelected ? Colors.white : Color(0xFFA08F70),
+                                      color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1606,7 +1606,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             child: Text(
                               '$dialogQty',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+                              style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 18, fontWeight: FontWeight.w700),
                             ),
                           ),
                           InkWell(
@@ -1721,7 +1721,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
+                  foregroundColor: Color(0xFFFAF1DE),
                   disabledBackgroundColor: const Color(0xFFE5DCC4),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -2491,7 +2491,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   salsa,
                                   style: TextStyle(
                                     color: isSelected
-                                        ? Colors.white
+                                        ? Color(0xFFFAF1DE)
                                         : Color(0xFFA08F70),
                                     fontSize: 13,
                                     fontWeight: isSelected
@@ -2848,7 +2848,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               '$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Color(0xFFFAF1DE),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700),
                             ),
@@ -2960,7 +2960,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
-                foregroundColor: Colors.white,
+                foregroundColor: Color(0xFFFAF1DE),
                 disabledBackgroundColor: const Color(0xFFE5DCC4),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -3198,7 +3198,7 @@ Future<void> addOrdenVariantToCart(
                   },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFF6D00),
-              foregroundColor: Colors.white,
+              foregroundColor: Color(0xFFFAF1DE),
               disabledBackgroundColor: const Color(0xFFE5DCC4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               minimumSize: const Size(0, 44),
@@ -3345,10 +3345,10 @@ class _ToggleOption extends StatelessWidget {
         ? (value ? orange : orange.withValues(alpha: 0.35))
         : const Color(0xFFCFC7B2);
     final contentColor = enabled
-        ? (value ? Colors.white : orange)
+        ? (value ? Color(0xFFFAF1DE) : orange)
         : const Color(0xFFB0A992);
     final priceColor = enabled
-        ? (value ? Colors.white.withValues(alpha: 0.9) : orange.withValues(alpha: 0.75))
+        ? (value ? Color(0xFFFAF1DE).withValues(alpha: 0.9) : orange.withValues(alpha: 0.75))
         : const Color(0xFFB0A992);
 
     return GestureDetector(
@@ -3458,7 +3458,7 @@ class _BaseChip extends StatelessWidget {
                       fontSize: 14,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected ? Colors.white : Color(0xFFA08F70),
+                      color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
                     ),
                   ),
                   Text(

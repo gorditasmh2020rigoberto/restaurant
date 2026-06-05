@@ -62,7 +62,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Text(
               'Nuevo Usuario Admin',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -95,7 +95,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                       child: DropdownButton<String>(
                         value: selectedRole,
                         dropdownColor: const Color(0xFFFAF1DE),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16),
                         isExpanded: true,
                         items: const [
                           DropdownMenuItem(value: 'admin', child: Text('Admin')),
@@ -121,7 +121,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                       child: DropdownButton<String?>(
                         value: selectedBranch,
                         dropdownColor: const Color(0xFFFAF1DE),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                        style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16),
                         isExpanded: true,
                         items: [
                           const DropdownMenuItem<String?>(
@@ -149,14 +149,14 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                 onPressed: isSaving ? null : save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
+                  foregroundColor: Color(0xFFFAF1DE),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
                 child: isSaving
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFFAF1DE)),
                       )
                     : const Text('Crear', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
@@ -185,7 +185,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Confirmar eliminación', style: TextStyle(color: Colors.white)),
+        title: const Text('Confirmar eliminación', style: TextStyle(color: Color(0xFFFAF1DE))),
         content: Text(
           '¿Eliminar al usuario "${user['username']}"? Esta acción no se puede deshacer.',
           style: const TextStyle(color: Color(0xFFA08F70)),
@@ -199,7 +199,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              foregroundColor: Color(0xFFFAF1DE),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             child: const Text('Eliminar', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -235,7 +235,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFFFAF1DE)),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -288,7 +288,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
       backgroundColor: const Color(0xFFFAF1DE),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAF1DE),
-        foregroundColor: Colors.white,
+        foregroundColor: Color(0xFFFAF1DE),
         title: const Text(
           'Usuarios Administradores',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -301,7 +301,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddUserDialog,
         backgroundColor: const Color(0xFFFF6D00),
-        foregroundColor: Colors.white,
+        foregroundColor: Color(0xFFFAF1DE),
         icon: const Icon(Icons.person_add),
         label: const Text('Nuevo Usuario', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
@@ -384,7 +384,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                   title: Text(
                     user['username'] as String,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFFAF1DE),
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),

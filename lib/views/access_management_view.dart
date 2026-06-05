@@ -86,7 +86,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
       children: [
         Text(
           'Gestión de Accesos (Cajeros y Admin)',
-          style: TextStyle(fontSize: isMobile ? 20 : 28, fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontSize: isMobile ? 20 : 28, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
         ),
         const SizedBox(height: 8),
         Text('Administra quién puede entrar al panel de administración de ${Globals.currentBranch}', style: const TextStyle(color: Color(0xFFA08F70))),
@@ -99,7 +99,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Agregar Nuevo Acceso a Caja', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text('Agregar Nuevo Acceso a Caja', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
               const SizedBox(height: 16),
               if (isMobile) ...[
                 TextField(
@@ -120,7 +120,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   label: const Text('DAR ACCESO'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -150,7 +150,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                       onPressed: _isLoading ? null : _addCashier,
                       icon: const Icon(Icons.add),
                       label: const Text('DAR ACCESO'),
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6D00), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6D00), foregroundColor: Color(0xFFFAF1DE), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                     ),
                   ],
                 ),
@@ -182,8 +182,8 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                     margin: const EdgeInsets.only(bottom: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0xFFE5DCC4))),
                     child: ListTile(
-                      leading: const CircleAvatar(backgroundColor: Color(0xFFFF6D00), child: Icon(Icons.point_of_sale, color: Colors.white)),
-                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                      leading: const CircleAvatar(backgroundColor: Color(0xFFFF6D00), child: Icon(Icons.point_of_sale, color: Color(0xFFFAF1DE))),
+                      title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
                       subtitle: Text('PIN: ${access['pin']}', style: const TextStyle(color: Color(0xFFA08F70))),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -212,7 +212,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               const Row(children: [
                 Icon(Icons.lock_outline, color: Color(0xFFFF6D00)),
                 SizedBox(width: 10),
-                Text('Claves de Acceso por Rol', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                Text('Claves de Acceso por Rol', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
               ]),
               const SizedBox(height: 6),
               const Text('Cambia el PIN de cada vista de trabajo', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
@@ -244,7 +244,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Personalizar Nombre de Sucursal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              const Text('Personalizar Nombre de Sucursal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
               const SizedBox(height: 8),
               const Text('Cambia el nombre de esta sucursal (ej: Sucursal 1 -> Matriz Central)', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
               const SizedBox(height: 16),
@@ -260,7 +260,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
                   const SizedBox(width: 16),
                   ElevatedButton(
                     onPressed: _renameBranch,
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey, foregroundColor: Color(0xFFFAF1DE), padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24)),
                     child: const Text('ACTUALIZAR NOMBRE'),
                   ),
                 ],
@@ -295,7 +295,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
               counterText: '',
               prefixIcon: const Icon(Icons.pin, color: Color(0xFFA08F70)),
             ),
-            style: const TextStyle(color: Colors.white, letterSpacing: 4, fontWeight: FontWeight.bold),
+            style: const TextStyle(color: Color(0xFFFAF1DE), letterSpacing: 4, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(width: 12),
@@ -303,7 +303,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
           onPressed: onSave,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFF6D00),
-            foregroundColor: Colors.white,
+            foregroundColor: Color(0xFFFAF1DE),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),

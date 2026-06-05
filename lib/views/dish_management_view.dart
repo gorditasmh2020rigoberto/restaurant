@@ -89,7 +89,7 @@ class _DishManagementViewState extends State<DishManagementView> {
                         label: const Text('Elegir Imagen'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFAF1DE),
-                          foregroundColor: Colors.white,
+                          foregroundColor: Color(0xFFFAF1DE),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -234,10 +234,10 @@ class _DishManagementViewState extends State<DishManagementView> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF6D00),
-                    foregroundColor: Colors.white,
+                    foregroundColor: Color(0xFFFAF1DE),
                   ),
                   child: isUploading 
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Color(0xFFFAF1DE), strokeWidth: 2))
                       : const Text('Guardar'),
                 ),
               ],
@@ -308,7 +308,7 @@ class _DishManagementViewState extends State<DishManagementView> {
                 label: const Text('Nuevo Platillo'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6D00),
-                  foregroundColor: Colors.white,
+                  foregroundColor: Color(0xFFFAF1DE),
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 ),
               ),
