@@ -433,41 +433,49 @@ class _ComandasViewState extends State<ComandasView> {
         duration: const Duration(milliseconds: 180),
         decoration: BoxDecoration(
           color: selected ? orange : cream,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.10),
-              blurRadius: 6,
+              blurRadius: 5,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Globals.categoryIcon(label),
-              size: 28,
-              color: selected ? Color(0xFFFAF1DE) : orange,
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                _translateCategory(label),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 12,
-                  height: 1.1,
-                  fontWeight: FontWeight.w700,
-                  color: selected ? Color(0xFFFAF1DE) : orange,
+        // El alto de la tarjeta varía según el viewport: escalamos icono y
+        // texto para que siempre encajen sin overflow.
+        child: LayoutBuilder(builder: (_, c) {
+          final double h = c.maxHeight;
+          final double iconSize = (h * 0.40).clamp(18.0, 28.0);
+          final double fontSize = (h * 0.18).clamp(9.0, 12.0);
+          final double gap = h < 56 ? 2 : 4;
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Globals.categoryIcon(label),
+                size: iconSize,
+                color: selected ? cream : orange,
+              ),
+              SizedBox(height: gap),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Text(
+                  _translateCategory(label),
+                  textAlign: TextAlign.center,
+                  maxLines: h < 56 ? 1 : 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    height: 1.05,
+                    fontWeight: FontWeight.w700,
+                    color: selected ? cream : orange,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -1257,24 +1265,38 @@ class _ComandasViewState extends State<ComandasView> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // ── Categorías: 2 columnas con scroll si no caben todas ──
-        Flexible(
+        // ── Categorías: 3 columnas que ocupan todo el espacio disponible.
+        // Calculamos el alto de cada tarjeta a partir del espacio sobrante
+        // para que las 17 categorías quepan sin scroll.
+        Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
-                child: GridView.builder(
-                  padding: EdgeInsets.zero,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    mainAxisExtent: 68,
-                  ),
-                  itemCount: _availableCategories.length,
-                  itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
-                ),
+                child: LayoutBuilder(builder: (ctx, constraints) {
+                  final int count = _availableCategories.length;
+                  const int cols = 3;
+                  final int rows = (count / cols).ceil();
+                  const double spacing = 6;
+                  final double availH = constraints.maxHeight;
+                  // Reparto el alto entre las filas (incluyendo separaciones).
+                  final double rowH = ((availH - (rows - 1) * spacing) / rows)
+                      .clamp(48.0, 96.0);
+                  return GridView.builder(
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      mainAxisSpacing: spacing,
+                      crossAxisSpacing: spacing,
+                      mainAxisExtent: rowH,
+                    ),
+                    itemCount: count,
+                    itemBuilder: (_, i) =>
+                        _buildCategoryBlock(_availableCategories[i]),
+                  );
+                }),
               ),
             ),
           ),
