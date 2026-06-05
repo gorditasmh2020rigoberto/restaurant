@@ -126,7 +126,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 SizedBox(width: 12),
                 Text('¿Desea dejar propina?',
                     style: TextStyle(
-                        color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                        color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
               ],
             ),
             content: Column(
@@ -294,7 +294,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             SizedBox(width: 12),
             Text('Método de Pago',
                 style: TextStyle(
-                    color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                    color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -392,7 +392,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 SizedBox(width: 12),
                 Text('Cobro en Efectivo',
                     style: TextStyle(
-                        color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                        color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
               ],
             ),
             content: Column(
@@ -1252,7 +1252,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               padding: const EdgeInsets.symmetric(horizontal: 2),
                               child: Text(
                                 '${entry.value.quantity}',
-                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                               ),
                             ),
                             IconButton(

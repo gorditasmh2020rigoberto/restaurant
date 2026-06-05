@@ -111,7 +111,7 @@ class _PayrollViewState extends State<PayrollView> {
                   children: [
                     Icon(Icons.account_balance_wallet, color: Color(0xFFFF6D00), size: 28),
                     SizedBox(width: 12),
-                    Text('Nómina y Pagos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+                    Text('Nómina y Pagos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -156,7 +156,7 @@ class _PayrollViewState extends State<PayrollView> {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Nómina y Pagos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE))),
+                    Text('Nómina y Pagos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00))),
                     Text('Gestión de sueldos, préstamos y propinas para meseros', style: TextStyle(fontSize: 14, color: Color(0xFFA08F70))),
                   ],
                 ),
@@ -220,7 +220,7 @@ class _PayrollViewState extends State<PayrollView> {
                 selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                 leading: CircleAvatar(
                   backgroundColor: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
-                  child: Text(waiter['name'][0].toUpperCase(), style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                  child: Text(waiter['name'][0].toUpperCase(), style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                 ),
                 title: Text(waiter['name'], style: TextStyle(color: isSelected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
                 onTap: () {
@@ -442,7 +442,7 @@ class _PayrollViewState extends State<PayrollView> {
               decoration: BoxDecoration(color: typeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
               child: Icon(typeIcon, color: typeColor, size: 20),
             ),
-            title: Text(typeLabel, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+            title: Text(typeLabel, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
             subtitle: Text(
               '${DateFormat('dd MMM yyyy, HH:mm').format(DateTime.parse(row['created_at']))}${row['description'] != null ? ' - ${row['description']}' : ''}',
               style: const TextStyle(color: Color(0xFFA08F70), fontSize: 13),
@@ -533,7 +533,7 @@ class _PayrollViewState extends State<PayrollView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(weekRange, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                          Text(weekRange, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                           const Icon(Icons.calendar_month, color: Color(0xFFFF6D00)),
                         ],
                       ),

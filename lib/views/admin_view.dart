@@ -104,7 +104,7 @@ class _AdminViewState extends State<AdminView> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Expanded(child: Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 14))),
+                              Expanded(child: Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 14))),
                               const Icon(Icons.edit, color: Color(0xFFA08F70), size: 16),
                             ],
                           ),
@@ -1021,7 +1021,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         return ListTile(
                           dense: true,
                           title: Text(d['name'] as String,
-                              style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.w600)),
+                              style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w600)),
                           subtitle: Text(d['category'] as String? ?? '',
                               style: const TextStyle(color: Color(0xFFB6A88A), fontSize: 11)),
                           trailing: Text('\$${(d['price'] as num).toStringAsFixed(0)}',
@@ -1096,7 +1096,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
               children: [
                 Icon(Icons.volunteer_activism, color: Color(0xFFFF6D00), size: 28),
                 SizedBox(width: 12),
-                Text('¿Desea dejar propina?', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                Text('¿Desea dejar propina?', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
               ],
             ),
             content: Column(
@@ -1161,7 +1161,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         ]),
                         const Divider(color: Color(0xFFFF6D00), height: 16),
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                          const Text('TOTAL A COBRAR:', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.w900, fontSize: 16)),
+                          const Text('TOTAL A COBRAR:', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w900, fontSize: 16)),
                           Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 26, fontWeight: FontWeight.w900)),
                         ]),
                       ],
@@ -1169,7 +1169,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   ),
                 ] else ...[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    const Text('TOTAL A COBRAR:', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.w900, fontSize: 16)),
+                    const Text('TOTAL A COBRAR:', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w900, fontSize: 16)),
                     Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 26, fontWeight: FontWeight.w900)),
                   ]),
                 ],
@@ -1213,7 +1213,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             children: [
               const Icon(Icons.payments, color: Colors.green, size: 28),
               const SizedBox(width: 12),
-              const Text('Cobro en Efectivo', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+              const Text('Cobro en Efectivo', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
             ],
           ),
           content: Column(
@@ -1285,7 +1285,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     const Row(children: [
                       Icon(Icons.receipt_long, color: Colors.blueAccent),
                       SizedBox(width: 8),
-                      Text('¿REQUIERE FACTURA?', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text('¿REQUIERE FACTURA?', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13)),
                     ]),
                     Switch(
                       value: wantFactura,
@@ -1369,7 +1369,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
               children: [
                 Icon(Icons.pie_chart, color: Colors.orangeAccent, size: 28),
                 SizedBox(width: 12),
-                Text('Cobro Mixto', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                Text('Cobro Mixto', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
               ],
             ),
             content: SingleChildScrollView(
@@ -1457,7 +1457,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         const Row(children: [
                           Icon(Icons.receipt_long, color: Colors.blueAccent),
                           SizedBox(width: 8),
-                          Text('¿REQUIERE FACTURA?', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text('¿REQUIERE FACTURA?', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13)),
                         ]),
                         Switch(
                           value: wantFactura,
@@ -1488,7 +1488,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     controller: cashReceivedController,
                     autofocus: true,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                     decoration: InputDecoration(
                       labelText: '¿CUÁNTO EFECTIVO RECIBES? (Cualquier monto restante irá a Tarjeta)',
                       labelStyle: const TextStyle(color: Colors.orangeAccent, fontSize: 13, fontWeight: FontWeight.bold),
@@ -1905,7 +1905,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
         title: const Row(children: [
           Icon(Icons.credit_card, color: Color(0xFFFF6D00), size: 28),
           SizedBox(width: 12),
-          Text('Pago con Clip', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+          Text('Pago con Clip', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
         ]),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2232,7 +2232,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                     initialValue: _discountPercent > 0 ? _discountPercent.toStringAsFixed(0) : '',
                                     keyboardType: TextInputType.number,
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
                                     decoration: InputDecoration(
                                       hintText: '0',
                                       hintStyle: const TextStyle(color: Colors.white30),

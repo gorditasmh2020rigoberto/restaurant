@@ -219,7 +219,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                 const Expanded(
                   child: Text(
                     'Gestión de Guisados',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                   ),
                 ),
                 IconButton(

@@ -519,7 +519,7 @@ class _ReportsViewState extends State<ReportsView> {
                               );
                             },
                             icon: const Icon(Icons.point_of_sale, color: Color(0xFFFAF1DE), size: 18),
-                            label: const Text('Cortes y Movimientos', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                            label: const Text('Cortes y Movimientos', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green[600],
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1015,7 +1015,7 @@ class _ReportsViewState extends State<ReportsView> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(children: [
-          Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(
@@ -1036,7 +1036,7 @@ class _ReportsViewState extends State<ReportsView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('\$${o['total_amount']}', style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold, fontSize: 13)),
+                Text('\$${o['total_amount']}', style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13)),
                 const SizedBox(width: 6),
                 InkWell(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
@@ -1122,7 +1122,7 @@ class _ReportsViewState extends State<ReportsView> {
                         child: const Icon(Icons.calendar_today, color: Color(0xFFFF6D00), size: 14),
                       ),
                       const SizedBox(width: 10),
-                      Text(c['label'] as String, style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
+                      Text(c['label'] as String, style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1144,7 +1144,7 @@ class _ReportsViewState extends State<ReportsView> {
                   flex: 2,
                   child: Text(
                     '\$${(c['total'] as double).toStringAsFixed(2)}',
-                    style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.w900, fontSize: 15),
+                    style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w900, fontSize: 15),
                     textAlign: TextAlign.right,
                   ),
                 ),

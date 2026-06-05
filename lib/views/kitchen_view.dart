@@ -630,7 +630,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                       children: [
                         Text(
                           _orderTypeStr,
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFFAF1DE)),
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                         ),
                         const SizedBox(height: 4),
                         Row(
