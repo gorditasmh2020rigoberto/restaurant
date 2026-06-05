@@ -229,7 +229,7 @@ Future<void> _addPreparedDishWithComment(
                           child: Text('$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Color(0xFFFAF1DE),
+                                  color: Color(0xFFFF6D00),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -491,7 +491,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                           child: Text('$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Color(0xFFFAF1DE),
+                                  color: Color(0xFFFF6D00),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700)),
                         ),
@@ -2848,7 +2848,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               '$dialogQty',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                  color: Color(0xFFFAF1DE),
+                                  color: Color(0xFFFF6D00),
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700),
                             ),
