@@ -1463,11 +1463,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                                 decoration: BoxDecoration(
                                   color: isChecked
-                                      ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                      ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
                                       : const Color(0xFFFAF1DE),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: isChecked ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                                    color: isChecked
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFFFF6D00).withValues(alpha: 0.35),
                                     width: 1.5,
                                   ),
                                 ),
@@ -1477,7 +1479,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     Icon(
                                       isChecked ? Icons.check_circle : Icons.radio_button_unchecked,
                                       size: 14,
-                                      color: isChecked ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
+                                      color: const Color(0xFFFF6D00),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
@@ -1486,9 +1488,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        color: isChecked ? Colors.white : Color(0xFF7A6E5A),
+                                        color: const Color(0xFFFF6D00),
                                         fontSize: 11,
-                                        fontWeight: isChecked ? FontWeight.w600 : FontWeight.w400,
+                                        fontWeight: isChecked ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                     ),
                                   ],
@@ -2556,13 +2558,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                                   decoration: BoxDecoration(
                                     color: isChecked
-                                        ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                        ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
                                         : const Color(0xFFFAF1DE),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: isChecked
                                           ? const Color(0xFFFF6D00)
-                                          : const Color(0xFFE5DCC4),
+                                          : const Color(0xFFFF6D00).withValues(alpha: 0.35),
                                       width: 1.5,
                                     ),
                                   ),
@@ -2574,9 +2576,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                             ? Icons.check_circle
                                             : Icons.radio_button_unchecked,
                                         size: 14,
-                                        color: isChecked
-                                            ? const Color(0xFFFF6D00)
-                                            : const Color(0xFFA08F70),
+                                        color: const Color(0xFFFF6D00),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -2585,11 +2585,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: isChecked ? Colors.white : Color(0xFF7A6E5A),
+                                          color: const Color(0xFFFF6D00),
                                           fontSize: 11,
                                           fontWeight: isChecked
-                                              ? FontWeight.w600
-                                              : FontWeight.w400,
+                                              ? FontWeight.w700
+                                              : FontWeight.w600,
                                         ),
                                       ),
                                     ],
@@ -2728,13 +2728,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   decoration: BoxDecoration(
                                     color: isSel
                                         ? const Color(0xFFFF6D00)
-                                            .withValues(alpha: 0.15)
+                                            .withValues(alpha: 0.18)
                                         : const Color(0xFFFAF1DE),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: isSel
                                           ? const Color(0xFFFF6D00)
-                                          : const Color(0xFFE5DCC4),
+                                          : const Color(0xFFFF6D00)
+                                              .withValues(alpha: 0.35),
                                       width: 1.5,
                                     ),
                                   ),
@@ -2746,9 +2747,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                             ? Icons.check_circle
                                             : Icons.radio_button_unchecked,
                                         size: 14,
-                                        color: isSel
-                                            ? const Color(0xFFFF6D00)
-                                            : const Color(0xFFA08F70),
+                                        color: const Color(0xFFFF6D00),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -2757,13 +2756,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
-                                          color: isSel
-                                              ? Colors.white
-                                              : Color(0xFF7A6E5A),
+                                          color: const Color(0xFFFF6D00),
                                           fontSize: 11,
                                           fontWeight: isSel
                                               ? FontWeight.w700
-                                              : FontWeight.w400,
+                                              : FontWeight.w600,
                                         ),
                                       ),
                                     ],
