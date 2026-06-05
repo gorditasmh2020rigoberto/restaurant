@@ -1283,28 +1283,32 @@ class _ComandasViewState extends State<ComandasView> {
             ),
           ),
         ),
-        // ── Grid de platillos (scrollable) ──
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final realWidth = constraints.maxWidth;
-              int cols;
-              if (isPhone) {
-                cols = realWidth < 400 ? 2 : (realWidth / 130).floor().clamp(2, 3);
-              } else if (isTablet) {
-                cols = (realWidth / 150).floor().clamp(2, 5);
-              } else {
-                cols = (realWidth / 180).floor().clamp(4, 8);
-              }
-              return CustomScrollView(
-                slivers: [
-                  ..._buildGroupedMenu(filteredDishes, cols, isPhone, isTablet: isTablet),
-                  const SliverToBoxAdapter(child: SizedBox(height: 40)),
-                ],
-              );
-            },
+        // ── Grid de platillos (scrollable). Sólo se renderiza cuando hay
+        // categoría seleccionada o búsqueda activa; cuando está en estado
+        // inicial dejamos que la cuadrícula de categorías ocupe TODA la
+        // pantalla (sin placeholder ni línea divisora).
+        if (!(_selectedCategory == 'Todos' && _searchQuery.isEmpty))
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final realWidth = constraints.maxWidth;
+                int cols;
+                if (isPhone) {
+                  cols = realWidth < 400 ? 2 : (realWidth / 130).floor().clamp(2, 3);
+                } else if (isTablet) {
+                  cols = (realWidth / 150).floor().clamp(2, 5);
+                } else {
+                  cols = (realWidth / 180).floor().clamp(4, 8);
+                }
+                return CustomScrollView(
+                  slivers: [
+                    ..._buildGroupedMenu(filteredDishes, cols, isPhone, isTablet: isTablet),
+                    const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
           ],
         ),
       ],
