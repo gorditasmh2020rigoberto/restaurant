@@ -162,7 +162,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Eliminar sabor?', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('¿Eliminar sabor?', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(
@@ -224,7 +224,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           backgroundColor: const Color(0xFFFAF1DE),
           title: Text(
             isEditing ? 'Editar sabor' : 'Nuevo sabor',
-            style: const TextStyle(color: Color(0xFFFAF1DE)),
+            style: const TextStyle(color: Color(0xFF3D2E1A)),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -233,7 +233,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               TextField(
                 controller: nameController,
                 autofocus: true,
-                style: const TextStyle(color: Color(0xFFFAF1DE)),
+                style: const TextStyle(color: Color(0xFF3D2E1A)),
                 textCapitalization: TextCapitalization.sentences,
                 onChanged: (_) => setDlgState(() {}),
                 decoration: InputDecoration(
@@ -378,7 +378,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Eliminar tamaño?', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('¿Eliminar tamaño?', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: Text('Se eliminará el precio para "$type".', style: const TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(
@@ -418,7 +418,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) => AlertDialog(
           backgroundColor: const Color(0xFFFAF1DE),
-          title: const Text('Nuevo tamaño', style: TextStyle(color: Color(0xFFFAF1DE))),
+          title: const Text('Nuevo tamaño', style: TextStyle(color: Color(0xFF3D2E1A))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,7 +463,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   Expanded(
                     child: TextField(
                       controller: labelCtrl,
-                      style: const TextStyle(color: Color(0xFFFAF1DE)),
+                      style: const TextStyle(color: Color(0xFF3D2E1A)),
                       decoration: const InputDecoration(
                         labelText: 'Tamaño',
                         labelStyle: TextStyle(color: Color(0xFFA08F70)),
@@ -480,7 +480,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                     child: TextField(
                       controller: priceCtrl,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(color: Color(0xFFFAF1DE)),
+                      style: const TextStyle(color: Color(0xFF3D2E1A)),
                       decoration: const InputDecoration(
                         labelText: 'Precio',
                         labelStyle: TextStyle(color: Color(0xFFA08F70)),
@@ -541,12 +541,12 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: Text('Precio $label', style: const TextStyle(color: Color(0xFFFAF1DE))),
+        title: Text('Precio $label', style: const TextStyle(color: Color(0xFF3D2E1A))),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           keyboardType: TextInputType.number,
-          style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 18),
+          style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 18),
           decoration: InputDecoration(
             prefixText: '\$',
             prefixStyle: TextStyle(color: color),

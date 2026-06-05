@@ -918,7 +918,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 child: Text(
                                   '$dialogQty',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 18, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.w700),
                                 ),
                               ),
                               InkWell(
@@ -1606,7 +1606,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             child: Text(
                               '$dialogQty',
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 18, fontWeight: FontWeight.w700),
+                              style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.w700),
                             ),
                           ),
                           InkWell(

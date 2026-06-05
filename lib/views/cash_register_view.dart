@@ -152,7 +152,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                       children: [
                         Expanded(
                           child: RadioListTile<String>(
-                            title: const Text('Salida', style: TextStyle(color: Color(0xFFFAF1DE))),
+                            title: const Text('Salida', style: TextStyle(color: Color(0xFF3D2E1A))),
                             value: 'salida',
                             groupValue: _selectedType,
                             activeColor: Colors.redAccent,
@@ -163,7 +163,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                         ),
                         Expanded(
                           child: RadioListTile<String>(
-                            title: const Text('Entrada', style: TextStyle(color: Color(0xFFFAF1DE))),
+                            title: const Text('Entrada', style: TextStyle(color: Color(0xFF3D2E1A))),
                             value: 'entrada',
                             groupValue: _selectedType,
                             activeColor: Colors.greenAccent,
@@ -180,7 +180,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     DropdownButtonFormField<String>(
                       initialValue: _selectedCategory,
                       dropdownColor: const Color(0xFFFAF1DE),
-                      style: const TextStyle(color: Color(0xFFFAF1DE)),
+                      style: const TextStyle(color: Color(0xFF3D2E1A)),
                       decoration: InputDecoration(
                         labelText: 'Categoría',
                         labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -198,7 +198,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                       DropdownButtonFormField<String>(
                         initialValue: _selectedRecipient,
                         dropdownColor: const Color(0xFFFAF1DE),
-                        style: const TextStyle(color: Color(0xFFFAF1DE)),
+                        style: const TextStyle(color: Color(0xFF3D2E1A)),
                         decoration: InputDecoration(
                           labelText: 'Dirigido a / Destinatario',
                           labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -216,7 +216,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     TextFormField(
                       controller: _amountController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: Color(0xFFFAF1DE)),
+                      style: const TextStyle(color: Color(0xFF3D2E1A)),
                       decoration: InputDecoration(
                         labelText: 'Monto (\$)',
                         labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -232,7 +232,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPaymentMethod,
                       dropdownColor: const Color(0xFFFAF1DE),
-                      style: const TextStyle(color: Color(0xFFFAF1DE)),
+                      style: const TextStyle(color: Color(0xFF3D2E1A)),
                       decoration: InputDecoration(
                         labelText: 'Medio de Pago',
                         labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -250,7 +250,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     // Descripción
                     TextFormField(
                       controller: _descriptionController,
-                      style: const TextStyle(color: Color(0xFFFAF1DE)),
+                      style: const TextStyle(color: Color(0xFF3D2E1A)),
                       maxLines: 2,
                       decoration: InputDecoration(
                         labelText: 'Concepto / Descripción detallada (opcional)',
@@ -366,7 +366,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const Text('Historial de Movimientos de Caja', style: TextStyle(color: Color(0xFFFAF1DE), fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('Historial de Movimientos de Caja', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
                 
                 // Lista de movimientos

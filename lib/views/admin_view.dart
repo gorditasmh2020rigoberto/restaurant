@@ -280,7 +280,7 @@ class _AdminViewState extends State<AdminView> {
                         const SizedBox(height: 4),
                         SwitchListTile(
                           value: Globals.splitKitchenMode,
-                          title: const Text('Cocina Especializada', style: TextStyle(color: Color(0xFFFAF1DE), fontSize: 13)),
+                          title: const Text('Cocina Especializada', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 13)),
                           subtitle: const Text('Separa pedidos To Go', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11)),
                           dense: true,
                           contentPadding: EdgeInsets.zero,
@@ -890,7 +890,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             return AlertDialog(
               backgroundColor: const Color(0xFFFAF1DE),
               title: Text(selectedDish!['name'] as String,
-                  style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16)),
+                  style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 16)),
               content: requiresGuisado && guisados.isNotEmpty
                   ? SizedBox(
                       width: 360,
@@ -979,7 +979,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
           // Vista de búsqueda de platillos
           return AlertDialog(
             backgroundColor: const Color(0xFFFAF1DE),
-            title: const Text('Agregar artículo', style: TextStyle(color: Color(0xFFFAF1DE))),
+            title: const Text('Agregar artículo', style: TextStyle(color: Color(0xFF3D2E1A))),
             content: SizedBox(
               width: 420,
               height: 480,
@@ -989,7 +989,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     controller: searchCtrl,
                     autofocus: true,
                     onChanged: (_) => setS(() {}),
-                    style: const TextStyle(color: Color(0xFFFAF1DE)),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     decoration: const InputDecoration(
                       hintText: 'Buscar platillo...',
                       hintStyle: TextStyle(color: Color(0xFFB6A88A)),
@@ -1110,7 +1110,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total de la cuenta:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 15)),
-                      Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 22, fontWeight: FontWeight.bold)),
+                      Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 22, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -1127,7 +1127,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                 TextField(
                   controller: customController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 20, fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
                     labelText: 'Monto personalizado',
                     labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -1162,7 +1162,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         const Divider(color: Color(0xFFFF6D00), height: 16),
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                           const Text('TOTAL A COBRAR:', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w900, fontSize: 16)),
-                          Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 26, fontWeight: FontWeight.w900)),
+                          Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 26, fontWeight: FontWeight.w900)),
                         ]),
                       ],
                     ),
@@ -1170,7 +1170,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                 ] else ...[
                   Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                     const Text('TOTAL A COBRAR:', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.w900, fontSize: 16)),
-                    Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 26, fontWeight: FontWeight.w900)),
+                    Text('\$${totalFinal.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 26, fontWeight: FontWeight.w900)),
                   ]),
                 ],
               ],
@@ -1229,7 +1229,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Total a Cobrar:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
-                    Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 24, fontWeight: FontWeight.bold)),
+                    Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 24, fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
@@ -1386,7 +1386,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Total:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
-                        Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 24, fontWeight: FontWeight.bold)),
+                        Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 24, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -1397,7 +1397,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         child: TextField(
                           controller: cardPartController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(color: Color(0xFFFAF1DE)),
+                          style: const TextStyle(color: Color(0xFF3D2E1A)),
                           decoration: InputDecoration(
                             labelText: 'Tarjeta (\$)',
                             labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -1422,7 +1422,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                         child: TextField(
                           controller: cashPartController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          style: const TextStyle(color: Color(0xFFFAF1DE)),
+                          style: const TextStyle(color: Color(0xFF3D2E1A)),
                           decoration: InputDecoration(
                             labelText: 'Efectivo (\$)',
                             labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -1641,27 +1641,27 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Cuenta cancelada exitosamente', style: TextStyle(color: Color(0xFFFAF1DE))), backgroundColor: Colors.red)
+                        const SnackBar(content: Text('Cuenta cancelada exitosamente', style: TextStyle(color: Color(0xFF3D2E1A))), backgroundColor: Colors.red)
                       );
                       widget.onDeselect?.call();
                     }
                   } else {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('PIN Incorrecto', style: TextStyle(color: Color(0xFFFAF1DE))), backgroundColor: Colors.red)
+                        const SnackBar(content: Text('PIN Incorrecto', style: TextStyle(color: Color(0xFF3D2E1A))), backgroundColor: Colors.red)
                       );
                     }
                   }
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e', style: const TextStyle(color: Color(0xFFFAF1DE))), backgroundColor: Colors.red)
+                      SnackBar(content: Text('Error: $e', style: const TextStyle(color: Color(0xFF3D2E1A))), backgroundColor: Colors.red)
                     );
                   }
                 }
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-              child: const Text('Cancelar Cuenta', style: TextStyle(color: Color(0xFFFAF1DE))),
+              child: const Text('Cancelar Cuenta', style: TextStyle(color: Color(0xFF3D2E1A))),
             ),
           ]
         );
@@ -1787,7 +1787,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     if (context.mounted) {
                       Navigator.pop(context); 
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('El pago no procedió, fue cancelado o rechazado ($state). Intentar nuevamente.', style: const TextStyle(color: Color(0xFFFAF1DE))), backgroundColor: Colors.red)
+                        SnackBar(content: Text('El pago no procedió, fue cancelado o rechazado ($state). Intentar nuevamente.', style: const TextStyle(color: Color(0xFF3D2E1A))), backgroundColor: Colors.red)
                       );
                     }
                     break;
@@ -1827,7 +1827,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
         backgroundColor: Color(0xFFFAF1DE),
         title: Row(children: [
           SizedBox(width: 8),
-          Text('Generando link...', style: TextStyle(color: Color(0xFFFAF1DE))),
+          Text('Generando link...', style: TextStyle(color: Color(0xFF3D2E1A))),
         ]),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           CircularProgressIndicator(color: Color(0xFFFF6D00)),
@@ -1920,7 +1920,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                 const Text('Total a cobrar:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 14)),
                 const SizedBox(height: 4),
                 Text('\$${amount.toStringAsFixed(2)}',
-                    style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 32, fontWeight: FontWeight.bold)),
+                    style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 32, fontWeight: FontWeight.bold)),
               ]),
             ),
             const SizedBox(height: 16),
@@ -2181,7 +2181,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                               ElevatedButton(
                                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                                                 onPressed: () => Navigator.pop(ctx, true), 
-                                                child: const Text('Quitar', style: TextStyle(color: Color(0xFFFAF1DE))),
+                                                child: const Text('Quitar', style: TextStyle(color: Color(0xFF3D2E1A))),
                                               ),
                                             ]
                                           )
@@ -2200,7 +2200,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                             ]);
 
                                             if (context.mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eliminado: $dishName', style: const TextStyle(color: Color(0xFFFAF1DE))), backgroundColor: Colors.orange));
+                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Eliminado: $dishName', style: const TextStyle(color: Color(0xFF3D2E1A))), backgroundColor: Colors.orange));
                                             }
                                           } catch(e) {
                                             if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));

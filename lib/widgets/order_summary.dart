@@ -579,7 +579,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Quitar elemento?', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('¿Quitar elemento?', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: Text('¿Deseas eliminar "${item['name']}" de la cuenta?', style: const TextStyle(color: Color(0xFF7A6E5A))),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70)))),
@@ -826,7 +826,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               backgroundColor: const Color(0xFFFAF1DE),
               title: Text(
                 '¿Qué guisado lleva el ${dish.name}?',
-                style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 16),
+                style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 16),
               ),
               content: guisados.isEmpty
                   ? const Text(
@@ -895,11 +895,11 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('Nuevo cliente', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('Nuevo cliente', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFFFAF1DE)),
+          style: const TextStyle(color: Color(0xFF3D2E1A)),
           decoration: InputDecoration(
             hintText: 'Nombre del cliente',
             hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
@@ -940,7 +940,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('¿Eliminar cliente?', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('¿Eliminar cliente?', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: Text(
           'Se eliminarán "$clientName" y todos sus platillos.',
           style: const TextStyle(color: Color(0xFF7A6E5A)),
@@ -969,11 +969,11 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFFFAF1DE),
-        title: const Text('Editar nombre', style: TextStyle(color: Color(0xFFFAF1DE))),
+        title: const Text('Editar nombre', style: TextStyle(color: Color(0xFF3D2E1A))),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Color(0xFFFAF1DE)),
+          style: const TextStyle(color: Color(0xFF3D2E1A)),
           decoration: const InputDecoration(
             hintText: 'Nombre del cliente',
             hintStyle: TextStyle(color: Color(0xFFB6A88A)),

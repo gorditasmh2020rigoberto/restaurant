@@ -71,7 +71,7 @@ class _PayrollViewState extends State<PayrollView> {
           return DropdownButtonFormField<String>(
             value: _selectedWaiterId,
             dropdownColor: const Color(0xFFFAF1DE),
-            style: const TextStyle(color: Color(0xFFFAF1DE)),
+            style: const TextStyle(color: Color(0xFF3D2E1A)),
             decoration: InputDecoration(
               labelText: 'Seleccionar mesero',
               labelStyle: const TextStyle(color: Color(0xFFA08F70)),
@@ -82,7 +82,7 @@ class _PayrollViewState extends State<PayrollView> {
             ),
             items: waiters.map((w) => DropdownMenuItem<String>(
               value: w['id'] as String,
-              child: Text(w['name'] as String, style: const TextStyle(color: Color(0xFFFAF1DE))),
+              child: Text(w['name'] as String, style: const TextStyle(color: Color(0xFF3D2E1A))),
             )).toList(),
             onChanged: (val) {
               final waiter = waiters.firstWhere((w) => w['id'] == val);
@@ -366,7 +366,7 @@ class _PayrollViewState extends State<PayrollView> {
               ],
             ),
             const SizedBox(height: 12),
-            Text(value, style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(value, style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 24, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -496,7 +496,7 @@ class _PayrollViewState extends State<PayrollView> {
                 children: [
                    const Icon(Icons.summarize, color: Color(0xFFFF6D00)),
                    const SizedBox(width: 12),
-                   const Text('Reporte Semanal', style: TextStyle(color: Color(0xFFFAF1DE))),
+                   const Text('Reporte Semanal', style: TextStyle(color: Color(0xFF3D2E1A))),
                 ],
               ),
               content: Column(
@@ -777,14 +777,14 @@ class _PayrollViewState extends State<PayrollView> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: const Color(0xFFFAF1DE),
-              title: const Text('Registrar Movimiento', style: TextStyle(color: Color(0xFFFAF1DE))),
+              title: const Text('Registrar Movimiento', style: TextStyle(color: Color(0xFF3D2E1A))),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<String>(
                     value: type,
                     dropdownColor: const Color(0xFFFAF1DE),
-                    style: const TextStyle(color: Color(0xFFFAF1DE)),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     decoration: const InputDecoration(labelText: 'Tipo de Movimiento', labelStyle: TextStyle(color: Colors.grey)),
                     items: const [
                       DropdownMenuItem(value: 'salary', child: Text('Sueldo / Jornada')),
@@ -798,14 +798,14 @@ class _PayrollViewState extends State<PayrollView> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: amountController,
-                    style: const TextStyle(color: Color(0xFFFAF1DE)),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Monto (\$)', labelStyle: TextStyle(color: Colors.grey)),
                   ),
                   const SizedBox(height: 16),
                   TextField(
                     controller: descriptionController,
-                    style: const TextStyle(color: Color(0xFFFAF1DE)),
+                    style: const TextStyle(color: Color(0xFF3D2E1A)),
                     decoration: const InputDecoration(labelText: 'Descripción / Comentario', labelStyle: TextStyle(color: Colors.grey)),
                   ),
                 ],

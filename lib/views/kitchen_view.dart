@@ -318,7 +318,7 @@ class _KitchenViewState extends State<KitchenView> {
                 const SizedBox(height: 12),
                 Text(
                   widget.isDrinksOnly ? 'Bar' : (widget.isTakeoutOnly ? 'Cocina To Go' : 'Cocina'),
-                  style: const TextStyle(color: Color(0xFFFAF1DE), fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 Text(Globals.currentBranch, style: const TextStyle(color: Color(0xFF7A6E5A))),
               ],
@@ -882,7 +882,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             children: [
                               Icon(Icons.warning, color: Colors.orange),
                               SizedBox(width: 8),
-                              Text('¿Orden Incompleta?', style: TextStyle(color: Color(0xFFFAF1DE))),
+                              Text('¿Orden Incompleta?', style: TextStyle(color: Color(0xFF3D2E1A))),
                             ],
                           ),
                           content: const Text(
@@ -897,7 +897,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context, true),
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                              child: const Text('Avisar Platillo Agotado', style: TextStyle(color: Color(0xFFFAF1DE))),
+                              child: const Text('Avisar Platillo Agotado', style: TextStyle(color: Color(0xFF3D2E1A))),
                             ),
                           ],
                         ),

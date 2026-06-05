@@ -102,7 +102,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
           builder: (ctx, setDialogState) => AlertDialog(
             backgroundColor: const Color(0xFFFAF1DE),
             title: const Text('Pago con Clip',
-                style: TextStyle(color: Color(0xFFFAF1DE))),
+                style: TextStyle(color: Color(0xFF3D2E1A))),
             content: SizedBox(
               width: 420,
               child: Column(
@@ -478,7 +478,7 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Subtotal:', style: TextStyle(color: Colors.grey)),
-                            Text('\$${cart.totalAmount.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFFAF1DE))),
+                            Text('\$${cart.totalAmount.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A))),
                           ],
                         ),
                         if (widget.orderType == 'delivery') ...[
