@@ -358,28 +358,30 @@ class _MenuBrowserState extends State<MenuBrowser> {
 
   Widget _buildCategoryBlock(String label) {
     final bool selected = _selectedCategory == label;
-    const activeColor = Color(0xFFE07A30);
+    const orange = Color(0xFFFF6D00);
+    const cream = Color(0xFFFAF1DE);
     return GestureDetector(
       onTap: () => _onCategoryTap(label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        width: 80,
-        height: 72,
         decoration: BoxDecoration(
-          color: selected ? activeColor : const Color(0xFFFAF1DE),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: selected ? activeColor : const Color(0xFFE5DCC4),
-            width: 1.5,
-          ),
+          color: selected ? orange : cream,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.10),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Globals.categoryIcon(label),
-              size: 26,
-              color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+              size: 32,
+              color: selected ? cream : orange,
             ),
             const SizedBox(height: 6),
             Padding(
@@ -390,10 +392,10 @@ class _MenuBrowserState extends State<MenuBrowser> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 13,
                   height: 1.1,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
-                  color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                  fontWeight: FontWeight.w700,
+                  color: selected ? cream : orange,
                 ),
               ),
             ),
@@ -675,7 +677,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                   crossAxisCount: 3,
                   mainAxisSpacing: 8,
                   crossAxisSpacing: 8,
-                  mainAxisExtent: 76,
+                  mainAxisExtent: 96,
                 ),
                 itemCount: _availableCategories.length,
                 itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
