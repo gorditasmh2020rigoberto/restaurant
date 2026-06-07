@@ -3143,18 +3143,25 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               ),
                             );
                           }
+                          // Si la sección principal de GUISADO ya muestra el
+                          // filtro CON CARNE / SIN CARNE arriba, no lo
+                          // repetimos aquí — comparten el mismo estado.
+                          final showTabs =
+                              !(anyRequiresGuisado && guisados.isNotEmpty);
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Row(
-                                children: [
-                                  filterTab('CON CARNE', true),
-                                  const SizedBox(width: 8),
-                                  filterTab('SIN CARNE', false),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
+                              if (showTabs) ...[
+                                Row(
+                                  children: [
+                                    filterTab('CON CARNE', true),
+                                    const SizedBox(width: 8),
+                                    filterTab('SIN CARNE', false),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                              ],
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 6,

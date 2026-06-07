@@ -546,7 +546,7 @@ class _AdminViewState extends State<AdminView> {
                                                   title: orderTypeStr,
                                                   subtitle: cleanName ?? 'Cliente',
                                                   icon: orderType == 'takeout' ? Icons.takeout_dining : Icons.delivery_dining,
-                                                  color: orderType == 'takeout' ? Colors.orangeAccent : Colors.purpleAccent,
+                                                  color: orderType == 'takeout' ? const Color(0xFFE07A30) : const Color(0xFFB7472A),
                                                   waiterName: waiterName,
                                                   isOccupied: true, // It's an active order
                                                   isSelected: isSelected,
