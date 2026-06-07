@@ -1225,18 +1225,18 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                     // Items for this client
                     for (final entry in grouped[client]!)
                       ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         title: Text(
                           entry.value.dish.name,
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF3D2E1A)),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          softWrap: true,
                         ),
                         subtitle: Text(
                           '\$${entry.value.dish.price.toStringAsFixed(2)}${entry.value.guisados.isNotEmpty ? ' · ${entry.value.guisados.join(', ')}' : ''}',
                           style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          softWrap: true,
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
