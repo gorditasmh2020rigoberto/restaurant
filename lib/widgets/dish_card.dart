@@ -2469,14 +2469,25 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             : matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
                 dialogQty;
 
-        // Piezas por orden: si todos los dishes del mixto tienen el mismo
-        // valor (>0), lo mostramos como chip en el header.
-        final piecesValues = dishes
-            .map((d) => d.piecesPerOrder ?? 0)
-            .where((v) => v > 0)
-            .toSet();
-        final int? headerPieces =
-            piecesValues.length == 1 ? piecesValues.first : null;
+        // Piezas por orden: prioriza la variante seleccionada (matchedByFlavor);
+        // si no hay selección, usa la primera que tenga un valor > 0. Así el
+        // chip aparece cuando aunque sea una variante tiene piezas definidas
+        // y se actualiza al cambiar de sabor.
+        int? headerPieces;
+        for (final d in matchedByFlavor.values) {
+          final p = d.piecesPerOrder ?? 0;
+          if (p > 0) {
+            headerPieces = p;
+            break;
+          }
+        }
+        headerPieces ??= () {
+          for (final d in dishes) {
+            final p = d.piecesPerOrder ?? 0;
+            if (p > 0) return p;
+          }
+          return null;
+        }();
 
         return AlertDialog(
           backgroundColor: const Color(0xFFFAF1DE),
