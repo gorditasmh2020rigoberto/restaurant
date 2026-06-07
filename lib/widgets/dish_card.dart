@@ -1795,12 +1795,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             letterSpacing: 1)),
                     const SizedBox(height: 8),
                     _ScrollableWithDownHint(
-                      height: 240,
+                      height: 260,
                       hintColor: const Color(0xFFFF6D00),
                       fadeColor: const Color(0xFFFAF1DE),
-                      child: Builder(builder: (_) {
-                        final itemW =
-                            (MediaQuery.of(ctx).size.width - 100) / 3;
+                      child: LayoutBuilder(builder: (_, c) {
+                        final itemW = (c.maxWidth - 12) / 3;
                         Widget buildItem(Map<String, dynamic> g) {
                           final name = g['name'] as String;
                           final isSel = selectedGuisadoForExtra == name;
@@ -2845,11 +2844,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     ),
                     const SizedBox(height: 8),
                     _ScrollableWithDownHint(
-                      height: 260,
+                      height: 320,
                       hintColor: const Color(0xFFFF6D00),
                       fadeColor: const Color(0xFFFAF1DE),
-                      child: Builder(builder: (innerCtx) {
-                          final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
+                      child: LayoutBuilder(builder: (innerCtx, c) {
+                          final itemW = (c.maxWidth - 12) / 3;
                           Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
                             final isChecked = selectedGuisados.contains(name);
@@ -3035,12 +3034,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             letterSpacing: 1)),
                     const SizedBox(height: 8),
                     _ScrollableWithDownHint(
-                      height: 220,
+                      height: 260,
                       hintColor: const Color(0xFFFF6D00),
                       fadeColor: const Color(0xFFFAF1DE),
-                      child: Builder(builder: (_) {
-                          final itemW =
-                              (MediaQuery.of(ctx).size.width - 100) / 3;
+                      child: LayoutBuilder(builder: (_, c) {
+                          final itemW = (c.maxWidth - 12) / 3;
                           Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
                             final isSel =
