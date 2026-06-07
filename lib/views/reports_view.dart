@@ -1010,7 +1010,7 @@ class _ReportsViewState extends State<ReportsView> {
 
       filas.add(Container(
         decoration: BoxDecoration(
-          color: i.isEven ? const Color(0xFF263148) : const Color(0xFFFAF1DE),
+          color: i.isEven ? const Color(0xFFF0E4C8) : const Color(0xFFFAF1DE),
           border: const Border(top: BorderSide(color: Color(0xFFE5DCC4), width: 0.5)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -1338,7 +1338,7 @@ class _ReportsViewState extends State<ReportsView> {
                 child: Text(
                   value,
                   style: const TextStyle(
-                    color: Color(0xFFFAF1DE),
+                    color: Color(0xFFFF6D00),
                     fontSize: 24, // Reducido para evitar overflows
                     fontWeight: FontWeight.w900,
                   ),
