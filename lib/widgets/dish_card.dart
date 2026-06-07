@@ -1329,9 +1329,34 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  '\$${activeDish.price.toStringAsFixed(0)}',
-                  style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
+                Row(
+                  children: [
+                    Text(
+                      '\$${activeDish.price.toStringAsFixed(0)}',
+                      style: const TextStyle(color: Color(0xFFFF6D00), fontSize: 14, fontWeight: FontWeight.w700),
+                    ),
+                    if ((activeDish.piecesPerOrder ?? 0) > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF6D00).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Text(
+                          '${activeDish.piecesPerOrder} ${activeDish.piecesPerOrder == 1 ? "pieza" : "piezas"}',
+                          style: const TextStyle(
+                            color: Color(0xFFFF6D00),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -2088,6 +2113,20 @@ class DishCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if ((dish.piecesPerOrder ?? 0) > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        '${dish.piecesPerOrder} ${dish.piecesPerOrder == 1 ? "pieza" : "piezas"} por orden',
+                        style: const TextStyle(
+                          color: Color(0xFFA08F70),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   const SizedBox(height: 6),
                   Builder(
                     builder: (context) {

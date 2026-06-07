@@ -9,6 +9,9 @@ class Dish {
   final bool isSale;
   final double cost;
   final bool requiresGuisado;
+  /// Cuántas piezas trae una orden (ej. 3 molletes). Si es null o 0,
+  /// el menú no muestra el contador.
+  final int? piecesPerOrder;
 
   const Dish({
     required this.id,
@@ -21,6 +24,7 @@ class Dish {
     this.isSale = true,
     this.cost = 0.0,
     this.requiresGuisado = false,
+    this.piecesPerOrder,
   });
 
   Dish copyWith({double? price, String? name}) => Dish(
@@ -34,6 +38,7 @@ class Dish {
         isSale: isSale,
         cost: cost,
         requiresGuisado: requiresGuisado,
+        piecesPerOrder: piecesPerOrder,
       );
 
   factory Dish.fromJson(Map<String, dynamic> json) {
@@ -48,6 +53,7 @@ class Dish {
       isSale: json['is_sale'] ?? true,
       cost: (json['cost'] as num? ?? 0.0).toDouble(),
       requiresGuisado: json['requires_guisado'] ?? false,
+      piecesPerOrder: (json['pieces_per_order'] as num?)?.toInt(),
     );
   }
 }
