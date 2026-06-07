@@ -1124,7 +1124,7 @@ class _ComandasViewState extends State<ComandasView> {
                     (w) => w['id'] == _selectedWaiterId,
                     orElse: () => {'name': '...'}
                   )['name'],
-                  style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
                 ),
                 backgroundColor: const Color(0xFFFF6D00),
                 side: BorderSide.none,
