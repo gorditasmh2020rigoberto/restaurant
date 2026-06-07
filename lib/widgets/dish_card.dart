@@ -20,6 +20,123 @@ const _drinkCategories = {
 bool _isPreparedDishes(Iterable<Dish> dishes) =>
     dishes.any((d) => !_drinkCategories.contains(d.category.toLowerCase()));
 
+/// Área scrollable de altura fija que muestra una flecha animada hacia abajo
+/// mientras quede contenido por debajo del viewport. La flecha desaparece al
+/// llegar al final.
+class _ScrollableWithDownHint extends StatefulWidget {
+  final double height;
+  final Color hintColor;
+  final Color fadeColor;
+  final Widget child;
+  const _ScrollableWithDownHint({
+    required this.height,
+    required this.hintColor,
+    required this.fadeColor,
+    required this.child,
+  });
+  @override
+  State<_ScrollableWithDownHint> createState() =>
+      _ScrollableWithDownHintState();
+}
+
+class _ScrollableWithDownHintState extends State<_ScrollableWithDownHint>
+    with SingleTickerProviderStateMixin {
+  final ScrollController _ctrl = ScrollController();
+  late final AnimationController _anim;
+  bool _hasOverflow = false;
+  bool _atBottom = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _anim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _ctrl.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
+  }
+
+  void _onScroll() {
+    if (!_ctrl.hasClients) return;
+    final pos = _ctrl.position;
+    final overflow = pos.maxScrollExtent > 0;
+    final atBottom = !overflow || pos.pixels >= pos.maxScrollExtent - 4;
+    if (overflow != _hasOverflow || atBottom != _atBottom) {
+      setState(() {
+        _hasOverflow = overflow;
+        _atBottom = atBottom;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.removeListener(_onScroll);
+    _ctrl.dispose();
+    _anim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final showHint = _hasOverflow && !_atBottom;
+    return SizedBox(
+      height: widget.height,
+      child: Stack(
+        children: [
+          NotificationListener<ScrollMetricsNotification>(
+            onNotification: (_) {
+              WidgetsBinding.instance
+                  .addPostFrameCallback((_) => _onScroll());
+              return false;
+            },
+            child: SingleChildScrollView(
+              controller: _ctrl,
+              physics: const ClampingScrollPhysics(),
+              child: widget.child,
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: showHint ? 1 : 0,
+                child: Container(
+                  height: 36,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        widget.fadeColor.withValues(alpha: 0),
+                        widget.fadeColor,
+                      ],
+                    ),
+                  ),
+                  alignment: Alignment.bottomCenter,
+                  child: FadeTransition(
+                    opacity: Tween<double>(begin: 0.45, end: 1.0)
+                        .animate(_anim),
+                    child: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: widget.hintColor,
+                      size: 28,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Sección reutilizable de comentarios libres para los diálogos de preparación.
 Widget _buildCommentField(TextEditingController controller) {
   return Column(
@@ -360,7 +477,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               child: Text('Lo dulce',
                   style: TextStyle(
-                      color: Color(0xFFFAF1DE),
+                      color: Color(0xFFE07A30),
                       fontSize: 20,
                       fontWeight: FontWeight.bold)),
             ),
@@ -385,7 +502,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
                       const SizedBox(width: 16),
                       Text(opt.$1,
                           style: const TextStyle(
-                              color: Color(0xFFFAF1DE),
+                              color: Color(0xFF5C4A36),
                               fontSize: 18,
                               fontWeight: FontWeight.w600)),
                       const Spacer(),
@@ -2565,11 +2682,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       ],
                     ),
                     const SizedBox(height: 8),
-                    SizedBox(
+                    _ScrollableWithDownHint(
                       height: 260,
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: Builder(builder: (innerCtx) {
+                      hintColor: const Color(0xFFFF6D00),
+                      fadeColor: const Color(0xFFFAF1DE),
+                      child: Builder(builder: (innerCtx) {
                           final itemW = (MediaQuery.of(ctx).size.width - 100) / 3;
                           Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
@@ -2693,7 +2810,6 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             ],
                           );
                         }),
-                      ),
                     ),
                   ],
                   // Cantidad de piezas: solo para enmoladas seleccionadas en solitario
@@ -2756,11 +2872,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1)),
                     const SizedBox(height: 8),
-                    SizedBox(
+                    _ScrollableWithDownHint(
                       height: 220,
-                      child: SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: Builder(builder: (_) {
+                      hintColor: const Color(0xFFFF6D00),
+                      fadeColor: const Color(0xFFFAF1DE),
+                      child: Builder(builder: (_) {
                           final itemW =
                               (MediaQuery.of(ctx).size.width - 100) / 3;
                           Widget buildItem(Map<String, dynamic> g) {
@@ -2887,7 +3003,6 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             ],
                           );
                         }),
-                      ),
                     ),
                   ],
                   // CANTIDAD: siempre visible (incluyendo lo dulce), igual que
