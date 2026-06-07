@@ -1014,7 +1014,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     child: Text(
                                       sabor,
                                       style: TextStyle(
-                                        color: isSelected ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A),
+                                        color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFF7A6E5A),
                                         fontSize: 11,
                                         fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                                       ),
@@ -1501,7 +1501,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Text(
                                     termino,
                                     style: TextStyle(
-                                      color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                                      color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -1569,7 +1569,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   Text(
                                     salsa,
                                     style: TextStyle(
-                                      color: isSelected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                                      color: isSelected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
                                       fontSize: 14,
                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
                                     ),
@@ -3968,7 +3968,7 @@ class _BaseChip extends StatelessWidget {
                       fontSize: 14,
                       fontWeight:
                           selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected ? Color(0xFFFAF1DE) : Color(0xFFA08F70),
+                      color: selected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
                     ),
                   ),
                   Text(
@@ -3976,7 +3976,7 @@ class _BaseChip extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: selected ? Color(0xFF7A6E5A) : const Color(0xFFA08F70),
+                      color: selected ? const Color(0xFF7A6E5A) : const Color(0xFFA08F70),
                     ),
                   ),
                 ],
