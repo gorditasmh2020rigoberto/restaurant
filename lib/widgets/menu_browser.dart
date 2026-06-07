@@ -663,51 +663,55 @@ class _MenuBrowserState extends State<MenuBrowser> {
             onChanged: (val) => setState(() => _searchQuery = val),
           ),
         ),
-        // Categorías: cuadrícula vertical de 3 columnas (mismo layout que Comandas).
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
-                  mainAxisExtent: 96,
+        // Categorías: cuadrícula de 3 columnas con scroll dentro de su Expanded,
+        // igual que el menú de Comandas (mesero). Cuando no hay categoría
+        // seleccionada ni búsqueda, ocupa toda la pantalla.
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: GridView.builder(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  physics: const BouncingScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    mainAxisExtent: 96,
+                  ),
+                  itemCount: _availableCategories.length,
+                  itemBuilder: (_, i) =>
+                      _buildCategoryBlock(_availableCategories[i]),
                 ),
-                itemCount: _availableCategories.length,
-                itemBuilder: (_, i) => _buildCategoryBlock(_availableCategories[i]),
               ),
             ),
           ),
         ),
-        const Divider(height: 1, thickness: 1, color: Color(0xFFFAF1DE)),
-        Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final realWidth = constraints.maxWidth;
-              int cols;
-              if (isPhone) {
-                cols = realWidth < 400 ? 2 : 3;
-              } else if (isTablet) {
-                cols = (realWidth / 150).floor().clamp(2, 5);
-              } else {
-                cols = (realWidth / 180).floor().clamp(4, 8);
-              }
-              return CustomScrollView(
-                slivers: [
-                  ..._buildGroupedMenu(filteredDishes, cols, isPhone,
-                      isTablet: isTablet),
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                ],
-              );
-            },
+        if (!(_selectedCategory == 'Todos' && _searchQuery.isEmpty))
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final realWidth = constraints.maxWidth;
+                int cols;
+                if (isPhone) {
+                  cols = realWidth < 400 ? 2 : 3;
+                } else if (isTablet) {
+                  cols = (realWidth / 150).floor().clamp(2, 5);
+                } else {
+                  cols = (realWidth / 180).floor().clamp(4, 8);
+                }
+                return CustomScrollView(
+                  slivers: [
+                    ..._buildGroupedMenu(filteredDishes, cols, isPhone,
+                        isTablet: isTablet),
+                    const SliverToBoxAdapter(child: SizedBox(height: 40)),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
           ],
         ),
       ],
