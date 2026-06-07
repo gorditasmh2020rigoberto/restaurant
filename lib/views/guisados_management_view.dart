@@ -120,83 +120,235 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
     final nameController = TextEditingController(
       text: isEditing ? guisado['name'] as String : '',
     );
+    bool withMeat = isEditing ? (guisado['with_meat'] as bool? ?? true) : true;
+    int spiceLevel =
+        isEditing ? (guisado['spice_level'] as int? ?? 0) : 0;
 
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFFFAF1DE),
-        title: Text(
-          isEditing ? 'Editar Guisado' : 'Nuevo Guisado',
-          style: const TextStyle(color: Color(0xFF3D2E1A)),
-        ),
-        content: TextField(
-          controller: nameController,
-          autofocus: true,
-          style: const TextStyle(color: Color(0xFF3D2E1A)),
-          textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(
-            hintText: isEditing ? guisado['name'] as String : 'Nombre del guisado (ej. Picadillo)',
-            hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFFF6D00)),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2),
-            ),
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFFAF1DE),
+          title: Text(
+            isEditing ? 'Editar Guisado' : 'Nuevo Guisado',
+            style: const TextStyle(color: Color(0xFF3D2E1A)),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
-          ),
-          TextButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) return;
-              Navigator.pop(ctx);
-              try {
-                if (isEditing) {
-                  // Actualizar UI inmediatamente
-                  setState(() {
-                    final index = _guisados.indexWhere((g) => g['id'] == guisado['id']);
-                    if (index != -1) _guisados[index] = {..._guisados[index], 'name': name};
-                  });
-                  await _supabase
-                      .from('guisados')
-                      .update({'name': name})
-                      .eq('id', guisado['id']);
-                } else {
-                  final result = await _supabase.from('guisados').insert({
-                    'name': name,
-                    'branch_name': null,
-                    'available': true,
-                  }).select().single();
-                  // Agregar a la lista inmediatamente
-                  setState(() {
-                    _guisados.add(result);
-                    _guisados.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
-                  });
-                }
-              } catch (e) {
-                _fetchGuisados(); // Recargar si falla
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                style: const TextStyle(color: Color(0xFF3D2E1A)),
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: isEditing
+                      ? guisado['name'] as String
+                      : 'Nombre del guisado (ej. Picadillo)',
+                  hintStyle: const TextStyle(color: Color(0xFFB6A88A)),
+                  enabledBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF6D00)),
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFFF6D00), width: 2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('TIPO',
+                  style: TextStyle(
+                      color: Color(0xFF7A6E5A),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setS(() => withMeat = true),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: withMeat
+                              ? const Color(0xFFFF6D00)
+                              : const Color(0xFFFAF1DE),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFFF6D00),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Text(
+                          'CON CARNE',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: withMeat
+                                ? const Color(0xFFFAF1DE)
+                                : const Color(0xFFFF6D00),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => setS(() => withMeat = false),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: !withMeat
+                              ? const Color(0xFFFF6D00)
+                              : const Color(0xFFFAF1DE),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFFFF6D00),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Text(
+                          'SIN CARNE',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: !withMeat
+                                ? const Color(0xFFFAF1DE)
+                                : const Color(0xFFFF6D00),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('PICOR',
+                      style: TextStyle(
+                          color: Color(0xFF7A6E5A),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1)),
+                  Text(
+                    spiceLevel == 0 ? 'no pica' : '$spiceLevel/5',
+                    style: const TextStyle(
+                        color: Color(0xFFA08F70),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: List.generate(5, (i) {
+                  final level = i + 1;
+                  final active = spiceLevel >= level;
+                  return Expanded(
+                    child: InkWell(
+                      onTap: () => setS(() {
+                        // Tocar el mismo nivel lo apaga (vuelve a 0).
+                        spiceLevel = spiceLevel == level ? 0 : level;
+                      }),
+                      borderRadius: BorderRadius.circular(6),
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                        child: Text(
+                          '🌶',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: active
+                                ? const Color(0xFFD64545)
+                                : const Color(0xFFE5DCC4),
+                          ),
+                        ),
+                      ),
+                    ),
                   );
-                }
-              }
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15),
-            ),
-            child: Text(
-              isEditing ? 'Guardar' : 'Agregar',
-              style: const TextStyle(color: Color(0xFFFF6D00)),
-            ),
+                }),
+              ),
+            ],
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Color(0xFFA08F70))),
+            ),
+            TextButton(
+              onPressed: () async {
+                final name = nameController.text.trim();
+                if (name.isEmpty) return;
+                Navigator.pop(ctx);
+                try {
+                  if (isEditing) {
+                    setState(() {
+                      final index =
+                          _guisados.indexWhere((g) => g['id'] == guisado['id']);
+                      if (index != -1) {
+                        _guisados[index] = {
+                          ..._guisados[index],
+                          'name': name,
+                          'with_meat': withMeat,
+                          'spice_level': spiceLevel,
+                        };
+                      }
+                    });
+                    await _supabase.from('guisados').update({
+                      'name': name,
+                      'with_meat': withMeat,
+                      'spice_level': spiceLevel,
+                    }).eq('id', guisado['id']);
+                  } else {
+                    final result = await _supabase
+                        .from('guisados')
+                        .insert({
+                          'name': name,
+                          'branch_name': null,
+                          'available': true,
+                          'with_meat': withMeat,
+                          'spice_level': spiceLevel,
+                        })
+                        .select()
+                        .single();
+                    setState(() {
+                      _guisados.add(result);
+                      _guisados.sort((a, b) =>
+                          (a['name'] as String).compareTo(b['name'] as String));
+                    });
+                  }
+                } catch (e) {
+                  _fetchGuisados();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D00).withOpacity(0.15),
+              ),
+              child: Text(
+                isEditing ? 'Guardar' : 'Agregar',
+                style: const TextStyle(color: Color(0xFFFF6D00)),
+              ),
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -273,18 +425,38 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                                   size: 20,
                                 ),
                               ),
-                              title: Text(
-                                g['name'] as String,
-                                style: TextStyle(
-                                  color: available ? const Color(0xFFA08F70) : const Color(0xFFB6A88A),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
+                              title: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      g['name'] as String,
+                                      style: TextStyle(
+                                        color: available
+                                            ? const Color(0xFFA08F70)
+                                            : const Color(0xFFB6A88A),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if ((g['spice_level'] as int? ?? 0) > 0) ...[
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '🌶' *
+                                          (g['spice_level'] as int? ?? 0)
+                                              .clamp(0, 5),
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  ],
+                                ],
                               ),
                               subtitle: Text(
-                                available ? 'Disponible' : 'No disponible',
+                                '${available ? "Disponible" : "No disponible"} · ${(g['with_meat'] as bool? ?? true) ? "Con carne" : "Sin carne"}',
                                 style: TextStyle(
-                                  color: available ? const Color(0xFF34D399) : Colors.redAccent,
+                                  color: available
+                                      ? const Color(0xFF34D399)
+                                      : Colors.redAccent,
                                   fontSize: 12,
                                 ),
                               ),

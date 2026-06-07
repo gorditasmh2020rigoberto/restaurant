@@ -20,6 +20,18 @@ const _drinkCategories = {
 bool _isPreparedDishes(Iterable<Dish> dishes) =>
     dishes.any((d) => !_drinkCategories.contains(d.category.toLowerCase()));
 
+/// Fila de 🌶 según spice_level (1..5). Devuelve un widget vacío si es 0.
+Widget _chileRow(int level) {
+  if (level <= 0) return const SizedBox.shrink();
+  return Padding(
+    padding: const EdgeInsets.only(top: 2),
+    child: Text(
+      '🌶' * level.clamp(0, 5),
+      style: const TextStyle(fontSize: 9, height: 1),
+    ),
+  );
+}
+
 /// Área scrollable de altura fija que muestra una flecha animada hacia abajo
 /// mientras quede contenido por debajo del viewport. La flecha desaparece al
 /// llegar al final.
@@ -1629,6 +1641,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                         fontWeight: isChecked ? FontWeight.w700 : FontWeight.w600,
                                       ),
                                     ),
+                                    _chileRow(g['spice_level'] as int? ?? 0),
                                   ],
                                 ),
                               ),
@@ -1717,7 +1730,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('CANTIDAD',
-                          style: TextStyle(color: const Color(0xFF7A6E5A), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                          style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
                       Row(
                         children: [
                           InkWell(
@@ -1730,7 +1743,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(color: const Color(0xFFE5DCC4)),
                               ),
-                              child: const Icon(Icons.remove, color: const Color(0xFF7A6E5A), size: 18),
+                              child: const Icon(Icons.remove, color: Color(0xFF7A6E5A), size: 18),
                             ),
                           ),
                           SizedBox(
@@ -1852,6 +1865,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                             : FontWeight.w600,
                                       ),
                                     ),
+                                    _chileRow(g['spice_level'] as int? ?? 0),
                                   ],
                                 ),
                               ),
@@ -2902,6 +2916,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                               : FontWeight.w600,
                                         ),
                                       ),
+                                      _chileRow(
+                                          g['spice_level'] as int? ?? 0),
                                     ],
                                   ),
                                 ),
@@ -3140,6 +3156,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                               : FontWeight.w600,
                                         ),
                                       ),
+                                      _chileRow(
+                                          g['spice_level'] as int? ?? 0),
                                     ],
                                   ),
                                 ),
