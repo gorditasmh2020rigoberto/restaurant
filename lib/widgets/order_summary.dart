@@ -145,7 +145,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               color: Color(0xFFA08F70), fontSize: 15)),
                       Text('\$${total.toStringAsFixed(2)}',
                           style: const TextStyle(
-                              color: Color(0xFFFAF1DE),
+                              color: Color(0xFFFF6D00),
                               fontSize: 22,
                               fontWeight: FontWeight.bold)),
                     ],
@@ -164,7 +164,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   style: const TextStyle(
-                      color: Color(0xFFFAF1DE),
+                      color: Color(0xFFFF6D00),
                       fontSize: 20,
                       fontWeight: FontWeight.bold),
                   decoration: InputDecoration(
@@ -221,12 +221,12 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                             children: [
                               const Text('TOTAL A COBRAR:',
                                   style: TextStyle(
-                                      color: Color(0xFFFAF1DE),
+                                      color: Color(0xFFFF6D00),
                                       fontWeight: FontWeight.w900,
                                       fontSize: 16)),
                               Text('\$${totalFinal.toStringAsFixed(2)}',
                                   style: const TextStyle(
-                                      color: Color(0xFFFAF1DE),
+                                      color: Color(0xFFFF6D00),
                                       fontSize: 26,
                                       fontWeight: FontWeight.w900)),
                             ]),
@@ -239,12 +239,12 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                       children: [
                         const Text('TOTAL A COBRAR:',
                             style: TextStyle(
-                                color: Color(0xFFFAF1DE),
+                                color: Color(0xFF3D2E1A),
                                 fontWeight: FontWeight.w900,
                                 fontSize: 16)),
                         Text('\$${totalFinal.toStringAsFixed(2)}',
                             style: const TextStyle(
-                                color: Color(0xFFFAF1DE),
+                                color: Color(0xFFFF6D00),
                                 fontSize: 26,
                                 fontWeight: FontWeight.w900)),
                       ]),
@@ -313,7 +313,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                           TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
                   Text('\$${total.toStringAsFixed(2)}',
                       style: const TextStyle(
-                          color: Color(0xFFFAF1DE),
+                          color: Color(0xFFFF6D00),
                           fontSize: 24,
                           fontWeight: FontWeight.bold)),
                 ],
@@ -411,7 +411,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                               color: Color(0xFFA08F70), fontSize: 16)),
                       Text('\$${total.toStringAsFixed(2)}',
                           style: const TextStyle(
-                              color: Color(0xFFFAF1DE),
+                              color: Color(0xFFFF6D00),
                               fontSize: 24,
                               fontWeight: FontWeight.bold)),
                     ],
@@ -854,7 +854,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                             },
                             title: Text(name,
                                 style: const TextStyle(
-                                    color: Color(0xFFFAF1DE), fontSize: 14)),
+                                    color: Color(0xFF3D2E1A), fontSize: 14)),
                             checkColor: Color(0xFFFAF1DE),
                             activeColor: const Color(0xFFFF6D00),
                             side: const BorderSide(color: Color(0xFFA08F70)),
@@ -1228,7 +1228,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                         title: Text(
                           entry.value.dish.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFFAF1DE)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF3D2E1A)),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
