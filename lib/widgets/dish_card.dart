@@ -2469,10 +2469,46 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             : matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
                 dialogQty;
 
+        // Piezas por orden: si todos los dishes del mixto tienen el mismo
+        // valor (>0), lo mostramos como chip en el header.
+        final piecesValues = dishes
+            .map((d) => d.piecesPerOrder ?? 0)
+            .where((v) => v > 0)
+            .toSet();
+        final int? headerPieces =
+            piecesValues.length == 1 ? piecesValues.first : null;
+
         return AlertDialog(
           backgroundColor: const Color(0xFFFAF1DE),
-          title: Text(displayName,
-              style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(displayName,
+                  style: TextStyle(color: const Color(0xFF3D2E1A), fontWeight: FontWeight.w700, fontSize: MediaQuery.of(ctx).size.width < 380 ? 14 : 16)),
+              if (headerPieces != null) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF6D00).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFFFF6D00).withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    '$headerPieces ${headerPieces == 1 ? "pieza" : "piezas"} por orden',
+                    style: const TextStyle(
+                      color: Color(0xFFFF6D00),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
