@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/cart_provider.dart';
@@ -11,8 +13,24 @@ import 'views/kitchen_view.dart';
 import 'views/reports_view.dart';
 import 'views/mesero_login_view.dart';
 
+/// Build-time flag: si la app se compila con --dart-define=KIOSKO_MESERO=true,
+/// arranca directo en la pantalla de mesero y deshabilita la selección de rol.
+/// Pensado para el APK de tablet que va a ser el "App de inicio" de un tablet
+/// en modo kiosko.
+const bool kKioskoMesero =
+    bool.fromEnvironment('KIOSKO_MESERO', defaultValue: false);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // En modo kiosko en Android: pantalla completa inmersiva y bloqueo de
+  // rotación a horizontal/vertical natural del tablet.
+  if (kKioskoMesero && !kIsWeb) {
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.immersiveSticky,
+    );
+  }
+
   await Supabase.initialize(
     url: 'https://jcaqolmacqhhgtjdgvaz.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjYXFvbG1hY3FoaGd0amRndmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDExMDIsImV4cCI6MjA4OTI3NzEwMn0.9TS8QZ5ZWG1MOct4nif0yiTW_bq_qbgAGbTjTle1_fk',
@@ -77,7 +95,8 @@ class RestaurantApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const RoleSelectionView(),
+        '/': (context) =>
+            kKioskoMesero ? const MeseroLoginView() : const RoleSelectionView(),
         '/client': (context) => const ClientHomeView(),
         '/admin': (context) => const AdminView(),
         '/comandas': (context) => const ComandasView(),
