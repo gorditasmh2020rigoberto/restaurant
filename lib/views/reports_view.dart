@@ -362,7 +362,7 @@ class _ReportsViewState extends State<ReportsView> {
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFFAF1DE),
+                              color: Color(0xFFFF6D00),
                             ),
                           ),
                           SizedBox(width: isSmall ? 0 : 24, height: isSmall ? 16 : 0),
@@ -1246,13 +1246,13 @@ class _ReportsViewState extends State<ReportsView> {
                   Text(
                     name,
                     style: const TextStyle(
-                      color: Color(0xFFFAF1DE),
+                      color: Color(0xFF3D2E1A),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     '$qty unidades',
-                    style: const TextStyle(color: Color(0xFF3D2E1A)),
+                    style: const TextStyle(color: Color(0xFFA08F70)),
                   ),
                 ],
               ),
@@ -1297,7 +1297,7 @@ class _ReportsViewState extends State<ReportsView> {
         Text(
           '\$${amount.toStringAsFixed(2)}',
           style: const TextStyle(
-            color: Color(0xFFFAF1DE),
+            color: Color(0xFFFF6D00),
             fontWeight: FontWeight.bold,
           ),
         ),

@@ -276,7 +276,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                               title: Text(
                                 g['name'] as String,
                                 style: TextStyle(
-                                  color: available ? const Color(0xFF5C4A36) : const Color(0xFFB6A88A),
+                                  color: available ? const Color(0xFFA08F70) : const Color(0xFFB6A88A),
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                 ),

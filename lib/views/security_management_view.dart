@@ -384,7 +384,7 @@ class _SecurityManagementViewState extends State<SecurityManagementView> {
                   title: Text(
                     user['username'] as String,
                     style: const TextStyle(
-                      color: Color(0xFFFAF1DE),
+                      color: Color(0xFFA08F70),
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),

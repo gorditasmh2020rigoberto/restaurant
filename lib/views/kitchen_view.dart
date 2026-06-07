@@ -72,7 +72,7 @@ class _KitchenViewState extends State<KitchenView> {
                       Text(
                         'Guisados disponibles hoy',
                         style: TextStyle(
-                          color: Color(0xFFFAF1DE),
+                          color: Color(0xFFFF6D00),
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -700,7 +700,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                             _deliveryAddress,
                                             style: const TextStyle(
                                               fontSize: 15,
-                                              color: Color(0xFFFAF1DE),
+                                              color: Color(0xFFFF6D00),
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
@@ -718,7 +718,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                           _deliveryPhone,
                                           style: const TextStyle(
                                             fontSize: 15,
-                                            color: Color(0xFFFAF1DE),
+                                            color: Color(0xFFFF6D00),
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),

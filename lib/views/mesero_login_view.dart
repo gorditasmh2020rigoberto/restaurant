@@ -117,7 +117,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFFFAF1DE)),
+                      color: Color(0xFFFF6D00)),
                 ),
                 const SizedBox(height: 6),
                 // Sucursal leída de la URL (o del dispositivo)
@@ -144,7 +144,7 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   maxLength: 4,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontSize: 30, letterSpacing: 18, color: Color(0xFFFAF1DE)),
+                      fontSize: 30, letterSpacing: 18, color: Color(0xFFFF6D00)),
                   decoration: InputDecoration(
                     hintText: '● ● ● ●',
                     hintStyle:
