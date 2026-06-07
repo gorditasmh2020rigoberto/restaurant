@@ -15,8 +15,8 @@ import 'access_management_view.dart';
 import 'billing_view.dart';
 import 'clients_view.dart';
 import 'payroll_view.dart';
-import 'dart:html' as html if (dart.library.io) 'dart:io';
 import '../utils/app_updater.dart';
+import '../utils/url_opener.dart';
 
 class AdminView extends StatefulWidget {
   const AdminView({super.key});
@@ -1892,7 +1892,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
     }
 
     // 2. Abrir el link de pago en nueva pestaña
-    html.window.open(paymentUrl, '_blank');
+    openInNewTab(paymentUrl);
 
     // 3. Mostrar diálogo de confirmación manual
     if (!context.mounted) return;
