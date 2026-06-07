@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:html' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../globals.dart';
+import '../utils/download_helper.dart';
 import 'billing_view.dart';
 import 'cash_register_view.dart';
 
@@ -244,15 +244,9 @@ class _ReportsViewState extends State<ReportsView> {
       csv.writeln('${o['id']},$date,$tipo,$mesaStr,$mesero,$sub,$total');
     }
 
-    if (kIsWeb) {
-      final bytes = utf8.encode(csv.toString());
-      final blob = html.Blob([bytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      html.AnchorElement(href: url)
-        ..setAttribute('download', 'reporte_ventas_restaurant.csv')
-        ..click();
-      html.Url.revokeObjectUrl(url);
-    }
+    final bytes = utf8.encode(csv.toString());
+    downloadBytes(bytes, 'reporte_ventas_restaurant.csv',
+        mimeType: 'text/csv');
   }
 
   Future<void> _downloadPdf() async {
@@ -320,15 +314,9 @@ class _ReportsViewState extends State<ReportsView> {
       ),
     );
 
-    if (kIsWeb) {
-      final bytes = await pdf.save();
-      final blob = html.Blob([bytes], 'application/pdf');
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      html.AnchorElement(href: url)
-        ..setAttribute('download', 'reporte_ventas_restaurant.pdf')
-        ..click();
-      html.Url.revokeObjectUrl(url);
-    }
+    final bytes = await pdf.save();
+    downloadBytes(bytes, 'reporte_ventas_restaurant.pdf',
+        mimeType: 'application/pdf');
   }
 
   @override
