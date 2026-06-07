@@ -241,7 +241,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1)),
                   Text(
-                    spiceLevel == 0 ? 'no pica' : '$spiceLevel/5',
+                    spiceLevel == 0 ? 'no pica' : '$spiceLevel/3',
                     style: const TextStyle(
                         color: Color(0xFFA08F70),
                         fontSize: 11,
@@ -251,7 +251,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
               ),
               const SizedBox(height: 8),
               Row(
-                children: List.generate(5, (i) {
+                children: List.generate(3, (i) {
                   final level = i + 1;
                   final active = spiceLevel >= level;
                   return Expanded(
@@ -445,7 +445,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                                     Text(
                                       '🌶' *
                                           (g['spice_level'] as int? ?? 0)
-                                              .clamp(0, 5),
+                                              .clamp(0, 3),
                                       style: const TextStyle(fontSize: 13),
                                     ),
                                   ],
