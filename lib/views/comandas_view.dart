@@ -9,6 +9,7 @@ import '../models/dish.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/dish_card.dart';
 import '../widgets/order_summary.dart';
+import 'mesero_login_view.dart';
 
 class ComandasView extends StatefulWidget {
   final String? waiterId;
@@ -1138,6 +1139,44 @@ class _ComandasViewState extends State<ComandasView> {
           IconButton(
             icon: const Icon(Icons.table_restaurant),
             onPressed: _showTableSelectionDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Cerrar sesión',
+            onPressed: () async {
+              final ok = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: const Color(0xFFFAF1DE),
+                  title: const Text('Cerrar sesión',
+                      style: TextStyle(color: Color(0xFF3D2E1A))),
+                  content: const Text(
+                      'Se cerrará la sesión del mesero y la tablet pedirá PIN al volver a abrir.',
+                      style: TextStyle(color: Color(0xFF7A6E5A))),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar',
+                          style: TextStyle(color: Color(0xFFA08F70))),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Cerrar sesión',
+                          style: TextStyle(color: Color(0xFFFF6D00))),
+                    ),
+                  ],
+                ),
+              );
+              if (ok == true && context.mounted) {
+                await clearRememberedMesero();
+                if (!context.mounted) return;
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MeseroLoginView()),
+                  (_) => false,
+                );
+              }
+            },
           ),
           if (!isPhone) const SizedBox(width: 16),
         ],

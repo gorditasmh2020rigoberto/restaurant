@@ -1,9 +1,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
 import '../utils/app_updater.dart';
 import 'comandas_view.dart';
+
+/// Llaves de persistencia para auto-login del mesero en este tablet.
+const _kRememberedPinKey = 'mesero_remembered_pin';
+const _kRememberedBranchKey = 'mesero_remembered_branch';
+
+/// Borra el "auto-login" persistido — se llama desde Cerrar sesión en Comandas.
+Future<void> clearRememberedMesero() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(_kRememberedPinKey);
+  await prefs.remove(_kRememberedBranchKey);
+}
 
 /// Lee el parámetro ?branch= del fragmento de la URL (hash routing).
 /// Ejemplo: /#/mesero?branch=Sucursal+1  →  "Sucursal 1"
@@ -38,11 +50,18 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
   final _pinController = TextEditingController();
   bool _loading = false;
   String? _error;
+  bool _rememberMe = true;
+  bool _autoLoginAttempted = false;
 
   @override
   void initState() {
     super.initState();
-    _applyBranch();
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    await _applyBranch();
+    await _tryAutoLogin();
   }
 
   /// Aplica la sucursal: primero del path, luego del query param de la URL.
@@ -51,6 +70,51 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
     if (branch != null && branch.isNotEmpty && branch != Globals.currentBranch) {
       await Globals.setBranch(branch);
       if (mounted) setState(() {});
+    }
+  }
+
+  /// Si en este tablet se guardó "Recordar mesero", intenta entrar
+  /// directo sin pedir PIN. Si las credenciales ya no son válidas, las
+  /// borra y deja la pantalla normal.
+  Future<void> _tryAutoLogin() async {
+    if (_autoLoginAttempted) return;
+    _autoLoginAttempted = true;
+    final prefs = await SharedPreferences.getInstance();
+    final savedPin = prefs.getString(_kRememberedPinKey);
+    final savedBranch = prefs.getString(_kRememberedBranchKey);
+    if (savedPin == null || savedPin.isEmpty) return;
+    if (savedBranch != null &&
+        savedBranch.isNotEmpty &&
+        savedBranch != Globals.currentBranch) {
+      // El tablet cambió de sucursal — pierde la sesión recordada.
+      await clearRememberedMesero();
+      return;
+    }
+    if (mounted) setState(() => _loading = true);
+    try {
+      final response = await _supabase
+          .from('waiters')
+          .select()
+          .eq('pin', savedPin)
+          .eq('branch_name', Globals.currentBranch)
+          .maybeSingle();
+      if (!mounted) return;
+      if (response != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (_) =>
+                  ComandasView(waiterId: response['id'].toString())),
+        );
+        return;
+      } else {
+        // PIN inválido (mesero borrado, PIN cambiado, etc.).
+        await clearRememberedMesero();
+      }
+    } catch (_) {
+      // Sin red u otro error — no auto-login, deja al usuario teclear.
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -73,6 +137,14 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
           .maybeSingle();
       if (!mounted) return;
       if (response != null) {
+        if (_rememberMe) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(_kRememberedPinKey, pin);
+          await prefs.setString(
+              _kRememberedBranchKey, Globals.currentBranch);
+        } else {
+          await clearRememberedMesero();
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -167,7 +239,29 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                   ),
                   onSubmitted: (_) => _enter(),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
+                // Recordar mesero en este tablet (kiosko)
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _rememberMe,
+                      onChanged: (v) =>
+                          setState(() => _rememberMe = v ?? true),
+                      activeColor: const Color(0xFFFF6D00),
+                      checkColor: const Color(0xFFFAF1DE),
+                      side: const BorderSide(
+                          color: Color(0xFFA08F70), width: 1.5),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        'Recordar este mesero en esta tablet\n(abre directo al prender)',
+                        style: TextStyle(
+                            color: Color(0xFFA08F70), fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
                   height: 56,
