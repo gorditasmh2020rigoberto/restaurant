@@ -1,0 +1,53 @@
+name: Build Mesero APK
+
+# Se ejecuta:
+# - manualmente desde Actions → Run workflow
+# - en push a main que toque android/ o lib/main.dart o lib/views/comandas_view.dart
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'lib/main.dart'
+      - 'lib/views/comandas_view.dart'
+      - 'lib/views/mesero_login_view.dart'
+      - 'pubspec.yaml'
+      - '.github/workflows/build-mesero-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Build APK release (kiosko mesero)
+        run: flutter build apk --release --dart-define=KIOSKO_MESERO=true
+
+      - name: Rename APK
+        run: |
+          mkdir -p artifacts
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             artifacts/gorditas-mesero.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: gorditas-mesero-apk
+          path: artifacts/gorditas-mesero.apk
+          retention-days: 30
