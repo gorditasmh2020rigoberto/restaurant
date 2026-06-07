@@ -124,6 +124,50 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
     super.dispose();
   }
 
+  /// Diálogo para que el dueño/admin elija qué sucursal usa este tablet.
+  /// La selección persiste en SharedPreferences (vía Globals.setBranch),
+  /// así que solo se hace una vez por tablet.
+  Future<void> _showBranchPicker() async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Text('Sucursal de este tablet',
+            style: TextStyle(color: Color(0xFF3D2E1A))),
+        children: [
+          for (final b in Globals.branches)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, b),
+              child: Row(
+                children: [
+                  Icon(
+                    b == Globals.currentBranch
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
+                    color: const Color(0xFFFF6D00),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(b,
+                      style: const TextStyle(
+                          color: Color(0xFF3D2E1A),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+    if (selected != null && selected != Globals.currentBranch) {
+      // Cambia la sucursal y borra cualquier mesero "recordado" anterior
+      // (sería de la sucursal vieja).
+      await Globals.setBranch(selected);
+      await clearRememberedMesero();
+      if (mounted) setState(() => _error = null);
+    }
+  }
+
   Future<void> _enter() async {
     final pin = _pinController.text.trim();
     if (pin.isEmpty) return;
@@ -192,18 +236,30 @@ class _MeseroLoginViewState extends State<MeseroLoginView> {
                       color: Color(0xFFFF6D00)),
                 ),
                 const SizedBox(height: 6),
-                // Sucursal leída de la URL (o del dispositivo)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.store, color: Color(0xFFFF6D00), size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      Globals.currentBranch,
-                      style: const TextStyle(
-                          color: Color(0xFFA08F70), fontSize: 14),
+                // Sucursal — tappable para cambiar en este tablet.
+                InkWell(
+                  onTap: _showBranchPicker,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.store,
+                            color: Color(0xFFFF6D00), size: 16),
+                        const SizedBox(width: 6),
+                        Text(
+                          Globals.currentBranch,
+                          style: const TextStyle(
+                              color: Color(0xFFA08F70), fontSize: 14),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_drop_down,
+                            color: Color(0xFFA08F70), size: 18),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 40),
 
