@@ -43,7 +43,10 @@ class _ScrollableWithDownHintState extends State<_ScrollableWithDownHint>
     with SingleTickerProviderStateMixin {
   final ScrollController _ctrl = ScrollController();
   late final AnimationController _anim;
-  bool _hasOverflow = false;
+  // Asumir overflow al inicio para que la flecha esté visible mientras se
+  // mide el contenido. Si después se detecta que cabe sin scrollear, se
+  // oculta.
+  bool _hasOverflow = true;
   bool _atBottom = false;
 
   @override
@@ -54,14 +57,20 @@ class _ScrollableWithDownHintState extends State<_ScrollableWithDownHint>
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
     _ctrl.addListener(_onScroll);
+    // Reintentar varias veces porque el Wrap puede tardar 1-2 frames en
+    // calcular su altura final.
     WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 50), _onScroll);
+      Future.delayed(const Duration(milliseconds: 200), _onScroll);
+    });
   }
 
   void _onScroll() {
-    if (!_ctrl.hasClients) return;
+    if (!mounted || !_ctrl.hasClients) return;
     final pos = _ctrl.position;
     final overflow = pos.maxScrollExtent > 0;
-    final atBottom = !overflow || pos.pixels >= pos.maxScrollExtent - 4;
+    final atBottom = overflow && pos.pixels >= pos.maxScrollExtent - 4;
     if (overflow != _hasOverflow || atBottom != _atBottom) {
       setState(() {
         _hasOverflow = overflow;
