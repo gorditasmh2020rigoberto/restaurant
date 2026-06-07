@@ -441,7 +441,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFFAF1DE)),
+                                  color: Color(0xFF5C4A36)),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
