@@ -5,7 +5,7 @@ import 'dart:convert';
 
 class Globals {
   static String currentBranch = 'Sucursal Maravillas';
-  static List<String> branches = ['Sucursal Maravillas'];
+  static List<String> branches = ['Sucursal Maravillas', 'Sucursal Pocitos'];
   static bool splitKitchenMode = false;
   static String currentUser = 'Admin';
   
