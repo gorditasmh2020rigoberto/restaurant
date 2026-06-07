@@ -599,7 +599,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
-                    color: Color(0xFFFAF1DE),
+                    color: Color(0xFFFF6D00),
                   ),
                 ),
                 const SizedBox(width: 8),
