@@ -36,6 +36,9 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Generar íconos del launcher con el logo de gorditas
+        run: dart run flutter_launcher_icons
+
       - name: Build APK release (kiosko mesero)
         run: flutter build apk --release --dart-define=KIOSKO_MESERO=true
 
