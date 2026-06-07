@@ -4,20 +4,20 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:convert';
 
 class Globals {
-  static String currentBranch = 'Sucursal 1';
-  static List<String> branches = ['Sucursal 1', 'Sucursal 2'];
+  static String currentBranch = 'Sucursal Maravillas';
+  static List<String> branches = ['Sucursal Maravillas'];
   static bool splitKitchenMode = false;
   static String currentUser = 'Admin';
   
   static Future<void> loadBranch() async {
     final prefs = await SharedPreferences.getInstance();
-    currentBranch = prefs.getString('restaurant_branch') ?? 'Sucursal 1';
-    
+    currentBranch = prefs.getString('restaurant_branch') ?? 'Sucursal Maravillas';
+
     // Try to load branches list and split mode from Supabase admin_settings
     try {
       final supabase = Supabase.instance.client;
       final settings = await supabase.from('admin_settings').select('setting_key, setting_value');
-      
+
       for (var setting in settings) {
         if (setting['setting_key'] == 'branches_list') {
           branches = List<String>.from(jsonDecode(setting['setting_value']));
@@ -30,6 +30,14 @@ class Globals {
       }
     } catch (e) {
       print('Error loading admin settings: $e');
+    }
+
+    // Si la sucursal guardada / default no está en la lista real cargada
+    // de Supabase, cambia automáticamente a la primera disponible para
+    // que el APK nunca arranque con una sucursal inválida tipo "Sucursal 1".
+    if (branches.isNotEmpty && !branches.contains(currentBranch)) {
+      currentBranch = branches.first;
+      await prefs.setString('restaurant_branch', currentBranch);
     }
   }
   
