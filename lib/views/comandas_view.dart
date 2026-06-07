@@ -1351,7 +1351,7 @@ class _ComandasViewState extends State<ComandasView> {
                 child: Text(
                   'Bebidas',
                   style: TextStyle(
-                    color: Color(0xFFFAF1DE),
+                    color: Color(0xFFE07A30),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1379,7 +1379,7 @@ class _ComandasViewState extends State<ComandasView> {
                         Text(
                           s.$2,
                           style: const TextStyle(
-                            color: Color(0xFFFAF1DE),
+                            color: Color(0xFF5C4A36),
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1456,7 +1456,7 @@ class _ComandasViewState extends State<ComandasView> {
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
-                    color: Color(0xFFFAF1DE),
+                    color: Color(0xFFFF6D00),
                   ),
                 ),
                 const SizedBox(width: 8),
