@@ -12,28 +12,29 @@ void main() async {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjYXFvbG1hY3FoaGd0amRndmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDExMDIsImV4cCI6MjA4OTI3NzEwMn0.9TS8QZ5ZWG1MOct4nif0yiTW_bq_qbgAGbTjTle1_fk',
   );
 
-  const conCarne = [
-    'Bistec',
-    'Buche',
-    'Chicharrón prensado verde',
-    'Chicharrón prensado rojo',
-    'Chicharrón prensado morita',
-    'Duro',
-    'Costilla',
-    'Mole',
-    'Lengua',
-    'Picadillo',
-    'Tinga',
-    'Trocito',
+  // [nombre, spice_level (0..5)]
+  const conCarne = <List<dynamic>>[
+    ['Bistec', 1],
+    ['Buche', 2],
+    ['Chicharrón prensado verde', 3],
+    ['Chicharrón prensado rojo', 3],
+    ['Chicharrón prensado morita', 4],
+    ['Duro', 1],
+    ['Costilla', 2],
+    ['Mole', 1],
+    ['Lengua', 1],
+    ['Picadillo', 1],
+    ['Tinga', 2],
+    ['Trocito', 3],
   ];
-  const sinCarne = [
-    'Champiñones',
-    'Papas con chorizo',
-    'Papas a la mexicana',
-    'Nopales',
-    'Huevo en salsa',
-    'Rajas a la mexicana',
-    'Rajas con crema',
+  const sinCarne = <List<dynamic>>[
+    ['Champiñones', 0],
+    ['Papas con chorizo', 1],
+    ['Papas a la mexicana', 2],
+    ['Nopales', 1],
+    ['Huevo en salsa', 1],
+    ['Rajas a la mexicana', 3],
+    ['Rajas con crema', 0],
   ];
 
   print('Borrando todos los guisados existentes…');
@@ -44,24 +45,30 @@ void main() async {
 
   print('Insertando ${conCarne.length + sinCarne.length} guisados…\n');
   int ok = 0;
-  for (final name in conCarne) {
+  for (final entry in conCarne) {
+    final name = entry[0] as String;
+    final spice = entry[1] as int;
     await supabase.from('guisados').insert({
       'name': name,
       'with_meat': true,
       'available': true,
       'branch_name': null,
+      'spice_level': spice,
     });
-    print('  ✔ $name  (CON CARNE)');
+    print('  ✔ $name  (CON CARNE, picor $spice)');
     ok++;
   }
-  for (final name in sinCarne) {
+  for (final entry in sinCarne) {
+    final name = entry[0] as String;
+    final spice = entry[1] as int;
     await supabase.from('guisados').insert({
       'name': name,
       'with_meat': false,
       'available': true,
       'branch_name': null,
+      'spice_level': spice,
     });
-    print('  ✔ $name  (SIN CARNE)');
+    print('  ✔ $name  (SIN CARNE, picor $spice)');
     ok++;
   }
 
