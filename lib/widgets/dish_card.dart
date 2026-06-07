@@ -2908,10 +2908,54 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               ),
                             );
                           }
+                          // Si el sabor seleccionado ya dice "con carne" o
+                          // "sin carne" (p.ej. "½ Litro Guisado con Carne"),
+                          // forzamos el filtro y escondemos los tabs — la
+                          // decisión ya está tomada arriba en SABOR.
+                          bool? forcedMeat;
+                          for (final d in matchedByFlavor.values) {
+                            final n = d.name.toLowerCase();
+                            if (n.contains('sin carne')) {
+                              forcedMeat = false;
+                              break;
+                            }
+                            if (n.contains('con carne')) {
+                              forcedMeat = true;
+                              break;
+                            }
+                          }
+                          // Sincroniza el estado para que GUISADO DEL EXTRA
+                          // y la lógica downstream usen el filtro correcto.
+                          if (forcedMeat != null &&
+                              mixedGuisadoMeatFilter != forcedMeat) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              setDialogState(() {
+                                mixedGuisadoMeatFilter = forcedMeat!;
+                                // Limpiar selecciones que ya no aplican al
+                                // nuevo filtro forzado.
+                                final allowed = guisados
+                                    .where((g) =>
+                                        (g['with_meat'] as bool? ?? true) ==
+                                        forcedMeat)
+                                    .map((g) => g['name'] as String)
+                                    .toSet();
+                                selectedGuisados = selectedGuisados
+                                    .where(allowed.contains)
+                                    .toList();
+                                if (selectedGuisadoForExtra != null &&
+                                    !allowed
+                                        .contains(selectedGuisadoForExtra)) {
+                                  selectedGuisadoForExtra = null;
+                                }
+                              });
+                            });
+                          }
+                          final effectiveMeatFilter =
+                              forcedMeat ?? mixedGuisadoMeatFilter;
                           final activeList = guisados
                               .where((g) =>
                                   (g['with_meat'] as bool? ?? true) ==
-                                  mixedGuisadoMeatFilter)
+                                  effectiveMeatFilter)
                               .toList();
                           Widget filterTab(String label, bool value) {
                             final isActive = mixedGuisadoMeatFilter == value;
@@ -2955,14 +2999,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Row(
-                                children: [
-                                  filterTab('CON CARNE', true),
-                                  const SizedBox(width: 8),
-                                  filterTab('SIN CARNE', false),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
+                              if (forcedMeat == null) ...[
+                                Row(
+                                  children: [
+                                    filterTab('CON CARNE', true),
+                                    const SizedBox(width: 8),
+                                    filterTab('SIN CARNE', false),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                              ],
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 6,
