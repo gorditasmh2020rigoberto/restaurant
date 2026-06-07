@@ -502,7 +502,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
                       const SizedBox(width: 16),
                       Text(opt.$1,
                           style: const TextStyle(
-                              color: Color(0xFF5C4A36),
+                              color: Color(0xFFA08F70),
                               fontSize: 18,
                               fontWeight: FontWeight.w600)),
                       const Spacer(),

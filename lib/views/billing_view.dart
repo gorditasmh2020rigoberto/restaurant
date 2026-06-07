@@ -1060,7 +1060,7 @@ class _BillingViewState extends State<BillingView> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFFAF1DE),
+                color: Color(0xFF3D2E1A),
               ),
             ),
             const SizedBox(height: 4),
@@ -1095,7 +1095,7 @@ class _BillingViewState extends State<BillingView> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFFAF1DE),
+                color: Color(0xFF3D2E1A),
               ),
             ),
           ),

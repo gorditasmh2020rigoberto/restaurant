@@ -133,7 +133,7 @@ class _TableManagementViewState extends State<TableManagementView> {
                           style: TextStyle(
                               fontSize: screenWidth < 800 ? 24 : 32,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFFFAF1DE))),
+                              color: Color(0xFFFF6D00))),
                       const Text('Administra las mesas de tu restaurante',
                           style: TextStyle(fontSize: 16, color: Color(0xFFA08F70))),
                     ],
