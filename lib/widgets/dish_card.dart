@@ -1222,6 +1222,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     if (!context.mounted) return;
   }
   final Set<String> selectedExtraIds = {};
+  // Sub-selector cuando el extra es "Orden Extra - Guisado": el usuario debe
+  // elegir cuál guisado lleva el extra.
+  bool isGuisadoExtra(Dish d) =>
+      d.name.toLowerCase().contains('guisado');
+  final bool hasGuisadoExtra = extrasDisponibles.any(isGuisadoExtra);
+  String? selectedGuisadoForExtra;
+  bool guisadoExtraMeatFilter = true;
 
   // Cargar ambas variantes de gordita (Maíz / Harina) si aplica, para que el
   // diálogo permita cambiar la base sin cerrarse.
@@ -1665,57 +1672,27 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             ),
                           );
                         }
-                        return Stack(
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
-                              height: 340,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      filterTab('CON CARNE', true),
-                                      const SizedBox(width: 8),
-                                      filterTab('SIN CARNE', false),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      physics: const ClampingScrollPhysics(),
-                                      child: Wrap(
-                                        spacing: 6,
-                                        runSpacing: 6,
-                                        children: activeList.map(buildItem).toList(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            Row(
+                              children: [
+                                filterTab('CON CARNE', true),
+                                const SizedBox(width: 8),
+                                filterTab('SIN CARNE', false),
+                              ],
                             ),
-                            // Degradado inferior indicando que hay más contenido
-                            Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: IgnorePointer(
-                                child: Container(
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        const Color(0xFFFAF1DE).withValues(alpha: 0),
-                                        const Color(0xFFFAF1DE).withValues(alpha: 0.9),
-                                      ],
-                                    ),
-                                  ),
-                                  child: const Center(
-                                    child: Icon(Icons.keyboard_arrow_down,
-                                        color: const Color(0xFFA08F70), size: 20),
-                                  ),
-                                ),
+                            const SizedBox(height: 10),
+                            _ScrollableWithDownHint(
+                              height: 290,
+                              hintColor: const Color(0xFFFF6D00),
+                              fadeColor: const Color(0xFFFAF1DE),
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children:
+                                    activeList.map(buildItem).toList(),
                               ),
                             ),
                           ],
@@ -1780,11 +1757,166 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       onToggle: (id) => setDialogState(() {
                         if (selectedExtraIds.contains(id)) {
                           selectedExtraIds.remove(id);
+                          final d = extrasDisponibles
+                              .firstWhere((e) => e.id == id);
+                          if (isGuisadoExtra(d)) {
+                            selectedGuisadoForExtra = null;
+                          }
                         } else {
                           selectedExtraIds.add(id);
                         }
                       }),
                     ),
+                  // Sub-selector: cuando se elige una ÓRDEN EXTRA de guisado,
+                  // pedir cuál guisado lleva.
+                  if (showExtras &&
+                      hasGuisadoExtra &&
+                      guisados.isNotEmpty &&
+                      extrasDisponibles.any((e) =>
+                          isGuisadoExtra(e) &&
+                          selectedExtraIds.contains(e.id))) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFFE5DCC4)),
+                    const SizedBox(height: 8),
+                    const Text('GUISADO DEL EXTRA',
+                        style: TextStyle(
+                            color: Color(0xFF7A6E5A),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 8),
+                    _ScrollableWithDownHint(
+                      height: 240,
+                      hintColor: const Color(0xFFFF6D00),
+                      fadeColor: const Color(0xFFFAF1DE),
+                      child: Builder(builder: (_) {
+                        final itemW =
+                            (MediaQuery.of(ctx).size.width - 100) / 3;
+                        Widget buildItem(Map<String, dynamic> g) {
+                          final name = g['name'] as String;
+                          final isSel = selectedGuisadoForExtra == name;
+                          return SizedBox(
+                            width: itemW,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: () => setDialogState(() {
+                                selectedGuisadoForExtra = isSel ? null : name;
+                              }),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isSel
+                                      ? const Color(0xFFFF6D00)
+                                          .withValues(alpha: 0.18)
+                                      : const Color(0xFFFAF1DE),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isSel
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFFFF6D00)
+                                            .withValues(alpha: 0.35),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isSel
+                                          ? Icons.check_circle
+                                          : Icons.radio_button_unchecked,
+                                      size: 14,
+                                      color: const Color(0xFFFF6D00),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      name,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: const Color(0xFFFF6D00),
+                                        fontSize: 11,
+                                        fontWeight: isSel
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        final activeList = guisados
+                            .where((g) =>
+                                (g['with_meat'] as bool? ?? true) ==
+                                guisadoExtraMeatFilter)
+                            .toList();
+                        Widget filterTab(String label, bool value) {
+                          final isActive =
+                              guisadoExtraMeatFilter == value;
+                          return Expanded(
+                            child: InkWell(
+                              onTap: () => setDialogState(() {
+                                guisadoExtraMeatFilter = value;
+                              }),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? const Color(0xFFFF6D00)
+                                      : const Color(0xFF0F172A),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isActive
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFF334155),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: Text(
+                                  label,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: isActive
+                                        ? const Color(0xFFFAF1DE)
+                                        : Colors.white70,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              children: [
+                                filterTab('CON CARNE', true),
+                                const SizedBox(width: 8),
+                                filterTab('SIN CARNE', false),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: activeList.map(buildItem).toList(),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ],
                   // Total dinámico
                   const SizedBox(height: 12),
                   const Divider(color: Color(0xFFE5DCC4)),
@@ -1830,6 +1962,21 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     );
                     return;
                   }
+                  // Si se eligió "Orden Extra - Guisado", exigir guisado.
+                  if (showExtras &&
+                      hasGuisadoExtra &&
+                      extrasDisponibles.any((e) =>
+                          isGuisadoExtra(e) &&
+                          selectedExtraIds.contains(e.id)) &&
+                      selectedGuisadoForExtra == null) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text('Selecciona el guisado del extra'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.pop(ctx);
                   final comment = commentController.text.trim();
                   final extras = [
@@ -1851,7 +1998,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   for (final extraId in selectedExtraIds) {
                     final extra = extrasDisponibles
                         .firstWhere((e) => e.id == extraId);
-                    cart.addItem(extra);
+                    if (isGuisadoExtra(extra) &&
+                        selectedGuisadoForExtra != null) {
+                      cart.addItemWithGuisados(
+                          extra, [selectedGuisadoForExtra!]);
+                    } else {
+                      cart.addItem(extra);
+                    }
                   }
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
