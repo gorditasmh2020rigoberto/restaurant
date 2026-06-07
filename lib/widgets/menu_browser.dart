@@ -305,7 +305,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                 child: Text(
                   'Bebidas',
                   style: TextStyle(
-                    color: Color(0xFFFAF1DE),
+                    color: Color(0xFFE07A30),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -335,7 +335,7 @@ class _MenuBrowserState extends State<MenuBrowser> {
                         Text(
                           s.$2,
                           style: const TextStyle(
-                            color: Color(0xFFFAF1DE),
+                            color: Color(0xFF5C4A36),
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           ),
