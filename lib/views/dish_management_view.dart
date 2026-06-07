@@ -23,6 +23,10 @@ class _DishManagementViewState extends State<DishManagementView> {
     XFile? selectedImage;
     bool isUploading = false;
     bool requiresGuisado = isEditing ? (dish['requires_guisado'] ?? false) : false;
+    final piecesController = TextEditingController(
+        text: isEditing && dish['pieces_per_order'] != null
+            ? dish['pieces_per_order'].toString()
+            : '');
 
     final formKey = GlobalKey<FormState>();
 
@@ -152,6 +156,22 @@ class _DishManagementViewState extends State<DishManagementView> {
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
+                    controller: piecesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Piezas por orden',
+                      helperText: 'Opcional. Ej. 3 para "3 molletes por orden".',
+                      prefixIcon: Icon(Icons.format_list_numbered),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (v) {
+                      if (v == null || v.isEmpty) return null;
+                      final n = int.tryParse(v);
+                      if (n == null || n < 0) return 'Número entero ≥ 0';
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
                     initialValue: (dish?['max_time'] ?? 15).toString(),
                     decoration: const InputDecoration(
                       labelText: 'Tiempo Máximo de Preparación (Minutos)',
@@ -204,6 +224,8 @@ class _DishManagementViewState extends State<DishManagementView> {
                         }
 
                         // 2. Save/Update dish in database
+                        final piecesStr = piecesController.text.trim();
+                        final piecesParsed = int.tryParse(piecesStr);
                         final data = {
                           'name': nameController.text,
                           'description': descController.text,
@@ -213,6 +235,10 @@ class _DishManagementViewState extends State<DishManagementView> {
                           'category': category,
                           'max_time': int.tryParse((dish?['max_time'] ?? 15).toString()) ?? 15,
                           'requires_guisado': requiresGuisado,
+                          'pieces_per_order':
+                              (piecesParsed != null && piecesParsed > 0)
+                                  ? piecesParsed
+                                  : null,
                         };
 
                         if (isEditing) {
