@@ -20,13 +20,13 @@ const _drinkCategories = {
 bool _isPreparedDishes(Iterable<Dish> dishes) =>
     dishes.any((d) => !_drinkCategories.contains(d.category.toLowerCase()));
 
-/// Fila de 🌶 según spice_level (1..5). Devuelve un widget vacío si es 0.
+/// Fila de 🌶 según spice_level (1..3). Devuelve un widget vacío si es 0.
 Widget _chileRow(int level) {
   if (level <= 0) return const SizedBox.shrink();
   return Padding(
     padding: const EdgeInsets.only(top: 2),
     child: Text(
-      '🌶' * level.clamp(0, 5),
+      '🌶' * level.clamp(0, 3),
       style: const TextStyle(fontSize: 9, height: 1),
     ),
   );
