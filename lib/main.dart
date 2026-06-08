@@ -12,6 +12,7 @@ import 'views/comandas_view.dart';
 import 'views/kitchen_view.dart';
 import 'views/reports_view.dart';
 import 'views/mesero_login_view.dart';
+import 'widgets/subscription_gate.dart';
 
 /// Build-time flag: si la app se compila con --dart-define=KIOSKO_MESERO=true,
 /// arranca directo en la pantalla de mesero y deshabilita la selección de rol.
@@ -95,8 +96,11 @@ class RestaurantApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) =>
-            kKioskoMesero ? const MeseroLoginView() : const RoleSelectionView(),
+        '/': (context) => SubscriptionGate(
+              child: kKioskoMesero
+                  ? const MeseroLoginView()
+                  : const RoleSelectionView(),
+            ),
         '/client': (context) => const ClientHomeView(),
         '/admin': (context) => const AdminView(),
         '/comandas': (context) => const ComandasView(),
