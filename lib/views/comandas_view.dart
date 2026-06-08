@@ -473,6 +473,142 @@ class _ComandasViewState extends State<ComandasView> {
     );
   }
 
+  /// Cambia el mesero activo sin salir de Comandas. Se dispara con doble
+  /// tap sobre el chip del mesero arriba. Pide PIN y, si es válido y de la
+  /// misma sucursal, actualiza el waiter activo y persiste el PIN para
+  /// el auto-login del tablet.
+  Future<void> _showSwitchWaiterDialog() async {
+    final pinController = TextEditingController();
+    String? errorMsg;
+    bool loading = false;
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
+        Future<void> submit() async {
+          final pin = pinController.text.trim();
+          if (pin.isEmpty) return;
+          setS(() {
+            loading = true;
+            errorMsg = null;
+          });
+          try {
+            final row = await _supabase
+                .from('waiters')
+                .select()
+                .eq('pin', pin)
+                .eq('branch_name', Globals.currentBranch)
+                .maybeSingle();
+            if (row == null) {
+              setS(() {
+                loading = false;
+                errorMsg = 'PIN incorrecto';
+                pinController.clear();
+              });
+              return;
+            }
+            final newId = row['id'].toString();
+            // Persistir el PIN para que el "Recordar mesero" del tablet
+            // ahora apunte a este nuevo mesero al reiniciar.
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('mesero_remembered_pin', pin);
+            await prefs.setString(
+                'mesero_remembered_branch', Globals.currentBranch);
+            if (!ctx.mounted) return;
+            Navigator.pop(ctx);
+            setState(() {
+              _selectedWaiterId = newId;
+            });
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Mesero cambiado a ${row['name']}'),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          } catch (e) {
+            setS(() {
+              loading = false;
+              errorMsg = 'Error: $e';
+            });
+          }
+        }
+
+        return AlertDialog(
+          backgroundColor: const Color(0xFFFAF1DE),
+          title: const Text('Cambiar de mesero',
+              style: TextStyle(color: Color(0xFF3D2E1A))),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Teclea el PIN del nuevo mesero',
+                style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: pinController,
+                autofocus: true,
+                obscureText: true,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 26,
+                    letterSpacing: 14,
+                    color: Color(0xFFFF6D00),
+                    fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: '● ● ● ●',
+                  hintStyle:
+                      const TextStyle(color: Color(0xFFE5DCC4), fontSize: 18),
+                  counterText: '',
+                  filled: true,
+                  fillColor: const Color(0xFFFAF1DE),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                        color: Color(0xFFFF6D00), width: 2),
+                  ),
+                  errorText: errorMsg,
+                ),
+                onSubmitted: (_) => submit(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: loading ? null : () => Navigator.pop(ctx),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Color(0xFFA08F70))),
+            ),
+            ElevatedButton(
+              onPressed: loading ? null : submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF6D00),
+                foregroundColor: const Color(0xFFFAF1DE),
+              ),
+              child: loading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Color(0xFFFAF1DE)),
+                    )
+                  : const Text('Entrar'),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
   void _showAddClientDialog(BuildContext context, CartProvider cart) {
     final controller = TextEditingController(text: 'Cliente ${cart.clients.length + 1}');
     showDialog(
@@ -1118,17 +1254,25 @@ class _ComandasViewState extends State<ComandasView> {
           if (!isPhone && _selectedWaiterId != null && _waiters.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-              child: Chip(
-                avatar: const Icon(Icons.person, size: 18, color: Color(0xFFFAF1DE)),
-                label: Text(
-                  _waiters.firstWhere(
-                    (w) => w['id'] == _selectedWaiterId,
-                    orElse: () => {'name': '...'}
-                  )['name'],
-                  style: const TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold),
+              child: GestureDetector(
+                onDoubleTap: _showSwitchWaiterDialog,
+                child: Tooltip(
+                  message: 'Doble tap para cambiar de mesero (con PIN)',
+                  child: Chip(
+                    avatar: const Icon(Icons.person,
+                        size: 18, color: Color(0xFFFAF1DE)),
+                    label: Text(
+                      _waiters.firstWhere(
+                          (w) => w['id'] == _selectedWaiterId,
+                          orElse: () => {'name': '...'})['name'],
+                      style: const TextStyle(
+                          color: Color(0xFFFAF1DE),
+                          fontWeight: FontWeight.bold),
+                    ),
+                    backgroundColor: const Color(0xFFFF6D00),
+                    side: BorderSide.none,
+                  ),
                 ),
-                backgroundColor: const Color(0xFFFF6D00),
-                side: BorderSide.none,
               ),
             ),
           IconButton(
