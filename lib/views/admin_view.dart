@@ -7,6 +7,7 @@ import 'dish_management_view.dart';
 import 'drinks_management_view.dart';
 import 'guisados_management_view.dart';
 import 'drink_flavors_management_view.dart';
+import 'subscriptions_management_view.dart';
 import 'waiter_management_view.dart';
 import 'table_management_view.dart';
 import 'security_management_view.dart';
@@ -150,6 +151,16 @@ class _AdminViewState extends State<AdminView> {
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
                       setState(() => _selectedIndex = 11);
+                      if (isDrawer) Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.verified_user, color: _selectedIndex == 12 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
+                    title: Text('Vigencia de Pago', style: TextStyle(color: _selectedIndex == 12 ? const Color(0xFFA08F70) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 12 ? FontWeight.bold : FontWeight.normal)),
+                    selected: _selectedIndex == 12,
+                    selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
+                    onTap: () {
+                      setState(() => _selectedIndex = 12);
                       if (isDrawer) Navigator.pop(context);
                     },
                   ),
@@ -335,6 +346,7 @@ class _AdminViewState extends State<AdminView> {
       9: 'Nómina',
       10: 'Guisados',
       11: 'Sabores de Bebidas',
+      12: 'Vigencia de Pago',
     };
     return titles[_selectedIndex] ?? 'Administrador';
   }
@@ -441,6 +453,7 @@ class _AdminViewState extends State<AdminView> {
       case 9: return const PayrollView();
       case 10: return const GuisadosManagementView();
       case 11: return const DrinkFlavorsManagementView();
+      case 12: return const SubscriptionsManagementView();
       default: return _buildTablesDashboard();
     }
   }
