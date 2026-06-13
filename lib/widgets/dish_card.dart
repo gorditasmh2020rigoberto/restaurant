@@ -32,6 +32,23 @@ Widget _chileRow(int level) {
   );
 }
 
+/// Emoji que representa el tipo de carne de un guisado.
+/// Si no hay meat_type, devuelve string vacío.
+String meatEmoji(String? meatType) {
+  switch (meatType) {
+    case 'res':
+      return '🐄';
+    case 'cerdo':
+      return '🐷';
+    case 'pollo':
+      return '🐔';
+    case 'sin_carne':
+      return '🌽';
+    default:
+      return '';
+  }
+}
+
 /// Área scrollable de altura fija que muestra una flecha animada hacia abajo
 /// mientras quede contenido por debajo del viewport. La flecha desaparece al
 /// llegar al final.
@@ -1656,7 +1673,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      name,
+                                      '${meatEmoji(g['meat_type'] as String?)} $name'.trim(),
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -1881,7 +1898,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      name,
+                                      '${meatEmoji(g['meat_type'] as String?)} $name'.trim(),
                                       textAlign: TextAlign.center,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -3013,7 +3030,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        name,
+                                        '${meatEmoji(g['meat_type'] as String?)} $name'.trim(),
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -3253,7 +3270,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        name,
+                                        '${meatEmoji(g['meat_type'] as String?)} $name'.trim(),
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
