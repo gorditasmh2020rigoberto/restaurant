@@ -64,15 +64,18 @@ DeliveryFeeBreakdown calculateDeliveryFee({
 /// migrar esto a admin_settings.
 const Map<String, String> kBranchAddresses = {
   'Sucursal Maravillas':
-      'La Providencia 97-B, Esq. Siglo XXI, Aguascalientes',
+      'Providencia 97, 20900 Barranquillas, Aguascalientes',
   'Sucursal Pocitos': 'Garza Sada 108, Aguascalientes',
 };
 
-/// Coordenadas pre-calculadas (lat, lon) de cada sucursal — para evitar
+/// Coordenadas exactas (lat, lon) de cada sucursal — para evitar
 /// geocodear el origen en cada cálculo. Si una sucursal nueva no está
 /// aquí, se geocodifica al vuelo.
 const Map<String, ({double lat, double lon})> kBranchCoords = {
-  'Sucursal Maravillas': (lat: 21.8853, lon: -102.2916),
+  // Providencia 97, Barranquillas, Aguascalientes (verificado en Google Maps).
+  'Sucursal Maravillas': (lat: 21.9501178, lon: -102.3191384),
+  // ⚠️ Pendiente: coordenadas exactas de Pocitos. Si no están en el
+  // mapa precargado, la app las geocodifica al vuelo.
   'Sucursal Pocitos': (lat: 21.8830, lon: -102.2540),
 };
 
