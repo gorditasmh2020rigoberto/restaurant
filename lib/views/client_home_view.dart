@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
+import '../services/delivery_fee.dart';
+import '../widgets/delivery_fee_calculator.dart';
 import 'client_menu_view.dart';
 
 class ClientHomeView extends StatefulWidget {
@@ -165,14 +167,16 @@ class _ClientHomeViewState extends State<ClientHomeView> {
     );
     final addressCtrl = TextEditingController(text: savedAddress);
     final phoneCtrl = TextEditingController(text: savedPhone);
+    DeliveryFeeBreakdown? deliveryFee;
 
     if (!mounted) return;
 
     await showDialog<void>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Servicio a Domicilio'),
-        content: SingleChildScrollView(
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setS) {
+        return AlertDialog(
+          title: const Text('Servicio a Domicilio'),
+          content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -196,6 +200,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                 textCapitalization: TextCapitalization.sentences,
                 minLines: 1,
                 maxLines: 3,
+                onChanged: (_) => setS(() {}),
                 decoration: const InputDecoration(
                   labelText: 'Dirección de entrega',
                   prefixIcon: Icon(Icons.location_on),
@@ -210,6 +215,11 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                   labelText: 'Teléfono (opcional)',
                   prefixIcon: Icon(Icons.phone),
                 ),
+              ),
+              const SizedBox(height: 16),
+              DeliveryFeeCalculator(
+                destinationAddress: addressCtrl.text,
+                onChanged: (b) => deliveryFee = b,
               ),
             ],
           ),
@@ -235,6 +245,12 @@ class _ClientHomeViewState extends State<ClientHomeView> {
               await prefs.setString('delivery_name', name);
               await prefs.setString('delivery_address', address);
               await prefs.setString('delivery_phone', phone);
+              final feeTotal = deliveryFee?.total ?? 0;
+              if (feeTotal > 0) {
+                await prefs.setDouble('delivery_fee', feeTotal);
+              } else {
+                await prefs.remove('delivery_fee');
+              }
               if (!ctx.mounted) return;
               Navigator.pop(ctx);
               // Reflejar el nombre en el campo principal
@@ -253,7 +269,8 @@ class _ClientHomeViewState extends State<ClientHomeView> {
             child: const Text('Continuar'),
           ),
         ],
-      ),
+        );
+      }),
     );
     nameCtrl.dispose();
     addressCtrl.dispose();
