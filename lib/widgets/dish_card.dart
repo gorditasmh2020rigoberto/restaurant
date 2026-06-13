@@ -2419,8 +2419,18 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         // Enmoladas: solo cuando hay exactamente ese sabor seleccionado
         final selectedIsEnmolada = selectedFlavors.length == 1 &&
             selectedFlavors.first.toLowerCase().contains('enmolad');
-        final anyRequiresGuisado =
+        // El sabor seleccionado pide guisado obligatorio.
+        final selectedRequiresGuisado =
             matchedByFlavor.values.any((d) => d.requiresGuisado);
+        // Cualquier variante de la categoría pide guisado (p.ej. en Molletes
+        // la variante "con Guisado" lo requiere aunque haya otros sabores).
+        // Mostramos la sección GUISADO siempre que esto sea cierto, así el
+        // mesero ve las opciones desde el inicio. La obligatoriedad sigue
+        // sujeta a selectedRequiresGuisado (lógica de canAdd).
+        final categoryHasGuisadoVariant =
+            dishes.any((d) => d.requiresGuisado);
+        final anyRequiresGuisado =
+            selectedRequiresGuisado || categoryHasGuisadoVariant;
 
         // El sabor "Chilaquiles" (p.ej. dentro de Molletes) exige elegir
         // salsa: 1 obligatoria, máx. 2.
@@ -2442,7 +2452,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
             (!needsPiezas || selectedPiezasLoDulce != null) &&
-            (!anyRequiresGuisado || selectedGuisados.isNotEmpty) &&
+            // Solo es obligatorio elegir guisado cuando el sabor SELECCIONADO
+            // lo requiere (no cuando solo es opcional en la categoría).
+            (!selectedRequiresGuisado || selectedGuisados.isNotEmpty) &&
             (!hasChilaquilFlavor || selectedSalsasChilaquil.isNotEmpty) &&
             // Si seleccionaron un extra de guisado, deben elegir cuál.
             (!extrasDisponibles.any((e) =>
