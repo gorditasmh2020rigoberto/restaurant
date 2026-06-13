@@ -2425,16 +2425,22 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         // Enmoladas: solo cuando hay exactamente ese sabor seleccionado
         final selectedIsEnmolada = selectedFlavors.length == 1 &&
             selectedFlavors.first.toLowerCase().contains('enmolad');
-        // La sección GUISADO se muestra cuando el sabor seleccionado tiene
-        // alguna variante (de cualquier tamaño) que requiere guisado, así
-        // aparece desde que se elige el sabor, sin necesitar elegir tamaño
-        // primero. Para sabores que no llevan guisado (Naturales,
-        // Chilaquiles, Arrachera) no se muestra.
-        final selectedRequiresGuisado = selectedFlavors.isNotEmpty &&
-            dishes.any((d) {
-              final dFlavor = _extractFlavor(d.name, categoryPrefix);
-              return d.requiresGuisado && selectedFlavors.contains(dFlavor);
-            });
+        // La sección GUISADO se muestra cuando el sabor seleccionado lo
+        // requiere. Usamos dos rutas para detectarlo:
+        //   1) El dish ya emparejado por sabor+tamaño (matchedByFlavor).
+        //   2) Si aún no hay tamaño elegido, comparar por nombre del sabor
+        //      contra los dishes — así aparece desde que se elige el sabor.
+        // Para sabores que no llevan guisado (Naturales, Chilaquiles,
+        // Arrachera) sigue sin aparecer.
+        final selectedRequiresGuisado =
+            matchedByFlavor.values.any((d) => d.requiresGuisado) ||
+                (selectedFlavors.isNotEmpty &&
+                    dishes.any((d) {
+                      final dFlavor =
+                          _extractFlavor(d.name, categoryPrefix);
+                      return d.requiresGuisado &&
+                          selectedFlavors.contains(dFlavor);
+                    }));
         final anyRequiresGuisado = selectedRequiresGuisado;
 
         // El sabor "Chilaquiles" (p.ej. dentro de Molletes) exige elegir
