@@ -1692,14 +1692,17 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
+                                  // Tabs CON CARNE / SIN CARNE: ambos en
+                                  // fondo claro con texto naranja/taupe —
+                                  // nada de blanco sobre dark navy.
                                   color: isActive
-                                      ? const Color(0xFFFF6D00)
-                                      : const Color(0xFF0F172A),
+                                      ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                      : const Color(0xFFFAF1DE),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: isActive
                                         ? const Color(0xFFFF6D00)
-                                        : const Color(0xFF334155),
+                                        : const Color(0xFFE5DCC4),
                                     width: 1.5,
                                   ),
                                 ),
@@ -1708,8 +1711,8 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: isActive
-                                        ? const Color(0xFFFAF1DE)
-                                        : Colors.white70,
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFFA08F70),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 0.5,
@@ -1915,14 +1918,17 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 10),
                                 decoration: BoxDecoration(
+                                  // Tabs CON CARNE / SIN CARNE: ambos en
+                                  // fondo claro con texto naranja/taupe —
+                                  // nada de blanco sobre dark navy.
                                   color: isActive
-                                      ? const Color(0xFFFF6D00)
-                                      : const Color(0xFF0F172A),
+                                      ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
+                                      : const Color(0xFFFAF1DE),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: isActive
                                         ? const Color(0xFFFF6D00)
-                                        : const Color(0xFF334155),
+                                        : const Color(0xFFE5DCC4),
                                     width: 1.5,
                                   ),
                                 ),
@@ -1931,8 +1937,8 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: isActive
-                                        ? const Color(0xFFFAF1DE)
-                                        : Colors.white70,
+                                        ? const Color(0xFFFF6D00)
+                                        : const Color(0xFFA08F70),
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 0.5,
@@ -3855,17 +3861,20 @@ class _ToggleOption extends StatelessWidget {
   Widget build(BuildContext context) {
     const orange = Color(0xFFFF6D00);
     const cream = Color(0xFFFAF1DE);
+    // Texto siempre en colores oscuros / naranja, NUNCA blanco. El estado
+    // seleccionado se diferencia con fondo naranja claro (alpha) + border
+    // naranja sólido + bold, no con texto cream sobre fondo sólido.
     final effectiveColor = enabled
-        ? (value ? orange : cream)
+        ? (value ? orange.withValues(alpha: 0.15) : cream)
         : const Color(0xFFEDE3CE);
     final borderColor = enabled
         ? (value ? orange : orange.withValues(alpha: 0.35))
         : const Color(0xFFCFC7B2);
     final contentColor = enabled
-        ? (value ? Color(0xFFFAF1DE) : orange)
+        ? orange
         : const Color(0xFFB0A992);
     final priceColor = enabled
-        ? (value ? Color(0xFFFAF1DE).withValues(alpha: 0.9) : orange.withValues(alpha: 0.75))
+        ? (value ? orange : orange.withValues(alpha: 0.75))
         : const Color(0xFFB0A992);
 
     return GestureDetector(
