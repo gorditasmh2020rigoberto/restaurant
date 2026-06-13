@@ -839,8 +839,9 @@ class _OrderTicketState extends State<_OrderTicket> {
                                         Text(
                                           subtitleLine2,
                                           style: TextStyle(
-                                            fontSize: 12,
-                                            color: isReady ? Colors.grey : Color(0xFFA08F70),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: isReady ? Colors.grey : const Color(0xFF3D2E1A),
                                           ),
                                         ),
                                     ],
