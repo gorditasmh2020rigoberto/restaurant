@@ -9,6 +9,21 @@ class GuisadosManagementView extends StatefulWidget {
   State<GuisadosManagementView> createState() => _GuisadosManagementViewState();
 }
 
+String _meatEmojiForType(String? type) {
+  switch (type) {
+    case 'res':
+      return '🐄 ';
+    case 'cerdo':
+      return '🐷 ';
+    case 'pollo':
+      return '🐔 ';
+    case 'sin_carne':
+      return '🌽 ';
+    default:
+      return '';
+  }
+}
+
 class _GuisadosManagementViewState extends State<GuisadosManagementView> {
   final _supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _guisados = [];
@@ -429,7 +444,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      g['name'] as String,
+                                      _meatEmojiForType(g['meat_type'] as String?) + (g['name'] as String),
                                       style: TextStyle(
                                         color: available
                                             ? const Color(0xFFA08F70)
