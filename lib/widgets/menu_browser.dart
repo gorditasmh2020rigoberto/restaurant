@@ -133,8 +133,8 @@ class _MenuBrowserState extends State<MenuBrowser> {
     }
     rawCats.removeWhere(_isPlatillosCategory);
     const pinned = [
-      'gorditas',
       'drink',
+      'gorditas',
       'chilaquiles',
       'huevos',
       'molletes',
@@ -672,19 +672,39 @@ class _MenuBrowserState extends State<MenuBrowser> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
-                child: GridView.builder(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  physics: const BouncingScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    mainAxisExtent: 96,
-                  ),
-                  itemCount: _availableCategories.length,
-                  itemBuilder: (_, i) =>
-                      _buildCategoryBlock(_availableCategories[i]),
-                ),
+                child: Builder(builder: (_) {
+                  const cols = 3;
+                  final realCount = _availableCategories.length;
+                  final paddedCount =
+                      ((realCount + cols - 1) ~/ cols) * cols;
+                  return GridView.builder(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      mainAxisExtent: 96,
+                    ),
+                    itemCount: paddedCount,
+                    itemBuilder: (_, i) {
+                      if (i >= realCount) {
+                        // Placeholder vacío para rellenar la última fila.
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFAF1DE)
+                                .withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color: const Color(0xFFE5DCC4), width: 1.5),
+                          ),
+                        );
+                      }
+                      return _buildCategoryBlock(_availableCategories[i]);
+                    },
+                  );
+                }),
               ),
             ),
           ),

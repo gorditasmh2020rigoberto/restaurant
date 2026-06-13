@@ -331,8 +331,8 @@ class _ComandasViewState extends State<ComandasView> {
     rawCats.removeWhere(_isPlatillosCategory); // ocultar categoría Platillos (todas las variantes)
     // Orden fijo solicitado para las primeras categorías
     const pinned = [
-      'gorditas',
       'drink',
+      'gorditas',
       'chilaquiles',
       'huevos',
       'molletes',
@@ -1449,19 +1449,30 @@ class _ComandasViewState extends State<ComandasView> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
-                child: GridView.builder(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  physics: const BouncingScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    mainAxisExtent: 96,
-                  ),
-                  itemCount: _availableCategories.length,
-                  itemBuilder: (_, i) =>
-                      _buildCategoryBlock(_availableCategories[i]),
-                ),
+                child: Builder(builder: (_) {
+                  // Rellenamos la última fila con placeholders blancos
+                  // para que la cuadrícula 3xN quede pareja (sin huecos).
+                  const cols = 3;
+                  final realCount = _availableCategories.length;
+                  final paddedCount =
+                      ((realCount + cols - 1) ~/ cols) * cols;
+                  return GridView.builder(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                      mainAxisExtent: 96,
+                    ),
+                    itemCount: paddedCount,
+                    itemBuilder: (_, i) {
+                      if (i >= realCount) return const _EmptyCategorySlot();
+                      return _buildCategoryBlock(_availableCategories[i]);
+                    },
+                  );
+                }),
               ),
             ),
           ),
@@ -1746,3 +1757,20 @@ class _ComandasViewState extends State<ComandasView> {
   }
 }
 
+
+/// Placeholder vacío para rellenar la última fila de la cuadrícula de
+/// categorías, así no quedan huecos cuando el total no es múltiplo de 3.
+class _EmptyCategorySlot extends StatelessWidget {
+  const _EmptyCategorySlot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF1DE).withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5DCC4), width: 1.5),
+      ),
+    );
+  }
+}
