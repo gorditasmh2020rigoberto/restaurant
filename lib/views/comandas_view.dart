@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../models/dish.dart';
 import '../providers/cart_provider.dart';
+import '../services/delivery_fee.dart';
+import '../widgets/delivery_fee_calculator.dart';
 import '../widgets/dish_card.dart';
 import '../widgets/order_summary.dart';
 import 'mesero_login_view.dart';
@@ -936,6 +938,9 @@ class _ComandasViewState extends State<ComandasView> {
     String tempOrderType = _selectedOrderType;
     String? tempCustomerName = _customerName;
     final nameController = TextEditingController(text: _customerName);
+    final deliveryAddressController = TextEditingController();
+    final deliveryPhoneController = TextEditingController();
+    DeliveryFeeBreakdown? deliveryFee;
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -1072,29 +1077,64 @@ class _ComandasViewState extends State<ComandasView> {
                               );
                             },
                           )
-                        : Padding(
-                            padding: const EdgeInsets.all(32.0),
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.all(20.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   tempOrderType == 'takeout' ? Icons.takeout_dining : Icons.delivery_dining,
-                                  size: 64,
+                                  size: 56,
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 16),
                                 TextField(
                                   controller: nameController,
-                                  decoration: InputDecoration(
-                                    labelText: tempOrderType == 'takeout' ? 'Nombre del Cliente' : 'Nombre/Dirección del Cliente',
-                                    border: const OutlineInputBorder(),
-                                    prefixIcon: const Icon(Icons.person),
+                                  textCapitalization: TextCapitalization.words,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Nombre del Cliente',
+                                    border: OutlineInputBorder(),
+                                    prefixIcon: Icon(Icons.person),
                                   ),
                                   onChanged: (value) {
                                     tempCustomerName = value;
                                   },
                                 ),
-                                const SizedBox(height: 24),
+                                if (tempOrderType == 'delivery') ...[
+                                  const SizedBox(height: 12),
+                                  TextField(
+                                    controller: deliveryAddressController,
+                                    textCapitalization:
+                                        TextCapitalization.sentences,
+                                    minLines: 1,
+                                    maxLines: 2,
+                                    onChanged: (_) => setStateDialog(() {}),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Dirección de entrega',
+                                      border: OutlineInputBorder(),
+                                      prefixIcon: Icon(Icons.location_on),
+                                      hintText:
+                                          'Calle, número, colonia, referencias',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextField(
+                                    controller: deliveryPhoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Teléfono',
+                                      border: OutlineInputBorder(),
+                                      prefixIcon: Icon(Icons.phone),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  DeliveryFeeCalculator(
+                                    destinationAddress:
+                                        deliveryAddressController.text,
+                                    onChanged: (b) => deliveryFee = b,
+                                  ),
+                                ],
+                                const SizedBox(height: 20),
                                 ElevatedButton(
                                   onPressed: () {
                                     if (tempCustomerName == null || tempCustomerName!.trim().isEmpty) {
@@ -1103,9 +1143,47 @@ class _ComandasViewState extends State<ComandasView> {
                                       );
                                       return;
                                     }
+                                    if (tempOrderType == 'delivery' &&
+                                        deliveryAddressController.text
+                                            .trim()
+                                            .isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Ingresa la dirección de entrega')),
+                                      );
+                                      return;
+                                    }
+                                    // Para delivery, empaquetamos
+                                    // nombre + dirección + tel + cuota
+                                    // en el customer_name para que se
+                                    // muestre en cocina (que parsea
+                                    // "DIR:", "TEL:" en admin_view).
+                                    String finalCustomerName =
+                                        tempCustomerName!.trim();
+                                    if (tempOrderType == 'delivery') {
+                                      final addr = deliveryAddressController
+                                          .text
+                                          .trim();
+                                      final tel = deliveryPhoneController
+                                          .text
+                                          .trim();
+                                      final feeTotal =
+                                          deliveryFee?.total ?? 0;
+                                      finalCustomerName =
+                                          '$finalCustomerName - DIR: $addr';
+                                      if (tel.isNotEmpty) {
+                                        finalCustomerName +=
+                                            ' - TEL: $tel';
+                                      }
+                                      if (feeTotal > 0) {
+                                        finalCustomerName +=
+                                            ' - ENVÍO: \$${feeTotal.toStringAsFixed(0)}';
+                                      }
+                                    }
                                     setState(() {
                                       _selectedOrderType = tempOrderType;
-                                      _customerName = tempCustomerName;
+                                      _customerName = finalCustomerName;
                                       _selectedTableId = null;
                                       _selectedTableNumber = null;
                                     });
