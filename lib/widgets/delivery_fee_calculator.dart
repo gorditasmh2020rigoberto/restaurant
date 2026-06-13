@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../globals.dart';
 import '../services/delivery_fee.dart';
+import '../services/geocoder.dart';
 
 /// Widget compacto que calcula la cuota de delivery FLASH a partir de:
 ///  - km (input)
@@ -40,6 +42,10 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
   late final TextEditingController _kmCarrCtrl;
   bool _rain = false;
   bool _holiday = false;
+  bool _autoCalcLoading = false;
+  String? _autoCalcError;
+  String? _lastAutoCalcAddress;
+  Timer? _autoCalcDebounce;
 
   @override
   void initState() {
@@ -53,13 +59,64 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
     _rain = widget.initialRain;
     _holiday = widget.initialHoliday;
     WidgetsBinding.instance.addPostFrameCallback((_) => _emit());
+    // Si ya venía con dirección, calcula automático.
+    _maybeAutoCalc(widget.destinationAddress);
+  }
+
+  @override
+  void didUpdateWidget(covariant DeliveryFeeCalculator old) {
+    super.didUpdateWidget(old);
+    if (old.destinationAddress != widget.destinationAddress) {
+      _maybeAutoCalc(widget.destinationAddress);
+    }
   }
 
   @override
   void dispose() {
+    _autoCalcDebounce?.cancel();
     _kmCtrl.dispose();
     _kmCarrCtrl.dispose();
     super.dispose();
+  }
+
+  /// Dispara cálculo automático de km con debounce de 1.2 s para no
+  /// pegarle a Nominatim mientras el usuario sigue tecleando.
+  void _maybeAutoCalc(String? address) {
+    _autoCalcDebounce?.cancel();
+    final addr = (address ?? '').trim();
+    if (addr.length < 8) return; // muy corto, no vale la pena
+    if (addr == _lastAutoCalcAddress) return; // ya calculado
+    _autoCalcDebounce = Timer(const Duration(milliseconds: 1200), () async {
+      await _autoCalcKm(addr);
+    });
+  }
+
+  Future<void> _autoCalcKm(String address) async {
+    final coords = kBranchCoords[Globals.currentBranch];
+    if (coords == null) return; // sucursal sin coords precalculadas
+    if (mounted) {
+      setState(() {
+        _autoCalcLoading = true;
+        _autoCalcError = null;
+      });
+    }
+    final km = await kmFromBranchTo(
+      branchLat: coords.lat,
+      branchLon: coords.lon,
+      destinationAddress: address,
+    );
+    if (!mounted) return;
+    setState(() {
+      _autoCalcLoading = false;
+      _lastAutoCalcAddress = address;
+      if (km == null) {
+        _autoCalcError = 'No se pudo ubicar la dirección — teclea km manual';
+      } else {
+        _kmCtrl.text = km.toString();
+        _autoCalcError = null;
+        _emit();
+      }
+    });
   }
 
   void _emit() {
@@ -125,6 +182,34 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
                 ),
               ),
               const Spacer(),
+              if (_autoCalcLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Color(0xFFFF6D00)),
+                  ),
+                )
+              else
+                TextButton.icon(
+                  onPressed: () {
+                    final addr = (widget.destinationAddress ?? '').trim();
+                    if (addr.isNotEmpty) {
+                      _lastAutoCalcAddress = null; // forzar
+                      _autoCalcKm(addr);
+                    }
+                  },
+                  icon: const Icon(Icons.refresh, size: 14),
+                  label: const Text('Calcular km'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFFF6D00),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 4),
+                    textStyle: const TextStyle(fontSize: 11),
+                  ),
+                ),
               TextButton.icon(
                 onPressed: _openMaps,
                 icon: const Icon(Icons.map, size: 16),
@@ -138,6 +223,17 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
               ),
             ],
           ),
+          if (_autoCalcError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                _autoCalcError!,
+                style: const TextStyle(
+                    color: Color(0xFFB7472A),
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic),
+              ),
+            ),
           const SizedBox(height: 8),
           Row(
             children: [
