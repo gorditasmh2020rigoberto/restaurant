@@ -136,6 +136,10 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
       text: isEditing ? guisado['name'] as String : '',
     );
     bool withMeat = isEditing ? (guisado['with_meat'] as bool? ?? true) : true;
+    String meatType = isEditing
+        ? (guisado['meat_type'] as String? ??
+            (withMeat ? 'res' : 'sin_carne'))
+        : 'res';
     int spiceLevel =
         isEditing ? (guisado['spice_level'] as int? ?? 0) : 0;
 
@@ -178,71 +182,61 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1)),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
                 children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => setS(() => withMeat = true),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                  for (final opt in const [
+                    ('res', '🐄', 'Res'),
+                    ('cerdo', '🐷', 'Cerdo'),
+                    ('pollo', '🐔', 'Pollo'),
+                    ('sin_carne', '🌽', 'Sin carne'),
+                  ])
+                    InkWell(
+                      onTap: () => setS(() {
+                        meatType = opt.$1;
+                        withMeat = opt.$1 != 'sin_carne';
+                      }),
+                      borderRadius: BorderRadius.circular(10),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 10),
                         decoration: BoxDecoration(
-                          color: withMeat
-                              ? const Color(0xFFFF6D00)
+                          color: meatType == opt.$1
+                              ? const Color(0xFFFF6D00).withValues(alpha: 0.15)
                               : const Color(0xFFFAF1DE),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: const Color(0xFFFF6D00),
-                            width: 1.5,
+                            color: meatType == opt.$1
+                                ? const Color(0xFFFF6D00)
+                                : const Color(0xFFE5DCC4),
+                            width: meatType == opt.$1 ? 2 : 1.5,
                           ),
                         ),
-                        child: Text(
-                          'CON CARNE',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: withMeat
-                                ? const Color(0xFFFAF1DE)
-                                : const Color(0xFFFF6D00),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(opt.$2,
+                                style: const TextStyle(fontSize: 18)),
+                            const SizedBox(width: 6),
+                            Text(
+                              opt.$3,
+                              style: TextStyle(
+                                color: meatType == opt.$1
+                                    ? const Color(0xFFFF6D00)
+                                    : const Color(0xFFA08F70),
+                                fontSize: 13,
+                                fontWeight: meatType == opt.$1
+                                    ? FontWeight.w800
+                                    : FontWeight.w600,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => setS(() => withMeat = false),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: !withMeat
-                              ? const Color(0xFFFF6D00)
-                              : const Color(0xFFFAF1DE),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: const Color(0xFFFF6D00),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Text(
-                          'SIN CARNE',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: !withMeat
-                                ? const Color(0xFFFAF1DE)
-                                : const Color(0xFFFF6D00),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 20),
@@ -317,6 +311,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                           ..._guisados[index],
                           'name': name,
                           'with_meat': withMeat,
+                          'meat_type': meatType,
                           'spice_level': spiceLevel,
                         };
                       }
@@ -324,6 +319,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                     await _supabase.from('guisados').update({
                       'name': name,
                       'with_meat': withMeat,
+                      'meat_type': meatType,
                       'spice_level': spiceLevel,
                     }).eq('id', guisado['id']);
                   } else {
@@ -334,6 +330,7 @@ class _GuisadosManagementViewState extends State<GuisadosManagementView> {
                           'branch_name': null,
                           'available': true,
                           'with_meat': withMeat,
+                          'meat_type': meatType,
                           'spice_level': spiceLevel,
                         })
                         .select()
