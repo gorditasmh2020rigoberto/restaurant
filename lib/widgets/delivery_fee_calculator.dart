@@ -225,13 +225,31 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
           ),
           if (_autoCalcError != null)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                _autoCalcError!,
-                style: const TextStyle(
-                    color: Color(0xFFB7472A),
-                    fontSize: 11,
-                    fontStyle: FontStyle.italic),
+              padding: const EdgeInsets.only(top: 6),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFB7472A).withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      color: const Color(0xFFB7472A).withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline,
+                        size: 14, color: Color(0xFFB7472A)),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'No se ubicó la dirección. Tap "Ver ruta" para abrir Google Maps y teclea los km manualmente.',
+                        style: const TextStyle(
+                            color: Color(0xFFB7472A),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           const SizedBox(height: 8),

@@ -14,46 +14,74 @@ class GeocodeResult {
   });
 }
 
+/// Genera varias variantes del query para intentar el geocoding.
+/// Nominatim no es muy bueno con direcciones residenciales mexicanas,
+/// así que probamos diferentes formatos hasta que uno acierte.
+List<String> _queryVariants(String address) {
+  var raw = address.trim();
+  // Asegura "Aguascalientes, México" al final
+  if (!raw.toLowerCase().contains('aguascalientes')) {
+    raw = '$raw, Aguascalientes';
+  }
+  if (!raw.toLowerCase().contains('méxico') &&
+      !raw.toLowerCase().contains('mexico')) {
+    raw = '$raw, México';
+  }
+  final variants = <String>[raw];
+
+  // Intentar separar "calle número" → "Calle Nombre N, Colonia, Agus, Mx"
+  final m = RegExp(r'^([a-záéíóúñü ]+?)\s+(\d+)\s+(.+)$',
+          caseSensitive: false)
+      .firstMatch(address.trim());
+  if (m != null) {
+    final street = m.group(1)!.trim();
+    final number = m.group(2)!.trim();
+    final rest = m.group(3)!.trim();
+    variants.add('Calle $street $number, $rest, Aguascalientes, México');
+    variants.add('$street $number, $rest, Aguascalientes, México');
+    variants.add('Avenida $street $number, $rest, Aguascalientes, México');
+    // Solo colonia (sin calle/número)
+    variants.add('$rest, Aguascalientes, México');
+  }
+  // Dedup conservando orden
+  final seen = <String>{};
+  return variants.where((v) => seen.add(v.toLowerCase())).toList();
+}
+
 /// Geocodifica una dirección usando Nominatim (OpenStreetMap, gratis).
-/// Devuelve null si no se encontró nada.
-///
-/// Notas:
-///   - Rate limit: ≤1 req/segundo. Aceptable para uso real (mesero teclea
-///     dirección y espera).
-///   - Sesgo regional: agregamos ", Aguascalientes, México" para mejorar
-///     precisión local.
+/// Intenta varias variantes del query para mejorar hit rate.
+/// Devuelve null si ninguna variante encontró nada.
 Future<GeocodeResult?> geocodeAddress(String address) async {
   if (address.trim().isEmpty) return null;
-  // Si ya incluye estado/país no lo duplicamos
-  String q = address.trim();
-  if (!q.toLowerCase().contains('aguascalientes')) {
-    q = '$q, Aguascalientes, México';
-  } else if (!q.toLowerCase().contains('méxico') &&
-      !q.toLowerCase().contains('mexico')) {
-    q = '$q, México';
+  final variants = _queryVariants(address);
+
+  for (final q in variants) {
+    try {
+      final uri = Uri.parse(
+        'https://nominatim.openstreetmap.org/search'
+        '?format=json&limit=1&countrycodes=mx&q=${Uri.encodeComponent(q)}',
+      );
+      final resp = await http.get(uri, headers: {
+        'User-Agent': 'GorditasMisHermanas/1.0 (delivery-fee-calc)',
+        'Accept': 'application/json',
+        'Accept-Language': 'es',
+      }).timeout(const Duration(seconds: 8));
+      if (resp.statusCode != 200) continue;
+      final list = jsonDecode(resp.body) as List;
+      if (list.isEmpty) continue;
+      final first = list.first as Map<String, dynamic>;
+      return GeocodeResult(
+        lat: double.parse(first['lat'].toString()),
+        lon: double.parse(first['lon'].toString()),
+        displayName: first['display_name']?.toString() ?? address,
+      );
+    } catch (_) {
+      // pasa a la siguiente variante
+    }
+    // Rate-limit cortés entre intentos
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
   }
-  try {
-    final uri = Uri.parse(
-      'https://nominatim.openstreetmap.org/search'
-      '?format=json&limit=1&q=${Uri.encodeComponent(q)}',
-    );
-    final resp = await http.get(uri, headers: {
-      // Nominatim pide identificar la app.
-      'User-Agent': 'GorditasMisHermanas/1.0 (delivery-fee-calc)',
-      'Accept': 'application/json',
-    }).timeout(const Duration(seconds: 8));
-    if (resp.statusCode != 200) return null;
-    final list = jsonDecode(resp.body) as List;
-    if (list.isEmpty) return null;
-    final first = list.first as Map<String, dynamic>;
-    return GeocodeResult(
-      lat: double.parse(first['lat'].toString()),
-      lon: double.parse(first['lon'].toString()),
-      displayName: first['display_name']?.toString() ?? address,
-    );
-  } catch (_) {
-    return null;
-  }
+  return null;
 }
 
 /// Distancia en kilómetros entre dos puntos (lat, lon) usando fórmula
