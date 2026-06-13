@@ -40,6 +40,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
     );
   }
 
+  // ignore: unused_element
   Future<void> _onDineInTap() async {
     if (nameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -312,23 +313,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
                   ),
-                  child: const Text('Para Llevar',
-                      style: TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: _onDineInTap,
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(56),
-                    side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2),
-                    foregroundColor: Theme.of(context).colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: const Text('Comer Aquí',
+                  child: const Text('To Go',
                       style: TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
