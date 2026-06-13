@@ -795,12 +795,9 @@ class _OrderTicketState extends State<_OrderTicket> {
                         final String subtitleLine1 = clientLabel;
                         final String? subtitleLine2 = !widget.isDrinksOnly ? extrasText : null;
 
-                        return InkWell(
-                          onTap: () => _toggleItemStatus(index, isReady),
-                          borderRadius: BorderRadius.circular(8),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
@@ -849,14 +846,8 @@ class _OrderTicketState extends State<_OrderTicket> {
                                     ],
                                   ),
                                 ),
-                                Checkbox(
-                                  value: isReady,
-                                  activeColor: Colors.green,
-                                  onChanged: (bool? value) => _toggleItemStatus(index, isReady),
-                                ),
                               ],
                             ),
-                          ),
                         );
                       },
                     ),
