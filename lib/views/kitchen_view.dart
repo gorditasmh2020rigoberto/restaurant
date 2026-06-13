@@ -808,7 +808,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
-                                    color: isReady ? Colors.green : Color(0xFFFAF1DE),
+                                    color: isReady ? Colors.green : const Color(0xFF3D2E1A),
                                   ),
                                 ),
                                 Expanded(
@@ -820,7 +820,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.w500,
-                                          color: isReady ? Colors.grey : Color(0xFFFAF1DE),
+                                          color: isReady ? Colors.grey : const Color(0xFF3D2E1A),
                                           decoration: isReady ? TextDecoration.lineThrough : null,
                                         ),
                                       ),
