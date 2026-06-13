@@ -14,27 +14,30 @@ void main() async {
 
   // [nombre, spice_level (0..3)]
   const conCarne = <List<dynamic>>[
-    ['Bistec', 1],
-    ['Buche', 2],
-    ['Chicharrón prensado verde', 2],
+    ['Bistec a la mexicana', 1],
+    ['Buche a la mexicana', 2],
     ['Chicharrón prensado rojo', 2],
-    ['Chicharrón prensado morita', 3],
-    ['Duro', 1],
-    ['Costilla', 2],
-    ['Mole', 1],
-    ['Lengua', 1],
+    ['Chicharrón prensado verde', 2],
+    ['Chicharrón prensado chile morita', 3],
+    ['Costillas en salsa verde', 2],
+    ['Lengua en salsa verde', 1],
     ['Picadillo', 1],
     ['Tinga', 2],
-    ['Trocito', 2],
+    ['Trocito en pasilla', 2],
   ];
   const sinCarne = <List<dynamic>>[
+    ['Arroz rojo', 0],
     ['Champiñones', 0],
     ['Papas con chorizo', 1],
-    ['Papas a la mexicana', 2],
-    ['Nopales', 1],
+    ['Frijoles adobados', 1],
+    ['Frijoles refritos', 0],
     ['Huevo en salsa', 1],
+    ['Papas', 1],
+    ['Mole rojo', 1],
+    ['Nopales', 1],
+    ['Duro', 1],
     ['Rajas a la mexicana', 3],
-    ['Rajas con crema', 0],
+    ['Rajas con crema y elote', 0],
   ];
 
   print('Borrando todos los guisados existentes…');
