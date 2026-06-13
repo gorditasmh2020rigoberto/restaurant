@@ -68,6 +68,14 @@ const Map<String, String> kBranchAddresses = {
   'Sucursal Pocitos': 'Garza Sada 108, Aguascalientes',
 };
 
+/// Coordenadas pre-calculadas (lat, lon) de cada sucursal — para evitar
+/// geocodear el origen en cada cálculo. Si una sucursal nueva no está
+/// aquí, se geocodifica al vuelo.
+const Map<String, ({double lat, double lon})> kBranchCoords = {
+  'Sucursal Maravillas': (lat: 21.8853, lon: -102.2916),
+  'Sucursal Pocitos': (lat: 21.8830, lon: -102.2540),
+};
+
 /// URL de Google Maps con ruta desde la sucursal al destino del cliente.
 /// Si no hay dirección de cliente, abre solo la sucursal.
 String buildMapsRouteUrl({
