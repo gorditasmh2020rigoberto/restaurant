@@ -1767,9 +1767,15 @@ class _EmptyCategorySlot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFFAF1DE).withValues(alpha: 0.7),
+        color: const Color(0xFFFAF1DE),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5DCC4), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.10),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
     );
   }
