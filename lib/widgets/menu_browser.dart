@@ -690,14 +690,19 @@ class _MenuBrowserState extends State<MenuBrowser> {
                     itemCount: paddedCount,
                     itemBuilder: (_, i) {
                       if (i >= realCount) {
-                        // Placeholder vacío para rellenar la última fila.
+                        // Placeholder sólido (mismo look que los demás cards)
+                        // para rellenar la última fila sin huecos.
                         return Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFAF1DE)
-                                .withValues(alpha: 0.7),
+                            color: const Color(0xFFFAF1DE),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                                color: const Color(0xFFE5DCC4), width: 1.5),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.10),
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                         );
                       }
