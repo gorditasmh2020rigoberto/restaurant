@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../globals.dart';
 import '../services/delivery_fee.dart';
 import '../services/geocoder.dart';
+import '../services/google_distance.dart';
 
 /// Widget compacto que calcula la cuota de delivery FLASH a partir de:
 ///  - km (input)
@@ -100,11 +101,21 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
         _autoCalcError = null;
       });
     }
-    final km = await kmFromBranchTo(
+
+    // 1) Intentar Google Distance Matrix (distancia REAL por carretera)
+    double? km = await googleDrivingDistanceKm(
+      originLat: coords.lat,
+      originLon: coords.lon,
+      destinationAddress: address,
+    );
+
+    // 2) Fallback: OSM/Nominatim (haversine × 1.3)
+    km ??= await kmFromBranchTo(
       branchLat: coords.lat,
       branchLon: coords.lon,
       destinationAddress: address,
     );
+
     if (!mounted) return;
     setState(() {
       _autoCalcLoading = false;

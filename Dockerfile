@@ -24,9 +24,16 @@ WORKDIR /app
 # Copiar archivos del proyecto
 COPY . .
 
+# Build arg para la API key de Google Maps. Se pasa al build de Flutter
+# con --dart-define para que quede embebida en el bundle JS. Si EasyPanel
+# no la define, queda vacía y la app cae al geocoder OSM (gratis) como
+# fallback.
+ARG GOOGLE_MAPS_API_KEY=""
+
 # Obtener dependencias y compilar para web
 RUN flutter pub get
-RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none
+RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none \
+    --dart-define=GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY}"
 
 # ETAPA 2: Servir con Nginx (Servidor Web)
 FROM nginx:alpine
