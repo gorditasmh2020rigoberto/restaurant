@@ -220,6 +220,10 @@ class _ClientHomeViewState extends State<ClientHomeView> {
               DeliveryFeeCalculator(
                 destinationAddress: addressCtrl.text,
                 onChanged: (b) => deliveryFee = b,
+                onAddressDetected: (addr) {
+                  addressCtrl.text = addr;
+                  setS(() {});
+                },
               ),
             ],
           ),
