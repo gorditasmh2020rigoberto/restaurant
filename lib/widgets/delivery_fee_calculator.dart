@@ -189,13 +189,21 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
         destLon: pos.longitude,
       );
 
-      // 5) Dirección legible (reverse geocode)
-      final address = await googleReverseGeocode(
+      // 5) Dirección legible (reverse geocode): Google primero, Nominatim como fallback
+      String? address = await googleReverseGeocode(
+        lat: pos.latitude,
+        lon: pos.longitude,
+      );
+      address ??= await nominatimReverseGeocode(
         lat: pos.latitude,
         lon: pos.longitude,
       );
 
       if (!mounted) return;
+      // Llenar dirección SIEMPRE que la tengamos (independiente de si km calculó)
+      if (address != null && widget.onAddressDetected != null) {
+        widget.onAddressDetected!(address);
+      }
       setState(() {
         _autoCalcLoading = false;
         if (km != null) {
@@ -203,13 +211,13 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
           _lastAutoCalcAddress = address;
           _autoCalcError = null;
           _emit();
+        } else if (address != null) {
+          // Dirección detectada pero sin km automático
+          _autoCalcError = '📍 Dirección detectada. Ingresa los km manualmente.';
         } else {
-          _autoCalcError = 'No se pudo calcular distancia con Google';
+          _autoCalcError = 'No se pudo detectar la dirección. Ingrésala manualmente.';
         }
       });
-      if (address != null && widget.onAddressDetected != null) {
-        widget.onAddressDetected!(address);
-      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -479,18 +487,4 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
   Widget _line(String label, double amount) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 12)),
-          Text('+\$${amount.toStringAsFixed(0)}',
-              style: const TextStyle(
-                  color: Color(0xFF7A6E5A),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-}
+    
