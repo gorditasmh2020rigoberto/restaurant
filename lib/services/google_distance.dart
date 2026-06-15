@@ -1,11 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'runtime_env.dart';
 
-/// API key de Google Maps inyectada al build con --dart-define.
-/// Si está vacía, la integración de Google se ignora y se cae al geocoder
-/// OSM/Nominatim como fallback.
-const String googleMapsApiKey =
-    String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: '');
+/// API key de Google Maps. Se busca primero en runtime (window.* en web,
+/// inyectado por env-config.js) y como fallback en compile-time
+/// (--dart-define para builds nativos).
+String get googleMapsApiKey {
+  final fromRuntime = runtimeEnv('GOOGLE_MAPS_API_KEY');
+  if (fromRuntime.isNotEmpty) return fromRuntime;
+  return const String.fromEnvironment('GOOGLE_MAPS_API_KEY',
+      defaultValue: '');
+}
 
 bool get hasGoogleMapsApiKey => googleMapsApiKey.isNotEmpty;
 
@@ -19,7 +24,8 @@ Future<double?> googleDrivingDistanceKm({
   required double originLon,
   required String destinationAddress,
 }) async {
-  if (!hasGoogleMapsApiKey) return null;
+  final key = googleMapsApiKey;
+  if (key.isEmpty) return null;
   if (destinationAddress.trim().isEmpty) return null;
 
   // Sesgo regional para mejorar precisión local — Google ignora "región"
@@ -38,7 +44,7 @@ Future<double?> googleDrivingDistanceKm({
       '&language=es'
       '&region=mx'
       '&units=metric'
-      '&key=$googleMapsApiKey',
+      '&key=$key',
     );
     final resp = await http.get(uri).timeout(const Duration(seconds: 8));
     if (resp.statusCode != 200) return null;

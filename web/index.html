@@ -242,6 +242,10 @@
       if (window._clipUnblockKeyboard) { window._clipUnblockKeyboard(); window._clipUnblockKeyboard = null; }
     };
   </script>
+  <!-- env-config.js es generado por docker-entrypoint.sh en cada arranque
+       del container con las variables de entorno (ej. GOOGLE_MAPS_API_KEY).
+       Se carga ANTES de Flutter para que window.* esté disponible. -->
+  <script src="env-config.js"></script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
