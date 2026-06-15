@@ -24,16 +24,12 @@ WORKDIR /app
 # Copiar archivos del proyecto
 COPY . .
 
-# Build arg para la API key de Google Maps. Se pasa al build de Flutter
-# con --dart-define para que quede embebida en el bundle JS. Si EasyPanel
-# no la define, queda vacía y la app cae al geocoder OSM (gratis) como
-# fallback.
-ARG GOOGLE_MAPS_API_KEY=""
-
-# Obtener dependencias y compilar para web
+# Obtener dependencias y compilar para web. La GOOGLE_MAPS_API_KEY se
+# inyecta en runtime vía env-config.js (ver docker-entrypoint.sh), no
+# en build time, porque EasyPanel solo pasa env vars al container al
+# arrancar (no al docker build).
 RUN flutter pub get
-RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none \
-    --dart-define=GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY}"
+RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none
 
 # ETAPA 2: Servir con Nginx (Servidor Web)
 FROM nginx:alpine
@@ -42,8 +38,12 @@ FROM nginx:alpine
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Exponer el puerto 80 (el puerto web estándar)
-EXPOSE 80
+# Script que genera /usr/share/nginx/html/env-config.js a partir de las
+# variables de entorno del container ANTES de iniciar nginx. Permite que
+# EasyPanel inyecte GOOGLE_MAPS_API_KEY en runtime sin re-buildear.
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Comando de arranque del servidor Nginx 
+EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
