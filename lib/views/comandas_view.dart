@@ -1132,6 +1132,10 @@ class _ComandasViewState extends State<ComandasView> {
                                     destinationAddress:
                                         deliveryAddressController.text,
                                     onChanged: (b) => deliveryFee = b,
+                                    onAddressDetected: (addr) {
+                                      deliveryAddressController.text = addr;
+                                      setStateDialog(() {});
+                                    },
                                   ),
                                 ],
                                 const SizedBox(height: 20),

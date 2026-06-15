@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../globals.dart';
 import '../services/delivery_fee.dart';
@@ -18,6 +19,11 @@ class DeliveryFeeCalculator extends StatefulWidget {
   final String? destinationAddress;
   final ValueChanged<DeliveryFeeBreakdown> onChanged;
 
+  /// Callback opcional cuando el usuario toca "Usar mi ubicación" y la
+  /// app obtiene una dirección por reverse-geocode. El parent debería
+  /// llenar su TextField de dirección con este texto.
+  final ValueChanged<String>? onAddressDetected;
+
   /// Valores iniciales (al editar una orden ya creada).
   final double initialKm;
   final double initialKmCarretera;
@@ -28,6 +34,7 @@ class DeliveryFeeCalculator extends StatefulWidget {
     super.key,
     required this.onChanged,
     this.destinationAddress,
+    this.onAddressDetected,
     this.initialKm = 0,
     this.initialKmCarretera = 0,
     this.initialRain = false,
@@ -142,6 +149,76 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
     ));
   }
 
+  /// Pide permiso de ubicación, obtiene GPS, calcula la distancia desde
+  /// la sucursal y reverse-geocode para llenar el campo de dirección.
+  Future<void> _useMyLocation() async {
+    final coords = kBranchCoords[Globals.currentBranch];
+    if (coords == null) return;
+    if (mounted) {
+      setState(() {
+        _autoCalcLoading = true;
+        _autoCalcError = null;
+      });
+    }
+    try {
+      // 1) ¿Servicio de ubicación habilitado?
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        throw 'Activa el servicio de ubicación de tu dispositivo';
+      }
+      // 2) Permiso
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        throw 'Necesitamos permiso de ubicación';
+      }
+      // 3) Posición
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.high),
+      ).timeout(const Duration(seconds: 15));
+
+      // 4) Distancia real por carretera desde la sucursal a estas coords
+      final km = await googleDrivingDistanceKmCoords(
+        originLat: coords.lat,
+        originLon: coords.lon,
+        destLat: pos.latitude,
+        destLon: pos.longitude,
+      );
+
+      // 5) Dirección legible (reverse geocode)
+      final address = await googleReverseGeocode(
+        lat: pos.latitude,
+        lon: pos.longitude,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _autoCalcLoading = false;
+        if (km != null) {
+          _kmCtrl.text = km.toString();
+          _lastAutoCalcAddress = address;
+          _autoCalcError = null;
+          _emit();
+        } else {
+          _autoCalcError = 'No se pudo calcular distancia con Google';
+        }
+      });
+      if (address != null && widget.onAddressDetected != null) {
+        widget.onAddressDetected!(address);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _autoCalcLoading = false;
+        _autoCalcError = e.toString().replaceAll('Exception: ', '');
+      });
+    }
+  }
+
   Future<void> _openMaps() async {
     final url = Uri.parse(buildMapsRouteUrl(
       branchName: Globals.currentBranch,
@@ -179,6 +256,27 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Botón grande: usar GPS para llenar dirección + distancia
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _autoCalcLoading ? null : _useMyLocation,
+              icon: const Icon(Icons.my_location, size: 18),
+              label: const Text('Usar mi ubicación (GPS)'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFFF6D00),
+                side: const BorderSide(
+                    color: Color(0xFFFF6D00), width: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                textStyle: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               const Icon(Icons.delivery_dining,

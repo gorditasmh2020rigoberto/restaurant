@@ -66,3 +66,69 @@ Future<double?> googleDrivingDistanceKm({
     return null;
   }
 }
+
+/// Calcula distancia real por carretera entre dos coordenadas
+/// (origen=sucursal, destino=GPS del cliente). No requiere geocoding.
+Future<double?> googleDrivingDistanceKmCoords({
+  required double originLat,
+  required double originLon,
+  required double destLat,
+  required double destLon,
+}) async {
+  final key = googleMapsApiKey;
+  if (key.isEmpty) return null;
+  try {
+    final uri = Uri.parse(
+      'https://maps.googleapis.com/maps/api/distancematrix/json'
+      '?origins=$originLat,$originLon'
+      '&destinations=$destLat,$destLon'
+      '&mode=driving&language=es&region=mx&units=metric'
+      '&key=$key',
+    );
+    final resp = await http.get(uri).timeout(const Duration(seconds: 8));
+    if (resp.statusCode != 200) return null;
+    final body = jsonDecode(resp.body) as Map<String, dynamic>;
+    if (body['status'] != 'OK') return null;
+    final rows = body['rows'] as List?;
+    if (rows == null || rows.isEmpty) return null;
+    final elements = (rows.first as Map)['elements'] as List?;
+    if (elements == null || elements.isEmpty) return null;
+    final first = elements.first as Map<String, dynamic>;
+    if (first['status'] != 'OK') return null;
+    final distance = first['distance'] as Map<String, dynamic>?;
+    if (distance == null) return null;
+    final meters = (distance['value'] as num).toDouble();
+    return double.parse((meters / 1000.0).toStringAsFixed(1));
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Reverse geocoding con Google: dado un (lat, lon), devuelve la
+/// dirección formateada. Útil para llenar el campo de dirección con
+/// la ubicación del GPS. Devuelve null si falla.
+Future<String?> googleReverseGeocode({
+  required double lat,
+  required double lon,
+}) async {
+  final key = googleMapsApiKey;
+  if (key.isEmpty) return null;
+  try {
+    final uri = Uri.parse(
+      'https://maps.googleapis.com/maps/api/geocode/json'
+      '?latlng=$lat,$lon'
+      '&language=es&region=mx'
+      '&key=$key',
+    );
+    final resp = await http.get(uri).timeout(const Duration(seconds: 8));
+    if (resp.statusCode != 200) return null;
+    final body = jsonDecode(resp.body) as Map<String, dynamic>;
+    if (body['status'] != 'OK') return null;
+    final results = body['results'] as List?;
+    if (results == null || results.isEmpty) return null;
+    final first = results.first as Map<String, dynamic>;
+    return first['formatted_address']?.toString();
+  } catch (_) {
+    return null;
+  }
+}
