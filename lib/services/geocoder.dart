@@ -120,3 +120,38 @@ Future<double?> kmFromBranchTo({
   final raw = haversineKm(branchLat, branchLon, dest.lat, dest.lon);
   return double.parse((raw * kStreetFactor).toStringAsFixed(1));
 }
+
+/// Reverse geocoding GRATUITO con Nominatim (OpenStreetMap).
+/// Dado un (lat, lon) devuelve la dirección formateada en español.
+/// Úsalo como fallback cuando no hay Google Maps API Key.
+Future<String?> nominatimReverseGeocode({
+  required double lat,
+  required double lon,
+}) async {
+  try {
+    final uri = Uri.parse(
+      'https://nominatim.openstreetmap.org/reverse'
+      '?format=json&lat=$lat&lon=$lon&accept-language=es&zoom=18',
+    );
+    final resp = await http.get(uri, headers: {
+      'User-Agent': 'GorditasMisHermanas/1.0 (reverse-geocode)',
+      'Accept': 'application/json',
+    }).timeout(const Duration(seconds: 8));
+    if (resp.statusCode != 200) return null;
+    final body = jsonDecode(resp.body) as Map<String, dynamic>;
+    final addr = body['address'] as Map<String, dynamic>?;
+    if (addr == null) return body['display_name']?.toString();
+    final parts = <String>[];
+    final road = addr['road'] ?? addr['pedestrian'] ?? addr['path'];
+    final number = addr['house_number'];
+    if (road != null) parts.add(number != null ? '$road $number' : road.toString());
+    final suburb = addr['suburb'] ?? addr['neighbourhood'] ?? addr['quarter'];
+    if (suburb != null) parts.add('Col. $suburb');
+    final city = addr['city'] ?? addr['town'] ?? addr['village'] ?? addr['municipality'];
+    if (city != null) parts.add(city.toString());
+    if (parts.isEmpty) return body['display_name']?.toString();
+    return parts.join(', ');
+  } catch (_) {
+    return null;
+  }
+}
