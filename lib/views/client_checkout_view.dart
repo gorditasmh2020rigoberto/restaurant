@@ -422,30 +422,49 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];
+                      final isDeliveryFee =
+                          item.dish.id == CartProvider.deliveryFeeId;
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(item.dish.imageUrl, width: 50, height: 50, fit: BoxFit.cover),
-                          ),
+                          leading: isDeliveryFee
+                              ? Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFF6D00)
+                                        .withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.delivery_dining,
+                                      color: Color(0xFFFF6D00), size: 28),
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(item.dish.imageUrl,
+                                      width: 50, height: 50, fit: BoxFit.cover),
+                                ),
                           title: Text(item.dish.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('\$${item.dish.price.toStringAsFixed(2)} c/u'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
-                                onPressed: () => cart.decrementQuantity(item.dish.id),
-                              ),
-                              Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              IconButton(
-                                icon: const Icon(Icons.add_circle_outline, color: Colors.green),
-                                onPressed: () => cart.incrementQuantity(item.dish.id),
-                              ),
-                            ],
-                          ),
+                          subtitle: Text(isDeliveryFee
+                              ? '\$${item.dish.price.toStringAsFixed(2)}'
+                              : '\$${item.dish.price.toStringAsFixed(2)} c/u'),
+                          trailing: isDeliveryFee
+                              ? null
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
+                                      onPressed: () => cart.decrementQuantity(item.dish.id),
+                                    ),
+                                    Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                    IconButton(
+                                      icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                                      onPressed: () => cart.incrementQuantity(item.dish.id),
+                                    ),
+                                  ],
+                                ),
                         ),
                       );
                     },
