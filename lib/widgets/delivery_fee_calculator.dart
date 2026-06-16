@@ -30,6 +30,12 @@ class DeliveryFeeCalculator extends StatefulWidget {
   final bool initialRain;
   final bool initialHoliday;
 
+  /// Si es false oculta el botón grande "Usar mi ubicación (GPS)" — útil
+  /// cuando el parent ya lo expone en otro lado (p.ej. dentro del campo
+  /// de dirección). El método [DeliveryFeeCalculatorState.useMyLocation]
+  /// sigue siendo accesible vía GlobalKey.
+  final bool showGpsButton;
+
   const DeliveryFeeCalculator({
     super.key,
     required this.onChanged,
@@ -39,13 +45,14 @@ class DeliveryFeeCalculator extends StatefulWidget {
     this.initialKmCarretera = 0,
     this.initialRain = false,
     this.initialHoliday = false,
+    this.showGpsButton = true,
   });
 
   @override
-  State<DeliveryFeeCalculator> createState() => _DeliveryFeeCalculatorState();
+  State<DeliveryFeeCalculator> createState() => DeliveryFeeCalculatorState();
 }
 
-class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
+class DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
   late final TextEditingController _kmCtrl;
   late final TextEditingController _kmCarrCtrl;
   bool _rain = false;
@@ -151,6 +158,10 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
 
   /// Pide permiso de ubicación, obtiene GPS, calcula la distancia desde
   /// la sucursal y reverse-geocode para llenar el campo de dirección.
+  /// Público para que un parent (p.ej. el botón dentro del campo de
+  /// dirección) pueda dispararlo vía GlobalKey.
+  Future<void> useMyLocation() => _useMyLocation();
+
   Future<void> _useMyLocation() async {
     final coords = kBranchCoords[Globals.currentBranch];
     if (coords == null) return;
@@ -264,27 +275,31 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Botón grande: usar GPS para llenar dirección + distancia
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: _autoCalcLoading ? null : _useMyLocation,
-              icon: const Icon(Icons.my_location, size: 18),
-              label: const Text('Usar mi ubicación (GPS)'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFFF6D00),
-                side: const BorderSide(
-                    color: Color(0xFFFF6D00), width: 1.5),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                textStyle: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 13),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+          // Botón grande: usar GPS para llenar dirección + distancia.
+          // Se oculta cuando el parent ya muestra un botón equivalente
+          // (p.ej. ícono dentro del TextField de dirección).
+          if (widget.showGpsButton) ...[
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _autoCalcLoading ? null : _useMyLocation,
+                icon: const Icon(Icons.my_location, size: 18),
+                label: const Text('Usar mi ubicación (GPS)'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFFF6D00),
+                  side: const BorderSide(
+                      color: Color(0xFFFF6D00), width: 1.5),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 13),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 10),
+            const SizedBox(height: 10),
+          ],
           Row(
             children: [
               const Icon(Icons.delivery_dining,
@@ -487,4 +502,18 @@ class _DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
   Widget _line(String label, double amount) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
-    
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 12)),
+          Text('+\$${amount.toStringAsFixed(0)}',
+              style: const TextStyle(
+                  color: Color(0xFF7A6E5A),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+}
