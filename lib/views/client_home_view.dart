@@ -170,6 +170,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
     final addressCtrl = TextEditingController(text: savedAddress);
     final phoneCtrl = TextEditingController(text: savedPhone);
     DeliveryFeeBreakdown? deliveryFee;
+    final feeCalcKey = GlobalKey<DeliveryFeeCalculatorState>();
 
     if (!mounted) return;
 
@@ -203,10 +204,16 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                 minLines: 1,
                 maxLines: 3,
                 onChanged: (_) => setS(() {}),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Dirección de entrega',
-                  prefixIcon: Icon(Icons.location_on),
+                  prefixIcon: const Icon(Icons.location_on),
                   hintText: 'Calle, número, colonia, referencias',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.my_location,
+                        color: Color(0xFFFF6D00)),
+                    tooltip: 'Usar mi ubicación (GPS)',
+                    onPressed: () => feeCalcKey.currentState?.useMyLocation(),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -220,7 +227,9 @@ class _ClientHomeViewState extends State<ClientHomeView> {
               ),
               const SizedBox(height: 16),
               DeliveryFeeCalculator(
+                key: feeCalcKey,
                 destinationAddress: addressCtrl.text,
+                showGpsButton: false,
                 onChanged: (b) => deliveryFee = b,
                 onAddressDetected: (addr) {
                   addressCtrl.text = addr;
