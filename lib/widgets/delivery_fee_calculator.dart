@@ -7,6 +7,8 @@ import '../globals.dart';
 import '../services/delivery_fee.dart';
 import '../services/geocoder.dart';
 import '../services/google_distance.dart';
+import '../services/holidays_mx.dart';
+import '../services/weather.dart';
 
 /// Widget compacto que calcula la cuota de delivery FLASH a partir de:
 ///  - km (input)
@@ -72,10 +74,28 @@ class DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
             ? widget.initialKmCarretera.toString()
             : '');
     _rain = widget.initialRain;
-    _holiday = widget.initialHoliday;
+    // Si hoy cae en festivo del negocio, lo prendemos auto. Cuando
+    // initialHoliday venía true (edición de orden), respetamos eso.
+    _holiday = widget.initialHoliday || isHolidayToday();
     WidgetsBinding.instance.addPostFrameCallback((_) => _emit());
     // Si ya venía con dirección, calcula automático.
     _maybeAutoCalc(widget.destinationAddress);
+    // Auto-detectar lluvia consultando Open-Meteo con las coords de
+    // la sucursal. No bloquea el UI: el toggle se prende cuando
+    // termina la consulta. Si initialRain venía true (edición de
+    // orden), respetamos lo que el usuario ya había puesto.
+    if (!widget.initialRain) _autoDetectRain();
+  }
+
+  Future<void> _autoDetectRain() async {
+    final coords = kBranchCoords[Globals.currentBranch];
+    if (coords == null) return;
+    final raining = await isRainingNow(lat: coords.lat, lon: coords.lon);
+    if (!mounted || !raining) return;
+    setState(() {
+      _rain = true;
+      _emit();
+    });
   }
 
   @override
