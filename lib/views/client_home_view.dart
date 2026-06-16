@@ -198,22 +198,38 @@ class _ClientHomeViewState extends State<ClientHomeView> {
                 ),
               ),
               const SizedBox(height: 12),
+              // Botón naranja "Compartir ubicación" — vive arriba del
+              // campo de dirección y dispara el flujo GPS del calculador.
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      feeCalcKey.currentState?.useMyLocation(),
+                  icon: const Icon(Icons.my_location, size: 18),
+                  label: const Text('Compartir ubicación'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFF6D00),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
               TextField(
                 controller: addressCtrl,
                 textCapitalization: TextCapitalization.sentences,
                 minLines: 1,
                 maxLines: 3,
                 onChanged: (_) => setS(() {}),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Dirección de entrega',
-                  prefixIcon: const Icon(Icons.location_on),
+                  prefixIcon: Icon(Icons.location_on),
                   hintText: 'Calle, número, colonia, referencias',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.my_location,
-                        color: Color(0xFFFF6D00)),
-                    tooltip: 'Usar mi ubicación (GPS)',
-                    onPressed: () => feeCalcKey.currentState?.useMyLocation(),
-                  ),
                 ),
               ),
               const SizedBox(height: 12),
