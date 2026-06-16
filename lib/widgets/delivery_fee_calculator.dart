@@ -283,98 +283,111 @@ class DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
       rain: _rain,
       holiday: _holiday,
     );
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFF6D00).withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: const Color(0xFFFF6D00).withValues(alpha: 0.4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Botón grande: usar GPS para llenar dirección + distancia.
-          // Se oculta cuando el parent ya muestra un botón equivalente
-          // (p.ej. ícono dentro del TextField de dirección).
-          if (widget.showGpsButton) ...[
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _autoCalcLoading ? null : _useMyLocation,
-                icon: const Icon(Icons.my_location, size: 18),
-                label: const Text('Usar mi ubicación (GPS)'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFFF6D00),
-                  side: const BorderSide(
-                      color: Color(0xFFFF6D00), width: 1.5),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  textStyle: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 13),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Botón grande GPS: queda arriba de todo (cuando aplica).
+        if (widget.showGpsButton) ...[
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: _autoCalcLoading ? null : _useMyLocation,
+              icon: const Icon(Icons.my_location, size: 18),
+              label: const Text('Usar mi ubicación (GPS)'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFFFF6D00),
+                side:
+                    const BorderSide(color: Color(0xFFFF6D00), width: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                textStyle: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-          ],
-          Row(
-            children: [
-              const Icon(Icons.delivery_dining,
-                  color: Color(0xFFFF6D00), size: 20),
-              const SizedBox(width: 6),
-              const Text(
-                'Cuota de Envío FLASH',
-                style: TextStyle(
-                  color: Color(0xFFFF6D00),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
+          ),
+          const SizedBox(height: 10),
+        ],
+        // Título: "Cuota de Envío FLASH" ARRIBA del cuadro, centrado.
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.delivery_dining,
+                color: Color(0xFFFF6D00), size: 20),
+            SizedBox(width: 6),
+            Text(
+              'Cuota de Envío FLASH',
+              style: TextStyle(
+                color: Color(0xFFFF6D00),
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
               ),
-              const Spacer(),
-              if (_autoCalcLoading)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Color(0xFFFF6D00)),
-                  ),
-                )
-              else
-                TextButton.icon(
-                  onPressed: () {
-                    final addr = (widget.destinationAddress ?? '').trim();
-                    if (addr.isNotEmpty) {
-                      _lastAutoCalcAddress = null; // forzar
-                      _autoCalcKm(addr);
-                    }
-                  },
-                  icon: const Icon(Icons.refresh, size: 14),
-                  label: const Text('Calcular km'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFFF6D00),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6, vertical: 4),
-                    textStyle: const TextStyle(fontSize: 11),
-                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        // Acciones centradas: Calcular km · Ver ruta (entre título y caja).
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_autoCalcLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Color(0xFFFF6D00)),
                 ),
+              )
+            else
               TextButton.icon(
-                onPressed: _openMaps,
-                icon: const Icon(Icons.map, size: 16),
-                label: const Text('Ver ruta'),
+                onPressed: () {
+                  final addr = (widget.destinationAddress ?? '').trim();
+                  if (addr.isNotEmpty) {
+                    _lastAutoCalcAddress = null; // forzar
+                    _autoCalcKm(addr);
+                  }
+                },
+                icon: const Icon(Icons.refresh, size: 14),
+                label: const Text('Calcular km'),
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFFFF6D00),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  textStyle: const TextStyle(fontSize: 12),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 6, vertical: 4),
+                  textStyle: const TextStyle(fontSize: 11),
                 ),
               ),
-            ],
+            const SizedBox(width: 8),
+            TextButton.icon(
+              onPressed: _openMaps,
+              icon: const Icon(Icons.map, size: 16),
+              label: const Text('Ver ruta'),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFFFF6D00),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                textStyle: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Caja naranja con km inputs, chips lluvia/festivo, totales.
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF6D00).withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+                color: const Color(0xFFFF6D00).withValues(alpha: 0.4)),
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
           if (_autoCalcError != null)
             Padding(
               padding: const EdgeInsets.only(top: 6),
@@ -514,8 +527,10 @@ class DeliveryFeeCalculatorState extends State<DeliveryFeeCalculator> {
                   fontSize: 12,
                   fontStyle: FontStyle.italic),
             ),
-        ],
-      ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
