@@ -145,22 +145,65 @@ function parseGuisados(raw) {
 }
 
 // ── Fetch + Format + Print ──────────────────────────────────────────
+// Fetch SOLO los datos de la orden (no items). Items se traen aparte
+// filtrados por printed_at IS NULL.
 async function fetchOrder(orderId) {
   const { data, error } = await supabase
     .from('orders')
     .select(`
       id, branch_name, order_type, customer_name, total_amount,
       table_id, created_at, payment_method,
-      sent_to_kitchen_at, printed_at,
-      order_items (
-        quantity, price_at_time, guisados_selected, client_label,
-        dishes ( name, category )
-      )
+      sent_to_kitchen_at, printed_at
     `)
     .eq('id', orderId)
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+// Trae solo los order_items que aún no se han impreso. Esto es lo que
+// permite imprimir las adiciones de una orden ya enviada sin reimprimir
+// los items que ya fueron a cocina.
+async function fetchUnprintedItems(orderId) {
+  const { data, error } = await supabase
+    .from('order_items')
+    .select(`
+      id, quantity, price_at_time, guisados_selected, client_label,
+      dishes ( name, category )
+    `)
+    .eq('order_id', orderId)
+    .is('printed_at', null)
+    .order('id', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+// Marca los items que acabamos de imprimir. Si después de eso ya no
+// quedan items sin imprimir, marca la orden como printed_at = NOW()
+// también, para que la query del catch-up (printed_at IS NULL) la
+// excluya y sea barata.
+async function markItemsPrinted(orderId, itemIds) {
+  if (itemIds.length === 0) return;
+  const nowIso = new Date().toISOString();
+  const { error: e1 } = await supabase
+    .from('order_items')
+    .update({ printed_at: nowIso })
+    .in('id', itemIds);
+  if (e1) throw e1;
+  // ¿Quedan items sin imprimir? Si no, marca también orders.printed_at
+  // para que el catch-up (filtrado por printed_at IS NULL) sea barato.
+  const { count, error: e2 } = await supabase
+    .from('order_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('order_id', orderId)
+    .is('printed_at', null);
+  if (e2) throw e2;
+  if ((count ?? 0) === 0) {
+    await supabase
+      .from('orders')
+      .update({ printed_at: nowIso })
+      .eq('id', orderId);
+  }
 }
 
 // Clasifica un order_item como bebida (BAR) o comida (COCINA) usando
@@ -228,38 +271,34 @@ function appendTicket(printer, kind, order, items) {
   printer.cut();
 }
 
-async function printOrder(order) {
+// Imprime los items dados (ya filtrados por unprinted). Devuelve true
+// si efectivamente mandó algo, false si no había nada que imprimir.
+async function printItems(order, items) {
   const printer = buildPrinter();
-  // Sanity check: solo si la impresora está conectada lanzamos.
   const connected = await printer.isPrinterConnected();
   if (!connected) {
     throw new Error(`Impresora "${PRINTER_NAME}" no responde. Verifica USB/driver.`);
   }
 
-  const items = order.order_items || [];
   const drinks = items.filter(isDrink);
   const kitchen = items.filter((it) => !isDrink(it));
 
-  if (!drinks.length && !kitchen.length) {
-    console.warn(`⚠ Orden ${order.id} sin ítems — nada que imprimir`);
-    return;
+  if (!drinks.length && !kitchen.length) return false;
+
+  // Si esta NO es la primera impresión (la orden ya tenía printed_at),
+  // los tickets traen un banner "ADICIÓN" para que cocina sepa que son
+  // items nuevos sobre una orden ya entregada.
+  const isAddition = !!order.printed_at;
+
+  if (kitchen.length) {
+    appendTicket(printer, isAddition ? 'COCINA — ADICIÓN' : 'COCINA', order, kitchen);
+  }
+  if (drinks.length) {
+    appendTicket(printer, isAddition ? 'BAR — ADICIÓN' : 'BAR', order, drinks);
   }
 
-  // Orden de impresión: COCINA primero (la comida tarda más), BAR
-  // después. Salen como dos tickets independientes con su propio cut.
-  if (kitchen.length) appendTicket(printer, 'COCINA', order, kitchen);
-  if (drinks.length) appendTicket(printer, 'BAR', order, drinks);
-
   await printer.execute();
-}
-
-async function markPrinted(orderId) {
-  const { error } = await supabase
-    .from('orders')
-    .update({ printed_at: new Date().toISOString() })
-    .eq('id', orderId)
-    .is('printed_at', null);
-  if (error) throw error;
+  return true;
 }
 
 // Lock en memoria para no procesar la misma orden en paralelo (puede
@@ -278,16 +317,26 @@ async function processOrder(orderId, source = 'unknown') {
       return;
     }
     if (order.branch_name !== BRANCH_NAME) return; // otra sucursal
-    if (order.printed_at) return;                  // ya impresa
     if (!order.sent_to_kitchen_at) return;         // aún no mandada a cocina
-    console.log(`→ Imprimiendo ${orderId} (${source})...`);
-    await printOrder(order);
-    await markPrinted(orderId);
-    console.log(`✓ ${orderId} impresa y marcada`);
+
+    const items = await fetchUnprintedItems(orderId);
+    if (items.length === 0) return; // todo ya impreso, nada que hacer
+
+    const tag = order.printed_at ? 'adición' : 'primera';
+    console.log(
+      `→ Imprimiendo ${items.length} item(s) de ${orderId} (${source}, ${tag})...`,
+    );
+    const printed = await printItems(order, items);
+    if (!printed) return; // por si acaso
+    await markItemsPrinted(
+      orderId,
+      items.map((it) => it.id),
+    );
+    console.log(`✓ ${orderId} — ${items.length} item(s) impresos y marcados`);
   } catch (e) {
     console.error(`✘ Falló orden ${orderId}: ${e.message}`);
-    // No marcamos printed_at → la orden vuelve a entrar al siguiente
-    // catch-up (cada 60s) o cuando llegue otro evento de realtime.
+    // No marcamos printed_at en items → vuelven a entrar al siguiente
+    // catch-up (cada 60s) o al próximo evento de realtime.
   } finally {
     _inFlight.delete(orderId);
   }
