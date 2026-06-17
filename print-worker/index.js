@@ -97,6 +97,7 @@ async function fetchOrder(orderId) {
     .select(`
       id, branch_name, order_type, customer_name, total_amount,
       table_id, created_at, payment_method,
+      sent_to_kitchen_at, printed_at,
       order_items (
         quantity, price_at_time, guisados_selected, client_label,
         dishes ( name, category )
@@ -207,18 +208,24 @@ async function markPrinted(orderId) {
   if (error) throw error;
 }
 
+// Lock en memoria para no procesar la misma orden en paralelo (puede
+// pasar si realtime entrega un evento mientras el catch-up trabaja).
+const _inFlight = new Set();
+
 async function processOrder(orderId, source = 'unknown') {
+  if (_inFlight.has(orderId)) {
+    return; // ya hay otro procesando esta orden
+  }
+  _inFlight.add(orderId);
   try {
     const order = await fetchOrder(orderId);
     if (!order) {
       console.warn(`⚠ Orden ${orderId} no encontrada (${source})`);
       return;
     }
-    if (order.branch_name !== BRANCH_NAME) {
-      // No es de esta sucursal — ignorar (el filtro en realtime debería
-      // evitar esto, pero defendemos por si acaso).
-      return;
-    }
+    if (order.branch_name !== BRANCH_NAME) return; // otra sucursal
+    if (order.printed_at) return;                  // ya impresa
+    if (!order.sent_to_kitchen_at) return;         // aún no mandada a cocina
     console.log(`→ Imprimiendo ${orderId} (${source})...`);
     await printOrder(order);
     await markPrinted(orderId);
@@ -226,19 +233,26 @@ async function processOrder(orderId, source = 'unknown') {
   } catch (e) {
     console.error(`✘ Falló orden ${orderId}: ${e.message}`);
     // No marcamos printed_at → la orden vuelve a entrar al siguiente
-    // catch-up (cada 60s) o cuando llegue otro INSERT que dispare poll.
+    // catch-up (cada 60s) o cuando llegue otro evento de realtime.
+  } finally {
+    _inFlight.delete(orderId);
   }
 }
 
 // ── Catch-up al arrancar y cada 60s (red de seguridad por si Realtime
 //    se cae y no nos enteramos) ──────────────────────────────────────
+//
+// Solo imprime órdenes que ya fueron "mandadas a cocina" por el mesero
+// (sent_to_kitchen_at IS NOT NULL). Las órdenes del cliente que aún
+// no aprueba el mesero quedan en cola sin tocar.
 async function catchUp() {
   const { data, error } = await supabase
     .from('orders')
     .select('id')
     .eq('branch_name', BRANCH_NAME)
+    .not('sent_to_kitchen_at', 'is', null)
     .is('printed_at', null)
-    .order('created_at', { ascending: true })
+    .order('sent_to_kitchen_at', { ascending: true })
     .limit(50);
   if (error) {
     console.error('Catch-up falló:', error.message);
@@ -251,10 +265,20 @@ async function catchUp() {
   }
 }
 
+// Defensive: el realtime UPDATE dispara para CUALQUIER cambio en la
+// fila (p.ej. el mesero edita total). Antes de imprimir, re-checamos
+// el gate contra la BD para no imprimir si ya está impresa o si el
+// sent_to_kitchen_at sigue null.
+function isReadyToPrint(row) {
+  return !!row?.sent_to_kitchen_at && !row?.printed_at;
+}
+
 // ── Realtime subscription ───────────────────────────────────────────
 function subscribeRealtime() {
   const channel = supabase
     .channel('orders-print-worker')
+    // INSERT — cuando el mesero crea orden ya con sent_to_kitchen_at
+    // seteado (su "guardar" es el "mandar a cocina" de una vez).
     .on(
       'postgres_changes',
       {
@@ -264,8 +288,25 @@ function subscribeRealtime() {
         filter: `branch_name=eq.${BRANCH_NAME}`,
       },
       (payload) => {
-        const orderId = payload?.new?.id;
-        if (orderId) processOrder(orderId, 'realtime');
+        if (isReadyToPrint(payload?.new)) {
+          processOrder(payload.new.id, 'realtime-insert');
+        }
+      },
+    )
+    // UPDATE — cuando el mesero toca "Mandar a cocina" en una orden
+    // del cliente que estaba esperando aprobación.
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'orders',
+        filter: `branch_name=eq.${BRANCH_NAME}`,
+      },
+      (payload) => {
+        if (isReadyToPrint(payload?.new)) {
+          processOrder(payload.new.id, 'realtime-update');
+        }
       },
     )
     .subscribe((status) => {
