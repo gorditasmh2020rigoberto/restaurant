@@ -701,6 +701,9 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             'total_amount': newTotal,
           }).eq('id', orderId);
         } else {
+          // El mesero "guardar comanda" = "mandar a cocina": setea
+          // sent_to_kitchen_at de una vez. El print-worker la imprime
+          // sin esperar aprobación extra.
           final orderResponse = await supabase.from('orders').insert({
             'table_id': widget.tableId,
             'waiter_id': widget.waiterId,
@@ -710,6 +713,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             'customer_name': widget.customerName,
             'branch_name': Globals.currentBranch,
             'daily_folio': nextFolio,
+            'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
           }).select().single();
           orderId = orderResponse['id'] as String;
         }
@@ -723,6 +727,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
           'customer_name': widget.customerName,
           'branch_name': Globals.currentBranch,
           'daily_folio': nextFolio,
+          'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
         }).select().single();
         orderId = orderResponse['id'] as String;
       }

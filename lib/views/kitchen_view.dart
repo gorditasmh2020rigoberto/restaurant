@@ -601,6 +601,60 @@ class _OrderTicketState extends State<_OrderTicket> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // ── BANNER: "Mandar a cocina" ────────────────────────────
+            // Aparece cuando la orden vino del cliente (auto-servicio)
+            // y aún no la aprueba el mesero. Al tap, marca
+            // sent_to_kitchen_at = NOW() y el print-worker imprime los
+            // tickets (COCINA + BAR) en la impresora térmica.
+            if (widget.order['sent_to_kitchen_at'] == null)
+              Material(
+                color: const Color(0xFFFF6D00),
+                child: InkWell(
+                  onTap: () async {
+                    try {
+                      await supabase.from('orders').update({
+                        'sent_to_kitchen_at':
+                            DateTime.now().toUtc().toIso8601String(),
+                      }).eq('id', orderId);
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Mandada a cocina — imprimiendo...'),
+                          backgroundColor: Color(0xFFFF6D00),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.print, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Text(
+                          'MANDAR A COCINA',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             // URGENT Banner
             if (isOverTime)
               Container(
