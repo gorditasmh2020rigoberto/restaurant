@@ -1257,6 +1257,9 @@ class _ComandasViewState extends State<ComandasView> {
           ],
         ),
         actions: [
+          // Bell con badge: cuenta órdenes del cliente esperando
+          // aprobación del mesero (sent_to_kitchen_at IS NULL).
+          _PendingClientOrdersBell(),
           Consumer<CartProvider>(
             builder: (context, cart, _) => Row(
               mainAxisSize: MainAxisSize.min,
@@ -1868,6 +1871,211 @@ class _EmptyCategorySlot extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Bell con badge que cuenta órdenes del cliente esperando aprobación
+/// del mesero (status='pending' AND sent_to_kitchen_at IS NULL). Al
+/// tap abre un diálogo con la lista y un botón "Mandar a cocina" por
+/// orden — al aprobar, el print-worker imprime los tickets.
+class _PendingClientOrdersBell extends StatelessWidget {
+  // ignore: unused_element
+  const _PendingClientOrdersBell();
+
+  @override
+  Widget build(BuildContext context) {
+    final supabase = Supabase.instance.client;
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: supabase
+          .from('orders')
+          .stream(primaryKey: ['id'])
+          .eq('branch_name', Globals.currentBranch),
+      builder: (context, snapshot) {
+        final all = snapshot.data ?? const [];
+        // Filtramos en memoria: el stream() de supabase-flutter solo
+        // soporta .eq, así que la condición compuesta la hacemos aquí.
+        final pending = all.where((o) =>
+            o['status'] == 'pending' &&
+            o['sent_to_kitchen_at'] == null).toList();
+        final count = pending.length;
+        return Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                tooltip: count == 0
+                    ? 'Sin pedidos pendientes del cliente'
+                    : '$count pedido(s) del cliente esperando',
+                icon: Icon(
+                  Icons.notifications,
+                  color: count == 0
+                      ? const Color(0xFFA08F70)
+                      : const Color(0xFFFF6D00),
+                ),
+                onPressed: count == 0
+                    ? null
+                    : () => _showPendingDialog(context, supabase, pending),
+              ),
+              if (count > 0)
+                Positioned(
+                  right: 4,
+                  top: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                        minWidth: 18, minHeight: 18),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showPendingDialog(
+    BuildContext context,
+    SupabaseClient supabase,
+    List<Map<String, dynamic>> orders,
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Row(
+            children: const [
+              Icon(Icons.notifications_active, color: Color(0xFFFF6D00)),
+              SizedBox(width: 8),
+              Text('Pedidos del cliente'),
+            ],
+          ),
+          content: SizedBox(
+            width: 380,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Estos pedidos del cliente esperan tu aprobación '
+                    'para mandarse a cocina e imprimir.',
+                    style: TextStyle(color: Color(0xFFA08F70), fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  for (final o in orders)
+                    Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  (o['order_type'] == 'delivery')
+                                      ? Icons.delivery_dining
+                                      : Icons.takeout_dining,
+                                  color: const Color(0xFFFF6D00),
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  (o['order_type'] ?? 'pedido')
+                                      .toString()
+                                      .toUpperCase(),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFFF6D00),
+                                  ),
+                                ),
+                                if (o['daily_folio'] != null) ...[
+                                  const Text(' • ',
+                                      style: TextStyle(
+                                          color: Color(0xFFA08F70))),
+                                  Text('Folio #${o['daily_folio']}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFFA08F70),
+                                      )),
+                                ],
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              o['customer_name']?.toString() ?? 'Sin nombre',
+                              style: const TextStyle(
+                                  color: Color(0xFF3D2E1A), fontSize: 13),
+                            ),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  try {
+                                    await supabase.from('orders').update({
+                                      'sent_to_kitchen_at': DateTime.now()
+                                          .toUtc()
+                                          .toIso8601String(),
+                                    }).eq('id', o['id'] as Object);
+                                    if (!ctx.mounted) return;
+                                    Navigator.pop(ctx);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Mandada a cocina — imprimiendo...'),
+                                        backgroundColor: Color(0xFFFF6D00),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    if (!ctx.mounted) return;
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: $e')),
+                                    );
+                                  }
+                                },
+                                icon: const Icon(Icons.print, size: 16),
+                                label: const Text('Mandar a cocina'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFF6D00),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  textStyle: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
