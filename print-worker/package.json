@@ -1,0 +1,19 @@
+{
+  "name": "restaurant-print-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Escucha la tabla `orders` de Supabase y manda tickets a la impresora térmica Star TSP143 (USB).",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test-print": "node index.js --test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.5",
+    "node-thermal-printer": "^4.4.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
