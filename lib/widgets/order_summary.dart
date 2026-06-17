@@ -697,8 +697,14 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         if (existingOrder != null) {
           orderId = existingOrder['id'] as String;
           final newTotal = (existingOrder['total_amount'] as num).toDouble() + cart.totalAmount;
+          // Agregar a una orden existente: actualizamos total + reseteamos
+          // printed_at + re-aplicamos sent_to_kitchen_at, para que el
+          // print-worker se entere y procese los items nuevos
+          // (filtra por printed_at IS NULL en order_items).
           await supabase.from('orders').update({
             'total_amount': newTotal,
+            'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
+            'printed_at': null,
           }).eq('id', orderId);
         } else {
           // El mesero "guardar comanda" = "mandar a cocina": setea
