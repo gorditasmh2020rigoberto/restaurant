@@ -11,6 +11,64 @@ Mini servicio Node.js que corre en la mini-PC de cocina (Windows). Escucha la ta
 
 Marca cada orden como `printed_at = NOW()` después de imprimir, así no se duplican tickets ni cuando se reinicia el worker.
 
+## Probar localmente (Mac/Linux, sin impresora)
+
+Para verificar que el flujo de Supabase → ticket funciona end-to-end sin tener que estar frente a la Star, usa el modo **DRY_RUN**:
+
+```bash
+cd print-worker
+npm install
+cp .env.example .env
+# Edita .env:
+#   SUPABASE_URL=...
+#   SUPABASE_SERVICE_KEY=...
+#   BRANCH_NAME=Maravillas
+#   DRY_RUN=true        ← clave
+npm start
+```
+
+El worker se conecta a Supabase de verdad, pero en vez de mandar bytes ESC-POS a una impresora, te dibuja el ticket en la **terminal** con la división COCINA/BAR. Ejemplo de output cuando alguien aprueba un pedido desde la PWA:
+
+```
+Print-worker iniciado | Sucursal: Maravillas | 🧪 DRY_RUN (terminal)
+Realtime: SUBSCRIBED
+→ Imprimiendo abc-1234 (realtime-update)...
+
+┌─── [DRY_RUN] Ticket(s) que se imprimirían ───┐
+                  COCINA
+            Sucursal Maravillas
+------------------------------------------------
+Tipo: DELIVERY
+Fecha: 16/06/2026 22:14
+Cliente: Mariano
+Tel: 4491234567
+Direccion:
+  Calle Moscatell, Fracc. Arboledas
+------------------------------------------------
+2 X GORDITA DE ASADA
+   Bistec, Chicharrón
+1 X ENVÍO FLASH
+------------------------------------------------
+                ID: abc-1234
+
+────────── ✂️  CORTE ──────────
+
+                   BAR
+            Sucursal Maravillas
+------------------------------------------------
+1 X REFRESCO 600ML
+   Coca-Cola
+------------------------------------------------
+                ID: abc-1234
+
+────────── ✂️  CORTE ──────────
+└──────────────────────────────────────────────┘
+
+✓ abc-1234 impresa y marcada
+```
+
+`printed_at` se marca igual en la BD — así puedes verificar el ciclo completo. Cuando estés listo para producción en la mini-PC, quita `DRY_RUN=true` del `.env`.
+
 ## Pre-requisitos en la mini-PC
 
 1. **Windows 10 / 11** (probado en estos).

@@ -25,14 +25,20 @@ const {
   SUPABASE_SERVICE_KEY,
   PRINTER_NAME,
   BRANCH_NAME,
+  DRY_RUN,
 } = process.env;
 
-for (const [k, v] of Object.entries({
-  SUPABASE_URL,
-  SUPABASE_SERVICE_KEY,
-  PRINTER_NAME,
-  BRANCH_NAME,
-})) {
+// DRY_RUN=true → no manda nada a la impresora; imprime el ticket
+// formateado en la terminal. Útil para probar localmente (p.ej. en
+// Mac sin impresora térmica) que la suscripción a Supabase, el
+// formato y la división en COCINA/BAR funcionan end-to-end.
+const isDryRun = String(DRY_RUN || '').toLowerCase() === 'true';
+
+const requiredVars = isDryRun
+  ? { SUPABASE_URL, SUPABASE_SERVICE_KEY, BRANCH_NAME }
+  : { SUPABASE_URL, SUPABASE_SERVICE_KEY, PRINTER_NAME, BRANCH_NAME };
+
+for (const [k, v] of Object.entries(requiredVars)) {
   if (!v) {
     console.error(`✘ Falta variable de entorno: ${k}. Revisa el archivo .env`);
     process.exit(1);
@@ -43,7 +49,55 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
 });
 
+// Fake printer para DRY_RUN: misma API que ThermalPrinter pero acumula
+// líneas en memoria y al execute() las vuelca a la terminal con cierto
+// formato (mayúsculas para bold, ====== para drawLine, ✂️ para cut).
+function buildDryRunPrinter() {
+  const lines = [];
+  let bold = false;
+  let align = 'left';
+  let scale = 'normal';
+  const pad = (s) => {
+    s = String(s);
+    if (align === 'center') {
+      const w = 48;
+      const trimmed = s.length > w ? s.slice(0, w) : s;
+      const space = Math.max(0, Math.floor((w - trimmed.length) / 2));
+      return ' '.repeat(space) + trimmed;
+    }
+    return s;
+  };
+  const fmt = (s) => {
+    let out = pad(s);
+    if (bold) out = out.toUpperCase();
+    if (scale === 'double') out = `★ ${out} ★`;
+    return out;
+  };
+  return {
+    isPrinterConnected: async () => true,
+    alignCenter: () => { align = 'center'; },
+    alignLeft: () => { align = 'left'; },
+    alignRight: () => { align = 'right'; },
+    bold: (v) => { bold = !!v; },
+    setTextDoubleHeight: () => { scale = 'double'; },
+    setTextNormal: () => { scale = 'normal'; },
+    println: (s) => lines.push(fmt(s)),
+    newLine: () => lines.push(''),
+    drawLine: () => lines.push('-'.repeat(48)),
+    cut: () => lines.push('\n────────── ✂️  CORTE ──────────\n'),
+    execute: async () => {
+      console.log(
+        '\n┌─── [DRY_RUN] Ticket(s) que se imprimirían ───┐',
+      );
+      for (const l of lines) console.log(l);
+      console.log('└──────────────────────────────────────────────┘\n');
+      lines.length = 0;
+    },
+  };
+}
+
 function buildPrinter() {
+  if (isDryRun) return buildDryRunPrinter();
   // En Windows, `interface: 'printer:NOMBRE'` manda los bytes al spooler
   // del sistema operativo, que a su vez los pasa a la impresora USB.
   return new ThermalPrinter({
@@ -317,7 +371,8 @@ function subscribeRealtime() {
 
 // ── Test print ──────────────────────────────────────────────────────
 async function testPrint() {
-  console.log(`Imprimiendo ticket de prueba en "${PRINTER_NAME}"...`);
+  const target = isDryRun ? 'DRY_RUN (terminal)' : `"${PRINTER_NAME}"`;
+  console.log(`Imprimiendo ticket de prueba en ${target}...`);
   const printer = buildPrinter();
   const ok = await printer.isPrinterConnected();
   if (!ok) {
@@ -334,7 +389,7 @@ async function testPrint() {
   printer.println(fmtDateTime());
   printer.drawLine();
   printer.println(`Sucursal: ${BRANCH_NAME}`);
-  printer.println(`Impresora: ${PRINTER_NAME}`);
+  printer.println(`Modo: ${isDryRun ? 'DRY_RUN' : `Impresora ${PRINTER_NAME}`}`);
   printer.newLine();
   printer.cut();
   await printer.execute();
@@ -348,7 +403,10 @@ async function main() {
     await testPrint();
     return;
   }
-  console.log(`Print-worker iniciado | Sucursal: ${BRANCH_NAME} | Impresora: ${PRINTER_NAME}`);
+  console.log(
+    `Print-worker iniciado | Sucursal: ${BRANCH_NAME} | ` +
+      (isDryRun ? '🧪 DRY_RUN (terminal)' : `Impresora: ${PRINTER_NAME}`),
+  );
   await catchUp();
   subscribeRealtime();
   // Red de seguridad: re-corre catch-up cada 60 s.
