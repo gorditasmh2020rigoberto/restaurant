@@ -63,11 +63,6 @@ function fmtDateTime(ts) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function fmtMoney(n) {
-  const num = Number(n) || 0;
-  return `$${num.toFixed(2)}`;
-}
-
 // `customer_name` viene smushed: "Mariano (Pago: efectivo) - DIR: ... - TEL: ..."
 // Lo partimos para imprimirlo en líneas separadas.
 function parseCustomerName(raw) {
@@ -113,29 +108,33 @@ async function fetchOrder(orderId) {
   return data;
 }
 
-async function printOrder(order) {
-  const printer = buildPrinter();
-  // Sanity check: solo si la impresora está conectada lanzamos.
-  const connected = await printer.isPrinterConnected();
-  if (!connected) {
-    throw new Error(`Impresora "${PRINTER_NAME}" no responde. Verifica USB/driver.`);
-  }
+// Clasifica un order_item como bebida (BAR) o comida (COCINA) usando
+// la misma regla de category que `kitchen_view.dart`. El Envío FLASH
+// (categoría 'Envío') se considera comida para que el cocinero vea
+// que es delivery.
+const DRINK_CATEGORIES = ['drink', 'alcohol', 'bebidas', 'drinks'];
+function isDrink(item) {
+  const cat = (item.dishes?.category || '').toString().toLowerCase().trim();
+  return DRINK_CATEGORIES.includes(cat);
+}
 
+// Añade un ticket completo (header → ítems → cut) al buffer del printer.
+// `kind` es 'COCINA' o 'BAR'. No llama execute() — lo hace el caller.
+function appendTicket(printer, kind, order, items) {
   const cust = parseCustomerName(order.customer_name);
   const tipo = (order.order_type || 'pedido').toUpperCase();
-  const items = order.order_items || [];
 
   // ── Encabezado
   printer.alignCenter();
   printer.setTextDoubleHeight();
   printer.bold(true);
-  printer.println('GORDITAS');
+  printer.println(kind);
   printer.bold(false);
   printer.setTextNormal();
   printer.println(`Sucursal ${order.branch_name || ''}`);
   printer.drawLine();
 
-  // ── Tipo + fecha
+  // ── Tipo + fecha + cliente
   printer.alignLeft();
   printer.setTextNormal();
   printer.println(`Tipo: ${tipo}`);
@@ -150,23 +149,13 @@ async function printOrder(order) {
   if (cust.pago) printer.println(`Pago: ${cust.pago}`);
   printer.drawLine();
 
-  // ── Ítems
+  // ── Ítems (sin precios — esto es ticket de producción, no recibo)
   for (const it of items) {
     const name = it.dishes?.name || '(sin nombre)';
     const qty = it.quantity || 1;
-    const price = Number(it.price_at_time || 0) * qty;
-    const left = `${qty} x ${name}`;
-    const right = fmtMoney(price);
-    // Si el renglón cabe en 42 char (estándar TSP143 80mm), lo manda
-    // como tabla; si no, dos líneas.
-    if (left.length + right.length + 2 <= 42) {
-      printer.leftRight(left, right);
-    } else {
-      printer.println(left);
-      printer.alignRight();
-      printer.println(right);
-      printer.alignLeft();
-    }
+    printer.bold(true);
+    printer.println(`${qty} x ${name}`);
+    printer.bold(false);
     const guisados = parseGuisados(it.guisados_selected);
     if (guisados.length) {
       printer.println(`   ${guisados.join(', ')}`);
@@ -177,19 +166,34 @@ async function printOrder(order) {
   }
   printer.drawLine();
 
-  // ── Total
-  printer.bold(true);
-  printer.setTextDoubleWidth();
-  printer.leftRight('TOTAL', fmtMoney(order.total_amount));
-  printer.setTextNormal();
-  printer.bold(false);
-
   // ── Pie
   printer.alignCenter();
-  printer.newLine();
   printer.println(`ID: ${String(order.id).slice(0, 8)}`);
   printer.newLine();
   printer.cut();
+}
+
+async function printOrder(order) {
+  const printer = buildPrinter();
+  // Sanity check: solo si la impresora está conectada lanzamos.
+  const connected = await printer.isPrinterConnected();
+  if (!connected) {
+    throw new Error(`Impresora "${PRINTER_NAME}" no responde. Verifica USB/driver.`);
+  }
+
+  const items = order.order_items || [];
+  const drinks = items.filter(isDrink);
+  const kitchen = items.filter((it) => !isDrink(it));
+
+  if (!drinks.length && !kitchen.length) {
+    console.warn(`⚠ Orden ${order.id} sin ítems — nada que imprimir`);
+    return;
+  }
+
+  // Orden de impresión: COCINA primero (la comida tarda más), BAR
+  // después. Salen como dos tickets independientes con su propio cut.
+  if (kitchen.length) appendTicket(printer, 'COCINA', order, kitchen);
+  if (drinks.length) appendTicket(printer, 'BAR', order, drinks);
 
   await printer.execute();
 }

@@ -92,9 +92,13 @@ Para verificarlo: reinicia la mini-PC, manda una orden desde otro dispositivo, d
 
 ## Formato del ticket
 
+Cada orden saca **dos tickets** (cocina + bar) que cortan entre sí. El
+de COCINA sale primero. Solo se imprime el ticket de un área si esa
+área tiene ítems — una orden sin bebidas no saca ticket de bar.
+
 ```
 ============================================
-                GORDITAS
+                COCINA
           Sucursal Maravillas
 ============================================
 Tipo: DELIVERY
@@ -103,17 +107,34 @@ Cliente: Mariano
 Tel: 4491234567
 Direccion:
   Calle X 123, Col. Centro
-Pago: efectivo
 --------------------------------------------
-2 x Gordita de Asada                  $80.00
+2 x Gordita de Asada
    Bistec, Chicharrón
-1 x Refresco 600ml                    $30.00
-   Coca-Cola
-1 x Envío FLASH                       $50.00
+1 x Envío FLASH
 --------------------------------------------
-TOTAL                                $160.00
-
                 ID: 8f3a1b2c
+[CORTE]
+
+============================================
+                  BAR
+          Sucursal Maravillas
+============================================
+Tipo: DELIVERY
+Fecha: 16/06/2026 19:42
+Cliente: Mariano
+--------------------------------------------
+1 x Refresco 600ml
+   Coca-Cola
+--------------------------------------------
+                ID: 8f3a1b2c
+[CORTE]
 ```
 
-Para cambiar el formato, edita `printOrder()` en `index.js`.
+Estos son tickets de **producción** (para cocina/bar) — no llevan
+precio ni total. Si quieres agregar precios, edita `appendTicket()`
+en `index.js`.
+
+Las categorías que cuentan como bebida son: `drink`, `alcohol`,
+`bebidas`, `drinks` (mismas que usa `kitchen_view.dart`). Cualquier
+otra categoría va a cocina, incluyendo el Envío FLASH (para que el
+cocinero sepa que es delivery).
