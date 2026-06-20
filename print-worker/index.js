@@ -19,11 +19,23 @@ const {
   types: PrinterTypes,
 } = require('node-thermal-printer');
 
+// Node <22 no tiene WebSocket nativo y @supabase/realtime-js lo exige
+// (incluso si solo hacemos polling). Cargamos `ws` como polyfill.
+let wsTransport;
+try {
+  wsTransport = require('ws');
+} catch {
+  // Node 22+ trae WebSocket nativo, no se necesita.
+}
+
 // ── Config ──────────────────────────────────────────────────────────
 const {
   SUPABASE_URL,
   SUPABASE_SERVICE_KEY,
-  PRINTER_NAME,
+  PRINTER_NAME,    // Windows: nombre en el spooler ("Star TSP143")
+  PRINTER_DEVICE,  // Linux/Raspberry: device file ("/dev/usb/lp0")
+  PRINTER_TYPE,    // 'epson' (default) o 'star' — comando set de la impresora
+  PAPER_WIDTH_CHARS, // 48 (80mm, default) o 32 (58mm)
   BRANCH_NAME,
   DRY_RUN,
 } = process.env;
@@ -34,19 +46,27 @@ const {
 // formato y la división en COCINA/BAR funcionan end-to-end.
 const isDryRun = String(DRY_RUN || '').toLowerCase() === 'true';
 
-const requiredVars = isDryRun
-  ? { SUPABASE_URL, SUPABASE_SERVICE_KEY, BRANCH_NAME }
-  : { SUPABASE_URL, SUPABASE_SERVICE_KEY, PRINTER_NAME, BRANCH_NAME };
+const paperWidth = Math.max(20, parseInt(PAPER_WIDTH_CHARS || '48', 10));
 
+const requiredVars = { SUPABASE_URL, SUPABASE_SERVICE_KEY, BRANCH_NAME };
 for (const [k, v] of Object.entries(requiredVars)) {
   if (!v) {
     console.error(`✘ Falta variable de entorno: ${k}. Revisa el archivo .env`);
     process.exit(1);
   }
 }
+if (!isDryRun && !PRINTER_NAME && !PRINTER_DEVICE) {
+  console.error(
+    '✘ Falta PRINTER_NAME (Windows) o PRINTER_DEVICE (Linux, p.ej. /dev/usb/lp0). Define uno en .env',
+  );
+  process.exit(1);
+}
+
+const printerTarget = PRINTER_DEVICE || PRINTER_NAME || '';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: { persistSession: false },
+  realtime: wsTransport ? { transport: wsTransport } : undefined,
 });
 
 // Fake printer para DRY_RUN: misma API que ThermalPrinter pero acumula
@@ -60,7 +80,7 @@ function buildDryRunPrinter() {
   const pad = (s) => {
     s = String(s);
     if (align === 'center') {
-      const w = 48;
+      const w = paperWidth;
       const trimmed = s.length > w ? s.slice(0, w) : s;
       const space = Math.max(0, Math.floor((w - trimmed.length) / 2));
       return ' '.repeat(space) + trimmed;
@@ -83,7 +103,7 @@ function buildDryRunPrinter() {
     setTextNormal: () => { scale = 'normal'; },
     println: (s) => lines.push(fmt(s)),
     newLine: () => lines.push(''),
-    drawLine: () => lines.push('-'.repeat(48)),
+    drawLine: () => lines.push('-'.repeat(paperWidth)),
     cut: () => lines.push('\n────────── ✂️  CORTE ──────────\n'),
     execute: async () => {
       console.log(
@@ -98,11 +118,17 @@ function buildDryRunPrinter() {
 
 function buildPrinter() {
   if (isDryRun) return buildDryRunPrinter();
-  // En Windows, `interface: 'printer:NOMBRE'` manda los bytes al spooler
-  // del sistema operativo, que a su vez los pasa a la impresora USB.
+  // - Windows: PRINTER_NAME="Star TSP143" → 'printer:Star TSP143' (spooler)
+  // - Linux/Raspberry: PRINTER_DEVICE="/dev/usb/lp0" → escribe al device USB
+  //   directamente (no requiere CUPS).
+  const iface = PRINTER_DEVICE ? PRINTER_DEVICE : `printer:${PRINTER_NAME}`;
+  const type = String(PRINTER_TYPE || 'epson').toLowerCase() === 'star'
+    ? PrinterTypes.STAR
+    : PrinterTypes.EPSON;
   return new ThermalPrinter({
-    type: PrinterTypes.STAR,
-    interface: `printer:${PRINTER_NAME}`,
+    type,
+    interface: iface,
+    width: paperWidth,
     characterSet: 'PC858_EURO',
     removeSpecialCharacters: false,
     lineCharacter: '-',
@@ -277,7 +303,7 @@ async function printItems(order, items) {
   const printer = buildPrinter();
   const connected = await printer.isPrinterConnected();
   if (!connected) {
-    throw new Error(`Impresora "${PRINTER_NAME}" no responde. Verifica USB/driver.`);
+    throw new Error(`Impresora "${printerTarget}" no responde. Verifica USB/driver.`);
   }
 
   const drinks = items.filter(isDrink);
@@ -420,7 +446,7 @@ function subscribeRealtime() {
 
 // ── Test print ──────────────────────────────────────────────────────
 async function testPrint() {
-  const target = isDryRun ? 'DRY_RUN (terminal)' : `"${PRINTER_NAME}"`;
+  const target = isDryRun ? 'DRY_RUN (terminal)' : `"${printerTarget}"`;
   console.log(`Imprimiendo ticket de prueba en ${target}...`);
   const printer = buildPrinter();
   const ok = await printer.isPrinterConnected();
@@ -438,7 +464,8 @@ async function testPrint() {
   printer.println(fmtDateTime());
   printer.drawLine();
   printer.println(`Sucursal: ${BRANCH_NAME}`);
-  printer.println(`Modo: ${isDryRun ? 'DRY_RUN' : `Impresora ${PRINTER_NAME}`}`);
+  printer.println(`Modo: ${isDryRun ? 'DRY_RUN' : `Impresora ${printerTarget}`}`);
+  printer.println(`Ancho: ${paperWidth} cols`);
   printer.newLine();
   printer.cut();
   await printer.execute();
@@ -454,7 +481,7 @@ async function main() {
   }
   console.log(
     `Print-worker iniciado | Sucursal: ${BRANCH_NAME} | ` +
-      (isDryRun ? '🧪 DRY_RUN (terminal)' : `Impresora: ${PRINTER_NAME}`),
+      (isDryRun ? '🧪 DRY_RUN (terminal)' : `Impresora: ${printerTarget} (${paperWidth} cols)`),
   );
   await catchUp();
   subscribeRealtime();
