@@ -151,8 +151,10 @@ Para verificarlo: reinicia la mini-PC, manda una orden desde otro dispositivo, d
 ## Formato del ticket
 
 Cada orden saca **dos tickets** (cocina + bar) que cortan entre sí. El
-de COCINA sale primero. Solo se imprime el ticket de un área si esa
-área tiene ítems — una orden sin bebidas no saca ticket de bar.
+de COCINA sale primero, después hay una pausa de 5 s (configurable con
+`PAUSE_BETWEEN_TICKETS_MS`) para dar tiempo a cortar/agarrar el ticket
+antes de que salga el de BAR. Solo se imprime el ticket de un área si
+esa área tiene ítems — una orden sin bebidas no saca ticket de bar.
 
 ```
 ============================================

@@ -36,6 +36,8 @@ const {
   PRINTER_DEVICE,  // Linux/Raspberry: device file ("/dev/usb/lp0")
   PRINTER_TYPE,    // 'epson' (default) o 'star' — comando set de la impresora
   PAPER_WIDTH_CHARS, // 48 (80mm, default) o 32 (58mm)
+  PAUSE_BETWEEN_TICKETS_MS, // ms de pausa entre BAR y COCINA (default 5000)
+  RESTAURANT_NAME, // se imprime en el encabezado de cada ticket
   BRANCH_NAME,
   DRY_RUN,
 } = process.env;
@@ -47,6 +49,8 @@ const {
 const isDryRun = String(DRY_RUN || '').toLowerCase() === 'true';
 
 const paperWidth = Math.max(20, parseInt(PAPER_WIDTH_CHARS || '48', 10));
+const pauseBetweenTicketsMs = Math.max(0, parseInt(PAUSE_BETWEEN_TICKETS_MS || '5000', 10));
+const restaurantName = (RESTAURANT_NAME || 'GORDITAS MIS HERMANAS').trim();
 
 const requiredVars = { SUPABASE_URL, SUPABASE_SERVICE_KEY, BRANCH_NAME };
 for (const [k, v] of Object.entries(requiredVars)) {
@@ -117,7 +121,7 @@ function buildDryRunPrinter() {
 }
 
 function buildPrinter() {
-  if (isDryRun) return buildDryRunPrinter();
+  if (isDryRun) return wrapPrinterAscii(buildDryRunPrinter());
   // - Windows: PRINTER_NAME="Star TSP143" → 'printer:Star TSP143' (spooler)
   // - Linux/Raspberry: PRINTER_DEVICE="/dev/usb/lp0" → escribe al device USB
   //   directamente (no requiere CUPS).
@@ -125,7 +129,7 @@ function buildPrinter() {
   const type = String(PRINTER_TYPE || 'epson').toLowerCase() === 'star'
     ? PrinterTypes.STAR
     : PrinterTypes.EPSON;
-  return new ThermalPrinter({
+  const printer = new ThermalPrinter({
     type,
     interface: iface,
     width: paperWidth,
@@ -134,9 +138,31 @@ function buildPrinter() {
     lineCharacter: '-',
     options: { timeout: 5000 },
   });
+  return wrapPrinterAscii(printer);
 }
 
 // ── Utils ───────────────────────────────────────────────────────────
+
+// Normaliza el texto a ASCII básico: quita acentos (á→a, é→e, ñ→n, ü→u…)
+// y otros diacríticos. La impresora térmica con charset PC858 a veces
+// renderiza glifos raros con vocales acentuadas; con esto siempre salen
+// letras "normales" sin importar la configuración del driver.
+function stripAccents(s) {
+  if (s == null) return s;
+  return String(s)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, ''); // combining diacritical marks
+}
+
+// Wraps un printer para que TODO lo que pase por println / drawLine /
+// alignXxx pase por stripAccents primero. Solo `println` mete texto;
+// el resto son comandos sin payload de string.
+function wrapPrinterAscii(printer) {
+  const origPrintln = printer.println.bind(printer);
+  printer.println = (s) => origPrintln(stripAccents(s));
+  return printer;
+}
+
 function fmtDateTime(ts) {
   const d = ts ? new Date(ts) : new Date();
   const pad = (n) => String(n).padStart(2, '0');
@@ -173,13 +199,19 @@ function parseGuisados(raw) {
 // ── Fetch + Format + Print ──────────────────────────────────────────
 // Fetch SOLO los datos de la orden (no items). Items se traen aparte
 // filtrados por printed_at IS NULL.
+//
+// JOIN-via-FK:
+//   - table_id  → restaurant_tables.table_number (número de mesa legible)
+//   - waiter_id → waiters.name (nombre del mesero)
 async function fetchOrder(orderId) {
   const { data, error } = await supabase
     .from('orders')
     .select(`
       id, branch_name, order_type, customer_name, total_amount,
-      table_id, created_at, payment_method,
-      sent_to_kitchen_at, printed_at
+      table_id, waiter_id, created_at, payment_method,
+      sent_to_kitchen_at, printed_at,
+      restaurant_tables ( table_number ),
+      waiters ( name )
     `)
     .eq('id', orderId)
     .maybeSingle();
@@ -247,22 +279,38 @@ function isDrink(item) {
 function appendTicket(printer, kind, order, items) {
   const cust = parseCustomerName(order.customer_name);
   const tipo = (order.order_type || 'pedido').toUpperCase();
+  // Mesa: viene como un JOIN (restaurant_tables.table_number). Si la
+  // PWA cambia el nombre del FK, cae al table_id (UUID) como fallback.
+  const tableNumber = order.restaurant_tables?.table_number;
+  // Mesero: igual, viene de waiters.name.
+  const waiterName = order.waiters?.name;
 
   // ── Encabezado
   printer.alignCenter();
   printer.setTextDoubleHeight();
   printer.bold(true);
+  printer.println(restaurantName);
+  printer.setTextNormal();
   printer.println(kind);
   printer.bold(false);
-  printer.setTextNormal();
-  printer.println(`Sucursal ${order.branch_name || ''}`);
+  // `branch_name` en la BD ya viene como "Sucursal Maravillas", no le
+  // anteponemos "Sucursal " porque salía duplicado ("Sucursal Sucursal
+  // Maravillas").
+  if (order.branch_name) printer.println(order.branch_name);
   printer.drawLine();
 
   // ── Tipo + fecha + cliente
   printer.alignLeft();
   printer.setTextNormal();
   printer.println(`Tipo: ${tipo}`);
-  if (order.table_id) printer.println(`Mesa: ${order.table_id}`);
+  if (tableNumber != null) {
+    printer.println(`Mesa: ${tableNumber}`);
+  } else if (order.table_id) {
+    // Fallback: si por alguna razón no resolvió el JOIN, mostramos el UUID
+    // recortado para no romper el ticket.
+    printer.println(`Mesa: ${String(order.table_id).slice(0, 8)}`);
+  }
+  if (waiterName) printer.println(`Mesero: ${waiterName}`);
   printer.println(`Fecha: ${fmtDateTime(order.created_at)}`);
   if (cust.name) printer.println(`Cliente: ${cust.name}`);
   if (cust.tel) printer.println(`Tel: ${cust.tel}`);
@@ -297,15 +345,27 @@ function appendTicket(printer, kind, order, items) {
   printer.cut();
 }
 
-// Imprime los items dados (ya filtrados por unprinted). Devuelve true
-// si efectivamente mandó algo, false si no había nada que imprimir.
-async function printItems(order, items) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Imprime un ticket "solo" (su propio buffer + execute), para que el
+// barman/cocinero pueda cortarlo físicamente antes de que salga el siguiente.
+async function printSingleTicket(kind, order, items) {
   const printer = buildPrinter();
   const connected = await printer.isPrinterConnected();
   if (!connected) {
     throw new Error(`Impresora "${printerTarget}" no responde. Verifica USB/driver.`);
   }
+  appendTicket(printer, kind, order, items);
+  await printer.execute();
+}
 
+// Imprime los items dados (ya filtrados por unprinted). Devuelve true
+// si efectivamente mandó algo, false si no había nada que imprimir.
+//
+// Flujo: COCINA primero, después BAR. Entre ambos hay una pausa
+// configurable (PAUSE_BETWEEN_TICKETS_MS, default 5s) para que el
+// cocinero pueda cortar/agarrar el ticket antes de que salga el siguiente.
+async function printItems(order, items) {
   const drinks = items.filter(isDrink);
   const kitchen = items.filter((it) => !isDrink(it));
 
@@ -317,13 +377,26 @@ async function printItems(order, items) {
   const isAddition = !!order.printed_at;
 
   if (kitchen.length) {
-    appendTicket(printer, isAddition ? 'COCINA — ADICIÓN' : 'COCINA', order, kitchen);
-  }
-  if (drinks.length) {
-    appendTicket(printer, isAddition ? 'BAR — ADICIÓN' : 'BAR', order, drinks);
+    await printSingleTicket(
+      isAddition ? 'COCINA — ADICIÓN' : 'COCINA',
+      order,
+      kitchen,
+    );
   }
 
-  await printer.execute();
+  // Pausa entre tickets solo si hay AMBOS (si solo hay uno, no tiene sentido).
+  if (drinks.length && kitchen.length && pauseBetweenTicketsMs > 0) {
+    await sleep(pauseBetweenTicketsMs);
+  }
+
+  if (drinks.length) {
+    await printSingleTicket(
+      isAddition ? 'BAR — ADICIÓN' : 'BAR',
+      order,
+      drinks,
+    );
+  }
+
   return true;
 }
 
