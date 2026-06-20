@@ -1,0 +1,37 @@
+# VCS
+.git/
+.github/
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.iml
+
+# Flutter intermediates (regenerados por `flutter build`)
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+flutter_*.png
+flutter_log.txt
+build_log.txt
+proxy_log.txt
+
+# Native platform builds (web no los necesita)
+android/build/
+android/.gradle/
+ios/build/
+ios/Pods/
+
+# Sibling project Node.js (no es parte del bundle Flutter Web)
+print-worker/
+
+# Logs
+*.log
+
+# Secretos
+.env
+.env.*
+
+# macOS
+.DS_Store

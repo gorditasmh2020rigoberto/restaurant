@@ -1,46 +1,50 @@
-# ETAPA 1: Compilación de la aplicación
-FROM debian:stable-slim AS build-env
+# syntax=docker/dockerfile:1.7
 
-# Instalar dependencias esenciales
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    wget \
-    unzip \
-    ca-certificates \
-    && apt-get clean
+# ─── ETAPA 1: Compilación de la app Flutter Web ────────────────────────
+#
+# Imagen prebuilt de Flutter (cirruslabs es el estándar de facto en CI).
+# Ahorra ~2-3 min por deploy vs el flujo anterior que (1) hacía
+# `apt-get install` de curl/git/wget/unzip, (2) `git clone` del repo de
+# flutter (~100 MB), y (3) `flutter channel stable && flutter upgrade`.
+FROM ghcr.io/cirruslabs/flutter:stable AS build-env
 
-# Descargar Flutter SDK
-RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
-ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+# La imagen cirruslabs usa el user `cirrus` por defecto; forzamos root
+# para evitar issues de permisos al COPY/build.
+USER root
 
-# Configurar Flutter
-RUN flutter channel stable
-RUN flutter upgrade
-
-# Configurar el directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos del proyecto
+# 1) Copiar SOLO los manifests primero. El layer de `pub get` se cachea
+#    así entre builds y solo se re-corre si cambian las dependencias,
+#    no en cada commit. Sin esto, cualquier cambio en `lib/` invalida
+#    el caché y se re-descargan ~150 MB de paquetes cada deploy.
+COPY pubspec.yaml pubspec.lock ./
+
+# 2) `pub get` con cache mount persistente (BuildKit). Los paquetes
+#    descargados sobreviven a invalidaciones del layer.
+RUN --mount=type=cache,target=/root/.pub-cache \
+    flutter pub get
+
+# 3) Ahora sí copiamos el resto del código fuente.
 COPY . .
 
-# Obtener dependencias y compilar para web. La GOOGLE_MAPS_API_KEY se
-# inyecta en runtime vía env-config.js (ver docker-entrypoint.sh), no
-# en build time, porque EasyPanel solo pasa env vars al container al
-# arrancar (no al docker build).
-RUN flutter pub get
-RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none
+# 4) Build web. La GOOGLE_MAPS_API_KEY se inyecta en runtime vía
+#    env-config.js (ver docker-entrypoint.sh), no en build time, porque
+#    EasyPanel solo pasa env vars al container al arrancar (no al
+#    `docker build`).
+RUN --mount=type=cache,target=/root/.pub-cache \
+    flutter build web --release --no-tree-shake-icons --pwa-strategy=none
 
-# ETAPA 2: Servir con Nginx (Servidor Web)
+# ─── ETAPA 2: Servir con Nginx ─────────────────────────────────────────
 FROM nginx:alpine
 
-# Copiar el resultado de la etapa anterior al directorio de Nginx
+# Copia el resultado del build al directorio de Nginx
 COPY --from=build-env /app/build/web /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Script que genera /usr/share/nginx/html/env-config.js a partir de las
-# variables de entorno del container ANTES de iniciar nginx. Permite que
-# EasyPanel inyecte GOOGLE_MAPS_API_KEY en runtime sin re-buildear.
+# Entrypoint genera /usr/share/nginx/html/env-config.js a partir de las
+# env vars del container ANTES de iniciar nginx. Permite que EasyPanel
+# inyecte GOOGLE_MAPS_API_KEY en runtime sin re-buildear.
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
