@@ -2,30 +2,44 @@
 
 # ─── ETAPA 1: Compilación de la app Flutter Web ────────────────────────
 #
-# Imagen prebuilt de Flutter (cirruslabs es el estándar de facto en CI).
-# Ahorra ~2-3 min por deploy vs el flujo anterior que (1) hacía
-# `apt-get install` de curl/git/wget/unzip, (2) `git clone` del repo de
-# flutter (~100 MB), y (3) `flutter channel stable && flutter upgrade`.
-FROM ghcr.io/cirruslabs/flutter:stable AS build-env
+# Base: debian:stable-slim + Flutter clonado (shallow). Antes intentamos
+# usar ghcr.io/cirruslabs/flutter:stable pero la imagen es ~10 GB extraídos
+# e incluye el emulador de Android, cuyos pseudo-devices crasheaban el
+# snapshotter de containerd con overlayfs (`failed to Lchown ...
+# qemu-system-armel-headless`). Volvemos a clonar Flutter pero con
+# `--depth=1 -b stable` (solo ~80 MB) y precargamos el SDK.
+FROM debian:stable-slim AS build-env
 
-# La imagen cirruslabs usa el user `cirrus` por defecto; forzamos root
-# para evitar issues de permisos al COPY/build.
-USER root
+RUN apt-get update && apt-get install -y \
+    curl git wget unzip ca-certificates xz-utils \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Clone shallow del branch stable (sin historia, sin otros branches).
+RUN git clone --depth=1 -b stable https://github.com/flutter/flutter.git /usr/local/flutter
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# Marca el folder como safe para git (evita warnings de "dubious ownership"
+# cuando flutter intenta leer git info dentro del SDK).
+RUN git config --global --add safe.directory /usr/local/flutter
+
+# Pre-cargar el Dart SDK de Flutter en este layer (queda cacheado).
+# Sin esto, el primer `pub get` lo descarga y rompe el cache mount.
+RUN flutter --version
 
 WORKDIR /app
 
-# 1) Copiar SOLO los manifests primero. El layer de `pub get` se cachea
-#    así entre builds y solo se re-corre si cambian las dependencias,
-#    no en cada commit. Sin esto, cualquier cambio en `lib/` invalida
-#    el caché y se re-descargan ~150 MB de paquetes cada deploy.
+# ─── Capas optimizadas para cache de pub get ─────────────────────────────
+#
+# 1) Copiar SOLO los manifests primero. Si solo cambia código en lib/, el
+#    layer de pub get se reusa (antes se invalidaba en cada commit y se
+#    re-descargaban ~150 MB de paquetes).
 COPY pubspec.yaml pubspec.lock ./
 
-# 2) `pub get` con cache mount persistente (BuildKit). Los paquetes
-#    descargados sobreviven a invalidaciones del layer.
+# 2) `pub get` con cache mount BuildKit para el pub-cache global.
 RUN --mount=type=cache,target=/root/.pub-cache \
     flutter pub get
 
-# 3) Ahora sí copiamos el resto del código fuente.
+# 3) Ahora sí el resto del código.
 COPY . .
 
 # 4) Build web. La GOOGLE_MAPS_API_KEY se inyecta en runtime vía
