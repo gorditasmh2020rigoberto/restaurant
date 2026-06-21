@@ -300,6 +300,25 @@ class _AdminViewState extends State<AdminView> {
                             setState(() {});
                           },
                         ),
+                        SwitchListTile(
+                          value: Globals.displayModeFor(Globals.currentBranch) == 'screen',
+                          title: const Text('Modo Pantalla', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 13)),
+                          subtitle: Text(
+                            Globals.displayModeFor(Globals.currentBranch) == 'screen'
+                                ? 'Cocina ve órdenes en pantalla; no imprime'
+                                : 'Imprime tickets en impresora térmica',
+                            style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
+                          ),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: (val) async {
+                            await Globals.setDisplayMode(
+                              Globals.currentBranch,
+                              val ? 'screen' : 'printer',
+                            );
+                            setState(() {});
+                          },
+                        ),
                       ],
                     ),
                   ),

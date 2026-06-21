@@ -8,6 +8,18 @@ class Globals {
   static List<String> branches = ['Sucursal Maravillas', 'Sucursal Pocitos'];
   static bool splitKitchenMode = false;
   static String currentUser = 'Admin';
+
+  /// Modo de visualización de cocina por sucursal:
+  ///   'printer' (default) → imprime tickets en impresora térmica.
+  ///   'screen'            → cocina ve órdenes en pantalla (kitchen_view).
+  /// Lo lee el print-worker desde admin_settings y deja de imprimir si está
+  /// en 'screen'. La pantalla (kitchen_view o kitchen-display-lite) no
+  /// necesita este flag — siempre muestra; el flag solo controla la
+  /// impresora.
+  static Map<String, String> displayModes = {};
+
+  static String displayModeFor(String branch) =>
+      displayModes[branch] ?? 'printer';
   
   static Future<void> loadBranch() async {
     final prefs = await SharedPreferences.getInstance();
@@ -26,6 +38,14 @@ class Globals {
         } else if (setting['setting_key'] == 'admin_user') {
           final val = setting['setting_value'] as String?;
           if (val != null && val.isNotEmpty) currentUser = val;
+        } else if (setting['setting_key'] == 'display_modes') {
+          try {
+            final raw = setting['setting_value'] as String;
+            final map = jsonDecode(raw) as Map<String, dynamic>;
+            displayModes = map.map((k, v) => MapEntry(k, v.toString()));
+          } catch (e) {
+            displayModes = {};
+          }
         }
       }
     } catch (e) {
@@ -57,6 +77,22 @@ class Globals {
       });
     } catch (e) {
       print('Error saving split mode: $e');
+    }
+  }
+
+  /// Cambia el modo de visualización de una sucursal. Persiste en
+  /// admin_settings.display_modes (JSON map de branch→mode). El
+  /// print-worker lo lee cada 30s y se ajusta sin reiniciar.
+  static Future<void> setDisplayMode(String branch, String mode) async {
+    displayModes[branch] = mode;
+    try {
+      final supabase = Supabase.instance.client;
+      await supabase.from('admin_settings').upsert({
+        'setting_key': 'display_modes',
+        'setting_value': jsonEncode(displayModes),
+      });
+    } catch (e) {
+      print('Error saving display modes: $e');
     }
   }
 
