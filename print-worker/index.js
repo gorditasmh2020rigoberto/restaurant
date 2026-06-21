@@ -38,6 +38,7 @@ const {
   PAPER_WIDTH_CHARS, // 48 (80mm, default) o 32 (58mm)
   PAUSE_BETWEEN_TICKETS_MS, // ms de pausa entre BAR y COCINA (default 5000)
   RESTAURANT_NAME, // se imprime en el encabezado de cada ticket
+  DISPLAY_MODE, // 'printer' (default) o 'screen' — ver abajo
   BRANCH_NAME,
   DRY_RUN,
 } = process.env;
@@ -52,6 +53,16 @@ const paperWidth = Math.max(20, parseInt(PAPER_WIDTH_CHARS || '48', 10));
 const pauseBetweenTicketsMs = Math.max(0, parseInt(PAUSE_BETWEEN_TICKETS_MS || '5000', 10));
 const restaurantName = (RESTAURANT_NAME || 'GORDITAS MIS HERMANAS').trim();
 
+// 'printer' (default): comportamiento normal — imprime tickets.
+// 'screen': la sucursal usa pantalla de cocina (kitchen_view de la PWA)
+//   en vez de tickets físicos. El worker NO imprime nada, pero sigue
+//   corriendo para que cuando el admin vuelva al modo 'printer' arranque
+//   sin reiniciar el servicio. Las órdenes nuevas se ven en la pantalla
+//   vía Supabase Realtime (kitchen_view ya hace eso por su cuenta).
+const displayMode = (String(DISPLAY_MODE || 'printer').toLowerCase() === 'screen')
+  ? 'screen'
+  : 'printer';
+
 const requiredVars = { SUPABASE_URL, SUPABASE_SERVICE_KEY, BRANCH_NAME };
 for (const [k, v] of Object.entries(requiredVars)) {
   if (!v) {
@@ -59,7 +70,8 @@ for (const [k, v] of Object.entries(requiredVars)) {
     process.exit(1);
   }
 }
-if (!isDryRun && !PRINTER_NAME && !PRINTER_DEVICE) {
+// En modo 'screen' no se imprime, así que no exigimos config de impresora.
+if (!isDryRun && displayMode === 'printer' && !PRINTER_NAME && !PRINTER_DEVICE) {
   console.error(
     '✘ Falta PRINTER_NAME (Windows) o PRINTER_DEVICE (Linux, p.ej. /dev/usb/lp0). Define uno en .env',
   );
@@ -418,6 +430,15 @@ async function processOrder(orderId, source = 'unknown') {
     if (order.branch_name !== BRANCH_NAME) return; // otra sucursal
     if (!order.sent_to_kitchen_at) return;         // aún no mandada a cocina
 
+    // Modo pantalla: la sucursal usa kitchen_view en la pantalla en vez
+    // de tickets. No imprimimos y no marcamos printed_at (kitchen_view
+    // tiene su propio flujo de "marcar como listo"). Solo logueamos por
+    // visibilidad.
+    if (displayMode === 'screen') {
+      console.log(`🖥  ${orderId} — modo pantalla, no se imprime (${source})`);
+      return;
+    }
+
     const items = await fetchUnprintedItems(orderId);
     if (items.length === 0) return; // todo ya impreso, nada que hacer
 
@@ -552,9 +573,13 @@ async function main() {
     await testPrint();
     return;
   }
+  const modeLabel = displayMode === 'screen'
+    ? '🖥  Modo pantalla (no imprime)'
+    : isDryRun
+      ? '🧪 DRY_RUN (terminal)'
+      : `Impresora: ${printerTarget} (${paperWidth} cols)`;
   console.log(
-    `Print-worker iniciado | Sucursal: ${BRANCH_NAME} | ` +
-      (isDryRun ? '🧪 DRY_RUN (terminal)' : `Impresora: ${printerTarget} (${paperWidth} cols)`),
+    `Print-worker iniciado | Sucursal: ${BRANCH_NAME} | ${modeLabel}`,
   );
   await catchUp();
   subscribeRealtime();
