@@ -59,9 +59,38 @@ const restaurantName = (RESTAURANT_NAME || 'GORDITAS MIS HERMANAS').trim();
 //   corriendo para que cuando el admin vuelva al modo 'printer' arranque
 //   sin reiniciar el servicio. Las órdenes nuevas se ven en la pantalla
 //   vía Supabase Realtime (kitchen_view ya hace eso por su cuenta).
-const displayMode = (String(DISPLAY_MODE || 'printer').toLowerCase() === 'screen')
-  ? 'screen'
-  : 'printer';
+//
+// El modo se puede setear de 3 formas, en orden de precedencia:
+//   1. Env var DISPLAY_MODE (override manual, p.ej. para debugging)
+//   2. admin_settings.display_modes (JSON {branch:mode}) — set desde la UI
+//      de admin de la PWA, refreshea cada 30s sin reiniciar el worker.
+//   3. Default 'printer'.
+const envDisplayMode = String(DISPLAY_MODE || '').toLowerCase();
+const hasEnvOverride = envDisplayMode === 'screen' || envDisplayMode === 'printer';
+let displayMode = hasEnvOverride ? envDisplayMode : 'printer';
+
+// Helper para leer el modo desde admin_settings (lo invoca un setInterval
+// más abajo, después de que el cliente de supabase está creado).
+async function refreshDisplayModeFromDb() {
+  if (hasEnvOverride) return; // env var siempre gana
+  try {
+    const { data, error } = await supabase
+      .from('admin_settings')
+      .select('setting_value')
+      .eq('setting_key', 'display_modes')
+      .maybeSingle();
+    if (error || !data?.setting_value) return;
+    const modes = JSON.parse(data.setting_value);
+    const branchMode = String(modes[BRANCH_NAME] || 'printer').toLowerCase();
+    const newMode = branchMode === 'screen' ? 'screen' : 'printer';
+    if (newMode !== displayMode) {
+      console.log(`🔁 Modo cambió: ${displayMode} → ${newMode} (admin_settings)`);
+      displayMode = newMode;
+    }
+  } catch (e) {
+    // Silencioso — la próxima iteración reintenta.
+  }
+}
 
 const requiredVars = { SUPABASE_URL, SUPABASE_SERVICE_KEY, BRANCH_NAME };
 for (const [k, v] of Object.entries(requiredVars)) {
@@ -70,12 +99,14 @@ for (const [k, v] of Object.entries(requiredVars)) {
     process.exit(1);
   }
 }
-// En modo 'screen' no se imprime, así que no exigimos config de impresora.
-if (!isDryRun && displayMode === 'printer' && !PRINTER_NAME && !PRINTER_DEVICE) {
-  console.error(
-    '✘ Falta PRINTER_NAME (Windows) o PRINTER_DEVICE (Linux, p.ej. /dev/usb/lp0). Define uno en .env',
+// Validación de printer: ya no es exit-fatal porque el modo puede
+// venir de admin_settings en runtime. Si no hay printer config y el
+// modo termina siendo 'printer', el intento de impresión falla
+// graceful con un log de error, pero el worker sigue vivo.
+if (!isDryRun && !PRINTER_NAME && !PRINTER_DEVICE) {
+  console.warn(
+    '⚠ No hay PRINTER_NAME ni PRINTER_DEVICE en .env. El worker solo funcionará en modo "screen" (admin_settings.display_modes).',
   );
-  process.exit(1);
 }
 
 const printerTarget = PRINTER_DEVICE || PRINTER_NAME || '';
@@ -573,18 +604,32 @@ async function main() {
     await testPrint();
     return;
   }
+
+  // Lee el modo inicial desde admin_settings (si no hay env var override).
+  // El env var DISPLAY_MODE siempre gana — útil para forzar el modo en
+  // un Pi específico independiente de lo que diga el admin.
+  await refreshDisplayModeFromDb();
+
+  const modeSrc = hasEnvOverride ? 'env var' : 'admin_settings';
   const modeLabel = displayMode === 'screen'
-    ? '🖥  Modo pantalla (no imprime)'
+    ? `🖥  Modo pantalla (${modeSrc}, no imprime)`
     : isDryRun
       ? '🧪 DRY_RUN (terminal)'
-      : `Impresora: ${printerTarget} (${paperWidth} cols)`;
+      : `Impresora: ${printerTarget} (${paperWidth} cols, modo via ${modeSrc})`;
   console.log(
     `Print-worker iniciado | Sucursal: ${BRANCH_NAME} | ${modeLabel}`,
   );
+
   await catchUp();
   subscribeRealtime();
   // Red de seguridad: re-corre catch-up cada 60 s.
   setInterval(catchUp, 60_000);
+  // Refresca el display mode desde admin_settings cada 30 s (si no hay
+  // env override). Permite al admin cambiar el modo desde la UI de la
+  // PWA y el worker se ajusta sin reiniciar.
+  if (!hasEnvOverride) {
+    setInterval(refreshDisplayModeFromDb, 30_000);
+  }
 }
 
 main().catch((e) => {
