@@ -16,7 +16,7 @@ import json
 import os
 import sys
 import tkinter as tk
-from tkinter import font as tkfont
+from tkinter import font as tkfont, messagebox
 from datetime import datetime, timezone
 from urllib import request, parse, error
 
@@ -125,6 +125,25 @@ def fetch_orders():
         return json.loads(resp.read().decode("utf-8"))
 
 
+def patch_supabase(endpoint, body):
+    """PATCH a /rest/v1/{endpoint} con el body dado. Usa la service key
+    porque el screen necesita poder editar orders/order_items.printed_at.
+    Devuelve el status code (200/204) o lanza la excepción del urllib."""
+    url = f"{SUPABASE_URL.rstrip('/')}/rest/v1/{endpoint}"
+    data = json.dumps(body).encode("utf-8")
+    req = request.Request(
+        url, data=data, method="PATCH",
+        headers={
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal",
+        },
+    )
+    with request.urlopen(req, timeout=8) as resp:
+        return resp.status
+
+
 def fmt_time(iso_str):
     if not iso_str:
         return ""
@@ -160,14 +179,17 @@ def strip_accents(s):
 
 
 # ── UI Tkinter ──────────────────────────────────────────────────────
-BG_DARK = "#0a0a0a"
-BG_CARD = "#1a1a1a"
-BG_CARD_NEW = "#1a2a1a"  # tinte verde para órdenes nuevas
-FG_TEXT = "#ffffff"
-FG_MUTED = "#888888"
-FG_ACCENT = "#ffd23f"  # amarillo
-FG_RED = "#ff6b6b"
-FG_GREEN = "#6bcf7f"
+# Paleta idéntica a la PWA (lib/views/admin_view.dart, etc.):
+# crema cálida + acentos naranjas + texto café oscuro.
+BG_DARK = "#FAF1DE"       # crema (fondo de la app)
+BG_CARD = "#FFFFFF"       # blanco para tarjetas de orden
+BG_CARD_NEW = "#FFE9D6"   # tinte naranja claro para órdenes nuevas
+FG_TEXT = "#3D2E1A"       # café oscuro (titulares e items)
+FG_MUTED = "#A08F70"      # café claro (timestamps, etiquetas, status)
+FG_ACCENT = "#FF6D00"     # naranja PWA (acentos / mesa / restaurante)
+FG_RED = "#D7263D"        # rojo para alertas
+FG_GREEN = "#3D8D3D"      # verde para guisados / OK
+BORDER = "#E5DCC4"        # borde sutil entre tarjetas
 
 
 class KitchenApp:
@@ -207,7 +229,7 @@ class KitchenApp:
         ).pack(side="right")
 
         # Separator
-        tk.Frame(root, bg="#333333", height=1).pack(fill="x", padx=12, pady=4)
+        tk.Frame(root, bg=BORDER, height=1).pack(fill="x", padx=12, pady=4)
 
         # ── Canvas scrollable de órdenes
         body = tk.Frame(root, bg=BG_DARK)
@@ -216,7 +238,7 @@ class KitchenApp:
         self.canvas = tk.Canvas(body, bg=BG_DARK, highlightthickness=0)
         self.scrollbar = tk.Scrollbar(
             body, orient="vertical", command=self.canvas.yview,
-            bg=BG_CARD, troughcolor=BG_DARK, activebackground=FG_ACCENT,
+            bg=FG_ACCENT, troughcolor=BORDER, activebackground="#E65A00",
         )
         self.cards_frame = tk.Frame(self.canvas, bg=BG_DARK)
         self.cards_frame_id = self.canvas.create_window(
@@ -318,7 +340,7 @@ class KitchenApp:
 
         card = tk.Frame(
             self.cards_frame, bg=bg, bd=0, relief="flat",
-            highlightthickness=1, highlightbackground="#2a2a2a",
+            highlightthickness=1, highlightbackground=BORDER,
         )
         card.pack(fill="x", pady=4, padx=2)
         inner = tk.Frame(card, bg=bg)
@@ -375,6 +397,50 @@ class KitchenApp:
                     inner, text=f"        ({strip_accents(label)})",
                     fg=FG_MUTED, bg=bg, font=self.f_sub, anchor="w",
                 ).pack(fill="x")
+
+        # Botón "Cerrar pedido" — marca la orden y todos sus items como
+        # impresos en Supabase (printed_at = NOW). La card desaparece
+        # del display al siguiente poll.
+        btn = tk.Button(
+            inner, text="✓  CERRAR PEDIDO",
+            bg=FG_GREEN, fg="white", font=self.f_card_title,
+            bd=0, padx=20, pady=12,
+            activebackground="#2D6E2D", activeforeground="white",
+            cursor="hand2", relief="flat",
+            command=lambda oid=order["id"]: self.close_order(oid),
+        )
+        btn.pack(fill="x", pady=(10, 0))
+
+    def close_order(self, order_id):
+        """Marca la orden como lista. Triple efecto:
+        1. orders.status='ready' → la app del mesero recibe la
+           notificación (banner + sonido) vía su Realtime subscription
+           ya existente en comandas_view._setupNotifications.
+        2. orders.printed_at=NOW → desaparece del display al filtrar
+           pendientes.
+        3. order_items.printed_at=NOW → coherencia con el print-worker
+           (no se reimprimen si vuelves a modo printer)."""
+        try:
+            now_iso = datetime.now(timezone.utc).isoformat()
+            # 1) Marcar items
+            patch_supabase(
+                f"order_items?order_id=eq.{order_id}",
+                {"printed_at": now_iso},
+            )
+            # 2) Marcar orden + status=ready (dispara notificación al mesero)
+            patch_supabase(
+                f"orders?id=eq.{order_id}",
+                {"printed_at": now_iso, "status": "ready"},
+            )
+            self.status_var.set(f"✓ Pedido #{order_id[:8]} cerrado · mesero notificado")
+            # Forzar refresh inmediato (sin esperar el próximo poll)
+            self._last_state_key = None
+            self.poll()
+        except Exception as e:
+            self.status_var.set(f"✘ Error cerrando: {str(e)[:120]}")
+            messagebox.showerror(
+                "Error", f"No se pudo cerrar el pedido:\n{e}", parent=self.root,
+            )
 
 
 def main():
