@@ -633,12 +633,16 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       }
 
       final supabase = Supabase.instance.client;
+      // Incluimos 'pending' (cocina aún la prepara) Y 'ready' (cocina ya
+      // marcó como lista desde la pantalla, pero falta cobrar). Así el
+      // mesero ve todos los items y puede cobrar aunque la orden ya
+      // esté lista. Solo se excluyen 'completed' / 'cancelled'.
       final response = await supabase
           .from('orders')
           .select('*, order_items(*, dishes(*))')
           .eq('table_id', widget.tableId as Object)
           .eq('branch_name', Globals.currentBranch)
-          .eq('status', 'pending');
+          .inFilter('status', ['pending', 'ready']);
 
       List<Map<String, dynamic>> items = [];
       for (var order in (response as List)) {
@@ -686,23 +690,29 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       final nextFolio = (countRes as List).length + 1;
 
       if (widget.tableId != null) {
+        // Igual que _fetchExistingItems: incluye 'pending' y 'ready'. Si la
+        // cocina marcó la orden como lista pero el mesero está agregando
+        // items nuevos (ej. la mesa quiere otra cosa), la regresamos a
+        // 'pending' al mergear (ver el update de abajo).
         final existingOrder = await supabase
             .from('orders')
             .select('id, total_amount')
             .eq('table_id', widget.tableId as Object)
             .eq('branch_name', Globals.currentBranch)
-            .eq('status', 'pending')
+            .inFilter('status', ['pending', 'ready'])
             .maybeSingle();
 
         if (existingOrder != null) {
           orderId = existingOrder['id'] as String;
           final newTotal = (existingOrder['total_amount'] as num).toDouble() + cart.totalAmount;
           // Agregar a una orden existente: actualizamos total + reseteamos
-          // printed_at + re-aplicamos sent_to_kitchen_at, para que el
-          // print-worker se entere y procese los items nuevos
-          // (filtra por printed_at IS NULL en order_items).
+          // printed_at + re-aplicamos sent_to_kitchen_at + regresamos
+          // status a 'pending' (si estaba 'ready'), para que el print-worker
+          // se entere y procese los items nuevos (filtra por
+          // printed_at IS NULL en order_items).
           await supabase.from('orders').update({
             'total_amount': newTotal,
+            'status': 'pending',
             'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
             'printed_at': null,
           }).eq('id', orderId);
