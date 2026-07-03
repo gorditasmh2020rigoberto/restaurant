@@ -39,9 +39,25 @@ const {
   PAUSE_BETWEEN_TICKETS_MS, // ms de pausa entre BAR y COCINA (default 5000)
   RESTAURANT_NAME, // se imprime en el encabezado de cada ticket
   DISPLAY_MODE, // 'printer' (default) o 'screen' — ver abajo
+  PRINT_AREA,   // '', 'drinks' o 'kitchen' — ver abajo
   BRANCH_NAME,
   DRY_RUN,
 } = process.env;
+
+// PRINT_AREA filtra qué items imprime esta Pi. Permite dividir la
+// misma sucursal en varias Pis, cada una imprimiendo solo su parte:
+//   - ''        (o unset): imprime TODO — un ticket COCINA + uno BAR.
+//                           Es el comportamiento original, compat.
+//   - 'drinks': imprime SOLO bebidas. Ticket titulado "BAR".
+//   - 'kitchen': imprime SOLO comida. Ticket titulado "COCINA".
+// Idempotencia: cada Pi marca únicamente los `order_items` que le
+// tocan (por id). Cuando la última Pi termina, no quedan items
+// pendientes y se marca `orders.printed_at`.
+const printArea = String(PRINT_AREA || '').toLowerCase();
+if (printArea && printArea !== 'drinks' && printArea !== 'kitchen') {
+  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen'.`);
+  process.exit(1);
+}
 
 // DRY_RUN=true → no manda nada a la impresora; imprime el ticket
 // formateado en la terminal. Útil para probar localmente (p.ej. en
@@ -317,6 +333,16 @@ function isDrink(item) {
   return DRINK_CATEGORIES.includes(cat);
 }
 
+// Filtra los items que esta Pi debe imprimir según PRINT_AREA. Si el
+// área no está seteada, no filtra nada — el caller mantiene la lógica
+// original de dos tickets (COCINA + BAR).
+function filterItemsByArea(items) {
+  if (!printArea) return items;
+  if (printArea === 'drinks') return items.filter(isDrink);
+  if (printArea === 'kitchen') return items.filter((it) => !isDrink(it));
+  return items;
+}
+
 // Añade un ticket completo (header → ítems → cut) al buffer del printer.
 // `kind` es 'COCINA' o 'BAR'. No llama execute() — lo hace el caller.
 function appendTicket(printer, kind, order, items) {
@@ -402,22 +428,29 @@ async function printSingleTicket(kind, order, items) {
   await printer.execute();
 }
 
-// Imprime los items dados (ya filtrados por unprinted). Devuelve true
-// si efectivamente mandó algo, false si no había nada que imprimir.
+// Imprime los items dados (ya filtrados por unprinted y por área).
+// Devuelve true si efectivamente mandó algo, false si no había nada.
 //
-// Flujo: COCINA primero, después BAR. Entre ambos hay una pausa
-// configurable (PAUSE_BETWEEN_TICKETS_MS, default 5s) para que el
-// cocinero pueda cortar/agarrar el ticket antes de que salga el siguiente.
+// Modos:
+//   - PRINT_AREA='drinks' → un solo ticket "BAR".
+//   - PRINT_AREA='kitchen' → un solo ticket "COCINA".
+//   - PRINT_AREA no seteada → COCINA primero, después BAR (comportamiento
+//     original), con pausa PAUSE_BETWEEN_TICKETS_MS entre ambos.
 async function printItems(order, items) {
+  if (!items.length) return false;
+  const isAddition = !!order.printed_at;
+
+  if (printArea === 'drinks') {
+    await printSingleTicket(isAddition ? 'BAR — ADICIÓN' : 'BAR', order, items);
+    return true;
+  }
+  if (printArea === 'kitchen') {
+    await printSingleTicket(isAddition ? 'COCINA — ADICIÓN' : 'COCINA', order, items);
+    return true;
+  }
+
   const drinks = items.filter(isDrink);
   const kitchen = items.filter((it) => !isDrink(it));
-
-  if (!drinks.length && !kitchen.length) return false;
-
-  // Si esta NO es la primera impresión (la orden ya tenía printed_at),
-  // los tickets traen un banner "ADICIÓN" para que cocina sepa que son
-  // items nuevos sobre una orden ya entregada.
-  const isAddition = !!order.printed_at;
 
   if (kitchen.length) {
     await printSingleTicket(
@@ -427,7 +460,6 @@ async function printItems(order, items) {
     );
   }
 
-  // Pausa entre tickets solo si hay AMBOS (si solo hay uno, no tiene sentido).
   if (drinks.length && kitchen.length && pauseBetweenTicketsMs > 0) {
     await sleep(pauseBetweenTicketsMs);
   }
@@ -470,12 +502,19 @@ async function processOrder(orderId, source = 'unknown') {
       return;
     }
 
-    const items = await fetchUnprintedItems(orderId);
-    if (items.length === 0) return; // todo ya impreso, nada que hacer
+    const allUnprinted = await fetchUnprintedItems(orderId);
+    if (allUnprinted.length === 0) return; // todo ya impreso, nada que hacer
+
+    // Si esta Pi tiene PRINT_AREA, se queda solo con los items de su
+    // área. Los items de OTRAS áreas quedan intactos (printed_at=null)
+    // para que la Pi de ese área los procese cuando le toque.
+    const items = filterItemsByArea(allUnprinted);
+    if (items.length === 0) return; // nada de MI área en esta orden
 
     const tag = order.printed_at ? 'adición' : 'primera';
+    const areaTag = printArea ? ` [${printArea}]` : '';
     console.log(
-      `→ Imprimiendo ${items.length} item(s) de ${orderId} (${source}, ${tag})...`,
+      `→ Imprimiendo ${items.length} item(s) de ${orderId} (${source}, ${tag}${areaTag})...`,
     );
     const printed = await printItems(order, items);
     if (!printed) return; // por si acaso
@@ -616,8 +655,9 @@ async function main() {
     : isDryRun
       ? '🧪 DRY_RUN (terminal)'
       : `Impresora: ${printerTarget} (${paperWidth} cols, modo via ${modeSrc})`;
+  const areaLabel = printArea ? ` | Área: ${printArea}` : ' | Área: todo (COCINA+BAR)';
   console.log(
-    `Print-worker iniciado | Sucursal: ${BRANCH_NAME} | ${modeLabel}`,
+    `Print-worker iniciado | Sucursal: ${BRANCH_NAME}${areaLabel} | ${modeLabel}`,
   );
 
   await catchUp();

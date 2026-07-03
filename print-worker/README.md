@@ -69,6 +69,18 @@ Direccion:
 
 `printed_at` se marca igual en la BD — así puedes verificar el ciclo completo. Cuando estés listo para producción en la mini-PC, quita `DRY_RUN=true` del `.env`.
 
+## Varias Pis en la misma sucursal (`PRINT_AREA`)
+
+Cuando quieres separar la impresión en **más de una Pi** (típicamente una para cocina y otra para bebidas), setea `PRINT_AREA` en el `.env` de cada Pi:
+
+| Pi | `PRINT_AREA` | Qué imprime |
+|---|---|---|
+| Bebidas / barra | `drinks` | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BAR**. |
+| Cocina | `kitchen` | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
+| Todo-en-uno | (vacío o no definido) | Comportamiento original: **COCINA** y **BAR** en la misma impresora, con pausa entre ambos. |
+
+Cada Pi marca solo los `order_items` que le tocaron por id — cuando la última termina, se marca también `orders.printed_at`. Si dejas `PRINT_AREA` vacía en **dos Pis distintas** de la misma sucursal, ambas se pelean por la orden y solo una imprime.
+
 ## Pre-requisitos en la mini-PC
 
 1. **Windows 10 / 11** (probado en estos).
