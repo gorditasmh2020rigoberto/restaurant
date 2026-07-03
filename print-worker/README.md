@@ -77,6 +77,7 @@ Cuando quieres separar la impresión en **más de una Pi** (típicamente una par
 |---|---|---|
 | Bebidas / barra | `drinks` | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BAR**. |
 | Cocina | `kitchen` | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
+| Línea de producción | `line` | Mismo filtro que `kitchen`, pero el ticket dice **LÍNEA DE PRODUCCIÓN**. Para sucursales que llaman "línea" al área de comida (p.ej. Pocitos). |
 | Todo-en-uno | (vacío o no definido) | Comportamiento original: **COCINA** y **BAR** en la misma impresora, con pausa entre ambos. |
 
 Cada Pi marca solo los `order_items` que le tocaron por id — cuando la última termina, se marca también `orders.printed_at`. Si dejas `PRINT_AREA` vacía en **dos Pis distintas** de la misma sucursal, ambas se pelean por la orden y solo una imprime.

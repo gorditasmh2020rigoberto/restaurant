@@ -50,12 +50,17 @@ const {
 //                           Es el comportamiento original, compat.
 //   - 'drinks': imprime SOLO bebidas. Ticket titulado "BAR".
 //   - 'kitchen': imprime SOLO comida. Ticket titulado "COCINA".
+//   - 'line':   igual que 'kitchen' (mismo filtro), pero el ticket
+//                se titula "LÍNEA DE PRODUCCIÓN". Para sucursales
+//                donde al área de comida se le dice "línea" y no
+//                "cocina".
 // Idempotencia: cada Pi marca únicamente los `order_items` que le
 // tocan (por id). Cuando la última Pi termina, no quedan items
 // pendientes y se marca `orders.printed_at`.
 const printArea = String(PRINT_AREA || '').toLowerCase();
-if (printArea && printArea !== 'drinks' && printArea !== 'kitchen') {
-  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen'.`);
+const validAreas = ['', 'drinks', 'kitchen', 'line'];
+if (!validAreas.includes(printArea)) {
+  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen', 'line'.`);
   process.exit(1);
 }
 
@@ -339,7 +344,11 @@ function isDrink(item) {
 function filterItemsByArea(items) {
   if (!printArea) return items;
   if (printArea === 'drinks') return items.filter(isDrink);
-  if (printArea === 'kitchen') return items.filter((it) => !isDrink(it));
+  // 'kitchen' y 'line' comparten el mismo filtro (todo lo no-bebida);
+  // solo se diferencian en el header del ticket.
+  if (printArea === 'kitchen' || printArea === 'line') {
+    return items.filter((it) => !isDrink(it));
+  }
   return items;
 }
 
@@ -446,6 +455,14 @@ async function printItems(order, items) {
   }
   if (printArea === 'kitchen') {
     await printSingleTicket(isAddition ? 'COCINA — ADICIÓN' : 'COCINA', order, items);
+    return true;
+  }
+  if (printArea === 'line') {
+    await printSingleTicket(
+      isAddition ? 'LÍNEA DE PRODUCCIÓN — ADICIÓN' : 'LÍNEA DE PRODUCCIÓN',
+      order,
+      items,
+    );
     return true;
   }
 
