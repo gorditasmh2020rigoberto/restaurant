@@ -383,7 +383,7 @@ function filterItemsByArea(items) {
 // Los guisos técnicos ("dine_in") confunden a la cocina cuando aparecen
 // en el ticket físico.
 const ORDER_TYPE_LABELS = {
-  dine_in: 'PARA COMER AQUÍ',
+  dine_in: 'COMER AQUÍ',
   to_go: 'PARA LLEVAR',
   delivery: 'A DOMICILIO',
 };
