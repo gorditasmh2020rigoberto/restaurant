@@ -426,21 +426,21 @@ function appendTicket(printer, kind, order, items) {
 
   // ── Ítems (sin precios — esto es ticket de producción, no recibo)
   //
-  // Formato:
-  //   "N x FRACCIÓN NOMBRE"       si el nombre trae "(Orden)" o "(1/2)"
-  //   "N x NOMBRE"                si no trae marcador (bebidas, etc.)
+  // Formato compacto ("2x1/2 MOLLETES..."):
+  //   "NxFRACCIÓN NOMBRE"   si el nombre trae "(Orden)" o "(1/2)"
+  //   "Nx NOMBRE"           si no trae marcador (bebidas, etc.)
   //
   // Ejemplos:
-  //   2× "Molletes con Guisado (Orden)" → "2 x 1 MOLLETES CON GUISADO"
-  //   3× "Molletes con Guisado (1/2)"   → "3 x 1/2 MOLLETES CON GUISADO"
-  //   1× "Refresco Coca"                → "1 x REFRESCO COCA"
+  //   2× "Molletes con Guisado (Orden)" → "2x1 MOLLETES CON GUISADO"
+  //   3× "Molletes con Guisado (1/2)"   → "3x1/2 MOLLETES CON GUISADO"
+  //   1× "Refresco Coca"                → "1x REFRESCO COCA"
   for (const it of items) {
     const rawName = it.dishes?.name || '(sin nombre)';
     const { fraction, cleanName } = parseSizeMarker(rawName);
     const qty = it.quantity || 1;
     const line = fraction
-      ? `${qty} x ${fraction} ${cleanName}`
-      : `${qty} x ${cleanName}`;
+      ? `${qty}x${fraction} ${cleanName}`
+      : `${qty}x ${cleanName}`;
     printer.bold(true);
     printer.println(line);
     printer.bold(false);
