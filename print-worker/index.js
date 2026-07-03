@@ -501,7 +501,7 @@ async function printItems(order, items) {
   const isAddition = !!order.printed_at;
 
   if (printArea === 'drinks') {
-    await printSingleTicket(isAddition ? 'BAR — ADICIÓN' : 'BAR', order, items);
+    await printSingleTicket(isAddition ? 'BEBIDAS — ADICIÓN' : 'BEBIDAS', order, items);
     return true;
   }
   if (printArea === 'kitchen') {
@@ -534,7 +534,7 @@ async function printItems(order, items) {
 
   if (drinks.length) {
     await printSingleTicket(
-      isAddition ? 'BAR — ADICIÓN' : 'BAR',
+      isAddition ? 'BEBIDAS — ADICIÓN' : 'BEBIDAS',
       order,
       drinks,
     );
