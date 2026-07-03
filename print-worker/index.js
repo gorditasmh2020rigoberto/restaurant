@@ -379,9 +379,22 @@ function filterItemsByArea(items) {
 
 // Añade un ticket completo (header → ítems → cut) al buffer del printer.
 // `kind` es 'COCINA' o 'BAR'. No llama execute() — lo hace el caller.
+// Traduce el enum order_type de la BD a un label humano en español.
+// Los guisos técnicos ("dine_in") confunden a la cocina cuando aparecen
+// en el ticket físico.
+const ORDER_TYPE_LABELS = {
+  dine_in: 'PARA COMER AQUÍ',
+  to_go: 'PARA LLEVAR',
+  delivery: 'A DOMICILIO',
+};
+function orderTypeLabel(raw) {
+  const key = String(raw || '').toLowerCase().trim();
+  return ORDER_TYPE_LABELS[key] || (raw || 'PEDIDO').toString().toUpperCase();
+}
+
 function appendTicket(printer, kind, order, items) {
   const cust = parseCustomerName(order.customer_name);
-  const tipo = (order.order_type || 'pedido').toUpperCase();
+  const tipo = orderTypeLabel(order.order_type);
   // Mesa: viene como un JOIN (restaurant_tables.table_number). Si la
   // PWA cambia el nombre del FK, cae al table_id (UUID) como fallback.
   const tableNumber = order.restaurant_tables?.table_number;
