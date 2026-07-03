@@ -260,6 +260,32 @@ function parseGuisados(raw) {
   }
 }
 
+// Traduce (quantity, pieces_per_order) → label de órdenes para el ticket.
+// Ejemplos con pieces_per_order=6 (mollete):
+//   qty=6  → "1 orden"
+//   qty=12 → "2 órdenes"
+//   qty=3  → "1/2 orden"
+//   qty=9  → "1 1/2 órdenes"
+// Si el platillo no tiene pieces_per_order o el cálculo no cae en
+// enteros ni medios, devuelve null (no se imprime línea de órdenes).
+function ordenesLabel(quantity, piecesPerOrder) {
+  if (!piecesPerOrder || piecesPerOrder <= 0) return null;
+  const qty = Number(quantity) || 0;
+  if (qty <= 0) return null;
+  const ratio = qty / piecesPerOrder;
+  if (Number.isInteger(ratio)) {
+    return ratio === 1 ? '1 orden' : `${ratio} órdenes`;
+  }
+  // Solo mostramos medios exactos: 0.5, 1.5, 2.5...
+  const doubled = ratio * 2;
+  if (Number.isInteger(doubled)) {
+    if (doubled === 1) return '1/2 orden';
+    const whole = Math.floor(ratio);
+    return whole === 0 ? '1/2 orden' : `${whole} 1/2 órdenes`;
+  }
+  return null;
+}
+
 // ── Fetch + Format + Print ──────────────────────────────────────────
 // Fetch SOLO los datos de la orden (no items). Items se traen aparte
 // filtrados por printed_at IS NULL.
@@ -291,7 +317,7 @@ async function fetchUnprintedItems(orderId) {
     .from('order_items')
     .select(`
       id, quantity, price_at_time, guisados_selected, client_label,
-      dishes ( name, category )
+      dishes ( name, category, pieces_per_order )
     `)
     .eq('order_id', orderId)
     .is('printed_at', null)
@@ -403,9 +429,14 @@ function appendTicket(printer, kind, order, items) {
   for (const it of items) {
     const name = it.dishes?.name || '(sin nombre)';
     const qty = it.quantity || 1;
+    const piecesPerOrder = it.dishes?.pieces_per_order || 0;
     printer.bold(true);
     printer.println(`${qty} x ${name}`);
     printer.bold(false);
+    const ordenes = ordenesLabel(qty, piecesPerOrder);
+    if (ordenes) {
+      printer.println(ordenes);
+    }
     const guisados = parseGuisados(it.guisados_selected);
     if (guisados.length) {
       printer.println(`   ${guisados.join(', ')}`);
