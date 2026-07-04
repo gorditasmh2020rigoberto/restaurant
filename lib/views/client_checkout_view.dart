@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
@@ -241,6 +243,17 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
     );
   }
 
+  /// Construye la URL pública del ticket virtual para el QR.
+  /// Formato: `<origin>/#/ticket/<orderId>` (hash routing de Flutter web).
+  /// En dev (mobile/desktop) usa un placeholder para que el QR no falle.
+  String _buildTicketUrl(String orderId) {
+    if (kIsWeb) {
+      final origin = Uri.base.origin;
+      return '$origin/#/ticket/$orderId';
+    }
+    return 'https://gorditasmh.com/#/ticket/$orderId';
+  }
+
   /// Crea la orden y muestra el diálogo de éxito.
   /// [onAfterCreate] se ejecuta después de crear la orden (ej. enviar ticket).
   Future<void> _createOrderAndNotify({
@@ -354,19 +367,54 @@ class _ClientCheckoutViewState extends State<ClientCheckoutView> {
       if (mounted) {
         // Orden enviada → limpiamos TODO incluyendo el envío.
         cart.clearCart(keepDeliveryFee: false);
-        
+
+        final ticketUrl = _buildTicketUrl(orderId);
+        final subtitle = widget.orderType == 'dine_in'
+            ? 'Tu orden para la mesa ${widget.tableNumber} ha sido enviada a producción.\n\nMétodo de pago: $_paymentMethod.'
+            : widget.orderType == 'delivery'
+                ? 'Tu pedido a domicilio está en camino de preparación.\n\nTotal a pagar (con envío): \$${finalTotal.toStringAsFixed(2)}.'
+                : 'Tu pedido To Go está en producción.\n\nMétodo de pago: $_paymentMethod.\nTotal a pagar: \$${finalTotal.toStringAsFixed(2)}';
+
         await showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
             title: const Text('¡Orden Enviada!', style: TextStyle(color: Colors.green)),
-            content: Text(
-              widget.orderType == 'dine_in' 
-                ? 'Tu orden para la mesa ${widget.tableNumber} ha sido enviada a producción.\n\nMétodo de pago: $_paymentMethod.'
-                : widget.orderType == 'delivery'
-                  ? 'Tu pedido a domicilio está en camino de preparación.\n\nTotal a pagar (con envío): \$${finalTotal.toStringAsFixed(2)}.'
-                  : 'Tu pedido To Go está en producción.\n\nMétodo de pago: $_paymentMethod.\nTotal a pagar: \$${finalTotal.toStringAsFixed(2)}',
-              style: const TextStyle(fontSize: 16),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(subtitle, style: const TextStyle(fontSize: 16)),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Escanea para ver tu ticket',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: QrImageView(
+                      data: ticketUrl,
+                      version: QrVersions.auto,
+                      size: 180,
+                      backgroundColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    ticketUrl,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
             actions: [
               TextButton(

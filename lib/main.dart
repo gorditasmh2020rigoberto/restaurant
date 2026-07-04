@@ -12,6 +12,7 @@ import 'views/comandas_view.dart';
 import 'views/kitchen_view.dart';
 import 'views/reports_view.dart';
 import 'views/mesero_login_view.dart';
+import 'views/ticket_view.dart';
 import 'widgets/subscription_gate.dart';
 
 /// Build-time flag: si la app se compila con --dart-define=KIOSKO_MESERO=true,
@@ -110,11 +111,20 @@ class RestaurantApp extends StatelessWidget {
         '/ventas': (context) => const ReportsView(),
         '/mesero': (context) => const MeseroLoginView(),
       },
-      // Maneja rutas dinámicas tipo /{sucursal}/mesero
+      // Maneja rutas dinámicas tipo /{sucursal}/mesero y /ticket/{orderId}
       // Ejemplo: /#/Maravillas/mesero → branch "Sucursal Maravillas"
+      // Ejemplo: /#/ticket/abc-1234   → TicketView para esa orden
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';
         final segments = name.split('/').where((s) => s.isNotEmpty).toList();
+        // /ticket/{orderId} — vista pública del ticket accedida por QR.
+        if (segments.length == 2 && segments.first == 'ticket') {
+          final orderId = Uri.decodeComponent(segments.last);
+          return MaterialPageRoute(
+            builder: (_) => TicketView(orderId: orderId),
+            settings: settings,
+          );
+        }
         if (segments.length == 2 && segments.last == 'mesero') {
           final slug = Uri.decodeComponent(segments.first);
           // Busca rama exacta primero, luego "Sucursal {slug}"
