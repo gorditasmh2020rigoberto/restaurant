@@ -9,9 +9,8 @@ on:
     branches: [main]
     paths:
       - 'android/**'
-      - 'lib/main.dart'
-      - 'lib/views/comandas_view.dart'
-      - 'lib/views/mesero_login_view.dart'
+      - 'lib/**'
+      - 'assets/**'
       - 'pubspec.yaml'
       - '.github/workflows/build-mesero-apk.yml'
 
