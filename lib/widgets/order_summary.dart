@@ -1,10 +1,84 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../models/dish.dart';
 import '../globals.dart';
+
+/// Construye la URL pública del ticket virtual (post-cobro).
+String _buildTicketUrl(String orderId) {
+  if (kIsWeb) {
+    return '${Uri.base.origin}/#/ticket/$orderId';
+  }
+  return 'https://gorditasmh.com/#/ticket/$orderId';
+}
+
+/// Muestra un diálogo con el/los QR(s) del ticket virtual después de que
+/// el cliente pagó. El mesero le muestra la pantalla al cliente para que
+/// escanee. Si son varias órdenes (mesa con tickets combinados), se
+/// muestra uno debajo del otro numerado.
+Future<void> showTicketQrDialog(BuildContext context, List<String> orderIds) async {
+  if (orderIds.isEmpty) return;
+  await showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Ticket del cliente'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'El cliente puede escanear este QR para ver su ticket:',
+              style: TextStyle(fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            for (var i = 0; i < orderIds.length; i++) ...[
+              if (orderIds.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    'Orden ${i + 1} de ${orderIds.length}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: QrImageView(
+                  data: _buildTicketUrl(orderIds[i]),
+                  version: QrVersions.auto,
+                  size: 200,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SelectableText(
+                _buildTicketUrl(orderIds[i]),
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+              if (i < orderIds.length - 1) const SizedBox(height: 16),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cerrar'),
+        ),
+      ],
+    ),
+  );
+}
 
 class OrderSummaryWidget extends StatefulWidget {
   final String? tableId;
@@ -506,7 +580,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                                             'Pago finalizado con éxito'),
                                         backgroundColor: Colors.green),
                                   );
-                                  setState(() => _existingItems = []);
+                                  await showTicketQrDialog(context, orderIds);
+                                  if (mounted) setState(() => _existingItems = []);
                                 }
                               }
                             } catch (e) {
@@ -552,7 +627,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                     : 'Pago con tarjeta registrado'),
                 backgroundColor: Colors.green),
           );
-          setState(() => _existingItems = []);
+          await showTicketQrDialog(context, orderIds);
+          if (mounted) setState(() => _existingItems = []);
         }
       } catch (e) {
         if (context.mounted) {
