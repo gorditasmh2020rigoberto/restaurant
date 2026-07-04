@@ -409,23 +409,9 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
             ),
             const SizedBox(height: 12),
             ElevatedButton.icon(
-              onPressed: () => Navigator.pop(ctx, 'card'),
+              onPressed: () => Navigator.pop(ctx, 'openpay'),
               icon: const Icon(Icons.credit_card),
-              label: const Text('Tarjeta / TPV',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 56),
-                backgroundColor: Colors.blueAccent,
-                foregroundColor: Color(0xFFFAF1DE),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(ctx, 'clip'),
-              icon: const Icon(Icons.contactless),
-              label: const Text('Clip',
+              label: const Text('Tarjeta (OpenPay)',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
@@ -606,13 +592,14 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
           ),
         ),
       );
-    } else {
-      // Tarjeta o Clip — mark as completed directly
-      final isClip = method == 'clip';
+    } else if (method == 'openpay') {
+      // TODO: integrar API de OpenPay (charges) cuando estén las
+      // credenciales. Por ahora marca la orden como pagada con
+      // payment_method='openpay' y muestra el QR del ticket.
       try {
         await supabase.from('orders').update({
           'status': 'completed',
-          'payment_method': isClip ? 'clip' : 'card',
+          'payment_method': 'openpay',
         }).inFilter('id', orderIds);
         if (tableId != null) {
           await supabase
@@ -621,10 +608,8 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         }
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(isClip
-                    ? 'Pago con Clip registrado'
-                    : 'Pago con tarjeta registrado'),
+            const SnackBar(
+                content: Text('Pago con OpenPay registrado'),
                 backgroundColor: Colors.green),
           );
           await showTicketQrDialog(context, orderIds);
