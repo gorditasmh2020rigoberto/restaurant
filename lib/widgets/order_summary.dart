@@ -1,20 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/cart_provider.dart';
 import '../models/dish.dart';
 import '../globals.dart';
-
-/// Construye la URL pública del ticket virtual para el QR de la comanda.
-String _buildTicketUrl(String orderId) {
-  if (kIsWeb) {
-    return '${Uri.base.origin}/#/ticket/$orderId';
-  }
-  return 'https://gorditasmh.com/#/ticket/$orderId';
-}
 
 class OrderSummaryWidget extends StatefulWidget {
   final String? tableId;
@@ -781,49 +771,14 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
 
       if (mounted) {
         cart.clearCart(keepDeliveryFee: false);
-        final ticketUrl = _buildTicketUrl(orderId);
-        final subtitle = widget.orderType == 'dine_in'
-            ? 'La comanda para la mesa ${widget.tableNumber} se envió a producción.'
-            : 'La comanda para ${widget.customerName ?? 'Cliente'} (${widget.orderType == 'takeout' ? 'To Go' : 'Delivery'}) se envió a producción.';
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('¡Comanda Enviada!'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(subtitle),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Ticket del cliente',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: QrImageView(
-                      data: ticketUrl,
-                      version: QrVersions.auto,
-                      size: 180,
-                      backgroundColor: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SelectableText(
-                    ticketUrl,
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+            content: Text(
+              widget.orderType == 'dine_in'
+                  ? 'La comanda para la mesa ${widget.tableNumber} se envió a producción.'
+                  : 'La comanda para ${widget.customerName ?? 'Cliente'} (${widget.orderType == 'takeout' ? 'To Go' : 'Delivery'}) se envió a producción.',
             ),
             actions: [
               TextButton(
