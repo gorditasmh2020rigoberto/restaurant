@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../globals.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dish_management_view.dart';
@@ -1353,9 +1355,10 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     if (ctx.mounted) {
                       Navigator.pop(ctx); // Cerrar diálogo ahora
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pago finalizado con éxito'), backgroundColor: Colors.green));
-                      
-                      widget.onDeselect?.call(); 
-
+                      if (context.mounted) {
+                        await _showTicketQrDialog(context, orderIds);
+                      }
+                      widget.onDeselect?.call();
                     }
                   } catch (e) {
                     if (ctx.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -1602,6 +1605,77 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
     );
   }
 
+  /// Construye la URL pública del ticket virtual.
+  /// Formato: `<origin>/#/ticket/<orderId>` (hash routing de Flutter web).
+  String _buildTicketUrl(String orderId) {
+    if (kIsWeb) {
+      return '${Uri.base.origin}/#/ticket/$orderId';
+    }
+    return 'https://gorditasmh.com/#/ticket/$orderId';
+  }
+
+  /// Muestra un diálogo con el/los QR(s) del ticket virtual de las
+  /// órdenes que se acaban de pagar. El cliente escanea, ve su ticket.
+  Future<void> _showTicketQrDialog(BuildContext context, List<String> orderIds) async {
+    if (orderIds.isEmpty) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Ticket del cliente'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'El cliente puede escanear este QR para ver su ticket:',
+                style: TextStyle(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              for (var i = 0; i < orderIds.length; i++) ...[
+                if (orderIds.length > 1)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(
+                      'Orden ${i + 1} de ${orderIds.length}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: QrImageView(
+                    data: _buildTicketUrl(orderIds[i]),
+                    version: QrVersions.auto,
+                    size: 180,
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                SelectableText(
+                  _buildTicketUrl(orderIds[i]),
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                if (i < orderIds.length - 1) const SizedBox(height: 16),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _executeFinalizeMixedPayment(BuildContext context, List<String> orderIds, double total, String? tableId, double cashAmount, double cardAmount) async {
     final supabase = Supabase.instance.client;
     try {
@@ -1619,6 +1693,9 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pago Mixto finalizado'), backgroundColor: Colors.green));
+        if (context.mounted) {
+          await _showTicketQrDialog(context, orderIds);
+        }
         widget.onDeselect?.call();
       }
     } catch (e) {
@@ -2011,6 +2088,9 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
           content: Text('Pago con Clip registrado correctamente'),
           backgroundColor: Colors.green,
         ));
+        if (context.mounted) {
+          await _showTicketQrDialog(context, orderIds);
+        }
         widget.onDeselect?.call();
       }
     } catch (e) {
