@@ -1384,92 +1384,113 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                  // Selector de base de la gordita (Maíz / Harina)
-                  if (showBaseSelector) ...[
-                    const Text(
-                      'BASE',
-                      style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1),
-                    ),
-                    const SizedBox(height: 4),
+                  // BASE + Opciones en una sola fila para maximizar el
+                  // espacio de los guisados. BASE (Maíz/Harina) a la
+                  // izquierda; Opciones (Queso/Frita) a la derecha.
+                  if (showBaseSelector || showOptions) ...[
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _BaseChip(
-                          label: 'Maíz',
-                          price: gorditaMaizDish!.price,
-                          selected: selectedBase == 'maíz',
-                          onTap: () => setDialogState(() {
-                            selectedBase = 'maíz';
-                          }),
-                        ),
-                        const SizedBox(width: 8),
-                        _BaseChip(
-                          label: 'Harina',
-                          price: gorditaHarinaDish!.price,
-                          selected: selectedBase == 'harina',
-                          onTap: () => setDialogState(() {
-                            selectedBase = 'harina';
-                            // Harina no puede ser frita
-                            frita = false;
-                          }),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Divider(color: Color(0xFFE5DCC4), height: 8),
-                    const SizedBox(height: 4),
-                  ],
-
-                  // Toggles de queso y frita
-                  if (showOptions) ...[
-                    const Text(
-                      'Opciones',
-                      style: TextStyle(
-                          color: const Color(0xFF7A6E5A),
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        if (isChilaquil)
-                          _ToggleOption(
-                            icon: Icons.egg,
-                            label: 'Con Huevo',
-                            value: conHuevo,
-                            onChanged: (v) => setDialogState(() {
-                              conHuevo = v;
-                              if (!v) selectedTerminoHuevo = null;
-                            }),
-                          )
-                        else
-                          _ToggleOption(
-                            icon: Icons.egg_alt,
-                            label: 'Con Queso',
-                            price: isTapa ? '+\$25' : null,
-                            value: conQueso,
-                            onChanged: (v) => setDialogState(() => conQueso = v),
+                        if (showBaseSelector)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'BASE',
+                                  style: TextStyle(
+                                      color: Color(0xFF7A6E5A),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    _BaseChip(
+                                      label: 'Maíz',
+                                      price: gorditaMaizDish!.price,
+                                      selected: selectedBase == 'maíz',
+                                      onTap: () => setDialogState(() {
+                                        selectedBase = 'maíz';
+                                      }),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    _BaseChip(
+                                      label: 'Harina',
+                                      price: gorditaHarinaDish!.price,
+                                      selected: selectedBase == 'harina',
+                                      onTap: () => setDialogState(() {
+                                        selectedBase = 'harina';
+                                        frita = false;
+                                      }),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        if (isGordita) ...[
+                        if (showBaseSelector && showOptions)
                           const SizedBox(width: 10),
-                          _ToggleOption(
-                            icon: Icons.local_fire_department,
-                            label: 'Frita',
-                            value: frita,
-                            enabled: canBeFrita,
-                            onChanged: canBeFrita
-                                ? (v) => setDialogState(() => frita = v)
-                                : (_) {},
+                        if (showOptions)
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Opciones',
+                                  style: TextStyle(
+                                      color: Color(0xFF7A6E5A),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 1),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    if (isChilaquil)
+                                      _ToggleOption(
+                                        icon: Icons.egg,
+                                        label: 'Con Huevo',
+                                        value: conHuevo,
+                                        onChanged: (v) => setDialogState(() {
+                                          conHuevo = v;
+                                          if (!v) selectedTerminoHuevo = null;
+                                        }),
+                                      )
+                                    else
+                                      _ToggleOption(
+                                        icon: Icons.egg_alt,
+                                        label: 'Con Queso',
+                                        price: isTapa ? '+\$25' : null,
+                                        value: conQueso,
+                                        onChanged: (v) =>
+                                            setDialogState(() => conQueso = v),
+                                      ),
+                                    if (isGordita) ...[
+                                      const SizedBox(width: 6),
+                                      _ToggleOption(
+                                        icon: Icons.local_fire_department,
+                                        label: 'Frita',
+                                        value: frita,
+                                        enabled: canBeFrita,
+                                        onChanged: canBeFrita
+                                            ? (v) =>
+                                                setDialogState(() => frita = v)
+                                            : (_) {},
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    const Divider(color: Color(0xFFE5DCC4), height: 8),
+                    const SizedBox(height: 6),
+                    const Divider(color: Color(0xFFE5DCC4), height: 4),
                     const SizedBox(height: 4),
                   ],
 
