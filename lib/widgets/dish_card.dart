@@ -2455,9 +2455,10 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
             (!needsPiezas || selectedPiezasLoDulce != null) &&
-            // Solo es obligatorio elegir guisado cuando el sabor SELECCIONADO
-            // lo requiere (no cuando solo es opcional en la categoría).
-            (!selectedRequiresGuisado || selectedGuisados.isNotEmpty) &&
+            // Guisado ya NO es obligatorio — el mesero puede pedir la gordita
+            // sin nada (solo con queso, o completamente vacía). Si el sabor
+            // lo requiere (dish.requiresGuisado=true) y el mesero no elige,
+            // se permite igual — la cocina lo hace como lo sepa.
             (!hasChilaquilFlavor || selectedSalsasChilaquil.isNotEmpty) &&
             // Si seleccionaron un extra de guisado, deben elegir cuál.
             (!extrasDisponibles.any((e) =>
