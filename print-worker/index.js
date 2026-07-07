@@ -404,16 +404,28 @@ function filterItemsByArea(items) {
   return items;
 }
 
+// Normaliza el order_type de la BD a nuestro enum interno.
+// La PWA usa 'takeout' pero el código estándar (y algunos legacy) usan
+// 'to_go' — los tratamos como equivalentes.
+function normalizeOrderType(raw) {
+  const t = String(raw || '').toLowerCase().trim();
+  if (t === 'takeout' || t === 'to_go' || t === 'togo') return 'to_go';
+  if (t === 'delivery' || t === 'a_domicilio') return 'delivery';
+  if (t === 'dine_in' || t === 'dinein' || t === 'comer_aqui') return 'dine_in';
+  return t;
+}
+
 // Devuelve true si la orden matchea los filtros por tipo (order_type)
 // según PRINT_AREA y/o PRINT_ORDER_TYPES.
 function orderTypeMatches(order) {
-  const type = String(order?.order_type || '').toLowerCase();
+  const type = normalizeOrderType(order?.order_type);
   if (printArea === 'takeout') {
     // Área takeout: implícitamente solo to_go y delivery.
     return type === 'to_go' || type === 'delivery';
   }
   if (printOrderTypes.length > 0) {
-    return printOrderTypes.includes(type);
+    const wanted = printOrderTypes.map(normalizeOrderType);
+    return wanted.includes(type);
   }
   return true;
 }
@@ -429,7 +441,8 @@ const ORDER_TYPE_LABELS = {
   delivery: 'A DOMICILIO',
 };
 function orderTypeLabel(raw) {
-  const key = String(raw || '').toLowerCase().trim();
+  // Normaliza primero para que 'takeout' → 'TO GO' también.
+  const key = normalizeOrderType(raw);
   return ORDER_TYPE_LABELS[key] || (raw || 'PEDIDO').toString().toUpperCase();
 }
 
