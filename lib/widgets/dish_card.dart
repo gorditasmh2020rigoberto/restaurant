@@ -1739,7 +1739,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _ScrollableWithDownHint(
-                              height: 290,
+                              height: 480,
                               hintColor: const Color(0xFFFF6D00),
                               fadeColor: const Color(0xFFFAF1DE),
                               child: Wrap(
@@ -1840,11 +1840,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             letterSpacing: 1)),
                     const SizedBox(height: 8),
                     _ScrollableWithDownHint(
-                      height: 260,
+                      height: 450,
                       hintColor: const Color(0xFFFF6D00),
                       fadeColor: const Color(0xFFFAF1DE),
                       child: LayoutBuilder(builder: (_, c) {
-                        final itemW = (c.maxWidth - 12) / 3;
+                        final itemW = (c.maxWidth - 18) / 4;
                         Widget buildItem(Map<String, dynamic> g) {
                           final name = g['name'] as String;
                           final isSel = selectedGuisadoForExtra == name;
@@ -2962,11 +2962,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     ),
                     const SizedBox(height: 8),
                     _ScrollableWithDownHint(
-                      height: 320,
+                      height: 500,
                       hintColor: const Color(0xFFFF6D00),
                       fadeColor: const Color(0xFFFAF1DE),
                       child: LayoutBuilder(builder: (innerCtx, c) {
-                          final itemW = (c.maxWidth - 12) / 3;
+                          final itemW = (c.maxWidth - 18) / 4;
                           Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
                             final isChecked = selectedGuisados.contains(name);
@@ -3194,11 +3194,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             letterSpacing: 1)),
                     const SizedBox(height: 8),
                     _ScrollableWithDownHint(
-                      height: 260,
+                      height: 450,
                       hintColor: const Color(0xFFFF6D00),
                       fadeColor: const Color(0xFFFAF1DE),
                       child: LayoutBuilder(builder: (_, c) {
-                          final itemW = (c.maxWidth - 12) / 3;
+                          final itemW = (c.maxWidth - 18) / 4;
                           Widget buildItem(Map<String, dynamic> g) {
                             final name = g['name'] as String;
                             final isSel =
