@@ -954,12 +954,14 @@ class _ComandasViewState extends State<ComandasView> {
                 height: MediaQuery.of(context).size.height * 0.80,
                 child: Column(
                   children: [
-                    // Order Type Selector
+                    // Order Type Selector — el segmento Delivery quedó
+                    // oculto por ahora (se reactiva agregándolo de vuelta
+                    // a la lista). La lógica de delivery en el resto del
+                    // archivo sigue intacta por si se reactiva.
                     SegmentedButton<String>(
                       segments: const [
                         ButtonSegment(value: 'dine_in', label: Text('Mesa'), icon: Icon(Icons.table_restaurant)),
                         ButtonSegment(value: 'takeout', label: Text('Llevar'), icon: Icon(Icons.takeout_dining)),
-                        ButtonSegment(value: 'delivery', label: Text('Delivery'), icon: Icon(Icons.delivery_dining)),
                       ],
                       selected: {tempOrderType},
                       onSelectionChanged: (Set<String> newSelection) {
