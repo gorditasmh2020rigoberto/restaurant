@@ -1650,7 +1650,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               }),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
                                 decoration: BoxDecoration(
                                   color: isChecked
                                       ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
@@ -1858,7 +1858,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 8),
+                                    horizontal: 4, vertical: 5),
                                 decoration: BoxDecoration(
                                   color: isSel
                                       ? const Color(0xFFFF6D00)
@@ -2983,7 +2983,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                 }),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 150),
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 5),
                                   decoration: BoxDecoration(
                                     color: isChecked
                                         ? const Color(0xFFFF6D00).withValues(alpha: 0.18)
@@ -3215,7 +3215,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   duration:
                                       const Duration(milliseconds: 150),
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 8),
+                                      horizontal: 4, vertical: 5),
                                   decoration: BoxDecoration(
                                     color: isSel
                                         ? const Color(0xFFFF6D00)
