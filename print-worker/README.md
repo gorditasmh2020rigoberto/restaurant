@@ -73,12 +73,23 @@ Direccion:
 
 Cuando quieres separar la impresión en **más de una Pi** (típicamente una para cocina y otra para bebidas), setea `PRINT_AREA` en el `.env` de cada Pi:
 
-| Pi | `PRINT_AREA` | Qué imprime |
-|---|---|---|
-| Bebidas / barra | `drinks` | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BAR**. |
-| Cocina | `kitchen` | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
-| Línea de producción | `line` | Mismo filtro que `kitchen`, pero el ticket dice **LÍNEA DE PRODUCCIÓN**. Para sucursales que llaman "línea" al área de comida (p.ej. Pocitos). |
-| Todo-en-uno | (vacío o no definido) | Comportamiento original: **COCINA** y **BAR** en la misma impresora, con pausa entre ambos. |
+| Pi | `PRINT_AREA` | `PRINT_ORDER_TYPES` | Qué imprime |
+|---|---|---|---|
+| Bebidas / barra | `drinks` | (vacío) | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BAR**. |
+| Cocina | `kitchen` | (vacío o `dine_in`) | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
+| Línea de producción | `line` | (vacío o `dine_in`) | Mismo filtro que `kitchen`, pero el ticket dice **LÍNEA DE PRODUCCIÓN**. Para sucursales que llaman "línea" al área de comida (p.ej. Pocitos). |
+| Para llevar | `takeout` | (auto — ignora esta var) | Comida (no bebida) SOLO de órdenes `to_go` o `delivery`. Ticket titulado **PARA LLEVAR**. |
+| Todo-en-uno | (vacío o no definido) | (vacío) | Comportamiento original: **COCINA** y **BAR** en la misma impresora, con pausa entre ambos. |
+
+**Ejemplo Pocitos con 3 Pis (bebidas + línea + para llevar):**
+
+```
+rasp1 (bebidas):     PRINT_AREA=drinks
+rasp2 (línea):       PRINT_AREA=line       PRINT_ORDER_TYPES=dine_in
+rasp3 (para llevar): PRINT_AREA=takeout
+```
+
+Sin el `PRINT_ORDER_TYPES=dine_in` en rasp2, esa Pi imprimiría también los takeouts que rasp3 imprime — resultando en doble ticket (rasp2 marcaría los items y rasp3 no vería nada). Con el filtro, los takeouts caen SOLO en rasp3.
 
 Cada Pi marca solo los `order_items` que le tocaron por id — cuando la última termina, se marca también `orders.printed_at`. Si dejas `PRINT_AREA` vacía en **dos Pis distintas** de la misma sucursal, ambas se pelean por la orden y solo una imprime.
 

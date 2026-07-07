@@ -54,14 +54,40 @@ const {
 //                se titula "LÍNEA DE PRODUCCIÓN". Para sucursales
 //                donde al área de comida se le dice "línea" y no
 //                "cocina".
+//   - 'takeout': comida SOLO de órdenes to_go/delivery. Ticket
+//                titulado "PARA LLEVAR". Automáticamente filtra
+//                por order_type — no necesita PRINT_ORDER_TYPES.
 // Idempotencia: cada Pi marca únicamente los `order_items` que le
 // tocan (por id). Cuando la última Pi termina, no quedan items
 // pendientes y se marca `orders.printed_at`.
 const printArea = String(PRINT_AREA || '').toLowerCase();
-const validAreas = ['', 'drinks', 'kitchen', 'line'];
+const validAreas = ['', 'drinks', 'kitchen', 'line', 'takeout'];
 if (!validAreas.includes(printArea)) {
-  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen', 'line'.`);
+  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen', 'line', 'takeout'.`);
   process.exit(1);
+}
+
+// PRINT_ORDER_TYPES: whitelist opcional de tipos de orden a imprimir.
+// Comma-separated. Valores: dine_in, to_go, delivery.
+//   - Vacío / no definido → acepta todos los tipos.
+//   - "dine_in"           → solo órdenes para comer aquí.
+//   - "to_go,delivery"    → solo órdenes para llevar/domicilio.
+// Se usa para evitar duplicados: si rasp3 imprime takeouts con
+// PRINT_AREA=takeout, en rasp2 pon PRINT_ORDER_TYPES=dine_in para
+// que NO imprima esos mismos takeouts.
+// Cuando PRINT_AREA='takeout' esta variable se ignora — el área ya
+// tiene su propio filtro implícito (to_go+delivery).
+const printOrderTypes = String(process.env.PRINT_ORDER_TYPES || '')
+  .toLowerCase()
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const validOrderTypes = ['dine_in', 'to_go', 'delivery'];
+for (const t of printOrderTypes) {
+  if (!validOrderTypes.includes(t)) {
+    console.error(`✘ PRINT_ORDER_TYPES tiene valor inválido: "${t}". Valores: ${validOrderTypes.join(', ')}.`);
+    process.exit(1);
+  }
 }
 
 // DRY_RUN=true → no manda nada a la impresora; imprime el ticket
@@ -369,12 +395,27 @@ function isDrink(item) {
 function filterItemsByArea(items) {
   if (!printArea) return items;
   if (printArea === 'drinks') return items.filter(isDrink);
-  // 'kitchen' y 'line' comparten el mismo filtro (todo lo no-bebida);
-  // solo se diferencian en el header del ticket.
-  if (printArea === 'kitchen' || printArea === 'line') {
+  // 'kitchen', 'line' y 'takeout' comparten el mismo filtro de área
+  // (todo lo no-bebida); se diferencian en el header y en si además
+  // se filtra por order_type (takeout).
+  if (printArea === 'kitchen' || printArea === 'line' || printArea === 'takeout') {
     return items.filter((it) => !isDrink(it));
   }
   return items;
+}
+
+// Devuelve true si la orden matchea los filtros por tipo (order_type)
+// según PRINT_AREA y/o PRINT_ORDER_TYPES.
+function orderTypeMatches(order) {
+  const type = String(order?.order_type || '').toLowerCase();
+  if (printArea === 'takeout') {
+    // Área takeout: implícitamente solo to_go y delivery.
+    return type === 'to_go' || type === 'delivery';
+  }
+  if (printOrderTypes.length > 0) {
+    return printOrderTypes.includes(type);
+  }
+  return true;
 }
 
 // Añade un ticket completo (header → ítems → cut) al buffer del printer.
@@ -531,6 +572,14 @@ async function printItems(order, items) {
     );
     return true;
   }
+  if (printArea === 'takeout') {
+    await printSingleTicket(
+      isAddition ? 'PARA LLEVAR — ADICIÓN' : 'PARA LLEVAR',
+      order,
+      items,
+    );
+    return true;
+  }
 
   const drinks = items.filter(isDrink);
   const kitchen = items.filter((it) => !isDrink(it));
@@ -584,6 +633,10 @@ async function processOrder(orderId, source = 'unknown') {
       console.log(`🖥  ${orderId} — modo pantalla, no se imprime (${source})`);
       return;
     }
+
+    // Filtro por tipo de orden (dine_in / to_go / delivery). Si la
+    // orden no matchea el whitelist de esta Pi, la ignoramos completa.
+    if (!orderTypeMatches(order)) return;
 
     const allUnprinted = await fetchUnprintedItems(orderId);
     if (allUnprinted.length === 0) return; // todo ya impreso, nada que hacer
@@ -739,8 +792,11 @@ async function main() {
       ? '🧪 DRY_RUN (terminal)'
       : `Impresora: ${printerTarget} (${paperWidth} cols, modo via ${modeSrc})`;
   const areaLabel = printArea ? ` | Área: ${printArea}` : ' | Área: todo (COCINA+BAR)';
+  const orderTypesLabel = printOrderTypes.length > 0
+    ? ` | Tipos: ${printOrderTypes.join(',')}`
+    : '';
   console.log(
-    `Print-worker iniciado | Sucursal: ${BRANCH_NAME}${areaLabel} | ${modeLabel}`,
+    `Print-worker iniciado | Sucursal: ${BRANCH_NAME}${areaLabel}${orderTypesLabel} | ${modeLabel}`,
   );
 
   await catchUp();
