@@ -450,6 +450,19 @@ function appendTicket(printer, kind, order, items) {
   printer.setTextNormal();
   printer.println(kind);
   printer.bold(false);
+  // Si el ticket es de BEBIDAS (bar/drinks) y la orden NO es dine_in,
+  // imprime un subtítulo GRANDE con el tipo (TO GO / A DOMICILIO) para
+  // que el barman sepa que la bebida va en vaso desechable, no en la barra.
+  const kindNorm = String(kind || '').toUpperCase();
+  const isBarTicket = kindNorm.includes('BEBIDAS') || kindNorm.includes('BAR');
+  const orderTypeRaw = String(order.order_type || '').toLowerCase();
+  if (isBarTicket && orderTypeRaw && orderTypeRaw !== 'dine_in') {
+    printer.setTextDoubleHeight();
+    printer.bold(true);
+    printer.println(orderTypeLabel(order.order_type));
+    printer.setTextNormal();
+    printer.bold(false);
+  }
   // `branch_name` en la BD ya viene como "Sucursal Maravillas", no le
   // anteponemos "Sucursal " porque salía duplicado ("Sucursal Sucursal
   // Maravillas").
