@@ -1390,11 +1390,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       'BASE',
                       style: TextStyle(
                           color: const Color(0xFF7A6E5A),
-                          fontSize: 12,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         _BaseChip(
@@ -1405,7 +1405,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             selectedBase = 'maíz';
                           }),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 8),
                         _BaseChip(
                           label: 'Harina',
                           price: gorditaHarinaDish!.price,
@@ -1418,9 +1418,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const Divider(color: Color(0xFFE5DCC4)),
                     const SizedBox(height: 8),
+                    const Divider(color: Color(0xFFE5DCC4), height: 8),
+                    const SizedBox(height: 4),
                   ],
 
                   // Toggles de queso y frita
@@ -1429,11 +1429,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       'Opciones',
                       style: TextStyle(
                           color: const Color(0xFF7A6E5A),
-                          fontSize: 12,
+                          fontSize: 10,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         if (isChilaquil)
@@ -1468,9 +1468,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const Divider(color: Color(0xFFE5DCC4)),
                     const SizedBox(height: 8),
+                    const Divider(color: Color(0xFFE5DCC4), height: 8),
+                    const SizedBox(height: 4),
                   ],
 
                   // Término del huevo (solo cuando conHuevo está activo)
@@ -3861,18 +3861,18 @@ class _ToggleOption extends StatelessWidget {
       onTap: enabled ? () => onChanged(!value) : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 160),
-        constraints: const BoxConstraints(minHeight: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        constraints: const BoxConstraints(minHeight: 34),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: effectiveColor,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(color: borderColor, width: 1.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: contentColor),
-            const SizedBox(width: 6),
+            Icon(icon, size: 15, color: contentColor),
+            const SizedBox(width: 5),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -3880,7 +3880,7 @@ class _ToggleOption extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: value ? FontWeight.w700 : FontWeight.w600,
                     color: contentColor,
                   ),
@@ -3930,13 +3930,13 @@ class _BaseChip extends StatelessWidget {
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          constraints: const BoxConstraints(minHeight: 56),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          constraints: const BoxConstraints(minHeight: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             color: selected
                 ? activeColor.withValues(alpha: 0.15)
                 : const Color(0xFFFAF1DE),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: selected ? activeColor : const Color(0xFFE5DCC4),
               width: 2,
@@ -3950,10 +3950,10 @@ class _BaseChip extends StatelessWidget {
                 selected
                     ? Icons.check_circle
                     : Icons.radio_button_unchecked,
-                size: 16,
+                size: 14,
                 color: selected ? activeColor : const Color(0xFFA08F70),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
