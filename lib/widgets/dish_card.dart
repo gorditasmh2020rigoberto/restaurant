@@ -1690,14 +1690,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             ),
                           );
                         }
-                        // Filtrar por CON CARNE / SIN CARNE — el usuario
-                        // alterna con dos botones arriba; sólo se muestra
-                        // el grupo seleccionado a la vez.
-                        final activeList = guisados
-                            .where((g) =>
-                                (g['with_meat'] as bool? ?? true) ==
-                                guisadoMeatFilter)
-                            .toList();
+                        // Mostrar todos los guisados sin filtro CON CARNE /
+                        // SIN CARNE (los botones de filtro fueron removidos).
+                        final activeList = guisados.toList();
                         Widget filterTab(String label, bool value) {
                           final isActive = guisadoMeatFilter == value;
                           return Expanded(
@@ -1743,14 +1738,6 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                filterTab('CON CARNE', true),
-                                const SizedBox(width: 8),
-                                filterTab('SIN CARNE', false),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
                             _ScrollableWithDownHint(
                               height: 290,
                               hintColor: const Color(0xFFFF6D00),
@@ -1917,11 +1904,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                             ),
                           );
                         }
-                        final activeList = guisados
-                            .where((g) =>
-                                (g['with_meat'] as bool? ?? true) ==
-                                guisadoExtraMeatFilter)
-                            .toList();
+                        final activeList = guisados.toList();
                         Widget filterTab(String label, bool value) {
                           final isActive =
                               guisadoExtraMeatFilter == value;
@@ -1969,14 +1952,6 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                filterTab('CON CARNE', true),
-                                const SizedBox(width: 8),
-                                filterTab('SIN CARNE', false),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
                             Wrap(
                               spacing: 6,
                               runSpacing: 6,
@@ -3092,13 +3067,17 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               });
                             });
                           }
-                          final effectiveMeatFilter =
-                              forcedMeat ?? mixedGuisadoMeatFilter;
-                          final activeList = guisados
-                              .where((g) =>
-                                  (g['with_meat'] as bool? ?? true) ==
-                                  effectiveMeatFilter)
-                              .toList();
+                          // Si forcedMeat viene del contexto (ej. sección
+                          // MENUDO con tipos de carne obligatorios), filtramos
+                          // por ese valor. Si no, mostramos todos los guisados
+                          // (los tabs CON CARNE / SIN CARNE fueron removidos).
+                          final activeList = forcedMeat == null
+                              ? guisados.toList()
+                              : guisados
+                                  .where((g) =>
+                                      (g['with_meat'] as bool? ?? true) ==
+                                      forcedMeat)
+                                  .toList();
                           Widget filterTab(String label, bool value) {
                             final isActive = mixedGuisadoMeatFilter == value;
                             return Expanded(
@@ -3141,16 +3120,6 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (forcedMeat == null) ...[
-                                Row(
-                                  children: [
-                                    filterTab('CON CARNE', true),
-                                    const SizedBox(width: 8),
-                                    filterTab('SIN CARNE', false),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                              ],
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 6,
@@ -3290,11 +3259,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               ),
                             );
                           }
-                          final activeList = guisados
-                              .where((g) =>
-                                  (g['with_meat'] as bool? ?? true) ==
-                                  mixedGuisadoMeatFilter)
-                              .toList();
+                          final activeList = guisados.toList();
                           Widget filterTab(String label, bool value) {
                             final isActive = mixedGuisadoMeatFilter == value;
                             return Expanded(
@@ -3333,25 +3298,10 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                               ),
                             );
                           }
-                          // Si la sección principal de GUISADO ya muestra el
-                          // filtro CON CARNE / SIN CARNE arriba, no lo
-                          // repetimos aquí — comparten el mismo estado.
-                          final showTabs =
-                              !(anyRequiresGuisado && guisados.isNotEmpty);
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (showTabs) ...[
-                                Row(
-                                  children: [
-                                    filterTab('CON CARNE', true),
-                                    const SizedBox(width: 8),
-                                    filterTab('SIN CARNE', false),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-                              ],
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 6,
