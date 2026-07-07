@@ -1437,8 +1437,11 @@ class _ComandasViewState extends State<ComandasView> {
           : _buildMenuContent(context);
     }
 
-    // Tablet y escritorio: lado a lado
-    final sidebarWidth = isDesktop ? 380.0 : (w < 800 ? 230.0 : 280.0);
+    // Tablet y escritorio: lado a lado.
+    // Antes: 230-280 en tablet → la comanda quedaba muy angosta y no se
+    // veían bien los guisados de cada ítem. Ahora usa 50% de la pantalla
+    // en tablets para dar mucho más espacio a la comanda.
+    final sidebarWidth = isDesktop ? 380.0 : w * 0.5;
     return Row(
       children: [
         Expanded(child: _buildMenuContent(context)),
