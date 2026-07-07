@@ -447,22 +447,37 @@ function appendTicket(printer, kind, order, items) {
   //   2× "Molletes con Guisado (Orden)" → "2x1 MOLLETES CON GUISADO"
   //   3× "Molletes con Guisado (1/2)"   → "3x1/2 MOLLETES CON GUISADO"
   //   1× "Refresco Coca"                → "1x REFRESCO COCA"
+  //
+  // Cuando la mesa tiene varios clientes (client_label = "Cliente 1",
+  // "Cliente 2", ...), agrupamos por cliente y ponemos una línea divisoria
+  // ENTRE grupos. El label del cliente en sí no se imprime — la línea
+  // separa visualmente cada pedido individual.
+  const groups = [];
+  const groupMap = new Map();
   for (const it of items) {
-    const rawName = it.dishes?.name || '(sin nombre)';
-    const { fraction, cleanName } = parseSizeMarker(rawName);
-    const qty = it.quantity || 1;
-    const line = fraction
-      ? `${qty}x${fraction} ${cleanName}`
-      : `${qty}x ${cleanName}`;
-    printer.bold(true);
-    printer.println(line);
-    printer.bold(false);
-    const guisados = parseGuisados(it.guisados_selected);
-    if (guisados.length) {
-      printer.println(`   ${guisados.join(', ')}`);
+    const label = it.client_label || 'Cliente 1';
+    if (!groupMap.has(label)) {
+      groupMap.set(label, []);
+      groups.push(groupMap.get(label));
     }
-    if (it.client_label && it.client_label !== 'Cliente 1') {
-      printer.println(`   (${it.client_label})`);
+    groupMap.get(label).push(it);
+  }
+  for (let g = 0; g < groups.length; g++) {
+    if (g > 0) printer.drawLine();
+    for (const it of groups[g]) {
+      const rawName = it.dishes?.name || '(sin nombre)';
+      const { fraction, cleanName } = parseSizeMarker(rawName);
+      const qty = it.quantity || 1;
+      const line = fraction
+        ? `${qty}x${fraction} ${cleanName}`
+        : `${qty}x ${cleanName}`;
+      printer.bold(true);
+      printer.println(line);
+      printer.bold(false);
+      const guisados = parseGuisados(it.guisados_selected);
+      if (guisados.length) {
+        printer.println(`   ${guisados.join(', ')}`);
+      }
     }
   }
   printer.drawLine();
