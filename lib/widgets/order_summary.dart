@@ -1209,8 +1209,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                           Text(
                             guisadosList.join(', '),
                             style: const TextStyle(color: Color(0xFFA08F70), fontSize: 10),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
                           ),
                       ],
                     ),
@@ -1320,7 +1319,6 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                         subtitle: Text(
                           '\$${entry.value.dish.price.toStringAsFixed(2)}${entry.value.guisados.isNotEmpty ? ' · ${entry.value.guisados.join(', ')}' : ''}',
                           style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11),
-                          maxLines: 3,
                           softWrap: true,
                         ),
                         trailing: Row(
