@@ -425,7 +425,7 @@ function orderTypeMatches(order) {
 // en el ticket físico.
 const ORDER_TYPE_LABELS = {
   dine_in: 'COMER AQUÍ',
-  to_go: 'PARA LLEVAR',
+  to_go: 'TO GO',
   delivery: 'A DOMICILIO',
 };
 function orderTypeLabel(raw) {
@@ -574,7 +574,7 @@ async function printItems(order, items) {
   }
   if (printArea === 'takeout') {
     await printSingleTicket(
-      isAddition ? 'PARA LLEVAR — ADICIÓN' : 'PARA LLEVAR',
+      isAddition ? 'TO GO — ADICIÓN' : 'TO GO',
       order,
       items,
     );
