@@ -2455,13 +2455,12 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
             (!isHuevoCategory || selectedTerminoHuevo != null) &&
             (!needsPiezas || selectedPiezasLoDulce != null) &&
-            // Si el sabor SELECCIONADO requiere guisado (dish.requiresGuisado),
-            // el mesero debe elegir AL MENOS uno de los dos: algún guisado O
-            // marcar "Con Queso". La gordita completamente vacía (sin nada) no
-            // se permite — la cocina no sabría qué hacer.
-            (!selectedRequiresGuisado ||
-                    selectedGuisados.isNotEmpty ||
-                    conQueso) &&
+            // En el diálogo MIXTO (multi-sabor) no hay toggle Con Queso, así
+            // que la única forma de "no dejar la gordita vacía" es exigir al
+            // menos un guisado cuando el sabor lo requiere. La opción "solo
+            // con queso" vive en el diálogo simple (individual) y ahí sí se
+            // permite sin guisado.
+            (!selectedRequiresGuisado || selectedGuisados.isNotEmpty) &&
             (!hasChilaquilFlavor || selectedSalsasChilaquil.isNotEmpty) &&
             // Si seleccionaron un extra de guisado, deben elegir cuál.
             (!extrasDisponibles.any((e) =>
