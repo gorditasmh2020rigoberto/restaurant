@@ -25,7 +25,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
 
   final List<String> _recipientOptions = ['N/A', 'Mesero', 'Cajera', 'Cocina', 'Barra de Alimentos', 'Barra de Bebidas', 'Barra de Postres'];
 
-  final List<String> _incomeCategories = ['retardo', 'aporte', 'otro'];
+  final List<String> _incomeCategories = ['apertura', 'retardo', 'aporte', 'otro'];
   final List<String> _expenseCategories = ['prestamo', 'gasto', 'propina', 'vacaciones', 'corte', 'otro'];
 
   @override
@@ -118,6 +118,114 @@ class _CashRegisterViewState extends State<CashRegisterView> {
         });
       }
     }
+  }
+
+  /// Diálogo simple para registrar el FONDO INICIAL de la caja (dinero
+  /// con el que se abre el día). Se guarda como movimiento tipo 'entrada'
+  /// con categoría 'apertura' y método EFECTIVO.
+  void _showAperturaCajaDialog() {
+    _amountController.clear();
+    _descriptionController.text = 'Fondo inicial de caja';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Row(
+          children: [
+            Icon(Icons.savings, color: Colors.green),
+            SizedBox(width: 8),
+            Text('Apertura de Caja',
+                style: TextStyle(
+                    color: Color(0xFF3D2E1A), fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+                'Ingresa el monto de efectivo con el que INICIA la caja hoy '
+                '(fondo inicial / caja chica).',
+                style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 13)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _amountController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              autofocus: true,
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold),
+              decoration: const InputDecoration(
+                labelText: 'Monto en efectivo',
+                prefixText: '\$ ',
+                prefixIcon: Icon(Icons.attach_money, color: Colors.green),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _descriptionController,
+              style: const TextStyle(color: Colors.black),
+              decoration: const InputDecoration(
+                labelText: 'Notas (opcional)',
+                prefixIcon: Icon(Icons.note, color: Color(0xFFA08F70)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Color(0xFFA08F70))),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final amount = double.tryParse(_amountController.text.trim());
+              if (amount == null || amount <= 0) {
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+                    content: Text('Monto inválido'),
+                    backgroundColor: Colors.red));
+                return;
+              }
+              try {
+                await _supabase.from('cash_movements').insert({
+                  'type': 'entrada',
+                  'category': 'apertura',
+                  'amount': amount,
+                  'payment_method': 'EFECTIVO',
+                  'description': _descriptionController.text.trim().isNotEmpty
+                      ? _descriptionController.text.trim()
+                      : 'Fondo inicial de caja',
+                  'branch_name': Globals.currentBranch,
+                  'registered_by': Globals.currentUser,
+                  'recipient': 'N/A',
+                });
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                        'Caja abierta con \$${amount.toStringAsFixed(2)} de fondo inicial'),
+                    backgroundColor: Colors.green,
+                  ));
+                  _fetchMovements();
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(content: Text('Error: $e')));
+                }
+              }
+            },
+            icon: const Icon(Icons.check),
+            label: const Text('Registrar Apertura'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showNewMovementDialog() {
@@ -309,12 +417,27 @@ class _CashRegisterViewState extends State<CashRegisterView> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Color(0xFFFAF1DE)),
         actions: [
+          // Botón dedicado para registrar el fondo inicial de la caja
+          // (cash de arranque del día). Abre el mismo diálogo pero pre-configurado
+          // como entrada de tipo 'apertura'.
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: _showAperturaCajaDialog,
+              icon: const Icon(Icons.savings, color: Colors.white),
+              label: const Text('Apertura de Caja', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: ElevatedButton.icon(
               onPressed: _showNewMovementDialog,
               icon: const Icon(Icons.add, color: Color(0xFFFAF1DE)),
-              label: const Text('Nuevo Movimiento', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+              label: const Text('Nuevo Movimiento', style: TextStyle(color: Color(0xFFFAF1DE), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFFF6D00),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
