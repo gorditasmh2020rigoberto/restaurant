@@ -1123,9 +1123,14 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       }
                       return;
                     }
+                    // Agua Fresca no tiene variantes de tamaño configuradas
+                    // en drink_type_prices (siempre es de 600 ml), así que
+                    // el selector de TAMAÑO no aparece. Para que igual
+                    // salga "600 ml" en la comanda impresa (como ya pasa
+                    // con refrescos), lo agregamos por defecto aquí.
                     final sizeLabel = selectedSizeType != null
                         ? _formatDrinkSizeLabel(selectedSizeType!)
-                        : null;
+                        : (isAguaFresca && !isNaturalSelected ? '600 ml' : null);
                     final extras = [
                       if (sizeLabel != null) sizeLabel,
                       selectedSabor!,

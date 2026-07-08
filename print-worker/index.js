@@ -393,7 +393,7 @@ async function markItemsPrinted(orderId, itemIds) {
 // la misma regla de category que `kitchen_view.dart`. El Envío FLASH
 // (categoría 'Envío') se considera comida para que el cocinero vea
 // que es delivery.
-const DRINK_CATEGORIES = ['drink', 'alcohol', 'bebidas', 'drinks'];
+const DRINK_CATEGORIES = ['drink', 'alcohol', 'bebidas', 'drinks', 'aguas', 'jugos', 'cafes', 'refrescos'];
 function isDrink(item) {
   const cat = (item.dishes?.category || '').toString().toLowerCase().trim();
   return DRINK_CATEGORIES.includes(cat);

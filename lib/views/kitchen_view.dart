@@ -497,7 +497,7 @@ class _OrderTicketState extends State<_OrderTicket> {
         bool isDrink(Map<String, dynamic> item) {
           final dish = item['dishes'] as Map<String, dynamic>?;
           final category = dish?['category']?.toString().toLowerCase().trim() ?? '';
-          const drinkCategories = ['drink', 'alcohol', 'bebidas', 'drinks'];
+          const drinkCategories = ['drink', 'alcohol', 'bebidas', 'drinks', 'aguas', 'jugos', 'cafes', 'refrescos'];
           return drinkCategories.contains(category);
         }
 
