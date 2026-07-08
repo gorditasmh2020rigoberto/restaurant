@@ -638,22 +638,55 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
   /// Manda a imprimir la CUENTA al ticket de caja. La Pi de caja
   /// (PRINT_AREA=receipt) escucha `cuenta_requested_at` y al detectar
   /// que se seteó, imprime un recibo formal con items+precios+total.
-  /// Reseteamos `caja_printed_at` a null para permitir reimpresiones.
+  ///
+  /// Regla anti-fraude: solo la PRIMERA impresión es libre para el
+  /// mesero. Si alguna de las órdenes ya se imprimió (caja_printed_at
+  /// != null), pedimos PIN de admin para permitir la REimpresión. Esto
+  /// evita que el mesero cobre en efectivo y reimprima el ticket para
+  /// dárselo a otro cliente.
   Future<void> _imprimirCuenta(BuildContext context) async {
     final orderIds = _existingOrderIds;
     if (orderIds.isEmpty) return;
+    final supabase = Supabase.instance.client;
+
+    // Chequea si alguna orden ya se imprimió antes.
+    bool alreadyPrinted = false;
     try {
-      final supabase = Supabase.instance.client;
+      final rows = await supabase
+          .from('orders')
+          .select('caja_printed_at')
+          .inFilter('id', orderIds);
+      alreadyPrinted = (rows as List)
+          .any((r) => r['caja_printed_at'] != null);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al verificar cuenta: $e')),
+        );
+      }
+      return;
+    }
+
+    if (alreadyPrinted) {
+      // Ya se imprimió — pide PIN de admin para reimprimir.
+      if (!context.mounted) return;
+      final ok = await _askAdminPinForReprint(context);
+      if (!ok) return;
+    }
+
+    try {
       await supabase.from('orders').update({
         'cuenta_requested_at': DateTime.now().toUtc().toIso8601String(),
         'caja_printed_at': null,
       }).inFilter('id', orderIds);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Imprimiendo cuenta en caja…'),
-            backgroundColor: Color(0xFFFF6D00),
-            duration: Duration(seconds: 2),
+          SnackBar(
+            content: Text(alreadyPrinted
+                ? 'Reimprimiendo cuenta en caja…'
+                : 'Imprimiendo cuenta en caja…'),
+            backgroundColor: const Color(0xFFFF6D00),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -664,6 +697,97 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
         );
       }
     }
+  }
+
+  /// Diálogo que pide el PIN maestro (guardado en admin_settings) para
+  /// autorizar la reimpresión de una cuenta ya impresa. Devuelve true
+  /// si el PIN es correcto, false si el mesero canceló o metió mal el PIN.
+  Future<bool> _askAdminPinForReprint(BuildContext context) async {
+    final pinController = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber, color: Colors.redAccent),
+              SizedBox(width: 8),
+              Text('Cuenta ya impresa'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Esta cuenta ya se imprimió al menos una vez. Para reimprimirla, ingresa el PIN maestro:',
+                style: TextStyle(color: Color(0xFF7A6E5A)),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: pinController,
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'PIN Maestro',
+                  prefixIcon: Icon(Icons.lock, color: Colors.redAccent),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancelar',
+                  style: TextStyle(color: Color(0xFFA08F70))),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final supabase = Supabase.instance.client;
+                try {
+                  final response = await supabase
+                      .from('admin_settings')
+                      .select('setting_value')
+                      .eq('setting_key', 'master_pin')
+                      .maybeSingle();
+                  String correctPin = '1234';
+                  if (response != null && response['setting_value'] != null) {
+                    correctPin = response['setting_value'] as String;
+                  }
+                  if (pinController.text == correctPin) {
+                    if (dialogContext.mounted) {
+                      Navigator.pop(dialogContext, true);
+                    }
+                  } else {
+                    if (dialogContext.mounted) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(
+                          content: Text('PIN Incorrecto'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Autorizar'),
+            ),
+          ],
+        );
+      },
+    );
+    return ok == true;
   }
 
   Future<void> _deleteExistingItem(Map<String, dynamic> item) async {
