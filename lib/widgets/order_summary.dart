@@ -635,6 +635,48 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
     await _showPaymentDialog(context, orderIds, totalConPropina);
   }
 
+  /// Reimprime la COMANDA (ticket de cocina/bebidas/línea/to go) para
+  /// las órdenes actuales de la mesa. Útil cuando la impresora falló,
+  /// se atascó, o el cocinero perdió el ticket físico.
+  ///
+  /// Resetea `printed_at` en los order_items y en las orders, para
+  /// que el print-worker las tome en el próximo evento realtime (o
+  /// en el catch-up de 60s como red de seguridad). Refresca también
+  /// `sent_to_kitchen_at` para disparar el realtime UPDATE al instante.
+  Future<void> _reimprimirComanda(BuildContext context) async {
+    final orderIds = _existingOrderIds;
+    if (orderIds.isEmpty) return;
+    final supabase = Supabase.instance.client;
+    try {
+      // Reset printed_at en TODOS los items de estas órdenes.
+      await supabase
+          .from('order_items')
+          .update({'printed_at': null})
+          .inFilter('order_id', orderIds);
+      // Reset orders.printed_at y refresca sent_to_kitchen_at para
+      // disparar el evento realtime al print-worker.
+      await supabase.from('orders').update({
+        'printed_at': null,
+        'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
+      }).inFilter('id', orderIds);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Reimprimiendo comanda…'),
+            backgroundColor: Colors.blueAccent,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al reimprimir: $e')),
+        );
+      }
+    }
+  }
+
   /// Manda a imprimir la CUENTA al ticket de caja. La Pi de caja
   /// (PRINT_AREA=receipt) escucha `cuenta_requested_at` y al detectar
   /// que se seteó, imprime un recibo formal con items+precios+total.
@@ -1569,17 +1611,20 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   ),
                 ),
                 SizedBox(height: isCompact ? 6 : 10),
+                // Botón para reimprimir la comanda (kitchen ticket) si
+                // la impresora falló o se perdió el ticket físico. NO
+                // cobra — el cobro se hace desde la tablet de caja.
                 ElevatedButton.icon(
-                  onPressed: () => _cobrarCuenta(context),
-                  icon: Icon(Icons.point_of_sale, size: isCompact ? 18 : 22),
+                  onPressed: () => _reimprimirComanda(context),
+                  icon: Icon(Icons.print_outlined, size: isCompact ? 18 : 22),
                   label: Text(
-                    'Cobrar · \$${_existingTotal.toStringAsFixed(2)}',
+                    'Reimprimir Comanda',
                     style: TextStyle(fontSize: btnFontSize, fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size.fromHeight(btnHeight),
-                    backgroundColor: Colors.green,
-                    foregroundColor: Color(0xFFFAF1DE),
+                    backgroundColor: Colors.blueAccent,
+                    foregroundColor: const Color(0xFFFAF1DE),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
