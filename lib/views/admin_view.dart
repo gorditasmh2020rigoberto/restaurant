@@ -1409,8 +1409,8 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Total a Cobrar:', style: TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
-                    Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text('Total a Cobrar:', style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text('\$${total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.w900)),
                   ],
                 ),
               ),

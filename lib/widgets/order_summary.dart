@@ -383,8 +383,10 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text('Total a Cobrar:',
-                      style:
-                          TextStyle(color: Color(0xFFA08F70), fontSize: 16)),
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                   Text('\$${total.toStringAsFixed(2)}',
                       style: const TextStyle(
                           color: Color(0xFFFF6D00),
@@ -1400,7 +1402,11 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                       children: [
                         Text(
                           '\$${item['price']} x ${item['quantity']}',
-                          style: const TextStyle(color: Color(0xFFB6A88A), fontSize: 10),
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         if (guisadosList.isNotEmpty)
                           Text(
