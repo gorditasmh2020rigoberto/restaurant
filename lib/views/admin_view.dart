@@ -344,6 +344,18 @@ class _AdminViewState extends State<AdminView> {
           ),
           const Divider(color: Color(0xFFE5DCC4)),
           ListTile(
+            leading: const Icon(Icons.lock_clock, color: Colors.redAccent),
+            title: const Text('Cerrar Día',
+                style: TextStyle(
+                    color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            subtitle: const Text('Libera mesas + cierra órdenes pendientes',
+                style: TextStyle(color: Color(0xFFA08F70), fontSize: 11)),
+            onTap: () {
+              if (isDrawer) Navigator.pop(context);
+              _cerrarDia(context);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.logout, color: Color(0xFFA08F70)),
             title: const Text('Salir al menú', style: TextStyle(color: Color(0xFFA08F70))),
             onTap: () => Navigator.pop(context),
@@ -352,6 +364,141 @@ class _AdminViewState extends State<AdminView> {
         ],
       ),
     );
+  }
+
+  /// Cierra todas las órdenes pendientes (pending/ready) y libera todas
+  /// las mesas de la sucursal activa. Pide PIN Maestro para confirmar.
+  /// Útil para iniciar o cerrar el día del restaurante.
+  Future<void> _cerrarDia(BuildContext context) async {
+    final supabase = Supabase.instance.client;
+    // Cuenta órdenes pendientes para mostrar cuántas van a cerrarse.
+    int pendingCount = 0;
+    try {
+      final res = await supabase
+          .from('orders')
+          .select('id')
+          .eq('branch_name', Globals.currentBranch)
+          .inFilter('status', ['pending', 'ready']);
+      pendingCount = (res as List).length;
+    } catch (_) {}
+
+    final pinController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber, color: Colors.redAccent),
+            SizedBox(width: 8),
+            Text('Cerrar Día'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Vas a cerrar el día de "${Globals.currentBranch}":\n\n'
+              '• Se marcarán $pendingCount orden(es) pendiente(s) como '
+              'completadas.\n'
+              '• Se liberarán TODAS las mesas ocupadas.\n\n'
+              'Esta acción NO se puede deshacer. Ingresa el PIN Maestro '
+              'para confirmar:',
+              style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: pinController,
+              keyboardType: TextInputType.number,
+              obscureText: true,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'PIN Maestro',
+                prefixIcon: Icon(Icons.lock, color: Colors.redAccent),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Color(0xFFA08F70))),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final response = await supabase
+                    .from('admin_settings')
+                    .select('setting_value')
+                    .eq('setting_key', 'master_pin')
+                    .maybeSingle();
+                String correctPin = '1234';
+                if (response != null && response['setting_value'] != null) {
+                  correctPin = response['setting_value'] as String;
+                }
+                if (pinController.text == correctPin) {
+                  if (ctx.mounted) Navigator.pop(ctx, true);
+                } else {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      const SnackBar(
+                        content: Text('PIN Incorrecto'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Cerrar Día'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      // Cierra órdenes pendientes.
+      await supabase
+          .from('orders')
+          .update({'status': 'completed'})
+          .eq('branch_name', Globals.currentBranch)
+          .inFilter('status', ['pending', 'ready']);
+      // Libera mesas.
+      await supabase
+          .from('restaurant_tables')
+          .update({'status': 'available'})
+          .eq('branch_name', Globals.currentBranch);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Día cerrado: $pendingCount orden(es) completadas + mesas liberadas'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al cerrar día: $e')),
+        );
+      }
+    }
   }
 
   String get _currentSectionTitle {
