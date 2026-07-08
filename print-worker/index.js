@@ -334,6 +334,7 @@ async function fetchOrder(orderId) {
       id, branch_name, order_type, customer_name, total_amount,
       table_id, waiter_id, created_at, payment_method,
       sent_to_kitchen_at, printed_at,
+      cuenta_requested_at, caja_printed_at,
       restaurant_tables ( table_number ),
       waiters ( name )
     `)
