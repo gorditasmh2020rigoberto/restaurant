@@ -61,11 +61,20 @@ const {
 // tocan (por id). Cuando la última Pi termina, no quedan items
 // pendientes y se marca `orders.printed_at`.
 const printArea = String(PRINT_AREA || '').toLowerCase();
-const validAreas = ['', 'drinks', 'kitchen', 'line', 'takeout'];
+const validAreas = ['', 'drinks', 'kitchen', 'line', 'takeout', 'receipt'];
 if (!validAreas.includes(printArea)) {
-  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen', 'line', 'takeout'.`);
+  console.error(`✘ PRINT_AREA inválida: "${printArea}". Valores: '', 'drinks', 'kitchen', 'line', 'takeout', 'receipt'.`);
   process.exit(1);
 }
+
+// PRINT_AREA='receipt' es completamente distinto a las demás áreas.
+// - No imprime tickets de cocina.
+// - Se dispara cuando el mesero taps "Imprimir Cuenta" en la PWA
+//   (que setea `orders.cuenta_requested_at = NOW()`).
+// - Imprime UN ticket por orden con items+precios+total como una
+//   cuenta formal para dar al cliente antes de pagar.
+// - Marca `orders.caja_printed_at` para no reimprimir en loop.
+const isReceiptMode = printArea === 'receipt';
 
 // PRINT_ORDER_TYPES: whitelist opcional de tipos de orden a imprimir.
 // Comma-separated. Valores: dine_in, to_go, delivery.
@@ -728,6 +737,210 @@ function isReadyToPrint(row) {
   return !!row?.sent_to_kitchen_at && !row?.printed_at;
 }
 
+// ─── Modo RECEIPT (impresora de caja) ──────────────────────────────
+// Fetch de items con precios (para el ticket de cuenta, no filtramos
+// por printed_at porque queremos TODO lo que el cliente pidió).
+async function fetchAllItemsForOrder(orderId) {
+  const { data, error } = await supabase
+    .from('order_items')
+    .select(`
+      id, quantity, price_at_time, guisados_selected, client_label,
+      dishes ( name, category )
+    `)
+    .eq('order_id', orderId)
+    .order('id', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+// Imprime la CUENTA (recibo con precios) — formato distinto al ticket
+// de cocina. Incluye items+precios, subtotal, total, y espacio para firma.
+function appendCuentaTicket(printer, order, items) {
+  const cust = parseCustomerName(order.customer_name);
+  const tipo = orderTypeLabel(order.order_type);
+  const tableNumber = order.restaurant_tables?.table_number;
+  const waiterName = order.waiters?.name;
+
+  // ── Encabezado
+  printer.alignCenter();
+  printer.setTextDoubleHeight();
+  printer.bold(true);
+  printer.println(restaurantName);
+  printer.setTextNormal();
+  printer.println('CUENTA');
+  printer.bold(false);
+  if (order.branch_name) printer.println(order.branch_name);
+  printer.drawLine();
+
+  // ── Info general
+  printer.alignLeft();
+  printer.println(`Tipo: ${tipo}`);
+  if (tableNumber != null) {
+    printer.println(`Mesa: ${tableNumber}`);
+  }
+  if (waiterName) printer.println(`Mesero: ${waiterName}`);
+  printer.println(`Fecha: ${fmtDateTime(order.created_at)}`);
+  if (cust.name) printer.println(`Cliente: ${cust.name}`);
+  printer.drawLine();
+
+  // ── Items con precios (agrupados por client_label)
+  const groups = [];
+  const groupMap = new Map();
+  for (const it of items) {
+    const label = it.client_label || 'Cliente 1';
+    if (!groupMap.has(label)) {
+      groupMap.set(label, []);
+      groups.push(groupMap.get(label));
+    }
+    groupMap.get(label).push(it);
+  }
+  let total = 0;
+  for (let g = 0; g < groups.length; g++) {
+    if (g > 0) printer.drawLine();
+    for (const it of groups[g]) {
+      const rawName = it.dishes?.name || '(sin nombre)';
+      const { fraction, cleanName } = parseSizeMarker(rawName);
+      const qty = it.quantity || 1;
+      const price = Number(it.price_at_time || 0);
+      const subtotal = price * qty;
+      total += subtotal;
+      const line = fraction
+        ? `${qty}x${fraction} ${cleanName}`
+        : `${qty}x ${cleanName}`;
+      // Nombre a la izquierda, precio a la derecha en la misma línea
+      const priceStr = `$${subtotal.toFixed(2)}`;
+      const nameWidth = paperWidth - priceStr.length - 1;
+      const nameTrunc = line.length > nameWidth
+        ? line.slice(0, nameWidth)
+        : line.padEnd(nameWidth, ' ');
+      printer.bold(true);
+      printer.println(`${nameTrunc} ${priceStr}`);
+      printer.bold(false);
+      const guisados = parseGuisados(it.guisados_selected);
+      if (guisados.length) {
+        printer.println(`   ${guisados.join(', ')}`);
+      }
+    }
+  }
+  printer.drawLine();
+
+  // ── Total
+  printer.alignRight();
+  printer.setTextDoubleHeight();
+  printer.bold(true);
+  printer.println(`TOTAL: $${total.toFixed(2)}`);
+  printer.setTextNormal();
+  printer.bold(false);
+  printer.newLine();
+
+  // ── Pie
+  printer.alignCenter();
+  printer.println('Gracias por su preferencia');
+  printer.println(`ID: ${String(order.id).slice(0, 8)}`);
+  printer.newLine();
+  printer.newLine();
+  printer.cut();
+}
+
+async function printCuenta(order, items) {
+  const printer = buildPrinter();
+  const connected = await printer.isPrinterConnected();
+  if (!connected) {
+    throw new Error(`Impresora "${printerTarget}" no responde. Verifica USB/driver.`);
+  }
+  appendCuentaTicket(printer, order, items);
+  await printer.execute();
+}
+
+async function markCajaPrinted(orderId) {
+  const { error } = await supabase
+    .from('orders')
+    .update({ caja_printed_at: new Date().toISOString() })
+    .eq('id', orderId);
+  if (error) throw error;
+}
+
+async function processReceipt(orderId, source = 'unknown') {
+  if (_inFlight.has(orderId)) return;
+  _inFlight.add(orderId);
+  try {
+    const order = await fetchOrder(orderId);
+    if (!order) {
+      console.warn(`⚠ Orden ${orderId} no encontrada (${source})`);
+      return;
+    }
+    if (order.branch_name !== BRANCH_NAME) return;
+    // Guard: solo imprimir si el mesero pidió cuenta y aún no imprimimos.
+    if (!order.cuenta_requested_at) return;
+    if (order.caja_printed_at) return;
+
+    const items = await fetchAllItemsForOrder(orderId);
+    if (items.length === 0) {
+      console.log(`⚠ ${orderId} no tiene items — se marca como impresa igual`);
+      await markCajaPrinted(orderId);
+      return;
+    }
+
+    console.log(
+      `→ Imprimiendo CUENTA de ${orderId} (${items.length} item(s), ${source})...`,
+    );
+    await printCuenta(order, items);
+    await markCajaPrinted(orderId);
+    console.log(`✓ ${orderId} — cuenta impresa y marcada`);
+  } catch (e) {
+    console.error(`✘ Falló cuenta ${orderId}: ${e.message}`);
+  } finally {
+    _inFlight.delete(orderId);
+  }
+}
+
+async function catchUpReceipts() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('branch_name', BRANCH_NAME)
+    .not('cuenta_requested_at', 'is', null)
+    .is('caja_printed_at', null)
+    .order('cuenta_requested_at', { ascending: true })
+    .limit(50);
+  if (error) {
+    console.error('Catch-up receipts falló:', error.message);
+    return;
+  }
+  if (!data?.length) return;
+  console.log(`Catch-up receipts: ${data.length} cuenta(s) pendiente(s)`);
+  for (const o of data) {
+    await processReceipt(o.id, 'catch-up');
+  }
+}
+
+function isReadyForReceipt(row) {
+  return !!row?.cuenta_requested_at && !row?.caja_printed_at;
+}
+
+function subscribeRealtimeReceipts() {
+  const channel = supabase
+    .channel('orders-receipt-worker')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'orders',
+        filter: `branch_name=eq.${BRANCH_NAME}`,
+      },
+      (payload) => {
+        if (isReadyForReceipt(payload?.new)) {
+          processReceipt(payload.new.id, 'realtime-update');
+        }
+      },
+    )
+    .subscribe((status) => {
+      console.log(`Realtime: ${status}`);
+    });
+  return channel;
+}
+
 // ── Realtime subscription ───────────────────────────────────────────
 function subscribeRealtime() {
   const channel = supabase
@@ -825,10 +1038,18 @@ async function main() {
     `Print-worker iniciado | Sucursal: ${BRANCH_NAME}${areaLabel}${orderTypesLabel} | ${modeLabel}`,
   );
 
-  await catchUp();
-  subscribeRealtime();
-  // Red de seguridad: re-corre catch-up cada 60 s.
-  setInterval(catchUp, 60_000);
+  if (isReceiptMode) {
+    // Modo caja/recibo: escucha `cuenta_requested_at` y no toca los
+    // items ni printed_at (esos son del ticket de cocina).
+    await catchUpReceipts();
+    subscribeRealtimeReceipts();
+    setInterval(catchUpReceipts, 60_000);
+  } else {
+    // Modo normal: ticket de cocina (drinks/kitchen/line/takeout).
+    await catchUp();
+    subscribeRealtime();
+    setInterval(catchUp, 60_000);
+  }
   // Refresca el display mode desde admin_settings cada 30 s (si no hay
   // env override). Permite al admin cambiar el modo desde la UI de la
   // PWA y el worker se ajusta sin reiniciar.

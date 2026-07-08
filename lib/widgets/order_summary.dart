@@ -635,6 +635,37 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
     await _showPaymentDialog(context, orderIds, totalConPropina);
   }
 
+  /// Manda a imprimir la CUENTA al ticket de caja. La Pi de caja
+  /// (PRINT_AREA=receipt) escucha `cuenta_requested_at` y al detectar
+  /// que se seteó, imprime un recibo formal con items+precios+total.
+  /// Reseteamos `caja_printed_at` a null para permitir reimpresiones.
+  Future<void> _imprimirCuenta(BuildContext context) async {
+    final orderIds = _existingOrderIds;
+    if (orderIds.isEmpty) return;
+    try {
+      final supabase = Supabase.instance.client;
+      await supabase.from('orders').update({
+        'cuenta_requested_at': DateTime.now().toUtc().toIso8601String(),
+        'caja_printed_at': null,
+      }).inFilter('id', orderIds);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Imprimiendo cuenta en caja…'),
+            backgroundColor: Color(0xFFFF6D00),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al pedir cuenta: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _deleteExistingItem(Map<String, dynamic> item) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -1394,6 +1425,26 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
               SizedBox(height: isCompact ? 8 : 12),
 
               if (_existingItems.isNotEmpty) ...[
+                // Botón para pedir imprimir la cuenta en la caja
+                // ANTES de cobrar. La Pi de caja (PRINT_AREA=receipt)
+                // escucha `cuenta_requested_at` y saca el ticket con
+                // items+precios+total para dar al cliente.
+                ElevatedButton.icon(
+                  onPressed: () => _imprimirCuenta(context),
+                  icon: Icon(Icons.receipt_long, size: isCompact ? 18 : 22),
+                  label: Text(
+                    'Imprimir Cuenta',
+                    style: TextStyle(fontSize: btnFontSize, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size.fromHeight(btnHeight),
+                    backgroundColor: const Color(0xFFFF6D00),
+                    foregroundColor: const Color(0xFFFAF1DE),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                  ),
+                ),
+                SizedBox(height: isCompact ? 6 : 10),
                 ElevatedButton.icon(
                   onPressed: () => _cobrarCuenta(context),
                   icon: Icon(Icons.point_of_sale, size: isCompact ? 18 : 22),
