@@ -351,13 +351,16 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  _RoleCard(
-                    title: 'Cliente / Menú Digital',
-                    subtitle: 'Escanear QR o To Go',
-                    icon: Icons.qr_code_2,
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ClientHomeView())),
-                  ),
-                  const SizedBox(height: 16),
+                  // Ocultados por requerimiento — se acceden por otras vías
+                  // (impresión física en Raspberry Pi, QR de mesa, etc.).
+                  // Solo dejamos Mesero y Caja/Admin en el selector.
+                  //
+                  // _RoleCard: Cliente / Menú Digital → ver ClientHomeView
+                  //   ocultado. Los clientes entran vía QR de mesa (/#/client).
+                  // _RoleCard: Línea de Producción → ocultado, se usa la
+                  //   impresora térmica de rasp2.
+                  // _RoleCard: Cocina To Go → ocultado, se usa rasp3.
+                  // _RoleCard: Bar / Bebidas → ocultado, se usa rasp1.
                   _RoleCard(
                     title: 'Mesero',
                     subtitle: 'Tomar comandas y mesas',
@@ -377,39 +380,6 @@ class _RoleSelectionViewState extends State<RoleSelectionView> {
                       _requireAdminLogin(context, () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminView()));
                       });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _RoleCard(
-                    title: 'Línea de Producción',
-                    subtitle: 'Despacho general de pedidos',
-                    icon: Icons.soup_kitchen,
-                    onTap: () {
-                      _requirePin(context, () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const KitchenView()));
-                      }, pinToCheck: _kitchenPin);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _RoleCard(
-                    title: 'Cocina To Go',
-                    subtitle: 'Solo pedidos To Go/delivery',
-                    icon: Icons.delivery_dining,
-                    onTap: () {
-                      _requirePin(context, () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const KitchenView(isTakeoutOnly: true)));
-                      }, pinToCheck: _kitchenPin);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _RoleCard(
-                    title: 'Bar / Bebidas',
-                    subtitle: 'Despacho de bebidas solamente',
-                    icon: Icons.local_bar,
-                    onTap: () {
-                      _requirePin(context, () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const KitchenView(isDrinksOnly: true)));
-                      }, pinToCheck: _barPin);
                     },
                   ),
                   const SizedBox(height: 32),
