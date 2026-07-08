@@ -86,6 +86,10 @@ class OrderSummaryWidget extends StatefulWidget {
   final String orderType;
   final String? customerName;
   final String? waiterId;
+  // Orden To Go/Delivery ya existente que se retoma (ej. desde la lista
+  // de "Órdenes To Go Activas"). Permite ver sus items, imprimir la
+  // cuenta o agregarle más artículos sin crear una orden duplicada.
+  final String? existingOrderId;
   final VoidCallback onOrderSubmitted;
 
   const OrderSummaryWidget({
@@ -94,6 +98,7 @@ class OrderSummaryWidget extends StatefulWidget {
     this.tableNumber,
     required this.orderType,
     this.customerName,
+    this.existingOrderId,
     required this.waiterId,
     required this.onOrderSubmitted,
   });
@@ -105,17 +110,25 @@ class OrderSummaryWidget extends StatefulWidget {
 class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
   bool _isSubmitting = false;
   List<Map<String, dynamic>> _existingItems = [];
+  // Para órdenes sin mesa (To Go/Delivery): id de la orden actualmente
+  // en curso, para poder reimprimir/agregar artículos sin tableId.
+  String? _activeOrderId;
 
   @override
   void initState() {
     super.initState();
+    _activeOrderId = widget.existingOrderId;
     _fetchExistingItems();
   }
 
   @override
   void didUpdateWidget(OrderSummaryWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.tableId != widget.tableId) {
+    if (oldWidget.tableId != widget.tableId ||
+        oldWidget.existingOrderId != widget.existingOrderId ||
+        oldWidget.orderType != widget.orderType ||
+        oldWidget.customerName != widget.customerName) {
+      _activeOrderId = widget.existingOrderId;
       _fetchExistingItems();
     }
   }
@@ -887,7 +900,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
 
   Future<void> _fetchExistingItems() async {
     try {
-      if (widget.tableId == null) {
+      if (widget.tableId == null && _activeOrderId == null) {
         if (mounted) setState(() => _existingItems = []);
         return;
       }
@@ -897,12 +910,20 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
       // marcó como lista desde la pantalla, pero falta cobrar). Así el
       // mesero ve todos los items y puede cobrar aunque la orden ya
       // esté lista. Solo se excluyen 'completed' / 'cancelled'.
-      final response = await supabase
-          .from('orders')
-          .select('*, order_items(*, dishes(*))')
-          .eq('table_id', widget.tableId as Object)
-          .eq('branch_name', Globals.currentBranch)
-          .inFilter('status', ['pending', 'ready']);
+      // Para mesa: filtramos por table_id. Para To Go/Delivery (sin
+      // mesa) filtramos por el id de la orden activa (_activeOrderId).
+      final response = widget.tableId != null
+          ? await supabase
+              .from('orders')
+              .select('*, order_items(*, dishes(*))')
+              .eq('table_id', widget.tableId as Object)
+              .eq('branch_name', Globals.currentBranch)
+              .inFilter('status', ['pending', 'ready'])
+          : await supabase
+              .from('orders')
+              .select('*, order_items(*, dishes(*))')
+              .eq('id', _activeOrderId as Object)
+              .inFilter('status', ['pending', 'ready']);
 
       List<Map<String, dynamic>> items = [];
       for (var order in (response as List)) {
@@ -994,18 +1015,44 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
           orderId = orderResponse['id'] as String;
         }
       } else {
-        final orderResponse = await supabase.from('orders').insert({
-          'table_id': null,
-          'waiter_id': widget.waiterId,
-          'status': 'pending',
-          'total_amount': cart.totalAmount,
-          'order_type': widget.orderType,
-          'customer_name': widget.customerName,
-          'branch_name': Globals.currentBranch,
-          'daily_folio': nextFolio,
-          'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
-        }).select().single();
-        orderId = orderResponse['id'] as String;
+        // To Go / Delivery (sin mesa). Si ya hay una orden activa en
+        // curso (_activeOrderId), le agregamos los artículos nuevos en
+        // vez de crear una orden duplicada — igual que se hace con las
+        // mesas — para que "Imprimir Cuenta" tome todo en un solo ticket.
+        Map<String, dynamic>? existingOrder;
+        if (_activeOrderId != null) {
+          existingOrder = await supabase
+              .from('orders')
+              .select('id, total_amount')
+              .eq('id', _activeOrderId as Object)
+              .inFilter('status', ['pending', 'ready'])
+              .maybeSingle();
+        }
+
+        if (existingOrder != null) {
+          orderId = existingOrder['id'] as String;
+          final newTotal = (existingOrder['total_amount'] as num).toDouble() + cart.totalAmount;
+          await supabase.from('orders').update({
+            'total_amount': newTotal,
+            'status': 'pending',
+            'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
+            'printed_at': null,
+          }).eq('id', orderId);
+        } else {
+          final orderResponse = await supabase.from('orders').insert({
+            'table_id': null,
+            'waiter_id': widget.waiterId,
+            'status': 'pending',
+            'total_amount': cart.totalAmount,
+            'order_type': widget.orderType,
+            'customer_name': widget.customerName,
+            'branch_name': Globals.currentBranch,
+            'daily_folio': nextFolio,
+            'sent_to_kitchen_at': DateTime.now().toUtc().toIso8601String(),
+          }).select().single();
+          orderId = orderResponse['id'] as String;
+        }
+        _activeOrderId = orderId;
       }
 
       final orderItems = cart.items.values.map((item) {

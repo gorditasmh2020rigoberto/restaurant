@@ -32,6 +32,10 @@ class _ComandasViewState extends State<ComandasView> {
   String? _selectedWaiterId;
   String _selectedOrderType = 'dine_in';
   String? _customerName;
+  // Id de una orden To Go/Delivery activa que el mesero eligió retomar
+  // desde la lista de "Órdenes To Go Activas" (para agregar artículos,
+  // imprimir su cuenta, etc.). Null cuando se está armando una orden nueva.
+  String? _selectedExistingOrderId;
   List<Map<String, dynamic>> _waiters = [];
   StreamSubscription<List<Map<String, dynamic>>>? _orderStreamSubscription;
   final Set<String> _notifiedOrders = {};
@@ -1032,6 +1036,7 @@ class _ComandasViewState extends State<ComandasView> {
                                                     _selectedTableId = table['id'];
                                                     _selectedTableNumber = table['table_number'].toString();
                                                     _customerName = null;
+                                                    _selectedExistingOrderId = null;
                                                   });
                                                   Navigator.pop(context);
                                                 },
@@ -1079,7 +1084,110 @@ class _ComandasViewState extends State<ComandasView> {
                               );
                             },
                           )
-                        : SingleChildScrollView(
+                        : StreamBuilder<List<Map<String, dynamic>>>(
+                            stream: _supabase
+                                .from('orders')
+                                .stream(primaryKey: ['id'])
+                                .eq('order_type', 'takeout'),
+                            builder: (context, activeToGoSnapshot) {
+                              final activeToGoOrders = (activeToGoSnapshot.data ?? [])
+                                  .where((o) =>
+                                      o['table_id'] == null &&
+                                      o['branch_name'] == Globals.currentBranch &&
+                                      ['pending', 'ready'].contains(o['status']))
+                                  .toList()
+                                ..sort((a, b) => (a['created_at'] as String? ?? '')
+                                    .compareTo(b['created_at'] as String? ?? ''));
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // ── Lista aparte de las órdenes To Go ya
+                                  // activas, separada de las mesas, para
+                                  // poder retomarlas (agregar artículos,
+                                  // imprimir su cuenta) sin duplicarlas.
+                                  if (activeToGoOrders.isNotEmpty) ...[
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 8),
+                                      child: Text(
+                                        'ÓRDENES TO GO ACTIVAS',
+                                        style: TextStyle(
+                                          color: Color(0xFFA08F70),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 86,
+                                      child: ListView.separated(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: activeToGoOrders.length,
+                                        separatorBuilder: (_, __) => const SizedBox(width: 10),
+                                        itemBuilder: (context, i) {
+                                          final o = activeToGoOrders[i];
+                                          final name = (o['customer_name'] as String?)?.trim();
+                                          return InkWell(
+                                            borderRadius: BorderRadius.circular(12),
+                                            onTap: () {
+                                              setState(() {
+                                                _selectedOrderType = 'takeout';
+                                                _selectedTableId = null;
+                                                _selectedTableNumber = null;
+                                                _customerName = name;
+                                                _selectedExistingOrderId = o['id'] as String;
+                                              });
+                                              Navigator.pop(context);
+                                            },
+                                            child: Container(
+                                              width: 140,
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFFAF1DE),
+                                                borderRadius: BorderRadius.circular(12),
+                                                border: Border.all(color: const Color(0xFFE07A30), width: 1.5),
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  const Icon(Icons.takeout_dining, color: Color(0xFFE07A30), size: 20),
+                                                  const SizedBox(height: 6),
+                                                  Text(
+                                                    (name != null && name.isNotEmpty) ? name : 'Cliente',
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF3D2E1A)),
+                                                  ),
+                                                  if (o['daily_folio'] != null)
+                                                    Text(
+                                                      'Folio #${o['daily_folio']}',
+                                                      style: const TextStyle(fontSize: 10, color: Color(0xFFA08F70)),
+                                                    ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const Divider(height: 24, color: Color(0xFFE5DCC4)),
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 8),
+                                      child: Text(
+                                        'O CREA UNA ORDEN NUEVA:',
+                                        style: TextStyle(
+                                          color: Color(0xFFA08F70),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                  Expanded(
+                                    child: SingleChildScrollView(
                             padding: const EdgeInsets.all(20.0),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1201,6 +1309,7 @@ class _ComandasViewState extends State<ComandasView> {
                                       _customerName = finalCustomerName;
                                       _selectedTableId = null;
                                       _selectedTableNumber = null;
+                                      _selectedExistingOrderId = null;
                                     });
                                     Navigator.pop(context);
                                   },
@@ -1211,6 +1320,11 @@ class _ComandasViewState extends State<ComandasView> {
                                 ),
                               ],
                             ),
+                          ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                     ),
                   ],
@@ -1481,10 +1595,12 @@ class _ComandasViewState extends State<ComandasView> {
                     ),
                   )
                 : OrderSummaryWidget(
+                    key: ValueKey('${_selectedOrderType}_${_selectedTableId}_${_customerName}_$_selectedExistingOrderId'),
                     tableId: _selectedTableId,
                     tableNumber: _selectedTableNumber,
                     orderType: _selectedOrderType,
                     customerName: _customerName,
+                    existingOrderId: _selectedExistingOrderId,
                     waiterId: _selectedWaiterId,
                     onOrderSubmitted: () {
                       if (_selectedOrderType != 'dine_in') {
