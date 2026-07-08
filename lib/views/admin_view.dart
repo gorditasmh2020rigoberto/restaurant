@@ -2411,10 +2411,11 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        displayTitle, 
+                                        displayTitle,
                                         style: TextStyle(
                                           fontSize: 16,
-                                          color: isItemReady ? Colors.green[300] : (isCancelled ? Colors.red[300] : Color(0xFFFAF1DE)),
+                                          fontWeight: FontWeight.w600,
+                                          color: isItemReady ? Colors.green[700] : (isCancelled ? Colors.red[400] : Colors.black),
                                           decoration: isItemReady || isCancelled ? TextDecoration.lineThrough : null,
                                         )
                                       ),
@@ -2424,7 +2425,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                     if (isCancelled)
                                       const Icon(Icons.cancel_outlined, size: 16, color: Colors.red),
                                     const SizedBox(width: 8),
-                                    Text('\$${itemSubtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, decoration: isCancelled ? TextDecoration.lineThrough : null, color: isCancelled ? Colors.red[300] : Color(0xFFFAF1DE))),
+                                    Text('\$${itemSubtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, decoration: isCancelled ? TextDecoration.lineThrough : null, color: isCancelled ? Colors.red[400] : Colors.black)),
                                     const SizedBox(width: 8),
                                     IconButton(
                                       icon: const Icon(Icons.close, color: Colors.redAccent, size: 20),
