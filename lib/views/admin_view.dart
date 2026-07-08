@@ -2075,6 +2075,183 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
     );
   }
 
+  /// Pide el PIN maestro para autorizar la reimpresión de una cuenta que
+  /// ya se había impreso antes (misma regla anti-fraude que en mesero).
+  Future<bool> _askAdminPinForReprint(BuildContext context) async {
+    final pinController = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber, color: Colors.redAccent),
+              SizedBox(width: 8),
+              Text('Cuenta ya impresa'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Esta cuenta ya se imprimió al menos una vez. Para reimprimirla, ingresa el PIN maestro:',
+                style: TextStyle(color: Color(0xFF7A6E5A)),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: pinController,
+                keyboardType: TextInputType.number,
+                obscureText: true,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'PIN Maestro',
+                  prefixIcon: Icon(Icons.lock, color: Colors.redAccent),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final supabase = Supabase.instance.client;
+                try {
+                  final response = await supabase
+                      .from('admin_settings')
+                      .select('setting_value')
+                      .eq('setting_key', 'master_pin')
+                      .maybeSingle();
+                  String correctPin = '1234';
+                  if (response != null && response['setting_value'] != null) {
+                    correctPin = response['setting_value'] as String;
+                  }
+                  if (pinController.text == correctPin) {
+                    if (dialogContext.mounted) Navigator.pop(dialogContext, true);
+                  } else {
+                    if (dialogContext.mounted) {
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(content: Text('PIN Incorrecto'), backgroundColor: Colors.red),
+                      );
+                    }
+                  }
+                } catch (e) {
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+              child: const Text('Autorizar'),
+            ),
+          ],
+        );
+      },
+    );
+    return ok == true;
+  }
+
+  /// Manda a imprimir la CUENTA (mesa o To Go) al ticket de caja, igual
+  /// que el botón equivalente del mesero. Sirve para dar el ticket al
+  /// cliente antes de cobrar, incluyendo pedidos To Go sin mesa.
+  Future<void> _imprimirCuenta(BuildContext context, List<Map<String, dynamic>> orders, List<String> orderIds) async {
+    if (orderIds.isEmpty) return;
+    final supabase = Supabase.instance.client;
+    final alreadyPrinted = orders.any((o) => o['caja_printed_at'] != null);
+
+    if (alreadyPrinted) {
+      final ok = await _askAdminPinForReprint(context);
+      if (!ok) return;
+    }
+
+    try {
+      await supabase.from('orders').update({
+        'cuenta_requested_at': DateTime.now().toUtc().toIso8601String(),
+        'caja_printed_at': null,
+      }).inFilter('id', orderIds);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(alreadyPrinted ? 'Reimprimiendo cuenta…' : 'Imprimiendo cuenta…'),
+            backgroundColor: const Color(0xFFFF6D00),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al pedir cuenta: $e')));
+      }
+    }
+  }
+
+  /// Cobro con "Tarjeta" SIN conectarse a ninguna terminal (Clip,
+  /// Mercado Pago, etc.). Solo registra la venta como pagada con
+  /// tarjeta para el corte de caja, cuando el cobro real ya se hizo en
+  /// una terminal física aparte que no está integrada.
+  Future<void> _markCardPaymentNoTerminal(BuildContext context, List<String> orderIds, double amount, String? tableId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Row(
+          children: [
+            Icon(Icons.credit_card, color: Colors.blueAccent, size: 28),
+            SizedBox(width: 12),
+            Text('Cobro con Tarjeta', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(
+          'Confirma que ya cobraste \$${amount.toStringAsFixed(2)} en tu terminal física.\n\n'
+          'Este botón NO se conecta a ninguna terminal: solo registra la venta como pagada con tarjeta para el corte de caja.',
+          style: const TextStyle(color: Color(0xFF7A6E5A)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white),
+            child: const Text('Confirmar cobro con tarjeta'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    try {
+      final supabase = Supabase.instance.client;
+      await supabase.from('orders').update({
+        'status': 'completed',
+        'payment_method': 'card',
+        'amount_card': amount,
+      }).inFilter('id', orderIds);
+
+      if (tableId != null) {
+        await supabase.from('restaurant_tables').update({'status': 'available'}).eq('id', tableId);
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Pago con tarjeta registrado'),
+          backgroundColor: Colors.green,
+        ));
+        await _showTicketQrDialog(context, orderIds);
+        widget.onDeselect?.call();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+
   Future<void> _payWithMercadoPago(BuildContext context, double amount, void Function() onFinish) async {
     showDialog(
       context: context, 
@@ -2704,6 +2881,18 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                               ),
                             ),
                             const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed: () => _imprimirCuenta(context, orders, orderIds),
+                              icon: const Icon(Icons.receipt_long, size: 22),
+                              label: const Text('Imprimir Cuenta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                foregroundColor: const Color(0xFFFF6D00),
+                                side: const BorderSide(color: Color(0xFFFF6D00), width: 2),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: () async {
                                 final totalConPropina = await _askPropina(context, totalToPay);
@@ -2725,9 +2914,26 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                               onPressed: () async {
                                 final totalConPropina = await _askPropina(context, totalToPay);
                                 if (totalConPropina == null || !context.mounted) return;
-                                _payWithClip(context, orderIds, totalConPropina, widget.tableId, panelTitle);
+                                _markCardPaymentNoTerminal(context, orderIds, totalConPropina, widget.tableId);
                               },
                               icon: const Icon(Icons.credit_card, size: 26),
+                              label: const Text('Tarjeta', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(60),
+                                backgroundColor: Colors.blueAccent,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 4,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                final totalConPropina = await _askPropina(context, totalToPay);
+                                if (totalConPropina == null || !context.mounted) return;
+                                _payWithClip(context, orderIds, totalConPropina, widget.tableId, panelTitle);
+                              },
+                              icon: const Icon(Icons.point_of_sale, size: 26),
                               label: const Text('Pagar con Clip', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(60),
