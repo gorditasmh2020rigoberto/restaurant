@@ -1464,7 +1464,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                       _ToggleOption(
                                         icon: Icons.egg_alt,
                                         label: 'Con Queso',
-                                        price: isTapa ? '+\$25' : null,
+                                        price: isTapa
+                                            ? '+\$25'
+                                            : (isGordita ? '+\$10' : null),
                                         value: conQueso,
                                         onChanged: (v) =>
                                             setDialogState(() => conQueso = v),
@@ -1988,7 +1990,9 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   const Divider(color: Color(0xFFE5DCC4)),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: \$${(((isTapa && conQueso) ? activeDish.price + 25 : activeDish.price) * dialogQty + extrasDisponibles.where((e) => selectedExtraIds.contains(e.id)).fold<double>(0, (s, e) => s + e.price)).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
+                    // Precio con queso extra: gordita +$10, tapa +$25.
+                    // Otros platillos con queso no aumentan.
+                    'Total: \$${((activeDish.price + (conQueso ? (isTapa ? 25 : (isGordita ? 10 : 0)) : 0)) * dialogQty + extrasDisponibles.where((e) => selectedExtraIds.contains(e.id)).fold<double>(0, (s, e) => s + e.price)).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
                     style: const TextStyle(
                       color: Color(0xFFFF6D00),
                       fontSize: 15,
@@ -2053,8 +2057,13 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     if (!isChilaquil) ...selected,
                     if (allowsComment && comment.isNotEmpty) comment,
                   ];
-                  final finalDish = (isTapa && conQueso)
-                      ? activeDish.copyWith(price: activeDish.price + 25)
+                  // Aplicar el extra de queso al precio: gordita +$10,
+                  // tapa +$25, resto sin cambio.
+                  final quesoExtra = conQueso
+                      ? (isTapa ? 25.0 : (isGordita ? 10.0 : 0.0))
+                      : 0.0;
+                  final finalDish = quesoExtra > 0
+                      ? activeDish.copyWith(price: activeDish.price + quesoExtra)
                       : activeDish;
                   cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                   // Agregar las órdenes extras seleccionadas como items
