@@ -1466,7 +1466,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                                         label: 'Con Queso',
                                         price: isTapa
                                             ? '+\$25'
-                                            : (isGordita ? '+\$10' : null),
+                                            : (isGordita ? '+\$5' : null),
                                         value: conQueso,
                                         onChanged: (v) =>
                                             setDialogState(() => conQueso = v),
@@ -1992,7 +1992,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   Text(
                     // Precio con queso extra: gordita +$10, tapa +$25.
                     // Otros platillos con queso no aumentan.
-                    'Total: \$${((activeDish.price + (conQueso ? (isTapa ? 25 : (isGordita ? 10 : 0)) : 0)) * dialogQty + extrasDisponibles.where((e) => selectedExtraIds.contains(e.id)).fold<double>(0, (s, e) => s + e.price)).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
+                    'Total: \$${((activeDish.price + (conQueso ? (isTapa ? 25 : (isGordita ? 5 : 0)) : 0)) * dialogQty + extrasDisponibles.where((e) => selectedExtraIds.contains(e.id)).fold<double>(0, (s, e) => s + e.price)).toStringAsFixed(0)}${dialogQty > 1 ? ' (×$dialogQty)' : ''}',
                     style: const TextStyle(
                       color: Color(0xFFFF6D00),
                       fontSize: 15,
@@ -2060,7 +2060,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                   // Aplicar el extra de queso al precio: gordita +$10,
                   // tapa +$25, resto sin cambio.
                   final quesoExtra = conQueso
-                      ? (isTapa ? 25.0 : (isGordita ? 10.0 : 0.0))
+                      ? (isTapa ? 25.0 : (isGordita ? 5.0 : 0.0))
                       : 0.0;
                   final finalDish = quesoExtra > 0
                       ? activeDish.copyWith(price: activeDish.price + quesoExtra)
