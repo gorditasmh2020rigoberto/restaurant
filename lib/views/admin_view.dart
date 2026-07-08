@@ -44,6 +44,156 @@ class _AdminViewState extends State<AdminView> {
   void initState() {
     super.initState();
     _fetchWaiters();
+    // Al abrir el admin, revisa si YA se registró la apertura de caja
+    // de HOY. Si no, muestra el diálogo automáticamente para pedirle
+    // a la cajera el fondo inicial.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAperturaCajaHoy();
+    });
+  }
+
+  /// Consulta la BD para ver si ya hay un cash_movement de categoría
+  /// 'apertura' con fecha de HOY para la sucursal activa. Si no lo hay,
+  /// muestra el diálogo para registrarla al momento.
+  Future<void> _checkAperturaCajaHoy() async {
+    try {
+      final startOfDay = DateTime.now().toUtc().copyWith(
+          hour: 0, minute: 0, second: 0, microsecond: 0, millisecond: 0);
+      // 6 AM local en México ≈ 12:00 UTC. Usamos inicio del día local
+      // aproximado con offset -6h para no perder aperturas de madrugada.
+      final startOfDayLocal =
+          DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+              .toUtc();
+      final res = await _supabase
+          .from('cash_movements')
+          .select('id')
+          .eq('branch_name', Globals.currentBranch)
+          .eq('category', 'apertura')
+          .gte('created_at', startOfDayLocal.toIso8601String())
+          .limit(1);
+      final has = (res as List).isNotEmpty;
+      if (!has && mounted) {
+        _showAperturaCajaAutoDialog();
+      }
+      // startOfDay used as sanity anchor (linter)
+      startOfDay.hashCode;
+    } catch (_) {
+      // Si falla (tabla no existe, red, etc.) ignora silenciosamente —
+      // no queremos bloquear al usuario si el chequeo no puede hacerse.
+    }
+  }
+
+  void _showAperturaCajaAutoDialog() {
+    final amountController = TextEditingController();
+    final noteController =
+        TextEditingController(text: 'Fondo inicial de caja');
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Row(
+          children: [
+            Icon(Icons.savings, color: Colors.green),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text('Apertura de Caja',
+                  style: TextStyle(
+                      color: Color(0xFF3D2E1A),
+                      fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+                'Buen día. Aún no se ha registrado la apertura de caja de '
+                'hoy. Ingresa el monto de efectivo con el que INICIA la '
+                'caja para poder llevar el corte al final del turno.',
+                style: TextStyle(color: Color(0xFF7A6E5A), fontSize: 13)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: amountController,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              autofocus: true,
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold),
+              decoration: const InputDecoration(
+                labelText: 'Fondo inicial',
+                prefixText: '\$ ',
+                prefixIcon: Icon(Icons.attach_money, color: Colors.green),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteController,
+              style: const TextStyle(color: Colors.black),
+              decoration: const InputDecoration(
+                labelText: 'Notas (opcional)',
+                prefixIcon:
+                    Icon(Icons.note_outlined, color: Color(0xFFA08F70)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Después',
+                style: TextStyle(color: Color(0xFFA08F70))),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final amount = double.tryParse(amountController.text.trim());
+              if (amount == null || amount <= 0) {
+                ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+                    content: Text('Monto inválido'),
+                    backgroundColor: Colors.red));
+                return;
+              }
+              try {
+                await _supabase.from('cash_movements').insert({
+                  'type': 'entrada',
+                  'category': 'apertura',
+                  'amount': amount,
+                  'payment_method': 'EFECTIVO',
+                  'description': noteController.text.trim().isNotEmpty
+                      ? noteController.text.trim()
+                      : 'Fondo inicial de caja',
+                  'branch_name': Globals.currentBranch,
+                  'registered_by': Globals.currentUser,
+                  'recipient': 'N/A',
+                });
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(
+                        'Caja abierta con \$${amount.toStringAsFixed(2)}'),
+                    backgroundColor: Colors.green,
+                  ));
+                }
+              } catch (e) {
+                if (ctx.mounted) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(content: Text('Error: $e')));
+                }
+              }
+            },
+            icon: const Icon(Icons.check),
+            label: const Text('Registrar Apertura'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
