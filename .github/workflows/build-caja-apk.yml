@@ -1,0 +1,59 @@
+name: Build Caja APK
+
+# Compila el APK sin el flag KIOSKO_MESERO. Al arrancar la app muestra
+# la pantalla de RoleSelectionView (Cliente / Mesero / Admin) — desde
+# ahí en la tablet de caja se entra como Admin para cobrar, ver mesas,
+# imprimir cuentas, etc.
+#
+# Ejecuta manualmente desde Actions → Build Caja APK → Run workflow,
+# o auto en push a main que toque lib/, android/, assets/, pubspec.yaml.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'lib/**'
+      - 'assets/**'
+      - 'pubspec.yaml'
+      - '.github/workflows/build-caja-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Generar íconos del launcher con el logo de gorditas
+        run: dart run flutter_launcher_icons
+
+      - name: Build APK release (caja — sin kiosko)
+        run: flutter build apk --release
+
+      - name: Rename APK
+        run: |
+          mkdir -p artifacts
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             artifacts/gorditas-caja.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: gorditas-caja-apk
+          path: artifacts/gorditas-caja.apk
+          retention-days: 30
