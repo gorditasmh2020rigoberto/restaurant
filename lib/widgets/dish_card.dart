@@ -321,6 +321,18 @@ String _formatDrinkSizeLabel(String type) {
   return suffix;
 }
 
+/// Nombre a mostrar/imprimir para un refresco según el TAMAÑO elegido en
+/// el diálogo. Se arma directo del `type` (ej. 'refresco_600') en vez de
+/// buscarlo en la BD, para que nunca dependa de que el nombre real del
+/// dish tenga cierto formato de texto — así el título nunca contradice
+/// el tamaño que de verdad se eligió.
+String _refrescoDisplayName(String type) {
+  final suffix = type.replaceFirst(RegExp(r'^refresco_'), '');
+  if (suffix.contains('355') || suffix.contains('255')) return 'Refresco de vidrio';
+  if (suffix.contains('600')) return 'Refresco no retornable';
+  return 'Refresco';
+}
+
 /// Diálogo mínimo para platillos preparados que se agregan directo (sin
 /// opciones de sabor/guisado, ej. arrachera, sopes, enchiladas): permite
 /// cantidad y un comentario libre antes de agregar a la orden.
@@ -1138,36 +1150,10 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     Dish finalDish = dish;
                     if (selectedSizeType != null) {
                       final price = await _loadDrinkPrice(selectedSizeType!);
-                      // El dish que se tocó en el menú trae su propio
-                      // tamaño/material pegado al nombre (ej. "Refresco
-                      // 355 ml vidrio"), pero el mesero pudo cambiar el
-                      // TAMAÑO en este diálogo a otro (ej. 600 ml). Si
-                      // guardamos el id de ese dish original, tanto la
-                      // comanda impresa como el ticket seguirían mostrando
-                      // el tamaño viejo (se leen por dish_id, no por lo
-                      // que se ve aquí en pantalla). Buscamos el dish real
-                      // que cobra exactamente ese precio (más confiable
-                      // que adivinar por texto en el nombre) para usar su
-                      // id/nombre/precio verdaderos.
-                      if (isRefresco && price != null) {
-                        try {
-                          final supabase = Supabase.instance.client;
-                          final rows = await supabase.from('dishes').select().ilike('name', '%refresco%');
-                          final candidates = (rows as List).cast<Map<String, dynamic>>().map(Dish.fromJson).toList();
-                          final match = candidates.where((d) => d.price == price).toList();
-                          if (match.isNotEmpty) finalDish = match.first;
-                        } catch (_) {}
-                      }
-                      if (finalDish.id == dish.id) {
-                        // No hubo dish real con ese precio exacto (u otro
-                        // tipo de bebida): al menos usa un nombre genérico
-                        // para que no se quede pegado el tamaño viejo en
-                        // lo que ve el mesero en pantalla.
-                        finalDish = dish.copyWith(
-                          price: price,
-                          name: isRefresco ? 'Refresco' : null,
-                        );
-                      }
+                      finalDish = dish.copyWith(
+                        price: price,
+                        name: isRefresco ? _refrescoDisplayName(selectedSizeType!) : null,
+                      );
                     }
                     cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                     if (context.mounted) {
