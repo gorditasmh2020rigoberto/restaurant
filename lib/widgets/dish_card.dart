@@ -1137,33 +1137,35 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     ];
                     Dish finalDish = dish;
                     if (selectedSizeType != null) {
-                      if (isRefresco) {
-                        // El dish que se tocó en el menú trae su propio
-                        // tamaño en el nombre (ej. "Refresco (355 ml
-                        // vidrio)"), pero el mesero pudo haber cambiado el
-                        // TAMAÑO en este diálogo a 600 ml. Buscamos el dish
-                        // real de ese tamaño para que el nombre/precio
-                        // guardados (y por lo tanto lo que se imprime) no
-                        // contradigan el tamaño elegido.
-                        final mlLabel = _formatDrinkSizeLabel(selectedSizeType!).toLowerCase();
+                      final price = await _loadDrinkPrice(selectedSizeType!);
+                      // El dish que se tocó en el menú trae su propio
+                      // tamaño/material pegado al nombre (ej. "Refresco
+                      // 355 ml vidrio"), pero el mesero pudo cambiar el
+                      // TAMAÑO en este diálogo a otro (ej. 600 ml). Si
+                      // guardamos el id de ese dish original, tanto la
+                      // comanda impresa como el ticket seguirían mostrando
+                      // el tamaño viejo (se leen por dish_id, no por lo
+                      // que se ve aquí en pantalla). Buscamos el dish real
+                      // que cobra exactamente ese precio (más confiable
+                      // que adivinar por texto en el nombre) para usar su
+                      // id/nombre/precio verdaderos.
+                      if (isRefresco && price != null) {
                         try {
                           final supabase = Supabase.instance.client;
                           final rows = await supabase.from('dishes').select().ilike('name', '%refresco%');
                           final candidates = (rows as List).cast<Map<String, dynamic>>().map(Dish.fromJson).toList();
-                          final match = candidates.where((d) => d.name.toLowerCase().contains(mlLabel)).toList();
+                          final match = candidates.where((d) => d.price == price).toList();
                           if (match.isNotEmpty) finalDish = match.first;
                         } catch (_) {}
                       }
                       if (finalDish.id == dish.id) {
-                        // No hubo match de dish real (u otro tipo de
-                        // bebida): al menos actualiza el precio y limpia
-                        // el nombre para que no quede un tamaño viejo
-                        // pegado al título.
-                        final price = await _loadDrinkPrice(selectedSizeType!);
-                        final cleanName = dish.name.replaceAll(RegExp(r'\s*\([^)]*\)\s*$'), '').trim();
+                        // No hubo dish real con ese precio exacto (u otro
+                        // tipo de bebida): al menos usa un nombre genérico
+                        // para que no se quede pegado el tamaño viejo en
+                        // lo que ve el mesero en pantalla.
                         finalDish = dish.copyWith(
                           price: price,
-                          name: cleanName.isEmpty ? null : cleanName,
+                          name: isRefresco ? 'Refresco' : null,
                         );
                       }
                     }
