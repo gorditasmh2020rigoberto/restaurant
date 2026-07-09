@@ -321,16 +321,22 @@ String _formatDrinkSizeLabel(String type) {
   return suffix;
 }
 
-/// Nombre a mostrar/imprimir para un refresco según el TAMAÑO elegido en
-/// el diálogo. Se arma directo del `type` (ej. 'refresco_600') en vez de
-/// buscarlo en la BD, para que nunca dependa de que el nombre real del
-/// dish tenga cierto formato de texto — así el título nunca contradice
-/// el tamaño que de verdad se eligió.
-String _refrescoDisplayName(String type) {
-  final suffix = type.replaceFirst(RegExp(r'^refresco_'), '');
-  if (suffix.contains('355') || suffix.contains('255')) return 'Refresco de vidrio';
-  if (suffix.contains('600')) return 'Refresco no retornable';
-  return 'Refresco';
+/// Nombre a mostrar/imprimir para una bebida (refresco/agua/jugo) según
+/// el TAMAÑO elegido en el diálogo. Se arma directo del `type` (ej.
+/// 'refresco_600', 'agua_1litro') en vez de usar el nombre del dish que
+/// se tocó originalmente en el menú — si no, al cambiar el TAMAÑO en el
+/// diálogo (ej. tocar "Agua Fresca 1 litro" pero elegir 600 ml), el
+/// título se quedaba con el tamaño viejo mientras el sabor/tamaño real
+/// se mostraba aparte, contradictorio.
+String _drinkDisplayName(String type) {
+  if (type.startsWith('refresco')) {
+    final suffix = type.replaceFirst(RegExp(r'^refresco_'), '');
+    if (suffix.contains('355') || suffix.contains('255')) return 'Refresco de vidrio';
+    if (suffix.contains('600')) return 'Refresco no retornable';
+    return 'Refresco';
+  }
+  if (type.startsWith('jugo')) return 'Jugo';
+  return 'Agua Fresca';
 }
 
 /// Diálogo mínimo para platillos preparados que se agregan directo (sin
@@ -1152,7 +1158,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       final price = await _loadDrinkPrice(selectedSizeType!);
                       finalDish = dish.copyWith(
                         price: price,
-                        name: isRefresco ? _refrescoDisplayName(selectedSizeType!) : null,
+                        name: _drinkDisplayName(selectedSizeType!),
                       );
                     }
                     cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
