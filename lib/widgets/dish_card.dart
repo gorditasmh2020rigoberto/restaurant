@@ -2485,6 +2485,16 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                     }));
         final anyRequiresGuisado = selectedRequiresGuisado;
 
+        // isHuevoCategory detecta si ALGÚN platillo del grupo es huevo (ej.
+        // "Huevo Estrellado o Revuelto" dentro de Órdenes Extras, junto con
+        // "Orden Extra - Arrachera", "Pieza de Bolillo", etc.). Pero el
+        // TÉRMINO DEL HUEVO solo debe pedirse cuando el platillo
+        // REALMENTE seleccionado es huevo — si no, un extra que no es
+        // huevo (ej. Arrachera) se quedaba bloqueado sin poder agregarse.
+        final selectedIsHuevoFlavor = isHuevoCategory &&
+            matchedByFlavor.values.any((d) =>
+                d.category == 'huevos' || d.name.toLowerCase().contains('huevo'));
+
         // El sabor "Chilaquiles" (p.ej. dentro de Molletes) exige elegir
         // salsa: 1 obligatoria, máx. 2.
         final hasChilaquilFlavor = selectedFlavors
@@ -2503,7 +2513,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             (!showFlavor || selectedFlavors.isNotEmpty) &&
             (!selectedIsEnmolada || selectedEnmolQty != null) &&
             (!isMenudo || selectedTiposCarne.isNotEmpty) &&
-            (!isHuevoCategory || selectedTerminoHuevo != null) &&
+            (!selectedIsHuevoFlavor || selectedTerminoHuevo != null) &&
             (!needsPiezas || selectedPiezasLoDulce != null) &&
             // En el diálogo MIXTO (multi-sabor) no hay toggle Con Queso, así
             // que la única forma de "no dejar la gordita vacía" es exigir al
@@ -2840,8 +2850,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                       );
                     }),
                   ],
-                  // Término del huevo: solo para categoría huevos
-                  if (isHuevoCategory) ...[
+                  // Término del huevo: solo si el platillo elegido es huevo
+                  if (selectedIsHuevoFlavor) ...[
                     const SizedBox(height: 12),
                     const Divider(color: Color(0xFFE5DCC4)),
                     const SizedBox(height: 8),
@@ -3470,7 +3480,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                             '$selectedEnmolQty piezas',
                           if (isMenudo && selectedTiposCarne.isNotEmpty)
                             selectedTiposCarne.join(', '),
-                          if (isHuevoCategory && selectedTerminoHuevo != null)
+                          if ((dish.category == 'huevos' ||
+                                  dish.name.toLowerCase().contains('huevo')) &&
+                              selectedTerminoHuevo != null)
                             selectedTerminoHuevo!,
                           if (isChilaquilFl &&
                               selectedSalsasChilaquil.isNotEmpty)
