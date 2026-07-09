@@ -219,6 +219,6 @@ precio ni total. Si quieres agregar precios, edita `appendTicket()`
 en `index.js`.
 
 Las categorías que cuentan como bebida son: `drink`, `alcohol`,
-`bebidas`, `drinks` (mismas que usa `kitchen_view.dart`). Cualquier
-otra categoría va a cocina, incluyendo el Envío FLASH (para que el
-cocinero sepa que es delivery).
+`bebidas`, `drinks`, `aguas`, `jugos`, `cafes`, `refrescos` (mismas
+que usa `kitchen_view.dart`). Cualquier otra categoría va a cocina,
+incluyendo el Envío FLASH (para que el cocinero sepa que es delivery).

@@ -1137,15 +1137,42 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     ];
                     Dish finalDish = dish;
                     if (selectedSizeType != null) {
-                      final price = await _loadDrinkPrice(selectedSizeType!);
-                      if (price != null) finalDish = dish.copyWith(price: price);
+                      if (isRefresco) {
+                        // El dish que se tocó en el menú trae su propio
+                        // tamaño en el nombre (ej. "Refresco (355 ml
+                        // vidrio)"), pero el mesero pudo haber cambiado el
+                        // TAMAÑO en este diálogo a 600 ml. Buscamos el dish
+                        // real de ese tamaño para que el nombre/precio
+                        // guardados (y por lo tanto lo que se imprime) no
+                        // contradigan el tamaño elegido.
+                        final mlLabel = _formatDrinkSizeLabel(selectedSizeType!).toLowerCase();
+                        try {
+                          final supabase = Supabase.instance.client;
+                          final rows = await supabase.from('dishes').select().ilike('name', '%refresco%');
+                          final candidates = (rows as List).cast<Map<String, dynamic>>().map(Dish.fromJson).toList();
+                          final match = candidates.where((d) => d.name.toLowerCase().contains(mlLabel)).toList();
+                          if (match.isNotEmpty) finalDish = match.first;
+                        } catch (_) {}
+                      }
+                      if (finalDish.id == dish.id) {
+                        // No hubo match de dish real (u otro tipo de
+                        // bebida): al menos actualiza el precio y limpia
+                        // el nombre para que no quede un tamaño viejo
+                        // pegado al título.
+                        final price = await _loadDrinkPrice(selectedSizeType!);
+                        final cleanName = dish.name.replaceAll(RegExp(r'\s*\([^)]*\)\s*$'), '').trim();
+                        finalDish = dish.copyWith(
+                          price: price,
+                          name: cleanName.isEmpty ? null : cleanName,
+                        );
+                      }
                     }
                     cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${dish.name} ($selectedSabor) agregado'),
+                          content: Text('${dialogQty > 1 ? '$dialogQty × ' : ''}${finalDish.name} ($selectedSabor) agregado'),
                           duration: const Duration(milliseconds: 500),
                           behavior: SnackBarBehavior.floating,
                           width: 280,
