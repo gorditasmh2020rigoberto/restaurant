@@ -2354,6 +2354,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   String? selectedTerminoHuevo;
   const terminosHuevo = ['Tierno', 'Cocido', 'Sellados'];
 
+  // Quesadilla de Maíz: opción "Frita" (de comal por default). Es
+  // exclusiva de este platillo — no aplica a los demás sabores del
+  // grupo (Burrito, Taco Chico, etc.).
+  bool selectedFritaQuesadilla = false;
+
   // Lo Dulce: selector de piezas (1, 2, 3)
   // Detecta por categoryPrefix (Lo dulce) o por categoría de los platillos
   final isLoDulce = categoryPrefix.toLowerCase() == 'lo dulce' ||
@@ -2500,6 +2505,11 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         final selectedIsHuevoFlavor = isHuevoCategory &&
             matchedByFlavor.values.any((d) =>
                 d.category == 'huevos' || d.name.toLowerCase().contains('huevo'));
+
+        // Quesadilla de Maíz: la opción "Frita" solo aparece cuando ese
+        // es el sabor realmente seleccionado, no para el resto del grupo.
+        final selectedIsQuesadillaMaiz = matchedByFlavor.values
+            .any((d) => d.name.toLowerCase() == 'quesadilla de maíz');
 
         // El sabor "Chilaquiles" (p.ej. dentro de Molletes) exige elegir
         // salsa: 1 obligatoria, máx. 2.
@@ -2879,6 +2889,27 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           selectedTerminoHuevo = v ? termino : null;
                         }),
                       )).toList(),
+                    ),
+                  ],
+                  // Frita: exclusivo de Quesadilla de Maíz.
+                  if (selectedIsQuesadillaMaiz) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFFE5DCC4)),
+                    const SizedBox(height: 8),
+                    const Text('¿DE COMAL O FRITA?',
+                        style: TextStyle(
+                            color: const Color(0xFF7A6E5A),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1)),
+                    const SizedBox(height: 10),
+                    _ToggleOption(
+                      icon: Icons.local_fire_department,
+                      label: 'Frita',
+                      value: selectedFritaQuesadilla,
+                      onChanged: (v) => setDialogState(() {
+                        selectedFritaQuesadilla = v;
+                      }),
                     ),
                   ],
                   // Piezas: solo para Churros / Hot Cakes (no Molletes Dulces,
@@ -3490,6 +3521,9 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                                   dish.name.toLowerCase().contains('huevo')) &&
                               selectedTerminoHuevo != null)
                             selectedTerminoHuevo!,
+                          if (dish.name.toLowerCase() == 'quesadilla de maíz' &&
+                              selectedFritaQuesadilla)
+                            'Frita',
                           if (isChilaquilFl &&
                               selectedSalsasChilaquil.isNotEmpty)
                             'Salsa ${selectedSalsasChilaquil.join(" + ")}',
