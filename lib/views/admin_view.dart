@@ -22,6 +22,33 @@ import 'print_status_view.dart';
 import '../utils/app_updater.dart';
 import '../utils/url_opener.dart';
 
+/// Refrescos/Aguas/Jugos comparten un solo dish_id representativo en la
+/// BD sin importar el TAMAÑO elegido, así que `dishes.name` puede no
+/// reflejar el tamaño real — el primer guisado sí lo trae (ej. "600 ml").
+/// Espejo de `correctDrinkName` en print-worker/index.js.
+String _correctDrinkName(String rawName, dynamic rawGuisados) {
+  List<String> guisados;
+  try {
+    guisados = rawGuisados == null
+        ? []
+        : (jsonDecode(rawGuisados as String) as List).cast<String>();
+  } catch (_) {
+    guisados = [];
+  }
+  if (guisados.isEmpty) return rawName;
+  final sizeStr = guisados.first.trim();
+  if (!RegExp(r'^\d+\s?(ml|litro)$', caseSensitive: false).hasMatch(sizeStr)) return rawName;
+  final n = rawName.toLowerCase();
+  if (n.contains('refresco')) {
+    if (sizeStr.contains('355') || sizeStr.contains('255')) return 'Refresco de vidrio';
+    if (sizeStr.contains('600')) return 'Refresco no retornable';
+    return 'Refresco';
+  }
+  if (n.contains('jugo')) return 'Jugo';
+  if (n.contains('agua') && !n.contains('natural')) return 'Agua Fresca';
+  return rawName;
+}
+
 class AdminView extends StatefulWidget {
   const AdminView({super.key});
 
@@ -2760,7 +2787,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                     .asyncMap((_) async {
                       final items = await supabase.from('order_items').select('''
                         id, order_id, quantity, status, price_at_time,
-                        dishes (name)
+                        guisados_selected, dishes (name)
                       ''').inFilter('order_id', orderIds).order('id');
                       return List<Map<String, dynamic>>.from(items);
                     }),
@@ -2789,7 +2816,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                             separatorBuilder: (context, index) => const Divider(color: Color(0xFFE5DCC4)),
                             itemBuilder: (context, index) {
                               final item = items[index];
-                              final dishName = item['dishes']['name'];
+                              final dishName = _correctDrinkName(item['dishes']['name'], item['guisados_selected']);
                               final quantity = item['quantity'];
                               final price = item['price_at_time'];
                               final itemSubtotal = quantity * price;

@@ -8,6 +8,35 @@ import '../providers/cart_provider.dart';
 import '../models/dish.dart';
 import '../globals.dart';
 
+/// Refrescos/Aguas/Jugos comparten un solo dish_id representativo en la
+/// BD sin importar el TAMAÑO elegido, así que `dishes.name` (lo que
+/// devuelve el JOIN) puede no reflejar el tamaño real elegido — el primer
+/// guisado sí lo trae (ej. "600 ml"). Espejo de `correctDrinkName` en
+/// print-worker/index.js, para que la cuenta en pantalla no contradiga
+/// el tamaño que el mesero elegió.
+String _correctDrinkName(String rawName, dynamic rawGuisados) {
+  List<String> guisados;
+  try {
+    guisados = rawGuisados == null
+        ? []
+        : (jsonDecode(rawGuisados as String) as List).cast<String>();
+  } catch (_) {
+    guisados = [];
+  }
+  if (guisados.isEmpty) return rawName;
+  final sizeStr = guisados.first.trim();
+  if (!RegExp(r'^\d+\s?(ml|litro)$', caseSensitive: false).hasMatch(sizeStr)) return rawName;
+  final n = rawName.toLowerCase();
+  if (n.contains('refresco')) {
+    if (sizeStr.contains('355') || sizeStr.contains('255')) return 'Refresco de vidrio';
+    if (sizeStr.contains('600')) return 'Refresco no retornable';
+    return 'Refresco';
+  }
+  if (n.contains('jugo')) return 'Jugo';
+  if (n.contains('agua') && !n.contains('natural')) return 'Agua Fresca';
+  return rawName;
+}
+
 /// Construye la URL pública del ticket virtual (post-cobro).
 String _buildTicketUrl(String orderId) {
   if (kIsWeb) {
@@ -931,7 +960,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
           items.add({
             'order_item_id': item['id'],
             'order_id': order['id'],
-            'name': item['dishes']['name'],
+            'name': _correctDrinkName(item['dishes']['name'], item['guisados_selected']),
             'quantity': item['quantity'],
             'price': item['price_at_time'],
             'guisados_selected': item['guisados_selected'],

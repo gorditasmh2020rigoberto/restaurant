@@ -14,6 +14,26 @@ const _drinkCategories = [
 bool _isDrinkCategory(String? category) =>
     _drinkCategories.contains((category ?? '').toLowerCase().trim());
 
+/// Espejo de `correctDrinkName` en print-worker/index.js: refrescos/aguas/
+/// jugos comparten un solo dish_id representativo sin importar el TAMAÑO
+/// elegido, así que `dishes.name` puede no reflejar el tamaño real — el
+/// primer guisado sí lo trae (ej. "600 ml"), y de ahí reconstruimos el
+/// nombre correcto para que el ticket simulado coincida con el impreso.
+String _correctDrinkName(String rawName, List<String> guisados) {
+  if (guisados.isEmpty) return rawName;
+  final sizeStr = guisados.first.trim();
+  if (!RegExp(r'^\d+\s?(ml|litro)$', caseSensitive: false).hasMatch(sizeStr)) return rawName;
+  final n = rawName.toLowerCase();
+  if (n.contains('refresco')) {
+    if (sizeStr.contains('355') || sizeStr.contains('255')) return 'Refresco de vidrio';
+    if (sizeStr.contains('600')) return 'Refresco no retornable';
+    return 'Refresco';
+  }
+  if (n.contains('jugo')) return 'Jugo';
+  if (n.contains('agua') && !n.contains('natural')) return 'Agua Fresca';
+  return rawName;
+}
+
 /// Áreas físicas esperadas (una Raspberry por cada una). 'kitchen' y
 /// 'line' son el mismo rol (cocina) con nombre distinto según sucursal
 /// — ver print-worker/README.md.
@@ -313,10 +333,11 @@ String _buildTicketPreviewText({
 
   for (final it in items) {
     final dish = it['dishes'] as Map<String, dynamic>?;
-    final name = (dish?['name'] as String?) ?? '(sin nombre)';
+    final rawName = (dish?['name'] as String?) ?? '(sin nombre)';
+    final guisados = _parseGuisadosPreview(it['guisados_selected']);
+    final name = _correctDrinkName(rawName, guisados);
     final qty = (it['quantity'] as num?)?.toInt() ?? 1;
     buffer.writeln('${qty}x $name');
-    final guisados = _parseGuisadosPreview(it['guisados_selected']);
     if (guisados.isNotEmpty) {
       buffer.writeln('   ${guisados.join(', ')}');
     }

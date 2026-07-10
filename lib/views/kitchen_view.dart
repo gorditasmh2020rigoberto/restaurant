@@ -4,6 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
 
+/// Refrescos/Aguas/Jugos comparten un solo dish_id representativo en la
+/// BD sin importar el TAMAÑO elegido, así que `dishes.name` puede no
+/// reflejar el tamaño real — el primer guisado sí lo trae (ej. "600 ml").
+/// Espejo de `correctDrinkName` en print-worker/index.js.
+String _correctDrinkName(String rawName, List<String> guisados) {
+  if (guisados.isEmpty) return rawName;
+  final sizeStr = guisados.first.trim();
+  if (!RegExp(r'^\d+\s?(ml|litro)$', caseSensitive: false).hasMatch(sizeStr)) return rawName;
+  final n = rawName.toLowerCase();
+  if (n.contains('refresco')) {
+    if (sizeStr.contains('355') || sizeStr.contains('255')) return 'Refresco de vidrio';
+    if (sizeStr.contains('600')) return 'Refresco no retornable';
+    return 'Refresco';
+  }
+  if (n.contains('jugo')) return 'Jugo';
+  if (n.contains('agua') && !n.contains('natural')) return 'Agua Fresca';
+  return rawName;
+}
+
 class KitchenView extends StatefulWidget {
   final bool isTakeoutOnly;
   final bool isDrinksOnly;
@@ -835,7 +854,6 @@ class _OrderTicketState extends State<_OrderTicket> {
                       separatorBuilder: (context, index) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final item = _items![index];
-                        final dishName = item['dishes']['name'] as String;
                         final isReady = item['status'] == 'ready';
 
                         // Parse guisados_selected JSON
@@ -846,6 +864,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                             extras = (jsonDecode(raw.toString()) as List).cast<String>();
                           } catch (_) {}
                         }
+                        final dishName = _correctDrinkName(item['dishes']['name'] as String, extras);
 
                         final clientLabel = item['client_label'] as String? ?? 'Cliente 1';
                         final extrasText = extras.isNotEmpty ? extras.join(' • ') : null;
