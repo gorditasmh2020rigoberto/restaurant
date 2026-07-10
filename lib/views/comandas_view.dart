@@ -329,17 +329,23 @@ class _ComandasViewState extends State<ComandasView> {
   List<String> get _availableCategories {
     final rawCats = _dishes.map((d) => d.category).toSet();
 
+    // "Té" tiene su propio chip aparte de "Bebidas" (a diferencia de
+    // Choco/Cafés/etc., que solo se acceden vía el submenú de Bebidas).
+    final hasTe = _dishes.any((d) => _effectiveCat(d) == 'te');
+
     // Consolidar todas las categorías de bebidas en un solo chip 'drink'.
     // El submenú vertical (Aguas/Jugos/Refrescos/Cafés) aparece al tocarlo.
     if (rawCats.any(_allDrinkCats.contains)) {
       rawCats.removeAll(_allDrinkCats);
       rawCats.add('drink');
     }
+    if (hasTe) rawCats.add('te');
 
     rawCats.removeWhere(_isPlatillosCategory); // ocultar categoría Platillos (todas las variantes)
     // Orden fijo solicitado para las primeras categorías
     const pinned = [
       'drink',
+      'te',
       'gorditas',
       'chilaquiles',
       'huevos',
