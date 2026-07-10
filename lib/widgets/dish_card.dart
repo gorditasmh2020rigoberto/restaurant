@@ -262,6 +262,8 @@ const _jugoFallback = [
   'Naranja', 'Zanahoria', 'Verde', 'Piña', 'Manzana', 'Betabel', 'Otro',
 ];
 
+const _chocoFallback = ['Fresa', 'Café', 'Chocolate', 'Vainilla'];
+
 Future<List<String>> _loadDrinkFlavors(String type) async {
   try {
     final supabase = Supabase.instance.client;
@@ -291,10 +293,12 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
     if (list.isNotEmpty) return list;
     if (type.startsWith('refresco')) return _refrescoFallback;
     if (type.startsWith('jugo')) return _jugoFallback;
+    if (type.startsWith('choco')) return _chocoFallback;
     return _aguaFallback;
   } catch (_) {
     if (type.startsWith('refresco')) return _refrescoFallback;
     if (type.startsWith('jugo')) return _jugoFallback;
+    if (type.startsWith('choco')) return _chocoFallback;
     return _aguaFallback;
   }
 }
@@ -882,10 +886,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   final bool isAguaFresca = (nameLower.contains('agua fresca') || nameLower.startsWith('agua')) &&
       !nameLower.contains('natural');
   final bool isJugo = dish.category == 'jugos' || nameLower.contains('jugo');
+  final bool isChoco = nameLower.contains('choco');
 
-  if (isRefresco || isAguaFresca || isJugo) {
-    final categoryPrefix = isJugo ? 'jugo' : isRefresco ? 'refresco' : 'agua';
-    final drinkIcon = isJugo ? Icons.blender : isRefresco ? Icons.sports_bar : Icons.local_drink;
+  if (isRefresco || isAguaFresca || isJugo || isChoco) {
+    final categoryPrefix = isChoco ? 'choco' : isJugo ? 'jugo' : isRefresco ? 'refresco' : 'agua';
+    final drinkIcon = isChoco ? Icons.icecream : isJugo ? Icons.blender : isRefresco ? Icons.sports_bar : Icons.local_drink;
 
     // Cargar tamaños desde drink_type_prices
     List<Map<String, dynamic>> drinkSizes = [];
