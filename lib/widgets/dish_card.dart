@@ -262,7 +262,7 @@ const _jugoFallback = [
   'Naranja', 'Zanahoria', 'Verde', 'Piña', 'Manzana', 'Betabel', 'Otro',
 ];
 
-const _chocoFallback = ['Fresa', 'Café', 'Chocolate', 'Vainilla'];
+const _chocoFallback = ['Fresa', 'Chocolate', 'Vainilla'];
 const _teFallback = ['Manzanilla', 'Limón', 'Negro', 'Verde'];
 
 Future<List<String>> _loadDrinkFlavors(String type) async {
