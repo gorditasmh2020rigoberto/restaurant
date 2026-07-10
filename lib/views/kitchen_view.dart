@@ -498,7 +498,12 @@ class _OrderTicketState extends State<_OrderTicket> {
           final dish = item['dishes'] as Map<String, dynamic>?;
           final category = dish?['category']?.toString().toLowerCase().trim() ?? '';
           const drinkCategories = ['drink', 'alcohol', 'bebidas', 'drinks', 'aguas', 'jugos', 'cafes', 'refrescos'];
-          return drinkCategories.contains(category);
+          if (drinkCategories.contains(category)) return true;
+          // Respaldo por nombre: si la categoría no quedó bien puesta en
+          // el dish, "café"/"capuchino" en el nombre igual cuenta como
+          // bebida.
+          final name = dish?['name']?.toString().toLowerCase() ?? '';
+          return name.contains('café') || name.contains('cafe') || name.contains('capuchino');
         }
 
         if (widget.isDrinksOnly) {
