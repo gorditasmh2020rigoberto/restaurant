@@ -179,6 +179,26 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   realtime: wsTransport ? { transport: wsTransport } : undefined,
 });
 
+// Heartbeat: cada Pi escribe su último "estoy viva" cada ~20s en
+// print_worker_heartbeats, para que la app de Caja pueda mostrar un LED
+// verde/rojo por impresora sin tener que conectarse a las Raspberries a
+// mano (ver lib/views/print_status_view.dart). No es crítico: si falla
+// (p.ej. no se aplicó la migración todavía), no afecta la impresión.
+const heartbeatArea = isReceiptMode ? 'receipt' : (printArea || 'todo-en-uno');
+const heartbeatId = `${BRANCH_NAME}:${heartbeatArea}`;
+async function sendHeartbeat() {
+  try {
+    await supabase.from('print_worker_heartbeats').upsert({
+      id: heartbeatId,
+      branch_name: BRANCH_NAME,
+      print_area: heartbeatArea,
+      last_seen_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    // Silencioso — ver comentario arriba.
+  }
+}
+
 // Fake printer para DRY_RUN: misma API que ThermalPrinter pero acumula
 // líneas en memoria y al execute() las vuelca a la terminal con cierto
 // formato (mayúsculas para bold, ====== para drawLine, ✂️ para cut).
@@ -1070,6 +1090,9 @@ async function main() {
   console.log(
     `Print-worker iniciado | Sucursal: ${BRANCH_NAME}${areaLabel}${orderTypesLabel} | ${modeLabel}`,
   );
+
+  await sendHeartbeat();
+  setInterval(sendHeartbeat, 20_000);
 
   if (isReceiptMode) {
     // Modo caja/recibo: escucha `cuenta_requested_at` y no toca los
