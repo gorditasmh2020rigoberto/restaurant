@@ -942,10 +942,16 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setDialogState) {
-            // Sabores según el tamaño seleccionado
+            // Sabores según el tamaño seleccionado. Si no hay NINGÚN
+            // tamaño configurado (ej. Choco/Té, de tamaño fijo),
+            // flavorsByType queda vacío — hay que caer directo a
+            // genericFlavors (el respaldo), si no la lista de sabores
+            // se queda vacía por completo.
             final List<String> baseSabores = selectedSizeType != null
                 ? (flavorsByType[selectedSizeType!] ?? genericFlavors)
-                : (flavorsByType.values.fold<Set<String>>({}, (s, l) => s..addAll(l)).toList()..sort());
+                : (flavorsByType.isEmpty
+                    ? genericFlavors
+                    : (flavorsByType.values.fold<Set<String>>({}, (s, l) => s..addAll(l)).toList()..sort()));
             // Para Agua Fresca, agregar "Natural" como un sabor extra
             // (mapea al dish de Agua Natural).
             final bool hasAguaNatural = aguaNaturalDish != null;
