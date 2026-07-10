@@ -68,7 +68,7 @@ class _PrintStatusViewState extends State<PrintStatusView> {
               style: TextStyle(color: Color(0xFFA08F70)),
             ),
           ),
-          const _PrinterLedsRow(),
+          const PrinterLedsRow(),
           const SizedBox(height: 16),
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
@@ -447,14 +447,18 @@ class _PrintStatusChip extends StatelessWidget {
 /// hace menos de _heartbeatStaleAfter, rojo si no. Se basa en
 /// print_worker_heartbeats, que cada print-worker escribe cada ~20s
 /// (ver print-worker/index.js, sendHeartbeat).
-class _PrinterLedsRow extends StatefulWidget {
-  const _PrinterLedsRow();
+class PrinterLedsRow extends StatefulWidget {
+  /// true → sin fondo/borde de tarjeta, para usarse pegada dentro de
+  /// otra barra (ej. la barra fija de abajo en admin_view.dart).
+  final bool compact;
+
+  const PrinterLedsRow({super.key, this.compact = false});
 
   @override
-  State<_PrinterLedsRow> createState() => _PrinterLedsRowState();
+  State<PrinterLedsRow> createState() => PrinterLedsRowState();
 }
 
-class _PrinterLedsRowState extends State<_PrinterLedsRow> {
+class PrinterLedsRowState extends State<PrinterLedsRow> {
   final _supabase = Supabase.instance.client;
 
   @override
@@ -480,14 +484,7 @@ class _PrinterLedsRowState extends State<_PrinterLedsRow> {
           return latest;
         }
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAF1DE),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5DCC4)),
-          ),
-          child: Wrap(
+        final ledRow = Wrap(
             spacing: 20,
             runSpacing: 10,
             children: _expectedPrintAreas.map((area) {
@@ -518,7 +515,18 @@ class _PrinterLedsRowState extends State<_PrinterLedsRow> {
                 ],
               );
             }).toList(),
+          );
+
+        if (widget.compact) return ledRow;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAF1DE),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5DCC4)),
           ),
+          child: ledRow,
         );
       },
     );

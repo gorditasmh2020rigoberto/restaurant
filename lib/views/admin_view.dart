@@ -707,16 +707,37 @@ class _AdminViewState extends State<AdminView> {
             )
           : null,
       drawer: isMobile ? Drawer(child: _buildSidebar(true)) : null,
-      body: Row(
+      body: Column(
         children: [
-          // Left Sidebar: Navigation (Only for Desktop)
-          if (!isMobile) _buildSidebar(false),
-
-          if (!isMobile) const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE5DCC4)),
-
-          // Main Content Section
           Expanded(
-            child: _buildMainContent(),
+            child: Row(
+              children: [
+                // Left Sidebar: Navigation (Only for Desktop)
+                if (!isMobile) _buildSidebar(false),
+
+                if (!isMobile) const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE5DCC4)),
+
+                // Main Content Section
+                Expanded(
+                  child: _buildMainContent(),
+                ),
+              ],
+            ),
+          ),
+          // Barra fija con el estado de las impresoras (LEDs), visible en
+          // cualquier sección de Caja/Admin — no solo en "Estado de
+          // Impresión". Tocar la barra lleva a esa pantalla para más detalle.
+          InkWell(
+            onTap: () => setState(() => _selectedIndex = 13),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFAF1DE),
+                border: Border(top: BorderSide(color: Color(0xFFE5DCC4))),
+              ),
+              child: const PrinterLedsRow(compact: true),
+            ),
           ),
         ],
       ),
