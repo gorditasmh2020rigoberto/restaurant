@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../globals.dart';
@@ -64,12 +66,11 @@ class _PrintStatusViewState extends State<PrintStatusView> {
           const Padding(
             padding: EdgeInsets.only(top: 4, bottom: 16),
             child: Text(
-              'Qué órdenes activas ya se imprimieron en cada área (Bebidas, Cocina/Para Llevar).',
+              'Qué órdenes activas ya se imprimieron en cada área (Bebidas, Cocina/Para Llevar). '
+              'Los LEDs de conexión están en la barra de abajo.',
               style: TextStyle(color: Color(0xFFA08F70)),
             ),
           ),
-          const PrinterLedsRow(),
-          const SizedBox(height: 16),
           Expanded(
             child: StreamBuilder<List<Map<String, dynamic>>>(
               stream: _supabase
@@ -460,75 +461,128 @@ class PrinterLedsRow extends StatefulWidget {
 
 class PrinterLedsRowState extends State<PrinterLedsRow> {
   final _supabase = Supabase.instance.client;
+  final _audioPlayer = AudioPlayer();
+  StreamSubscription<List<Map<String, dynamic>>>? _sub;
+  Timer? _pollTimer;
+  List<Map<String, dynamic>> _rows = const [];
+  // null = todavía no sabemos (no avisar en la primera carga); true/false
+  // = último estado conocido, para detectar CAMBIOS y avisar solo ahí.
+  final Map<String, bool?> _lastKnownOnline = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _sub = _supabase
+        .from('print_worker_heartbeats')
+        .stream(primaryKey: ['id'])
+        .eq('branch_name', Globals.currentBranch)
+        .listen((rows) {
+      if (mounted) setState(() => _rows = rows);
+    });
+    // El stream solo avisa cuando llega un heartbeat NUEVO — si una Pi se
+    // cae, no hay ningún evento nuevo que dispare un rebuild y notemos
+    // que ya pasaron los 45s. Revisamos cada 5s con la hora actual para
+    // detectar la desconexión aunque no llegue ningún dato nuevo.
+    _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    _pollTimer?.cancel();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
+  DateTime? _lastSeenFor(List<String> areas) {
+    DateTime? latest;
+    for (final row in _rows) {
+      if (!areas.contains(row['print_area'])) continue;
+      final seen = DateTime.tryParse(row['last_seen_at'] as String? ?? '');
+      if (seen != null && (latest == null || seen.isAfter(latest))) {
+        latest = seen;
+      }
+    }
+    return latest;
+  }
+
+  void _announceChange(String label, bool isOnline) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isOnline
+            ? '🟢 $label volvió a conectarse'
+            : '🔴 $label se desconectó'),
+        backgroundColor: isOnline ? Colors.green[700] : Colors.red[700],
+        duration: const Duration(seconds: 5),
+      ),
+    );
+    if (!isOnline) {
+      // Solo sonido en la desconexión — es lo que de verdad necesita
+      // atención inmediata; la reconexión ya se resolvió sola.
+      _audioPlayer.play(
+        UrlSource('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _supabase
-          .from('print_worker_heartbeats')
-          .stream(primaryKey: ['id'])
-          .eq('branch_name', Globals.currentBranch),
-      builder: (context, snapshot) {
-        final rows = snapshot.data ?? const [];
-        final now = DateTime.now().toUtc();
+    final now = DateTime.now().toUtc();
 
-        DateTime? lastSeenFor(List<String> areas) {
-          DateTime? latest;
-          for (final row in rows) {
-            if (!areas.contains(row['print_area'])) continue;
-            final seen = DateTime.tryParse(row['last_seen_at'] as String? ?? '');
-            if (seen != null && (latest == null || seen.isAfter(latest))) {
-              latest = seen;
-            }
-          }
-          return latest;
+    final ledRow = Wrap(
+      spacing: 20,
+      runSpacing: 10,
+      children: _expectedPrintAreas.map((area) {
+        final (matchAreas, label, icon) = area;
+        final lastSeen = _lastSeenFor(matchAreas);
+        final isOnline =
+            lastSeen != null && now.difference(lastSeen) < _heartbeatStaleAfter;
+
+        final previous = _lastKnownOnline[label];
+        if (previous != null && previous != isOnline) {
+          WidgetsBinding.instance
+              .addPostFrameCallback((_) => _announceChange(label, isOnline));
         }
+        _lastKnownOnline[label] = isOnline;
 
-        final ledRow = Wrap(
-            spacing: 20,
-            runSpacing: 10,
-            children: _expectedPrintAreas.map((area) {
-              final (matchAreas, label, icon) = area;
-              final lastSeen = lastSeenFor(matchAreas);
-              final isOnline = lastSeen != null &&
-                  now.difference(lastSeen) < _heartbeatStaleAfter;
-              final color = isOnline ? Colors.green : Colors.redAccent;
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 6),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(icon, size: 16, color: const Color(0xFF7A6E5A)),
-                  const SizedBox(width: 4),
-                  Text(label,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3D2E1A))),
+        final color = isOnline ? Colors.green : Colors.redAccent;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 6),
                 ],
-              );
-            }).toList(),
-          );
-
-        if (widget.compact) return ledRow;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFAF1DE),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE5DCC4)),
-          ),
-          child: ledRow,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(icon, size: 16, color: const Color(0xFF7A6E5A)),
+            const SizedBox(width: 4),
+            Text(label,
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3D2E1A))),
+          ],
         );
-      },
+      }).toList(),
+    );
+
+    if (widget.compact) return ledRow;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF1DE),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5DCC4)),
+      ),
+      child: ledRow,
     );
   }
 }
