@@ -328,6 +328,28 @@ function parseGuisados(raw) {
   }
 }
 
+// Refrescos/Aguas/Jugos comparten UN solo dish_id "representativo" en la
+// BD sin importar el TAMAÑO elegido en el diálogo del mesero (ej. todo
+// refresco se guarda con el id de "Refresco 355 ml vidrio", aunque el
+// mesero haya elegido 600 ml) — por eso `dishes.name` no refleja el
+// tamaño real. El primer guisado SÍ trae el tamaño real (ej. "600 ml",
+// "355 ml", "1 litro"), así que si coincide con ese patrón, reconstruimos
+// el nombre a partir de ahí en vez del nombre (potencialmente equivocado)
+// de la BD. Espejo de `_drinkDisplayName` en dish_card.dart.
+function correctDrinkName(rawName, guisados) {
+  const sizeStr = guisados[0];
+  if (!sizeStr || !/^\d+\s?(ml|litro)$/i.test(sizeStr.trim())) return rawName;
+  const n = String(rawName || '').toLowerCase();
+  if (n.includes('refresco')) {
+    if (sizeStr.includes('355') || sizeStr.includes('255')) return 'Refresco de vidrio';
+    if (sizeStr.includes('600')) return 'Refresco no retornable';
+    return 'Refresco';
+  }
+  if (n.includes('jugo')) return 'Jugo';
+  if (n.includes('agua') && !n.includes('natural')) return 'Agua Fresca';
+  return rawName;
+}
+
 // Extrae el marcador de tamaño del nombre del platillo. En este proyecto
 // cada tamaño es un platillo separado en `dishes` con nombre tipo:
 //   "Molletes con Guisado (Orden)"  → orden entera
@@ -580,7 +602,8 @@ function appendTicket(printer, kind, order, items) {
   for (let g = 0; g < groups.length; g++) {
     if (g > 0) printer.drawLine();
     for (const it of groups[g]) {
-      const rawName = it.dishes?.name || '(sin nombre)';
+      const guisados = parseGuisados(it.guisados_selected);
+      const rawName = correctDrinkName(it.dishes?.name || '(sin nombre)', guisados);
       const { fraction, cleanName } = parseSizeMarker(rawName);
       const qty = it.quantity || 1;
       const line = fraction
@@ -589,7 +612,6 @@ function appendTicket(printer, kind, order, items) {
       printer.bold(true);
       printer.println(line);
       printer.bold(false);
-      const guisados = parseGuisados(it.guisados_selected);
       if (guisados.length) {
         printer.println(`   ${guisados.join(', ')}`);
       }
@@ -862,7 +884,8 @@ function appendCuentaTicket(printer, order, items) {
   for (let g = 0; g < groups.length; g++) {
     if (g > 0) printer.drawLine();
     for (const it of groups[g]) {
-      const rawName = it.dishes?.name || '(sin nombre)';
+      const guisados = parseGuisados(it.guisados_selected);
+      const rawName = correctDrinkName(it.dishes?.name || '(sin nombre)', guisados);
       const { fraction, cleanName } = parseSizeMarker(rawName);
       const qty = it.quantity || 1;
       const price = Number(it.price_at_time || 0);
@@ -880,7 +903,6 @@ function appendCuentaTicket(printer, order, items) {
       printer.bold(true);
       printer.println(`${nameTrunc} ${priceStr}`);
       printer.bold(false);
-      const guisados = parseGuisados(it.guisados_selected);
       if (guisados.length) {
         printer.println(`   ${guisados.join(', ')}`);
       }
