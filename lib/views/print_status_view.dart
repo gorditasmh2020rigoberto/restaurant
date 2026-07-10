@@ -466,22 +466,23 @@ class PrinterLedsRowState extends State<PrinterLedsRow> {
   // null = todavía no sabemos (no avisar en la primera carga); true/false
   // = último estado conocido, para detectar CAMBIOS y avisar solo ahí.
   final Map<String, bool?> _lastKnownOnline = {};
-  // Se crea UNA sola vez (no dentro de build) para no resubscribirse en
-  // cada rebuild, pero sigue siendo consumido por StreamBuilder — el
-  // mismo patrón ya probado en el resto de la app (ver PrintStatusView).
-  late final Stream<List<Map<String, dynamic>>> _heartbeatStream;
+  // Se guarda la sucursal con la que se armó el stream actual — si
+  // Globals.currentBranch cambia (ej. todavía no había cargado la
+  // guardada cuando este widget arrancó — arranca en 'Sucursal
+  // Maravillas' por default hasta que termina esa carga async), hay que
+  // volver a crear el stream con la sucursal correcta.
+  String? _streamBranch;
+  Stream<List<Map<String, dynamic>>>? _heartbeatStream;
 
   @override
   void initState() {
     super.initState();
-    _heartbeatStream = _supabase
-        .from('print_worker_heartbeats')
-        .stream(primaryKey: ['id'])
-        .eq('branch_name', Globals.currentBranch);
     // El stream solo avisa cuando llega un heartbeat NUEVO — si una Pi se
     // cae, no hay ningún evento nuevo que dispare un rebuild y notemos
     // que ya pasaron los 45s. Revisamos cada 5s con la hora actual para
-    // detectar la desconexión aunque no llegue ningún dato nuevo.
+    // detectar la desconexión aunque no llegue ningún dato nuevo. De paso,
+    // esto también hace que se reintente armar el stream con la sucursal
+    // correcta una vez que Globals.currentBranch ya cargó de verdad.
     _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (mounted) setState(() {});
     });
@@ -528,6 +529,14 @@ class PrinterLedsRowState extends State<PrinterLedsRow> {
 
   @override
   Widget build(BuildContext context) {
+    if (_streamBranch != Globals.currentBranch) {
+      _streamBranch = Globals.currentBranch;
+      _heartbeatStream = _supabase
+          .from('print_worker_heartbeats')
+          .stream(primaryKey: ['id'])
+          .eq('branch_name', Globals.currentBranch);
+    }
+
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: _heartbeatStream,
       builder: (context, snapshot) {
