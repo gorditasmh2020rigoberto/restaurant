@@ -188,14 +188,20 @@ const heartbeatArea = isReceiptMode ? 'receipt' : (printArea || 'todo-en-uno');
 const heartbeatId = `${BRANCH_NAME}:${heartbeatArea}`;
 async function sendHeartbeat() {
   try {
-    await supabase.from('print_worker_heartbeats').upsert({
+    const { error } = await supabase.from('print_worker_heartbeats').upsert({
       id: heartbeatId,
       branch_name: BRANCH_NAME,
       print_area: heartbeatArea,
       last_seen_at: new Date().toISOString(),
     });
+    // supabase-js no lanza excepción en errores de BD — vienen en
+    // `error`, no como throw. Sin este chequeo, un fallo (tabla sin
+    // migrar, RLS, etc.) queda completamente invisible en los logs.
+    if (error) {
+      console.error(`⚠ Heartbeat falló (${heartbeatId}): ${error.message}`);
+    }
   } catch (e) {
-    // Silencioso — ver comentario arriba.
+    console.error(`⚠ Heartbeat falló (${heartbeatId}): ${e.message}`);
   }
 }
 
