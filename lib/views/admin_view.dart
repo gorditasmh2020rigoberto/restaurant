@@ -1709,6 +1709,43 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
     );
   }
 
+  /// Confirmación SIN conectarse a ninguna terminal — el cajero ya cobró
+  /// esa parte en su terminal física aparte, esto solo registra que esa
+  /// porción del cobro mixto va como tarjeta.
+  Future<bool> _confirmCardPortion(BuildContext context, double amount) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Row(
+          children: [
+            Icon(Icons.credit_card, color: Colors.blueAccent, size: 28),
+            SizedBox(width: 12),
+            Text('Confirmar tarjeta', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(
+          'Confirma que ya cobraste \$${amount.toStringAsFixed(2)} en tu terminal física.\n\n'
+          'Esto NO se conecta a ninguna terminal — solo registra esa parte del cobro mixto como pagada con tarjeta.',
+          style: const TextStyle(color: Color(0xFF7A6E5A)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, foregroundColor: Colors.white),
+            child: const Text('Ya cobré, confirmar'),
+          ),
+        ],
+      ),
+    );
+    return confirm == true;
+  }
+
   Future<void> _showMixedPaymentDialog(BuildContext context, List<String> orderIds, double total, String? tableId) async {
     final cashPartController = TextEditingController(text: total.toStringAsFixed(2));
     final cardPartController = TextEditingController(text: '0.00');
@@ -1836,14 +1873,14 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   const SizedBox(height: 16),
                   if (cardAmount > 0)
                     ElevatedButton.icon(
-                      onPressed: isCardValidated ? null : () {
-                        _payWithMercadoPago(context, cardAmount, () {
-                          setState(() { isCardValidated = true; });
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pago con tarjeta validado con éxito'), backgroundColor: Colors.blue));
-                        });
+                      onPressed: isCardValidated ? null : () async {
+                        final ok = await _confirmCardPortion(context, cardAmount);
+                        if (!ok) return;
+                        setState(() { isCardValidated = true; });
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pago con tarjeta confirmado'), backgroundColor: Colors.blue));
                       },
                       icon: Icon(isCardValidated ? Icons.check : Icons.point_of_sale),
-                      label: Text(isCardValidated ? 'TARJETA VALIDADA' : 'CUIDADO: COBRAR \$${cardAmount.toStringAsFixed(2)} EN TERMINAL'),
+                      label: Text(isCardValidated ? 'TARJETA CONFIRMADA' : 'CONFIRMAR \$${cardAmount.toStringAsFixed(2)} DE TARJETA'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isCardValidated ? Colors.green : const Color(0xFF009EE3),
                         minimumSize: const Size.fromHeight(40),
@@ -1907,15 +1944,13 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar', style: TextStyle(color: Colors.grey))),
               ElevatedButton(
-                onPressed: totalEntered < total 
-                  ? null 
+                onPressed: totalEntered < total
+                  ? null
                   : () async {
                       if (cardAmount > 0 && !isCardValidated) {
-                        _payWithMercadoPago(context, cardAmount, () async {
-                           setState(() { isCardValidated = true; });
-                           await _executeFinalizeMixedPayment(context, orderIds, total, tableId, cashAmount, cardAmount);
-                        });
-                        return;
+                        final ok = await _confirmCardPortion(context, cardAmount);
+                        if (!ok) return;
+                        setState(() { isCardValidated = true; });
                       }
                       await _executeFinalizeMixedPayment(context, orderIds, total, tableId, cashAmount, cardAmount);
                     },
@@ -1925,7 +1960,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: Text(
-                  (cardAmount > 0 && !isCardValidated) ? 'COBRAR TARJETA Y FINALIZAR' : 'FINALIZAR TODO EL COBRO', 
+                  (cardAmount > 0 && !isCardValidated) ? 'CONFIRMAR TARJETA Y FINALIZAR' : 'FINALIZAR TODO EL COBRO',
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16)
                 ),
               ),
@@ -2956,6 +2991,23 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                 minimumSize: const Size.fromHeight(60),
                                 backgroundColor: Colors.blueAccent,
                                 foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                elevation: 4,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                final totalConPropina = await _askPropina(context, totalToPay);
+                                if (totalConPropina == null || !context.mounted) return;
+                                _showMixedPaymentDialog(context, orderIds, totalConPropina, widget.tableId);
+                              },
+                              icon: const Icon(Icons.pie_chart, size: 26),
+                              label: const Text('Pago Mixto (Efectivo + Tarjeta)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(60),
+                                backgroundColor: Colors.orangeAccent,
+                                foregroundColor: Colors.black,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                                 elevation: 4,
                               ),
