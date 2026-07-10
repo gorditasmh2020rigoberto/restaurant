@@ -916,6 +916,205 @@ async function printCuenta(order, items) {
   await printer.execute();
 }
 
+// ── Corte del día ───────────────────────────────────────────────────
+// Se dispara cuando la caja inserta una fila en `corte_requests` (botón
+// "Imprimir Corte del Día" en Reportes). A diferencia de la cuenta, no
+// está atado a una orden: agrega TODAS las órdenes completadas de HOY
+// para esta sucursal, agrupadas por método de pago, más los
+// movimientos de caja (fondo inicial/entradas/salidas) para calcular
+// el efectivo que debería haber físicamente en la caja.
+//
+// Clasificación de payment_method (mismo criterio que usa la vista de
+// Reportes en la app para no mostrar números distintos entre pantalla
+// y ticket impreso):
+//   - 'mixed' (o con amount_cash/amount_card presentes): se reparte
+//     entre efectivo y tarjeta según esos montos exactos.
+//   - contiene 'cash'/'efectivo': todo el total va a efectivo.
+//   - contiene 'openpay'/'trans': todo el total va a "otros".
+//   - cualquier otro valor (card, clip, mercado, tarjeta...): tarjeta.
+async function fetchCorteSummary(branchName) {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('id, total_amount, payment_method, amount_cash, amount_card')
+    .eq('branch_name', branchName)
+    .eq('status', 'completed')
+    .gte('created_at', startOfDay.toISOString());
+  if (error) throw error;
+
+  let efectivo = 0;
+  let tarjeta = 0;
+  let otros = 0;
+  let count = 0;
+  for (const o of orders || []) {
+    count++;
+    const total = Number(o.total_amount || 0);
+    const pm = String(o.payment_method || '').toLowerCase();
+    if (pm.includes('mixed') || o.amount_cash != null || o.amount_card != null) {
+      efectivo += Number(o.amount_cash || 0);
+      tarjeta += Number(o.amount_card || 0);
+    } else if (pm.includes('cash') || pm.includes('efectivo')) {
+      efectivo += total;
+    } else if (pm.includes('openpay') || pm.includes('trans')) {
+      otros += total;
+    } else {
+      tarjeta += total;
+    }
+  }
+
+  const { data: movs, error: movsError } = await supabase
+    .from('cash_movements')
+    .select('type, category, amount')
+    .eq('branch_name', branchName)
+    .gte('created_at', startOfDay.toISOString());
+  if (movsError) throw movsError;
+
+  let fondoInicial = 0;
+  let entradas = 0;
+  let salidas = 0;
+  for (const m of movs || []) {
+    const amt = Number(m.amount || 0);
+    if (m.category === 'apertura') {
+      fondoInicial += amt;
+    } else if (m.type === 'entrada') {
+      entradas += amt;
+    } else if (m.type === 'salida') {
+      salidas += amt;
+    }
+  }
+
+  const total = efectivo + tarjeta + otros;
+  const efectivoEsperado = fondoInicial + efectivo + entradas - salidas;
+  return { date: now, count, efectivo, tarjeta, otros, total, fondoInicial, entradas, salidas, efectivoEsperado };
+}
+
+function appendCorteTicket(printer, summary, branchName) {
+  const row = (label, amt) => {
+    const amtStr = `$${amt.toFixed(2)}`;
+    const width = paperWidth - amtStr.length - 1;
+    const labelTrunc = label.length > width ? label.slice(0, width) : label.padEnd(width, ' ');
+    printer.println(`${labelTrunc} ${amtStr}`);
+  };
+
+  printer.alignCenter();
+  printer.setTextDoubleHeight();
+  printer.bold(true);
+  printer.println(restaurantName);
+  printer.setTextNormal();
+  printer.println('CORTE DEL DIA');
+  printer.bold(false);
+  if (branchName) printer.println(branchName);
+  printer.drawLine();
+
+  printer.alignLeft();
+  printer.println(`Fecha: ${fmtDateTime(summary.date)}`);
+  printer.println(`Ordenes cobradas: ${summary.count}`);
+  printer.drawLine();
+
+  row('Efectivo', summary.efectivo);
+  row('Tarjeta', summary.tarjeta);
+  if (summary.otros > 0) row('Otros (transf/openpay)', summary.otros);
+  printer.drawLine();
+  printer.bold(true);
+  row('TOTAL VENTAS', summary.total);
+  printer.bold(false);
+  printer.newLine();
+
+  row('Fondo inicial', summary.fondoInicial);
+  if (summary.entradas > 0) row('Entradas extra', summary.entradas);
+  if (summary.salidas > 0) row('Salidas/gastos', -summary.salidas);
+  printer.drawLine();
+  printer.bold(true);
+  row('EFECTIVO ESPERADO', summary.efectivoEsperado);
+  printer.bold(false);
+
+  printer.alignCenter();
+  printer.newLine();
+  printer.println(fmtDateTime());
+  printer.newLine();
+  printer.newLine();
+  printer.cut();
+}
+
+async function printCorte(summary, branchName) {
+  const printer = buildPrinter();
+  const connected = await printer.isPrinterConnected();
+  if (!connected) {
+    throw new Error(`Impresora "${printerTarget}" no responde. Verifica USB/driver.`);
+  }
+  appendCorteTicket(printer, summary, branchName);
+  await printer.execute();
+}
+
+async function markCorteRequestPrinted(requestId) {
+  const { error } = await supabase
+    .from('corte_requests')
+    .update({ printed_at: new Date().toISOString() })
+    .eq('id', requestId);
+  if (error) throw error;
+}
+
+async function processCorteRequest(requestId, branchName, source = 'unknown') {
+  const flightKey = `corte:${requestId}`;
+  if (_inFlight.has(flightKey)) return;
+  _inFlight.add(flightKey);
+  try {
+    console.log(`→ Imprimiendo CORTE DEL DÍA de ${branchName} (${source})...`);
+    const summary = await fetchCorteSummary(branchName);
+    await printCorte(summary, branchName);
+    await markCorteRequestPrinted(requestId);
+    console.log(`✓ Corte ${requestId} impreso y marcado`);
+  } catch (e) {
+    console.error(`✘ Falló corte ${requestId}: ${e.message}`);
+  } finally {
+    _inFlight.delete(flightKey);
+  }
+}
+
+async function catchUpCorteRequests() {
+  const { data, error } = await supabase
+    .from('corte_requests')
+    .select('id, branch_name')
+    .eq('branch_name', BRANCH_NAME)
+    .is('printed_at', null)
+    .order('requested_at', { ascending: true })
+    .limit(20);
+  if (error) {
+    console.error('Catch-up corte falló:', error.message);
+    return;
+  }
+  if (!data?.length) return;
+  console.log(`Catch-up corte: ${data.length} solicitud(es) pendiente(s)`);
+  for (const r of data) {
+    await processCorteRequest(r.id, r.branch_name, 'catch-up');
+  }
+}
+
+function subscribeRealtimeCorteRequests() {
+  const channel = supabase
+    .channel('corte-requests-worker')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'corte_requests',
+        filter: `branch_name=eq.${BRANCH_NAME}`,
+      },
+      (payload) => {
+        if (payload?.new?.id) {
+          processCorteRequest(payload.new.id, payload.new.branch_name, 'realtime-insert');
+        }
+      },
+    )
+    .subscribe((status) => {
+      console.log(`Realtime corte: ${status}`);
+    });
+  return channel;
+}
+
 async function markCajaPrinted(orderId) {
   const { error } = await supabase
     .from('orders')
@@ -1111,6 +1310,10 @@ async function main() {
     await catchUpReceipts();
     subscribeRealtimeReceipts();
     setInterval(catchUpReceipts, 60_000);
+
+    await catchUpCorteRequests();
+    subscribeRealtimeCorteRequests();
+    setInterval(catchUpCorteRequests, 30_000);
   } else {
     // Modo normal: ticket de cocina (drinks/kitchen/line/takeout).
     await catchUp();
