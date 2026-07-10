@@ -429,7 +429,12 @@ async function markItemsPrinted(orderId, itemIds) {
 const DRINK_CATEGORIES = ['drink', 'alcohol', 'bebidas', 'drinks', 'aguas', 'jugos', 'cafes', 'refrescos'];
 function isDrink(item) {
   const cat = (item.dishes?.category || '').toString().toLowerCase().trim();
-  return DRINK_CATEGORIES.includes(cat);
+  if (DRINK_CATEGORIES.includes(cat)) return true;
+  // Respaldo por nombre: si por lo que sea la categoría no quedó bien
+  // puesta en el dish, "café"/"capuchino" en el nombre igual cuenta
+  // como bebida — no debe depender de que el dato esté perfecto.
+  const name = (item.dishes?.name || '').toString().toLowerCase();
+  return name.includes('café') || name.includes('cafe') || name.includes('capuchino');
 }
 
 // Filtra los items que esta Pi debe imprimir según PRINT_AREA. Si el
