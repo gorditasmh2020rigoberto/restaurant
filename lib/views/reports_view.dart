@@ -32,6 +32,7 @@ class _ReportsViewState extends State<ReportsView> {
 
   // Vista activa: 'historial' o 'cortes'
   String _activeView = 'historial';
+  bool _isPrintingCorte = false;
 
   // Filtros
   String _timeFilter = 'all'; // all, day, week, month, exact_date
@@ -625,11 +626,28 @@ class _ReportsViewState extends State<ReportsView> {
                   const SizedBox(height: 32),
 
                   // Toggle Historial / Cortes por Día
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
                       _buildViewTab('historial', Icons.list_alt, 'Historial de Órdenes'),
-                      const SizedBox(width: 8),
                       _buildViewTab('cortes', Icons.calendar_today, 'Cortes por Día'),
+                      ElevatedButton.icon(
+                        onPressed: _isPrintingCorte ? null : _imprimirCorteDelDia,
+                        icon: _isPrintingCorte
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : const Icon(Icons.print, size: 18),
+                        label: const Text('Imprimir Corte del Día'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF6D00),
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -1142,6 +1160,33 @@ class _ReportsViewState extends State<ReportsView> {
         ],
       )),
     ];
+  }
+
+  /// Manda a imprimir el corte del día en la impresora térmica de Caja.
+  /// Solo inserta la solicitud — el print-worker (PRINT_AREA=receipt)
+  /// la detecta vía Realtime, agrega las ventas de hoy y la imprime.
+  Future<void> _imprimirCorteDelDia() async {
+    setState(() => _isPrintingCorte = true);
+    try {
+      await _supabase.from('corte_requests').insert({
+        'branch_name': Globals.currentBranch,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Corte del día enviado a la impresora de ${Globals.currentBranch}'),
+          backgroundColor: Colors.green,
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error al solicitar el corte: $e'),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _isPrintingCorte = false);
+    }
   }
 
   List<Map<String, dynamic>> _buildDailyCuts() {
