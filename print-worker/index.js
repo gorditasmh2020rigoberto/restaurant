@@ -375,11 +375,11 @@ function parseSizeMarker(name) {
   return { fraction: null, cleanName: s };
 }
 
-// Etiqueta a imprimir para el marcador de tamaño: "orden" en vez de "1",
-// "media orden" en vez de "1/2" — más claro para cocina que la fracción.
+// Etiqueta a imprimir para el marcador de tamaño: "Orden" en vez de "1",
+// "Media" en vez de "1/2" — más claro para cocina que la fracción.
 function fractionLabel(fraction) {
-  if (fraction === '1') return 'orden';
-  if (fraction === '1/2') return 'media orden';
+  if (fraction === '1') return 'Orden';
+  if (fraction === '1/2') return 'Media';
   return fraction;
 }
 
@@ -584,13 +584,13 @@ function appendTicket(printer, kind, order, items) {
 
   // ── Ítems (sin precios — esto es ticket de producción, no recibo)
   //
-  // Formato compacto ("2xORDEN MOLLETES..."):
-  //   "Nx<orden|media orden> NOMBRE"   si el nombre trae "(Orden)" o "(1/2)"
-  //   "Nx NOMBRE"                      si no trae marcador (bebidas, etc.)
+  // Formato compacto ("2x Orden MOLLETES..."):
+  //   "Nx <Orden|Media> NOMBRE"   si el nombre trae "(Orden)" o "(1/2)"
+  //   "Nx NOMBRE"                 si no trae marcador (bebidas, etc.)
   //
   // Ejemplos:
-  //   2× "Molletes con Guisado (Orden)" → "2xorden MOLLETES CON GUISADO"
-  //   3× "Molletes con Guisado (1/2)"   → "3xmedia orden MOLLETES CON GUISADO"
+  //   2× "Molletes con Guisado (Orden)" → "2x Orden MOLLETES CON GUISADO"
+  //   3× "Molletes con Guisado (1/2)"   → "3x Media MOLLETES CON GUISADO"
   //   1× "Refresco Coca"                → "1x REFRESCO COCA"
   //
   // Cuando la mesa tiene varios clientes (client_label = "Cliente 1",
@@ -615,7 +615,7 @@ function appendTicket(printer, kind, order, items) {
       const { fraction, cleanName } = parseSizeMarker(rawName);
       const qty = it.quantity || 1;
       const line = fraction
-        ? `${qty}x${fractionLabel(fraction)} ${cleanName}`
+        ? `${qty}x ${fractionLabel(fraction)} ${cleanName}`
         : `${qty}x ${cleanName}`;
       printer.bold(true);
       printer.println(line);
@@ -900,7 +900,7 @@ function appendCuentaTicket(printer, order, items) {
       const subtotal = price * qty;
       total += subtotal;
       const line = fraction
-        ? `${qty}x${fractionLabel(fraction)} ${cleanName}`
+        ? `${qty}x ${fractionLabel(fraction)} ${cleanName}`
         : `${qty}x ${cleanName}`;
       // Nombre a la izquierda, precio a la derecha en la misma línea
       const priceStr = `$${subtotal.toFixed(2)}`;
