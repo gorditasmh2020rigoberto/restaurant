@@ -462,23 +462,22 @@ class PrinterLedsRow extends StatefulWidget {
 class PrinterLedsRowState extends State<PrinterLedsRow> {
   final _supabase = Supabase.instance.client;
   final _audioPlayer = AudioPlayer();
-  StreamSubscription<List<Map<String, dynamic>>>? _sub;
   Timer? _pollTimer;
-  List<Map<String, dynamic>> _rows = const [];
   // null = todavía no sabemos (no avisar en la primera carga); true/false
   // = último estado conocido, para detectar CAMBIOS y avisar solo ahí.
   final Map<String, bool?> _lastKnownOnline = {};
+  // Se crea UNA sola vez (no dentro de build) para no resubscribirse en
+  // cada rebuild, pero sigue siendo consumido por StreamBuilder — el
+  // mismo patrón ya probado en el resto de la app (ver PrintStatusView).
+  late final Stream<List<Map<String, dynamic>>> _heartbeatStream;
 
   @override
   void initState() {
     super.initState();
-    _sub = _supabase
+    _heartbeatStream = _supabase
         .from('print_worker_heartbeats')
         .stream(primaryKey: ['id'])
-        .eq('branch_name', Globals.currentBranch)
-        .listen((rows) {
-      if (mounted) setState(() => _rows = rows);
-    });
+        .eq('branch_name', Globals.currentBranch);
     // El stream solo avisa cuando llega un heartbeat NUEVO — si una Pi se
     // cae, no hay ningún evento nuevo que dispare un rebuild y notemos
     // que ya pasaron los 45s. Revisamos cada 5s con la hora actual para
@@ -490,15 +489,14 @@ class PrinterLedsRowState extends State<PrinterLedsRow> {
 
   @override
   void dispose() {
-    _sub?.cancel();
     _pollTimer?.cancel();
     _audioPlayer.dispose();
     super.dispose();
   }
 
-  DateTime? _lastSeenFor(List<String> areas) {
+  DateTime? _lastSeenFor(List<Map<String, dynamic>> rows, List<String> areas) {
     DateTime? latest;
-    for (final row in _rows) {
+    for (final row in rows) {
       if (!areas.contains(row['print_area'])) continue;
       final seen = DateTime.tryParse(row['last_seen_at'] as String? ?? '');
       if (seen != null && (latest == null || seen.isAfter(latest))) {
@@ -530,59 +528,65 @@ class PrinterLedsRowState extends State<PrinterLedsRow> {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now().toUtc();
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _heartbeatStream,
+      builder: (context, snapshot) {
+        final rows = snapshot.data ?? const [];
+        final now = DateTime.now().toUtc();
 
-    final ledRow = Wrap(
-      spacing: 20,
-      runSpacing: 10,
-      children: _expectedPrintAreas.map((area) {
-        final (matchAreas, label, icon) = area;
-        final lastSeen = _lastSeenFor(matchAreas);
-        final isOnline =
-            lastSeen != null && now.difference(lastSeen) < _heartbeatStaleAfter;
+        final ledRow = Wrap(
+          spacing: 20,
+          runSpacing: 10,
+          children: _expectedPrintAreas.map((area) {
+            final (matchAreas, label, icon) = area;
+            final lastSeen = _lastSeenFor(rows, matchAreas);
+            final isOnline = lastSeen != null &&
+                now.difference(lastSeen) < _heartbeatStaleAfter;
 
-        final previous = _lastKnownOnline[label];
-        if (previous != null && previous != isOnline) {
-          WidgetsBinding.instance
-              .addPostFrameCallback((_) => _announceChange(label, isOnline));
-        }
-        _lastKnownOnline[label] = isOnline;
+            final previous = _lastKnownOnline[label];
+            if (previous != null && previous != isOnline) {
+              WidgetsBinding.instance
+                  .addPostFrameCallback((_) => _announceChange(label, isOnline));
+            }
+            _lastKnownOnline[label] = isOnline;
 
-        final color = isOnline ? Colors.green : Colors.redAccent;
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 6),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(icon, size: 16, color: const Color(0xFF7A6E5A)),
-            const SizedBox(width: 4),
-            Text(label,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3D2E1A))),
-          ],
+            final color = isOnline ? Colors.green : Colors.redAccent;
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: color.withValues(alpha: 0.6), blurRadius: 6),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(icon, size: 16, color: const Color(0xFF7A6E5A)),
+                const SizedBox(width: 4),
+                Text(label,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF3D2E1A))),
+              ],
+            );
+          }).toList(),
         );
-      }).toList(),
-    );
 
-    if (widget.compact) return ledRow;
+        if (widget.compact) return ledRow;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAF1DE),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5DCC4)),
-      ),
-      child: ledRow,
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFAF1DE),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE5DCC4)),
+          ),
+          child: ledRow,
+        );
+      },
     );
   }
 }
