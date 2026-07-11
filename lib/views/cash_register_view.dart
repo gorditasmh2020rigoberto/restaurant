@@ -110,11 +110,26 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     };
   }
 
+  /// El Cierre de Caja también cierra el día: marca las órdenes
+  /// pending/ready como completadas y libera todas las mesas de la
+  /// sucursal (antes esto era un botón "Cerrar Día" aparte). Por eso pide
+  /// PIN Maestro — es una acción que no se puede deshacer.
   Future<void> _showCierreCajaDialog() async {
     final breakdown = await _computeExpectedCash();
     final expected = breakdown['expected']!;
     final countedController = TextEditingController();
     final notesController = TextEditingController();
+    final pinController = TextEditingController();
+
+    int pendingCount = 0;
+    try {
+      final res = await _supabase
+          .from('orders')
+          .select('id')
+          .eq('branch_name', Globals.currentBranch)
+          .inFilter('status', ['pending', 'ready']);
+      pendingCount = (res as List).length;
+    } catch (_) {}
 
     await showDialog(
       context: context,
@@ -213,6 +228,31 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                       prefixIcon: Icon(Icons.note, color: Color(0xFFA08F70)),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Esto también CIERRA EL DÍA: se marcarán $pendingCount orden(es) '
+                      'pendiente(s) como completadas y se liberarán todas las mesas. '
+                      'No se puede deshacer.',
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: pinController,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    style: const TextStyle(color: Colors.black),
+                    decoration: const InputDecoration(
+                      labelText: 'PIN Maestro',
+                      prefixIcon: Icon(Icons.lock, color: Colors.redAccent),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -226,6 +266,24 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     ? null
                     : () async {
                         try {
+                          final pinRes = await _supabase
+                              .from('admin_settings')
+                              .select('setting_value')
+                              .eq('setting_key', 'master_pin')
+                              .maybeSingle();
+                          final correctPin = (pinRes != null && pinRes['setting_value'] != null)
+                              ? pinRes['setting_value'] as String
+                              : '1234';
+                          if (pinController.text != correctPin) {
+                            if (ctx.mounted) {
+                              ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
+                                content: Text('PIN Incorrecto'),
+                                backgroundColor: Colors.red,
+                              ));
+                            }
+                            return;
+                          }
+
                           await _supabase.from('cash_closings').insert({
                             'branch_name': Globals.currentBranch,
                             'expected_cash': expected,
@@ -234,13 +292,27 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                             'registered_by': Globals.currentUser,
                             'notes': notesController.text.trim().isNotEmpty ? notesController.text.trim() : null,
                           });
+
+                          // Cierra el día: completa pendientes + libera mesas.
+                          await _supabase
+                              .from('orders')
+                              .update({'status': 'completed'})
+                              .eq('branch_name', Globals.currentBranch)
+                              .inFilter('status', ['pending', 'ready']);
+                          await _supabase
+                              .from('restaurant_tables')
+                              .update({'status': 'available'})
+                              .eq('branch_name', Globals.currentBranch);
+
                           if (ctx.mounted) Navigator.pop(ctx);
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text(difference == 0
-                                  ? 'Cierre registrado — coincide exactamente'
-                                  : 'Cierre registrado — diferencia de \$${difference!.abs().toStringAsFixed(2)}'),
+                              content: Text((difference == 0
+                                      ? 'Cierre registrado — coincide exactamente'
+                                      : 'Cierre registrado — diferencia de \$${difference!.abs().toStringAsFixed(2)}') +
+                                  ' · Día cerrado ($pendingCount orden(es) + mesas liberadas)'),
                               backgroundColor: difference == 0 ? Colors.green : Colors.orange,
+                              duration: const Duration(seconds: 4),
                             ));
                             _fetchClosings();
                           }
