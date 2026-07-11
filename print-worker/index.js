@@ -341,7 +341,7 @@ function correctDrinkName(rawName, guisados) {
   if (!sizeStr || !/^\d+\s?(ml|litro)$/i.test(sizeStr.trim())) return rawName;
   const n = String(rawName || '').toLowerCase();
   if (n.includes('refresco')) {
-    if (sizeStr.includes('355') || sizeStr.includes('255')) return 'Refresco de vidrio';
+    if (sizeStr.includes('355')) return 'Refresco de vidrio';
     if (sizeStr.includes('600')) return 'Refresco no retornable';
     return 'Refresco';
   }

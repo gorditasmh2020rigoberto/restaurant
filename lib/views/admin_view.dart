@@ -40,7 +40,7 @@ String _correctDrinkName(String rawName, dynamic rawGuisados) {
   if (!RegExp(r'^\d+\s?(ml|litro)$', caseSensitive: false).hasMatch(sizeStr)) return rawName;
   final n = rawName.toLowerCase();
   if (n.contains('refresco')) {
-    if (sizeStr.contains('355') || sizeStr.contains('255')) return 'Refresco de vidrio';
+    if (sizeStr.contains('355')) return 'Refresco de vidrio';
     if (sizeStr.contains('600')) return 'Refresco no retornable';
     return 'Refresco';
   }
