@@ -274,6 +274,10 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
     } else if (type == 'refresco_355') {
       // Incluye también refresco_255 por compatibilidad con datos previos
       types = ['refresco_355', 'refresco_255', 'refresco'];
+    } else if (type == 'refresco_600') {
+      // Un sabor guardado como "Refresco" genérico (sin tamaño específico)
+      // debe verse también en 600 ml, igual que ya pasa con 355/255.
+      types = ['refresco_600', 'refresco'];
     } else if (type.startsWith('agua_')) {
       types = [type, 'agua_fresca'];
     } else if (type == 'jugo_330' || type == 'jugo_1litro') {

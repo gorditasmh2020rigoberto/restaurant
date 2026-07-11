@@ -196,20 +196,48 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
     }
   }
 
+  // Tamaños disponibles por categoría (código corto → etiqueta). `null` en
+  // selectedSize significa "Todos los tamaños" (el sabor genérico, sin
+  // tamaño específico — ver `_concreteType`).
+  static const Map<String, List<(String, String)>> _sizesByCategory = {
+    'refresco': [('255', '255 ml'), ('355', '355 ml'), ('600', '600 ml')],
+    'agua_fresca': [('600', '600 ml'), ('1litro', '1 litro')],
+    'jugo': [('330', '330 ml'), ('1litro', '1 litro')],
+  };
+
+  static String _concreteType(String category, String? size) {
+    if (size == null) return category;
+    if (category == 'agua_fresca') return 'agua_$size';
+    return '${category}_$size';
+  }
+
+  /// Separa un `type` guardado en BD (ej. "refresco_600") en su categoría
+  /// ("refresco") y tamaño ("600"), o tamaño `null` si es genérico.
+  static (String, String?) _splitType(String rawType) {
+    if (rawType == 'agua_fresca') return ('agua_fresca', null);
+    if (rawType.startsWith('agua_')) {
+      return ('agua_fresca', rawType.substring('agua_'.length));
+    }
+    if (rawType == 'jugo') return ('jugo', null);
+    if (rawType.startsWith('jugo_')) {
+      return ('jugo', rawType.substring('jugo_'.length));
+    }
+    if (rawType == 'refresco') return ('refresco', null);
+    if (rawType.startsWith('refresco_')) {
+      return ('refresco', rawType.substring('refresco_'.length));
+    }
+    return ('refresco', null);
+  }
+
   Future<void> _showFlavorDialog({Map<String, dynamic>? flavor, required String type}) async {
     final isEditing = flavor != null;
     final nameController = TextEditingController(text: isEditing ? flavor['name'] as String : '');
 
-    // Map any size-specific type to its parent category
+    // Map any size-specific type to its parent category (+ tamaño si aplica)
     final rawType = isEditing ? (flavor['type'] as String? ?? type) : type;
-    String selectedCategory;
-    if (rawType.startsWith('agua')) {
-      selectedCategory = 'agua_fresca';
-    } else if (rawType.startsWith('jugo')) {
-      selectedCategory = 'jugo';
-    } else {
-      selectedCategory = 'refresco';
-    }
+    final (initialCategory, initialSize) = _splitType(rawType);
+    String selectedCategory = initialCategory;
+    String? selectedSize = initialSize;
 
     const typeOptions = [
       ('refresco',   'Refresco',     Icons.local_drink),
@@ -256,7 +284,10 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               ...typeOptions.map((opt) {
                 final isSelected = selectedCategory == opt.$1;
                 return GestureDetector(
-                  onTap: () => setDlgState(() => selectedCategory = opt.$1),
+                  onTap: () => setDlgState(() {
+                    selectedCategory = opt.$1;
+                    selectedSize = null;
+                  }),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     margin: const EdgeInsets.only(bottom: 6),
@@ -294,6 +325,48 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
                   ),
                 );
               }),
+              const SizedBox(height: 16),
+              const Text('Tamaño',
+                  style: TextStyle(color: Color(0xFFA08F70), fontSize: 12, letterSpacing: 1)),
+              const SizedBox(height: 4),
+              const Text('"Todos" lo muestra en cualquier tamaño de esa categoría.',
+                  style: TextStyle(color: Color(0xFFB6A88A), fontSize: 11)),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ChoiceChip(
+                    label: const Text('Todos'),
+                    selected: selectedSize == null,
+                    onSelected: (_) => setDlgState(() => selectedSize = null),
+                    selectedColor: const Color(0xFFFF6D00).withValues(alpha: 0.2),
+                    labelStyle: TextStyle(
+                      color: selectedSize == null ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
+                      fontWeight: selectedSize == null ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                    backgroundColor: const Color(0xFFFAF1DE),
+                    side: BorderSide(
+                      color: selectedSize == null ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                    ),
+                  ),
+                  for (final sizeOpt in _sizesByCategory[selectedCategory]!)
+                    ChoiceChip(
+                      label: Text(sizeOpt.$2),
+                      selected: selectedSize == sizeOpt.$1,
+                      onSelected: (_) => setDlgState(() => selectedSize = sizeOpt.$1),
+                      selectedColor: const Color(0xFFFF6D00).withValues(alpha: 0.2),
+                      labelStyle: TextStyle(
+                        color: selectedSize == sizeOpt.$1 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
+                        fontWeight: selectedSize == sizeOpt.$1 ? FontWeight.w600 : FontWeight.w400,
+                      ),
+                      backgroundColor: const Color(0xFFFAF1DE),
+                      side: BorderSide(
+                        color: selectedSize == sizeOpt.$1 ? const Color(0xFFFF6D00) : const Color(0xFFE5DCC4),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
           actions: [
@@ -305,28 +378,29 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
               onPressed: nameController.text.trim().isNotEmpty
                   ? () async {
                       final name = nameController.text.trim();
+                      final finalType = _concreteType(selectedCategory, selectedSize);
                       Navigator.pop(ctx);
                       try {
                         if (isEditing) {
                           final oldType = flavor['type'] as String;
                           await _supabase
                               .from('drink_flavors')
-                              .update({'name': name, 'type': selectedCategory})
+                              .update({'name': name, 'type': finalType})
                               .eq('id', flavor['id']);
-                          if (oldType != selectedCategory) {
+                          if (oldType != finalType) {
                             _fetchFlavors();
                           } else {
-                            _updateLocal(selectedCategory, flavor['id'],
-                                {'name': name, 'type': selectedCategory});
+                            _updateLocal(finalType, flavor['id'],
+                                {'name': name, 'type': finalType});
                           }
                         } else {
                           final result = await _supabase.from('drink_flavors').insert({
                             'name': name,
-                            'type': selectedCategory,
+                            'type': finalType,
                             'available': true,
                           }).select().single();
                           setState(() {
-                            final list = _listForType(selectedCategory);
+                            final list = _listForType(finalType);
                             list.add(result);
                             list.sort((a, b) =>
                                 (a['name'] as String).compareTo(b['name'] as String));
