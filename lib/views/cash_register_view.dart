@@ -627,14 +627,21 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 800;
 
-    // Calculo de totales del dia según movimientos de salida/entrada en EFECTIVO
+    // Calculo de totales de HOY según movimientos de salida/entrada en
+    // EFECTIVO. Excluye 'apertura' de "Entradas Extra" — el fondo inicial
+    // no es un ingreso adicional del día, se muestra aparte en el
+    // historial y se usa en el Cierre de Caja.
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
     double entradasEfectivo = 0;
     double salidasEfectivo = 0;
     double prestamosHoy = 0;
 
     for (var m in _movements) {
+      final createdAt = DateTime.tryParse(m['created_at']?.toString() ?? '');
+      if (createdAt == null || createdAt.isBefore(startOfDay)) continue;
       double amount = double.tryParse(m['amount'].toString()) ?? 0.0;
-      if (m['type'] == 'entrada' && m['payment_method'] == 'EFECTIVO') entradasEfectivo += amount;
+      if (m['type'] == 'entrada' && m['payment_method'] == 'EFECTIVO' && m['category'] != 'apertura') entradasEfectivo += amount;
       if (m['type'] == 'salida' && m['payment_method'] == 'EFECTIVO') salidasEfectivo += amount;
       if (m['category'] == 'prestamo') prestamosHoy += amount;
     }
