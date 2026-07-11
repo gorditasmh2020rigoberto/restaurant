@@ -29,6 +29,7 @@ class _ReportsViewState extends State<ReportsView> {
   double _ventasTarjeta = 0.0;
   double _ventasClip = 0.0;
   double _ventasTransferencia = 0.0;
+  List<Map<String, dynamic>> _topProducts = [];
 
   // Vista activa: 'historial' o 'cortes'
   String _activeView = 'historial';
@@ -112,6 +113,38 @@ class _ReportsViewState extends State<ReportsView> {
       _ventasClip = clip;
       _ventasTransferencia = tra;
     });
+    _fetchTopProducts();
+  }
+
+  /// Agrega la cantidad vendida por platillo entre las órdenes actualmente
+  /// filtradas (mismos filtros de fecha/sucursal/mesero/pago que la tabla),
+  /// para la sección "Productos Más Vendidos".
+  Future<void> _fetchTopProducts() async {
+    if (_filteredOrders.isEmpty) {
+      if (mounted) setState(() => _topProducts = []);
+      return;
+    }
+    try {
+      final orderIds = _filteredOrders.map((o) => o['id']).toList();
+      final items = await _supabase
+          .from('order_items')
+          .select('quantity, dishes(name)')
+          .inFilter('order_id', orderIds);
+      final Map<String, int> counts = {};
+      for (final it in (items as List)) {
+        final name = it['dishes']?['name'] as String?;
+        if (name == null) continue;
+        final qty = (it['quantity'] as num?)?.toInt() ?? 0;
+        counts[name] = (counts[name] ?? 0) + qty;
+      }
+      final sorted = counts.entries.toList()
+        ..sort((a, b) => b.value.compareTo(a.value));
+      if (mounted) {
+        setState(() {
+          _topProducts = sorted.take(5).map((e) => {'name': e.key, 'qty': e.value}).toList();
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _fetchWaiters() async {
@@ -755,11 +788,7 @@ class _ReportsViewState extends State<ReportsView> {
                             Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 12)),
                           ]),
                           const SizedBox(height: 16),
-                          _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
-                          const SizedBox(height: 16),
-                          _buildProductRow('Croissant Clásico', 62, 100, Icons.bakery_dining),
-                          const SizedBox(height: 16),
-                          _buildProductRow('Sandwich de Pavo', 48, 100, Icons.lunch_dining),
+                          ..._buildTopProductsRows(),
                         ],
                       ),
                     ),
@@ -825,11 +854,7 @@ class _ReportsViewState extends State<ReportsView> {
                                   Text('PRODUCTOS MÁS VENDIDOS', style: TextStyle(color: Color(0xFFA08F70), fontWeight: FontWeight.bold, fontSize: 12)),
                                 ]),
                                 const SizedBox(height: 16),
-                                _buildProductRow('Café Americano', 85, 100, Icons.local_cafe),
-                                const SizedBox(height: 16),
-                                _buildProductRow('Croissant Clásico', 62, 100, Icons.bakery_dining),
-                                const SizedBox(height: 16),
-                                _buildProductRow('Sandwich de Pavo', 48, 100, Icons.lunch_dining),
+                                ..._buildTopProductsRows(),
                               ],
                             ),
                           ),
@@ -1255,6 +1280,22 @@ class _ReportsViewState extends State<ReportsView> {
         textAlign: textAlign,
       ),
     );
+  }
+
+  List<Widget> _buildTopProductsRows() {
+    if (_topProducts.isEmpty) {
+      return const [
+        Text('Sin ventas registradas en este período', style: TextStyle(color: Color(0xFFA08F70), fontSize: 13)),
+      ];
+    }
+    final top3 = _topProducts.take(3).toList();
+    final maxQty = top3.first['qty'] as int;
+    final rows = <Widget>[];
+    for (var i = 0; i < top3.length; i++) {
+      if (i > 0) rows.add(const SizedBox(height: 16));
+      rows.add(_buildProductRow(top3[i]['name'] as String, top3[i]['qty'] as int, maxQty, Icons.local_dining));
+    }
+    return rows;
   }
 
   Widget _buildProductRow(String name, int qty, int maxQty, IconData icon) {
