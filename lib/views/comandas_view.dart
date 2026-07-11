@@ -341,12 +341,20 @@ class _ComandasViewState extends State<ComandasView> {
     const pinned = [
       'drink',
       'gorditas',
-      'chilaquiles',
+      'quesadillas',
       'huevos',
+      'lo_dulce',
       'molletes',
       'enchiladas',
       'huaraches',
       'arrachera',
+      'enmoladas',
+      'chile_relleno',
+      'menudo',
+      'sopes',
+      'tapas',
+      'extras',
+      'para_llevar',
     ];
     final rest = rawCats.where((c) => !pinned.contains(c)).toList()..sort();
     final ordered = [...pinned.where(rawCats.contains), ...rest];
