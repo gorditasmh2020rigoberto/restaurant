@@ -289,7 +289,7 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
         .select('name')
         .inFilter('type', types)
         .eq('available', true)
-        .order('name');
+        .order('name', ascending: true);
     final list = (rows as List)
         .map((r) => r['name'] as String)
         .toSet()
@@ -768,7 +768,7 @@ Future<List<Dish>> _loadExtras() async {
         .from('dishes')
         .select()
         .eq('category', 'extras')
-        .order('name');
+        .order('name', ascending: true);
     final all = (rows as List)
         .cast<Map<String, dynamic>>()
         .map(Dish.fromJson)
@@ -905,7 +905,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish, {String? replaceKey}
     List<Map<String, dynamic>> drinkSizes = [];
     try {
       final supabase = Supabase.instance.client;
-      final rows = await supabase.from('drink_type_prices').select('type, price').order('price');
+      final rows = await supabase.from('drink_type_prices').select('type, price').order('price', ascending: true);
       drinkSizes = (rows as List).cast<Map<String, dynamic>>()
           .where((r) => (r['type'] as String).startsWith(categoryPrefix))
           .toList();
@@ -1277,7 +1277,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish, {String? replaceKey}
         .from('guisados')
         .select()
         .eq('available', true)
-        .order('name');
+        .order('name', ascending: true);
     guisados = (rows as List)
         .cast<Map<String, dynamic>>()
         .where((g) {
@@ -2408,7 +2408,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
           .from('guisados')
           .select()
           .eq('available', true)
-          .order('name');
+          .order('name', ascending: true);
       guisados = (rows as List).cast<Map<String, dynamic>>()
           .where((g) {
             final branch = g['branch_name'] as String?;

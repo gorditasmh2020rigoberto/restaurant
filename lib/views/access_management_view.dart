@@ -165,7 +165,7 @@ class _AccessManagementViewState extends State<AccessManagementView> {
         const SizedBox(height: 16),
         Expanded(
           child: StreamBuilder<List<Map<String, dynamic>>>(
-            stream: _supabase.from('waiters').stream(primaryKey: ['id']).eq('branch_name', Globals.currentBranch).order('name'),
+            stream: _supabase.from('waiters').stream(primaryKey: ['id']).eq('branch_name', Globals.currentBranch).order('name', ascending: true),
             builder: (context, snapshot) {
               if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
               final allAccess = snapshot.data!.where((w) => w['name'].toString().startsWith('CAJERO:')).toList();

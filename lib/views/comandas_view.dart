@@ -946,7 +946,7 @@ class _ComandasViewState extends State<ComandasView> {
 
   Future<void> _fetchWaiters() async {
     try {
-      final response = await _supabase.from('waiters').select().eq('branch_name', Globals.currentBranch).order('name');
+      final response = await _supabase.from('waiters').select().eq('branch_name', Globals.currentBranch).order('name', ascending: true);
       if (mounted) {
         setState(() {
           _waiters = List<Map<String, dynamic>>.from(response);

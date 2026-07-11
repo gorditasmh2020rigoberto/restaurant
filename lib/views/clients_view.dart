@@ -55,7 +55,7 @@ class _ClientsViewState extends State<ClientsView> {
 
   Future<void> _fetchClients() async {
     try {
-      final res = await _supabase.from('cw_clients').select().order('name');
+      final res = await _supabase.from('cw_clients').select().order('name', ascending: true);
       setState(() {
         _clients = List<Map<String, dynamic>>.from(res);
         _isLoading = false;

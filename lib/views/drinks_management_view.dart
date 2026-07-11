@@ -276,8 +276,7 @@ class _DrinksManagementViewState extends State<DrinksManagementView> {
                 .from('dishes')
                 .stream(primaryKey: ['id'])
                 .inFilter('category', widget.categories)
-                .order('category')
-                .order('name'),
+                .order('name', ascending: true),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());

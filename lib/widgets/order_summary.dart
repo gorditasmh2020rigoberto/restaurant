@@ -1169,7 +1169,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
           .from('guisados')
           .select()
           .eq('available', true)
-          .order('name');
+          .order('name', ascending: true);
       guisados = (rows as List)
           .cast<Map<String, dynamic>>()
           .where((g) {
