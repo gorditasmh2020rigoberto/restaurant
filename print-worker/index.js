@@ -395,7 +395,7 @@ async function fetchOrder(orderId) {
     .from('orders')
     .select(`
       id, branch_name, order_type, customer_name, total_amount,
-      table_id, waiter_id, created_at, payment_method,
+      table_id, waiter_id, created_at, payment_method, daily_folio,
       sent_to_kitchen_at, printed_at,
       cuenta_requested_at, caja_printed_at,
       restaurant_tables ( table_number ),
@@ -629,7 +629,9 @@ function appendTicket(printer, kind, order, items) {
 
   // ── Pie
   printer.alignCenter();
-  printer.println(`ID: ${String(order.id).slice(0, 8)}`);
+  printer.println(order.daily_folio != null
+    ? `Folio #${order.daily_folio}`
+    : `ID: ${String(order.id).slice(0, 8)}`);
   printer.newLine();
   printer.cut();
 }
@@ -930,7 +932,9 @@ function appendCuentaTicket(printer, order, items) {
   // ── Pie
   printer.alignCenter();
   printer.println('Gracias por su preferencia');
-  printer.println(`ID: ${String(order.id).slice(0, 8)}`);
+  printer.println(order.daily_folio != null
+    ? `Folio #${order.daily_folio}`
+    : `ID: ${String(order.id).slice(0, 8)}`);
   printer.newLine();
   printer.newLine();
   printer.cut();
