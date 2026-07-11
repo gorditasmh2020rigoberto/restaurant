@@ -270,13 +270,12 @@ Future<List<String>> _loadDrinkFlavors(String type) async {
     final supabase = Supabase.instance.client;
     List<String> types;
     if (type == 'refresco') {
-      types = ['refresco', 'refresco_255', 'refresco_355', 'refresco_600'];
+      types = ['refresco', 'refresco_355', 'refresco_600'];
     } else if (type == 'refresco_355') {
-      // Incluye también refresco_255 por compatibilidad con datos previos
-      types = ['refresco_355', 'refresco_255', 'refresco'];
+      types = ['refresco_355', 'refresco'];
     } else if (type == 'refresco_600') {
       // Un sabor guardado como "Refresco" genérico (sin tamaño específico)
-      // debe verse también en 600 ml, igual que ya pasa con 355/255.
+      // debe verse también en 600 ml, igual que ya pasa con 355.
       types = ['refresco_600', 'refresco'];
     } else if (type.startsWith('agua_')) {
       types = [type, 'agua_fresca'];
@@ -342,7 +341,7 @@ String _formatDrinkSizeLabel(String type) {
 String _drinkDisplayName(String type) {
   if (type.startsWith('refresco')) {
     final suffix = type.replaceFirst(RegExp(r'^refresco_'), '');
-    if (suffix.contains('355') || suffix.contains('255')) return 'Refresco de vidrio';
+    if (suffix.contains('355')) return 'Refresco de vidrio';
     if (suffix.contains('600')) return 'Refresco no retornable';
     return 'Refresco';
   }

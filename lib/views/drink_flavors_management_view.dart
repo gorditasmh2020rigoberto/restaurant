@@ -72,7 +72,6 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
           _refrescos = list
               .where((f) =>
                   f['type'] == 'refresco' ||
-                  f['type'] == 'refresco_255' ||
                   f['type'] == 'refresco_355' ||
                   f['type'] == 'refresco_600')
               .toList();
@@ -133,7 +132,6 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
 
   String _subtypeLabel(String type) {
     switch (type) {
-      case 'refresco_255': return '255 ml';
       case 'refresco_355': return '355 ml';
       case 'refresco_600': return '600 ml';
       case 'jugo_330':     return '330 ml';
@@ -146,7 +144,6 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
 
   Color _subtypeColor(String type) {
     switch (type) {
-      case 'refresco_255': return const Color(0xFF38BDF8);
       case 'refresco_355': return const Color(0xFF34D399);
       case 'refresco_600': return const Color(0xFFA78BFA);
       case 'jugo_330':     return const Color(0xFF4ADE80);
@@ -200,7 +197,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
   // selectedSize significa "Todos los tamaños" (el sabor genérico, sin
   // tamaño específico — ver `_concreteType`).
   static const Map<String, List<(String, String)>> _sizesByCategory = {
-    'refresco': [('255', '255 ml'), ('355', '355 ml'), ('600', '600 ml')],
+    'refresco': [('355', '355 ml'), ('600', '600 ml')],
     'agua_fresca': [('600', '600 ml'), ('1litro', '1 litro')],
     'jugo': [('330', '330 ml'), ('1litro', '1 litro')],
   };
