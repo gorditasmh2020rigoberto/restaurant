@@ -343,7 +343,9 @@ String _buildTicketPreviewText({
     }
   }
   buffer.writeln(divider);
-  buffer.writeln(center('ID: ${order['id'].toString().substring(0, 8)}'));
+  buffer.writeln(center(order['daily_folio'] != null
+      ? 'Folio #${order['daily_folio']}'
+      : 'ID: ${order['id'].toString().substring(0, 8)}'));
   return buffer.toString();
 }
 
