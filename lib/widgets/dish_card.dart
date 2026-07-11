@@ -350,7 +350,7 @@ String _drinkDisplayName(String type) {
 /// opciones de sabor/guisado, ej. arrachera, sopes, enchiladas): permite
 /// cantidad y un comentario libre antes de agregar a la orden.
 Future<void> _addPreparedDishWithComment(
-    BuildContext context, Dish dish) async {
+    BuildContext context, Dish dish, {String? replaceKey}) async {
   final cart = context.read<CartProvider>();
   final commentController = TextEditingController();
   int dialogQty = 1;
@@ -455,6 +455,7 @@ Future<void> _addPreparedDishWithComment(
                   [if (comment.isNotEmpty) comment],
                   quantity: dialogQty,
                 );
+                if (replaceKey != null) cart.removeItem(replaceKey);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -485,7 +486,7 @@ Future<void> _addPreparedDishWithComment(
 
 /// Bottom sheet para "Lo dulce": separa Molletes / Hot Cakes / Churros en
 /// 3 opciones, cada una con su selector apropiado.
-void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
+void showLoDulcePickerSheet(BuildContext context, List<Dish> items, {String? replaceKey}) {
   Dish? findFirst(bool Function(Dish) test) {
     for (final d in items) {
       if (test(d)) return d;
@@ -500,15 +501,15 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
   final options = <(String, IconData, VoidCallback)>[
     if (molletes != null)
       ('Molletes Dulces', Icons.breakfast_dining, () {
-        _showMolletesDulcesDialog(context, molletes);
+        _showMolletesDulcesDialog(context, molletes, replaceKey: replaceKey);
       }),
     if (hotCakes.isNotEmpty)
       ('Hot Cakes', Icons.cake, () {
-        addMultiFlavorVariantToCart(context, hotCakes, 'Hot Cakes', 'Hot Cakes');
+        addMultiFlavorVariantToCart(context, hotCakes, 'Hot Cakes', 'Hot Cakes', replaceKey: replaceKey);
       }),
     if (churros != null)
       ('Churros', Icons.bakery_dining, () {
-        _addPreparedDishWithComment(context, churros);
+        _addPreparedDishWithComment(context, churros, replaceKey: replaceKey);
       }),
   ];
 
@@ -586,7 +587,7 @@ void showLoDulcePickerSheet(BuildContext context, List<Dish> items) {
 
 /// Diálogo específico para Molletes Dulces con selector de "1 Orden" /
 /// "1/2 Orden" (la 1/2 orden se calcula a la mitad del precio base).
-Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
+Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish, {String? replaceKey}) async {
   final cart = context.read<CartProvider>();
   final commentController = TextEditingController();
   String selectedSize = 'orden'; // 'orden' o 'media'
@@ -725,6 +726,7 @@ Future<void> _showMolletesDulcesDialog(BuildContext context, Dish dish) async {
                   [if (comment.isNotEmpty) comment],
                   quantity: dialogQty,
                 );
+                if (replaceKey != null) cart.removeItem(replaceKey);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -882,7 +884,7 @@ Widget _buildExtrasSection({
   );
 }
 
-Future<void> addDishToCart(BuildContext context, Dish dish) async {
+Future<void> addDishToCart(BuildContext context, Dish dish, {String? replaceKey}) async {
   final cart = context.read<CartProvider>();
   final nameLower = dish.name.toLowerCase();
   final bool isRefresco = nameLower.contains('refresco');
@@ -1143,6 +1145,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                     // nombre vienen de la BD).
                     if (isNaturalSelected && aguaNaturalDish != null) {
                       cart.addItemWithGuisados(aguaNaturalDish!, [], quantity: dialogQty);
+                      if (replaceKey != null) cart.removeItem(replaceKey);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -1177,6 +1180,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       );
                     }
                     cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
+                    if (replaceKey != null) cart.removeItem(replaceKey);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -1222,6 +1226,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
       !isJugo;
   if (isBebidaSimple) {
     cart.addItemWithGuisados(dish, []);
+    if (replaceKey != null) cart.removeItem(replaceKey);
     if (context.mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -1235,7 +1240,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
   }
 
   if (isArrachera) {
-    await _addPreparedDishWithComment(context, dish);
+    await _addPreparedDishWithComment(context, dish, replaceKey: replaceKey);
     return;
   }
 
@@ -1244,10 +1249,11 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
     // Platillos preparados que se agregan directo → permitir comentario.
     // Bebidas (alcohol, etc.) se agregan sin diálogo.
     if (_isPreparedDishes([dish])) {
-      await _addPreparedDishWithComment(context, dish);
+      await _addPreparedDishWithComment(context, dish, replaceKey: replaceKey);
       return;
     }
     cart.addItem(dish);
+    if (replaceKey != null) cart.removeItem(replaceKey);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -2107,6 +2113,7 @@ Future<void> addDishToCart(BuildContext context, Dish dish) async {
                       ? activeDish.copyWith(price: activeDish.price + quesoExtra)
                       : activeDish;
                   cart.addItemWithGuisados(finalDish, extras, quantity: dialogQty);
+                  if (replaceKey != null) cart.removeItem(replaceKey);
                   // Agregar las órdenes extras seleccionadas como items
                   // del carrito; usamos addItem para que si el mismo
                   // extra ya existe (mismo cliente) incremente la
@@ -2290,7 +2297,7 @@ String _extractSize(String name) {
 
 Future<void> addMultiFlavorVariantToCart(BuildContext context,
     List<Dish> dishes, String displayName, String categoryPrefix,
-    {bool multiSelectFlavors = false}) async {
+    {bool multiSelectFlavors = false, String? replaceKey}) async {
   final cart = context.read<CartProvider>();
 
   // Deduplicar variantes equivalentes con / sin prefijo 'Orden Extra - '
@@ -3564,6 +3571,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           cart.addItem(extra);
                         }
                       }
+                      if (replaceKey != null) cart.removeItem(replaceKey);
                       if (context.mounted) {
                         final names = matchedByFlavor.values
                             .map((d) => d.name)
@@ -3738,7 +3746,7 @@ String _baseOrdenName(String name) {
 }
 
 Future<void> addOrdenVariantToCart(
-    BuildContext context, Dish ordenDish, Dish mediaDish) async {
+    BuildContext context, Dish ordenDish, Dish mediaDish, {String? replaceKey}) async {
   final cart = context.read<CartProvider>();
   Dish? selected;
   final allowsComment = _isPreparedDishes([ordenDish]);
@@ -3806,6 +3814,7 @@ Future<void> addOrdenVariantToCart(
                       selected!,
                       [if (allowsComment && comment.isNotEmpty) comment],
                     );
+                    if (replaceKey != null) cart.removeItem(replaceKey);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

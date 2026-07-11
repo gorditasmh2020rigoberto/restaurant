@@ -120,6 +120,11 @@ class OrderSummaryWidget extends StatefulWidget {
   // cuenta o agregarle más artículos sin crear una orden duplicada.
   final String? existingOrderId;
   final VoidCallback onOrderSubmitted;
+  // Permite reabrir el diálogo con el que se agregó un artículo del
+  // carrito (mismo tipo de sabor/guisado/tamaño), para reemplazarlo en
+  // vez de tener que borrarlo y volver a agregarlo desde el menú.
+  // Devuelve `false` si no hay diálogo de edición para ese platillo.
+  final bool Function(BuildContext context, CartItem item, String itemKey)? onEditItem;
 
   const OrderSummaryWidget({
     super.key,
@@ -130,6 +135,7 @@ class OrderSummaryWidget extends StatefulWidget {
     this.existingOrderId,
     required this.waiterId,
     required this.onOrderSubmitted,
+    this.onEditItem,
   });
 
   @override
@@ -1603,6 +1609,22 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            if (widget.onEditItem != null && entry.key != CartProvider.deliveryFeeKey)
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 16, color: Color(0xFFA08F70)),
+                                onPressed: () {
+                                  final handled = widget.onEditItem!(context, entry.value, entry.key);
+                                  if (!handled && context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                      content: Text('Este artículo no se puede editar — bórralo y vuelve a agregarlo'),
+                                      duration: Duration(seconds: 2),
+                                    ));
+                                  }
+                                },
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                visualDensity: VisualDensity.compact,
+                              ),
                             IconButton(
                               icon: const Icon(Icons.remove_circle_outline, size: 18, color: Color(0xFFA08F70)),
                               onPressed: () => cart.decrementQuantity(entry.key),
