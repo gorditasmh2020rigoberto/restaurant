@@ -47,7 +47,7 @@ class _DrinkFlavorsManagementViewState extends State<DrinkFlavorsManagementView>
         final priceRows = await _supabase
             .from('drink_type_prices')
             .select()
-            .order('type');
+            .order('type', ascending: true);
         final jugoP = <String, double>{};
         final refrescoP = <String, double>{};
         final aguaP = <String, double>{};

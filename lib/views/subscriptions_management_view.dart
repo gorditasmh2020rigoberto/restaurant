@@ -35,7 +35,7 @@ class _SubscriptionsManagementViewState
       final rows = await _supabase
           .from('subscriptions')
           .select()
-          .order('branch_name');
+          .order('branch_name', ascending: true);
       // Asegura que cada sucursal conocida tenga una fila para mostrar
       // (aunque el insert real lo hace el SQL inicial).
       final list = (rows as List).cast<Map<String, dynamic>>();

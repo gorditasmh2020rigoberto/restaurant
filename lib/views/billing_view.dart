@@ -135,7 +135,7 @@ class _BillingViewState extends State<BillingView> {
     _clientsSubscription = _supabase
         .from('cw_clients')
         .stream(primaryKey: ['id'])
-        .order('name')
+        .order('name', ascending: true)
         .listen((res) {
           if (mounted) {
             setState(() {

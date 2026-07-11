@@ -60,7 +60,7 @@ class _ClientHomeViewState extends State<ClientHomeView> {
           .from('restaurant_tables')
           .select('id, table_number, status')
           .eq('branch_name', Globals.currentBranch)
-          .order('table_number');
+          .order('table_number', ascending: true);
       tables = (rows as List).cast<Map<String, dynamic>>();
     } catch (e) {
       if (!mounted) return;

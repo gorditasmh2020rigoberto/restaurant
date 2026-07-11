@@ -1245,9 +1245,9 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
     List<Map<String, dynamic>> dishes = [];
     List<Map<String, dynamic>> guisados = [];
     try {
-      final rows = await supabase.from('dishes').select().eq('available', true).order('name');
+      final rows = await supabase.from('dishes').select().eq('available', true).order('name', ascending: true);
       dishes = (rows as List).cast<Map<String, dynamic>>();
-      final gRows = await supabase.from('guisados').select().eq('available', true).order('name');
+      final gRows = await supabase.from('guisados').select().eq('available', true).order('name', ascending: true);
       guisados = (gRows as List).cast<Map<String, dynamic>>()
           .where((g) { final b = g['branch_name'] as String?; return b == null || b == Globals.currentBranch; })
           .toList();

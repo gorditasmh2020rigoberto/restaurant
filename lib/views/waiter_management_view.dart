@@ -347,7 +347,7 @@ class _WaiterManagementViewState extends State<WaiterManagementView> {
           .from('waiters')
           .stream(primaryKey: ['id'])
           .eq('branch_name', Globals.currentBranch)
-          .order('name'),
+          .order('name', ascending: true),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));

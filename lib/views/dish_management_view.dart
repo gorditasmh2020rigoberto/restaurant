@@ -343,7 +343,7 @@ class _DishManagementViewState extends State<DishManagementView> {
         ),
         Expanded(
           child: StreamBuilder<List<Map<String, dynamic>>>(
-            stream: _supabase.from('dishes').stream(primaryKey: ['id']).order('category').order('name'),
+            stream: _supabase.from('dishes').stream(primaryKey: ['id']).order('name', ascending: true),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
