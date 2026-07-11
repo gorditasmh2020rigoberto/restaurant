@@ -28,10 +28,233 @@ class _CashRegisterViewState extends State<CashRegisterView> {
   final List<String> _incomeCategories = ['apertura', 'retardo', 'aporte', 'otro'];
   final List<String> _expenseCategories = ['prestamo', 'gasto', 'propina', 'vacaciones', 'corte', 'otro'];
 
+  List<Map<String, dynamic>> _closings = [];
+
   @override
   void initState() {
     super.initState();
     _fetchMovements();
+    _fetchClosings();
+  }
+
+  Future<void> _fetchClosings() async {
+    try {
+      final response = await _supabase
+          .from('cash_closings')
+          .select()
+          .eq('branch_name', Globals.currentBranch)
+          .order('closed_at', ascending: false)
+          .limit(10);
+      if (mounted) {
+        setState(() => _closings = List<Map<String, dynamic>>.from(response));
+      }
+    } catch (_) {
+      // Tabla nueva — si aún no existe la migración, simplemente no mostramos historial.
+    }
+  }
+
+  /// Calcula cuánto efectivo debería haber en caja HOY: fondo inicial
+  /// (apertura) + ventas cobradas en efectivo (incluye la parte en
+  /// efectivo de pagos mixtos) + entradas extra − salidas/gastos, todo
+  /// filtrado a partir de la medianoche de hoy.
+  Future<Map<String, double>> _computeExpectedCash() async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+
+    double fondoInicial = 0, entradas = 0, salidas = 0;
+    for (final m in _movements) {
+      final createdAt = DateTime.tryParse(m['created_at']?.toString() ?? '');
+      if (createdAt == null || createdAt.isBefore(startOfDay)) continue;
+      final amt = double.tryParse(m['amount']?.toString() ?? '0') ?? 0.0;
+      if (m['payment_method'] != 'EFECTIVO') continue;
+      if (m['category'] == 'apertura') {
+        fondoInicial += amt;
+      } else if (m['type'] == 'entrada') {
+        entradas += amt;
+      } else if (m['type'] == 'salida') {
+        salidas += amt;
+      }
+    }
+
+    double efectivoVentas = 0;
+    try {
+      final orders = await _supabase
+          .from('orders')
+          .select('total_amount, payment_method, amount_cash')
+          .eq('branch_name', Globals.currentBranch)
+          .eq('status', 'completed')
+          .gte('created_at', startOfDay.toIso8601String());
+      for (final o in (orders as List)) {
+        final pm = (o['payment_method']?.toString() ?? '').toLowerCase();
+        final total = double.tryParse(o['total_amount']?.toString() ?? '0') ?? 0.0;
+        if (pm.contains('mixed') || o['amount_cash'] != null) {
+          efectivoVentas += double.tryParse(o['amount_cash']?.toString() ?? '0') ?? 0.0;
+        } else if (pm.contains('cash') || pm.contains('efectivo')) {
+          efectivoVentas += total;
+        }
+      }
+    } catch (_) {}
+
+    final expected = fondoInicial + efectivoVentas + entradas - salidas;
+    return {
+      'fondoInicial': fondoInicial,
+      'efectivoVentas': efectivoVentas,
+      'entradas': entradas,
+      'salidas': salidas,
+      'expected': expected,
+    };
+  }
+
+  Future<void> _showCierreCajaDialog() async {
+    final breakdown = await _computeExpectedCash();
+    final expected = breakdown['expected']!;
+    final countedController = TextEditingController();
+    final notesController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDlgState) {
+          final counted = double.tryParse(countedController.text.trim());
+          final difference = counted != null ? counted - expected : null;
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFFFAF1DE),
+            title: const Row(
+              children: [
+                Icon(Icons.point_of_sale, color: Color(0xFFFF6D00)),
+                SizedBox(width: 8),
+                Text('Cierre de Caja',
+                    style: TextStyle(color: Color(0xFF3D2E1A), fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE5DCC4).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('SEGÚN EL SISTEMA',
+                            style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                        const SizedBox(height: 6),
+                        Text('Fondo inicial: \$${breakdown['fondoInicial']!.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Color(0xFF3D2E1A))),
+                        Text('Ventas en efectivo: \$${breakdown['efectivoVentas']!.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Color(0xFF3D2E1A))),
+                        if (breakdown['entradas']! > 0)
+                          Text('Entradas extra: \$${breakdown['entradas']!.toStringAsFixed(2)}',
+                              style: const TextStyle(color: Color(0xFF3D2E1A))),
+                        if (breakdown['salidas']! > 0)
+                          Text('Salidas/gastos: -\$${breakdown['salidas']!.toStringAsFixed(2)}',
+                              style: const TextStyle(color: Color(0xFF3D2E1A))),
+                        const Divider(color: Color(0xFFA08F70)),
+                        Text('Efectivo esperado: \$${expected.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 16)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: countedController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    autofocus: true,
+                    onChanged: (_) => setDlgState(() {}),
+                    style: const TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+                    decoration: const InputDecoration(
+                      labelText: 'Efectivo real contado',
+                      prefixText: '\$ ',
+                      prefixIcon: Icon(Icons.calculate, color: Color(0xFFFF6D00)),
+                    ),
+                  ),
+                  if (difference != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: (difference == 0 ? Colors.green : (difference < 0 ? Colors.red : Colors.blue)).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        difference == 0
+                            ? '✓ Coincide exactamente'
+                            : difference < 0
+                                ? 'Falta \$${(-difference).toStringAsFixed(2)}'
+                                : 'Sobra \$${difference.toStringAsFixed(2)}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: difference == 0 ? Colors.green : (difference < 0 ? Colors.red : Colors.blue),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: notesController,
+                    style: const TextStyle(color: Colors.black),
+                    decoration: const InputDecoration(
+                      labelText: 'Notas (opcional)',
+                      prefixIcon: Icon(Icons.note, color: Color(0xFFA08F70)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
+              ),
+              ElevatedButton.icon(
+                onPressed: counted == null
+                    ? null
+                    : () async {
+                        try {
+                          await _supabase.from('cash_closings').insert({
+                            'branch_name': Globals.currentBranch,
+                            'expected_cash': expected,
+                            'counted_cash': counted,
+                            'difference': difference,
+                            'registered_by': Globals.currentUser,
+                            'notes': notesController.text.trim().isNotEmpty ? notesController.text.trim() : null,
+                          });
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(difference == 0
+                                  ? 'Cierre registrado — coincide exactamente'
+                                  : 'Cierre registrado — diferencia de \$${difference!.abs().toStringAsFixed(2)}'),
+                              backgroundColor: difference == 0 ? Colors.green : Colors.orange,
+                            ));
+                            _fetchClosings();
+                          }
+                        } catch (e) {
+                          if (ctx.mounted) {
+                            ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(content: Text('Error: $e')));
+                          }
+                        }
+                      },
+                icon: const Icon(Icons.check),
+                label: const Text('Registrar Cierre'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF6D00),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _fetchMovements() async {
@@ -433,6 +656,18 @@ class _CashRegisterViewState extends State<CashRegisterView> {
             ),
           ),
           Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: _showCierreCajaDialog,
+              icon: const Icon(Icons.point_of_sale, color: Colors.white),
+              label: const Text('Cierre de Caja', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: ElevatedButton.icon(
               onPressed: _showNewMovementDialog,
@@ -488,10 +723,44 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                     _buildSummaryCard('Préstamos \nEntregados Hoy', '\$${prestamosHoy.toStringAsFixed(2)}', Colors.orangeAccent, isMobile),
                   ],
                 ),
+                if (_closings.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  const Text('Últimos Cierres de Caja', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: _closings.map((c) {
+                      final diff = double.tryParse(c['difference']?.toString() ?? '0') ?? 0.0;
+                      final color = diff == 0 ? Colors.green : (diff < 0 ? Colors.red : Colors.blue);
+                      final dateStr = c['closed_at'] != null
+                          ? DateTime.parse(c['closed_at']).toLocal().toString().substring(0, 16)
+                          : '';
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: color.withValues(alpha: 0.4)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(dateStr, style: const TextStyle(color: Color(0xFFA08F70), fontSize: 11)),
+                            Text(
+                              diff == 0 ? 'Coincide' : (diff < 0 ? 'Falta \$${(-diff).toStringAsFixed(2)}' : 'Sobra \$${diff.toStringAsFixed(2)}'),
+                              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
                 const SizedBox(height: 24),
                 const Text('Historial de Movimientos de Caja', style: TextStyle(color: Color(0xFF3D2E1A), fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
-                
+
                 // Lista de movimientos
                 Expanded(
                   child: _movements.isEmpty 
