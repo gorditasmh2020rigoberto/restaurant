@@ -90,7 +90,7 @@ class _ComandasViewState extends State<ComandasView> {
 
   /// Abre el diálogo directo si la categoría produce exactamente 1 tarjeta.
   /// Devuelve true si se abrió el diálogo (no hace falta filtrar).
-  bool _triggerSingleCardAction(BuildContext context, String label) {
+  bool _triggerSingleCardAction(BuildContext context, String label, {String? replaceKey}) {
     final items = _dishes
         .where((d) => _effectiveCat(d) == label)
         .toList();
@@ -112,25 +112,25 @@ class _ComandasViewState extends State<ComandasView> {
                 (n.startsWith('agua') && !n.contains('natural'));
           }, orElse: () => items.first);
         }
-        addDishToCart(context, rep);
+        addDishToCart(context, rep, replaceKey: replaceKey);
         return true;
       }
       // Cafés, Alcohol y demás: diálogo consolidado para elegir el tipo.
       final displayName = _translateCategory(label);
-      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName, replaceKey: replaceKey);
       return true;
     }
 
     // Menudo: abrir diálogo consolidado con todas las opciones.
     if (label == 'menudo') {
       final displayName = _translateCategory(label);
-      addMultiFlavorVariantToCart(context, items, displayName, displayName);
+      addMultiFlavorVariantToCart(context, items, displayName, displayName, replaceKey: replaceKey);
       return true;
     }
     // Lo dulce: bottom sheet con Molletes / Hot Cakes / Churros (cada uno
     // con su selector apropiado).
     if (label == 'lo_dulce' || label == 'dessert') {
-      showLoDulcePickerSheet(context, items);
+      showLoDulcePickerSheet(context, items, replaceKey: replaceKey);
       return true;
     }
 
@@ -147,7 +147,7 @@ class _ComandasViewState extends State<ComandasView> {
         }
       }
       canonica ??= items.first;
-      addDishToCart(context, canonica.copyWith(name: 'Gordita'));
+      addDishToCart(context, canonica.copyWith(name: 'Gordita'), replaceKey: replaceKey);
       return true;
     }
 
@@ -165,7 +165,7 @@ class _ComandasViewState extends State<ComandasView> {
         }
       }
       if (aguaFresca != null) {
-        addDishToCart(context, aguaFresca);
+        addDishToCart(context, aguaFresca, replaceKey: replaceKey);
         return true;
       }
     }
@@ -181,7 +181,7 @@ class _ComandasViewState extends State<ComandasView> {
     if (items.length > 1 && !skipMultiFlavor.contains(cat)) {
       final displayName = _translateCategory(cat);
       addMultiFlavorVariantToCart(context, items, displayName, displayName,
-          multiSelectFlavors: multiSelectCategories.contains(cat));
+          multiSelectFlavors: multiSelectCategories.contains(cat), replaceKey: replaceKey);
       return true;
     }
 
@@ -203,14 +203,23 @@ class _ComandasViewState extends State<ComandasView> {
       final orden = entry.value['orden'];
       final media = entry.value['media'];
       if (orden != null && media != null) {
-        addOrdenVariantToCart(context, orden, media);
+        addOrdenVariantToCart(context, orden, media, replaceKey: replaceKey);
       } else {
-        addDishToCart(context, orden ?? media!);
+        addDishToCart(context, orden ?? media!, replaceKey: replaceKey);
       }
       return true;
     }
 
     return false; // Múltiples tarjetas → filtrar normalmente
+  }
+
+  /// Reabre el diálogo con el que se agregó `item` (mismo selector de
+  /// sabor/guisado/tamaño/propiedades), para que la mesera pueda cambiarlo
+  /// sin borrar la línea y volver a agregarla desde el menú. Al confirmar,
+  /// el diálogo reemplaza `itemKey` en vez de sumar una línea nueva.
+  bool _editCartItem(BuildContext context, CartItem item, String itemKey) {
+    final label = _effectiveCat(item.dish);
+    return _triggerSingleCardAction(context, label, replaceKey: itemKey);
   }
 
   Future<void> _onCategoryTap(String label) async {
@@ -1612,6 +1621,7 @@ class _ComandasViewState extends State<ComandasView> {
                     customerName: _customerName,
                     existingOrderId: _selectedExistingOrderId,
                     waiterId: _selectedWaiterId,
+                    onEditItem: _editCartItem,
                     onOrderSubmitted: () {
                       if (_selectedOrderType != 'dine_in') {
                         // After submission, maybe clear or ask for next order
