@@ -242,7 +242,7 @@ class _AdminViewState extends State<AdminView> {
       dense: true,
       contentPadding: const EdgeInsets.only(left: 32),
       leading: Icon(icon, size: 20, color: selected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-      title: Text(label, style: TextStyle(fontSize: 13, color: selected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+      title: Text(label, style: TextStyle(fontSize: 13, color: selected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
       selected: selected,
       selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
       onTap: () {
@@ -296,7 +296,7 @@ class _AdminViewState extends State<AdminView> {
                   const SizedBox(height: 16),
                   ListTile(
                     leading: Icon(Icons.dashboard, color: _selectedIndex == 0 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Mesas Activas', style: TextStyle(color: _selectedIndex == 0 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Mesas Activas', style: TextStyle(color: _selectedIndex == 0 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 0 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 0,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -306,7 +306,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.restaurant_menu, color: _selectedIndex == 1 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Gestión de Menú', style: TextStyle(color: _selectedIndex == 1 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Gestión de Menú', style: TextStyle(color: _selectedIndex == 1 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 1 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 1,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -316,7 +316,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.soup_kitchen, color: _selectedIndex == 10 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Guisados', style: TextStyle(color: _selectedIndex == 10 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 10 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Guisados', style: TextStyle(color: _selectedIndex == 10 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 10 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 10,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -326,7 +326,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.local_drink, color: _selectedIndex == 11 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Sabores de Bebidas', style: TextStyle(color: _selectedIndex == 11 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 11 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Sabores de Bebidas', style: TextStyle(color: _selectedIndex == 11 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 11 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 11,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -346,7 +346,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.print, color: _selectedIndex == 13 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Estado de Impresión', style: TextStyle(color: _selectedIndex == 13 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 13 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Estado de Impresión', style: TextStyle(color: _selectedIndex == 13 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 13 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 13,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -356,7 +356,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.people, color: _selectedIndex == 2 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Gestión de Meseros', style: TextStyle(color: _selectedIndex == 2 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Gestión de Meseros', style: TextStyle(color: _selectedIndex == 2 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 2 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 2,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -366,7 +366,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.grid_view, color: _selectedIndex == 3 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Gestión de Mesas', style: TextStyle(color: _selectedIndex == 3 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 3 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Gestión de Mesas', style: TextStyle(color: _selectedIndex == 3 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 3 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 3,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -376,7 +376,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.insert_chart, color: _selectedIndex == 5 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Reportes de Ventas', style: TextStyle(color: _selectedIndex == 5 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 5 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Reportes de Ventas', style: TextStyle(color: _selectedIndex == 5 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 5 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 5,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -386,7 +386,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.manage_accounts, color: _selectedIndex == 6 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Gestión de Acceso', style: TextStyle(color: _selectedIndex == 6 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 6 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Gestión de Acceso', style: TextStyle(color: _selectedIndex == 6 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 6 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 6,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -396,7 +396,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.receipt_long, color: _selectedIndex == 7 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Facturación CFDI', style: TextStyle(color: _selectedIndex == 7 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 7 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Facturación CFDI', style: TextStyle(color: _selectedIndex == 7 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 7 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 7,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -406,7 +406,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.people_alt, color: _selectedIndex == 8 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Gestión de Clientes', style: TextStyle(color: _selectedIndex == 8 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 8 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Gestión de Clientes', style: TextStyle(color: _selectedIndex == 8 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 8 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 8,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -416,7 +416,7 @@ class _AdminViewState extends State<AdminView> {
                   ),
                   ListTile(
                     leading: Icon(Icons.account_balance_wallet, color: _selectedIndex == 9 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
-                    title: Text('Nómina', style: TextStyle(color: _selectedIndex == 9 ? Color(0xFFFAF1DE) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 9 ? FontWeight.bold : FontWeight.normal)),
+                    title: Text('Nómina', style: TextStyle(color: _selectedIndex == 9 ? const Color(0xFFFF6D00) : const Color(0xFFA08F70), fontWeight: _selectedIndex == 9 ? FontWeight.bold : FontWeight.normal)),
                     selected: _selectedIndex == 9,
                     selectedTileColor: const Color(0xFFFF6D00).withValues(alpha: 0.1),
                     onTap: () {
@@ -465,7 +465,7 @@ class _AdminViewState extends State<AdminView> {
                                     child: Text(
                                       branch,
                                       style: TextStyle(
-                                        color: selected ? Color(0xFFFAF1DE) : const Color(0xFFA08F70),
+                                        color: selected ? const Color(0xFFFF6D00) : const Color(0xFFA08F70),
                                         fontSize: 12,
                                         fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                                       ),
@@ -1321,7 +1321,7 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                                           size: 13, color: checked ? const Color(0xFFFF6D00) : const Color(0xFFA08F70)),
                                       const SizedBox(width: 4),
                                       Expanded(child: Text(name,
-                                          style: TextStyle(color: checked ? Color(0xFFFAF1DE) : Color(0xFF7A6E5A), fontSize: 10),
+                                          style: TextStyle(color: checked ? const Color(0xFFFF6D00) : Color(0xFF7A6E5A), fontSize: 10),
                                           maxLines: 2, overflow: TextOverflow.ellipsis)),
                                     ]),
                                   ),
