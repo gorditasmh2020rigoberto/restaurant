@@ -77,20 +77,24 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     }
 
     double efectivoVentas = 0;
+    double tarjetaVentas = 0;
     try {
       final orders = await _supabase
           .from('orders')
-          .select('total_amount, payment_method, amount_cash')
+          .select('total_amount, payment_method, amount_cash, amount_card')
           .eq('branch_name', Globals.currentBranch)
           .eq('status', 'completed')
           .gte('created_at', startOfDay.toIso8601String());
       for (final o in (orders as List)) {
         final pm = (o['payment_method']?.toString() ?? '').toLowerCase();
         final total = double.tryParse(o['total_amount']?.toString() ?? '0') ?? 0.0;
-        if (pm.contains('mixed') || o['amount_cash'] != null) {
+        if (pm.contains('mixed') || o['amount_cash'] != null || o['amount_card'] != null) {
           efectivoVentas += double.tryParse(o['amount_cash']?.toString() ?? '0') ?? 0.0;
+          tarjetaVentas += double.tryParse(o['amount_card']?.toString() ?? '0') ?? 0.0;
         } else if (pm.contains('cash') || pm.contains('efectivo')) {
           efectivoVentas += total;
+        } else {
+          tarjetaVentas += total;
         }
       }
     } catch (_) {}
@@ -99,6 +103,7 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     return {
       'fondoInicial': fondoInicial,
       'efectivoVentas': efectivoVentas,
+      'tarjetaVentas': tarjetaVentas,
       'entradas': entradas,
       'salidas': salidas,
       'expected': expected,
@@ -148,6 +153,8 @@ class _CashRegisterViewState extends State<CashRegisterView> {
                         Text('Fondo inicial: \$${breakdown['fondoInicial']!.toStringAsFixed(2)}',
                             style: const TextStyle(color: Color(0xFF3D2E1A))),
                         Text('Ventas en efectivo: \$${breakdown['efectivoVentas']!.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Color(0xFF3D2E1A))),
+                        Text('Ventas en tarjeta: \$${breakdown['tarjetaVentas']!.toStringAsFixed(2)}',
                             style: const TextStyle(color: Color(0xFF3D2E1A))),
                         if (breakdown['entradas']! > 0)
                           Text('Entradas extra: \$${breakdown['entradas']!.toStringAsFixed(2)}',
