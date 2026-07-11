@@ -714,7 +714,7 @@ class _OrderTicketState extends State<_OrderTicket> {
                         Row(
                           children: [
                             Text(
-                              'Folio #${widget.order['daily_folio'] ?? '---'}',
+                              'Folio #${widget.order['daily_folio'] != null ? (widget.order['daily_folio'] as num).toString().padLeft(3, '0') : '---'}',
                               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFFF6D00)),
                             ),
                             const Text(' • ', style: TextStyle(color: Color(0xFFA08F70))),

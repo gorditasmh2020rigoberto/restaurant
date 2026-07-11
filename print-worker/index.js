@@ -630,7 +630,7 @@ function appendTicket(printer, kind, order, items) {
   // ── Pie
   printer.alignCenter();
   printer.println(order.daily_folio != null
-    ? `Folio #${order.daily_folio}`
+    ? `Folio #${String(order.daily_folio).padStart(3, '0')}`
     : `ID: ${String(order.id).slice(0, 8)}`);
   printer.newLine();
   printer.cut();
@@ -933,7 +933,7 @@ function appendCuentaTicket(printer, order, items) {
   printer.alignCenter();
   printer.println('Gracias por su preferencia');
   printer.println(order.daily_folio != null
-    ? `Folio #${order.daily_folio}`
+    ? `Folio #${String(order.daily_folio).padStart(3, '0')}`
     : `ID: ${String(order.id).slice(0, 8)}`);
   printer.newLine();
   printer.newLine();
