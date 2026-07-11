@@ -1181,7 +1181,7 @@ class _ComandasViewState extends State<ComandasView> {
                                                   ),
                                                   if (o['daily_folio'] != null)
                                                     Text(
-                                                      'Folio #${o['daily_folio']}',
+                                                      'Folio #${(o['daily_folio'] as num).toString().padLeft(3, '0')}',
                                                       style: const TextStyle(fontSize: 10, color: Color(0xFFA08F70)),
                                                     ),
                                                 ],
@@ -2150,7 +2150,7 @@ class _PendingClientOrdersBell extends StatelessWidget {
                                   const Text(' • ',
                                       style: TextStyle(
                                           color: Color(0xFFA08F70))),
-                                  Text('Folio #${o['daily_folio']}',
+                                  Text('Folio #${(o['daily_folio'] as num).toString().padLeft(3, '0')}',
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: Color(0xFFA08F70),

@@ -220,7 +220,7 @@ class _OrderPrintCard extends StatelessWidget {
           '${name != null && name.isNotEmpty ? ' — $name' : ''}';
     }
     if (order['daily_folio'] != null) {
-      title += ' · Folio #${order['daily_folio']}';
+      title += ' · Folio #${(order['daily_folio'] as num).toString().padLeft(3, '0')}';
     }
 
     return Container(
@@ -344,7 +344,7 @@ String _buildTicketPreviewText({
   }
   buffer.writeln(divider);
   buffer.writeln(center(order['daily_folio'] != null
-      ? 'Folio #${order['daily_folio']}'
+      ? 'Folio #${(order['daily_folio'] as num).toString().padLeft(3, '0')}'
       : 'ID: ${order['id'].toString().substring(0, 8)}'));
   return buffer.toString();
 }
