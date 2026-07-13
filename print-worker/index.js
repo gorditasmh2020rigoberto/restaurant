@@ -1126,6 +1126,14 @@ async function catchUpCorteRequests() {
   }
 }
 
+// Si el canal se cae (CHANNEL_ERROR/TIMED_OUT/CLOSED — ej. tras un corte
+// de conexión con Supabase) el cliente NO se reconecta solo; sin esto,
+// el worker se queda dependiendo únicamente del catch-up cada 60s (los
+// tickets tardan hasta 1 minuto en salir en vez de ser instantáneos).
+function isDeadChannelStatus(status) {
+  return status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED';
+}
+
 function subscribeRealtimeCorteRequests() {
   const channel = supabase
     .channel('corte-requests-worker')
@@ -1145,6 +1153,11 @@ function subscribeRealtimeCorteRequests() {
     )
     .subscribe((status) => {
       console.log(`Realtime corte: ${status}`);
+      if (isDeadChannelStatus(status)) {
+        console.warn('Realtime corte desconectado, reintentando en 3s...');
+        supabase.removeChannel(channel);
+        setTimeout(subscribeRealtimeCorteRequests, 3000);
+      }
     });
   return channel;
 }
@@ -1234,6 +1247,11 @@ function subscribeRealtimeReceipts() {
     )
     .subscribe((status) => {
       console.log(`Realtime: ${status}`);
+      if (isDeadChannelStatus(status)) {
+        console.warn('Realtime recibo desconectado, reintentando en 3s...');
+        supabase.removeChannel(channel);
+        setTimeout(subscribeRealtimeReceipts, 3000);
+      }
     });
   return channel;
 }
@@ -1276,6 +1294,11 @@ function subscribeRealtime() {
     )
     .subscribe((status) => {
       console.log(`Realtime: ${status}`);
+      if (isDeadChannelStatus(status)) {
+        console.warn('Realtime órdenes desconectado, reintentando en 3s...');
+        supabase.removeChannel(channel);
+        setTimeout(subscribeRealtime, 3000);
+      }
     });
   return channel;
 }
