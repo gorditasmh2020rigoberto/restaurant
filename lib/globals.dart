@@ -25,10 +25,17 @@ class Globals {
     final prefs = await SharedPreferences.getInstance();
     currentBranch = prefs.getString('restaurant_branch') ?? 'Sucursal Maravillas';
 
-    // Try to load branches list and split mode from Supabase admin_settings
+    // Try to load branches list and split mode from Supabase admin_settings.
+    // Con límite de tiempo: si la conexión se cuelga (sin fallar ni
+    // completarse), la app se quedaría en pantalla en blanco para siempre
+    // ya que esto se espera ANTES de runApp(). Con el timeout, sigue con
+    // los valores default/cacheados en vez de trabarse.
     try {
       final supabase = Supabase.instance.client;
-      final settings = await supabase.from('admin_settings').select('setting_key, setting_value');
+      final settings = await supabase
+          .from('admin_settings')
+          .select('setting_key, setting_value')
+          .timeout(const Duration(seconds: 8));
 
       for (var setting in settings) {
         if (setting['setting_key'] == 'branches_list') {

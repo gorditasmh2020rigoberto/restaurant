@@ -33,10 +33,18 @@ void main() async {
     );
   }
 
-  await Supabase.initialize(
-    url: 'https://jcaqolmacqhhgtjdgvaz.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjYXFvbG1hY3FoaGd0amRndmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDExMDIsImV4cCI6MjA4OTI3NzEwMn0.9TS8QZ5ZWG1MOct4nif0yiTW_bq_qbgAGbTjTle1_fk',
-  );
+  // Límite de tiempo en el arranque: si la conexión a Supabase se cuelga
+  // aquí (sin fallar ni completarse), la pantalla se quedaría en blanco
+  // para siempre porque runApp() nunca se llama. Con el timeout, la app
+  // arranca igual (con lo que haya en caché/default) en vez de trabarse.
+  try {
+    await Supabase.initialize(
+      url: 'https://jcaqolmacqhhgtjdgvaz.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjYXFvbG1hY3FoaGd0amRndmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDExMDIsImV4cCI6MjA4OTI3NzEwMn0.9TS8QZ5ZWG1MOct4nif0yiTW_bq_qbgAGbTjTle1_fk',
+    ).timeout(const Duration(seconds: 10));
+  } catch (e) {
+    debugPrint('Supabase.initialize tardó demasiado o falló: $e');
+  }
 
   await Globals.loadBranch();
 
