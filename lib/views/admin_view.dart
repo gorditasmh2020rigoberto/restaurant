@@ -2893,23 +2893,6 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                final totalConPropina = await _askPropina(context, totalToPay);
-                                if (totalConPropina == null || !context.mounted) return;
-                                _payWithClip(context, orderIds, totalConPropina, widget.tableId, panelTitle);
-                              },
-                              icon: const Icon(Icons.point_of_sale, size: 26),
-                              label: const Text('Pagar con Clip', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(60),
-                                backgroundColor: const Color(0xFFFF6D00),
-                                foregroundColor: Color(0xFFFAF1DE),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                elevation: 4,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
                             OutlinedButton.icon(
                               onPressed: () => _cancelOrdersWithPin(context, orderIds, widget.tableId),
                               icon: const Icon(Icons.delete_forever),
