@@ -1547,42 +1547,70 @@ class _TableDetailPanelState extends State<_TableDetailPanel> {
               onPressed: () => Navigator.pop(ctx),
               child: const Text('Cancelar', style: TextStyle(color: Color(0xFFA08F70))),
             ),
-            ElevatedButton(
-              onPressed: (double.tryParse(cashController.text) ?? 0) < total
-                ? null
-                : () async {
-                  final supabase = Supabase.instance.client;
-                  try {
-                    await supabase.from('orders').update({
-                      'status': 'completed',
-                      'payment_method': 'cash',
-                      'amount_cash': total
-                    }).inFilter('id', orderIds);
-
-                    if (tableId != null) {
-                      await supabase.from('restaurant_tables').update({'status': 'available'}).eq('id', tableId as Object);
-                    }
-                    
-                    if (ctx.mounted) {
-                      Navigator.pop(ctx); // Cerrar diálogo ahora
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pago finalizado con éxito'), backgroundColor: Colors.green));
-                      if (context.mounted) {
-                        await _showTicketQrDialog(context, orderIds);
-                      }
-                      widget.onDeselect?.call();
-                    }
-                  } catch (e) {
-                    if (ctx.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-                  }
+            // Si lo que ingresó el cajero no alcanza para cubrir el total,
+            // en vez de solo bloquear el botón, se ofrece cobrar el resto
+            // con tarjeta (mismo flujo/registro que Pago Mixto) sin tener
+            // que cancelar y volver a empezar desde ese botón aparte.
+            if ((double.tryParse(cashController.text) ?? 0) > 0 &&
+                (double.tryParse(cashController.text) ?? 0) < total)
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final cashEntered = double.tryParse(cashController.text) ?? 0;
+                  final remaining = total - cashEntered;
+                  final confirmed = await _confirmCardPortion(context, remaining);
+                  if (confirmed != true || !ctx.mounted) return;
+                  Navigator.pop(ctx);
+                  await _executeFinalizeMixedPayment(context, orderIds, total, tableId, cashEntered, remaining);
                 },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Color(0xFFFAF1DE),
-                minimumSize: const Size(150, 50),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                icon: const Icon(Icons.credit_card, size: 20),
+                label: Text(
+                  'Cobrar \$${(total - (double.tryParse(cashController.text) ?? 0)).toStringAsFixed(2)} con Tarjeta',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(150, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              )
+            else
+              ElevatedButton(
+                onPressed: (double.tryParse(cashController.text) ?? 0) < total
+                  ? null
+                  : () async {
+                    final supabase = Supabase.instance.client;
+                    try {
+                      await supabase.from('orders').update({
+                        'status': 'completed',
+                        'payment_method': 'cash',
+                        'amount_cash': total
+                      }).inFilter('id', orderIds);
+
+                      if (tableId != null) {
+                        await supabase.from('restaurant_tables').update({'status': 'available'}).eq('id', tableId as Object);
+                      }
+
+                      if (ctx.mounted) {
+                        Navigator.pop(ctx); // Cerrar diálogo ahora
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pago finalizado con éxito'), backgroundColor: Colors.green));
+                        if (context.mounted) {
+                          await _showTicketQrDialog(context, orderIds);
+                        }
+                        widget.onDeselect?.call();
+                      }
+                    } catch (e) {
+                      if (ctx.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Color(0xFFFAF1DE),
+                  minimumSize: const Size(150, 50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('FINALIZAR COBRO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
-              child: const Text('FINALIZAR COBRO', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
           ],
         ),
       ),
