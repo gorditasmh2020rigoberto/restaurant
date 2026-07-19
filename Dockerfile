@@ -26,13 +26,14 @@ COPY . .
 
 # Obtener dependencias y compilar para web
 RUN flutter pub get
-RUN flutter build web --release --no-tree-shake-icons
+RUN flutter build web --release --no-tree-shake-icons --pwa-strategy=none
 
 # ETAPA 2: Servir con Nginx (Servidor Web)
 FROM nginx:alpine
 
 # Copiar el resultado de la etapa anterior al directorio de Nginx
 COPY --from=build-env /app/build/web /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto 80 (el puerto web estándar)
 EXPOSE 80
