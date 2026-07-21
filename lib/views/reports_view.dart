@@ -1022,6 +1022,7 @@ class _ReportsViewState extends State<ReportsView> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(children: const [
         Expanded(flex: 2, child: Text('ID ORDEN', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
+        Expanded(flex: 2, child: Text('TICKET', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
         Expanded(flex: 2, child: Text('HORA', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
         Expanded(flex: 3, child: Text('MESA / CLIENTE', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
         Expanded(flex: 2, child: Text('PAGO', style: TextStyle(color: Color(0xFFA08F70), fontSize: 11, fontWeight: FontWeight.bold))),
@@ -1045,6 +1046,9 @@ class _ReportsViewState extends State<ReportsView> {
       final String idShort = o['id'].toString().length >= 8
           ? o['id'].toString().substring(0, 8)
           : o['id'].toString();
+      final ticketLabel = o['daily_folio'] != null
+          ? 'Folio #${o['daily_folio'].toString().padLeft(3, '0')}'
+          : '#${idShort.toUpperCase()}';
 
       filas.add(Container(
         decoration: BoxDecoration(
@@ -1054,6 +1058,7 @@ class _ReportsViewState extends State<ReportsView> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(children: [
           Expanded(flex: 2, child: Text('#${idShort.toUpperCase()}', style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text(ticketLabel, style: const TextStyle(color: Color(0xFF3D2E1A), fontWeight: FontWeight.bold, fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(flex: 2, child: Text(hora, style: const TextStyle(color: Color(0xFF7A6E5A), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(flex: 3, child: Text(mesaStr, style: const TextStyle(color: Color(0xFF3D2E1A), fontSize: 13), overflow: TextOverflow.ellipsis)),
           Expanded(
@@ -1079,6 +1084,11 @@ class _ReportsViewState extends State<ReportsView> {
                 InkWell(
                   onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BillingView(ticket: o))),
                   child: const Icon(Icons.receipt_long, color: Colors.blueAccent, size: 16),
+                ),
+                const SizedBox(width: 10),
+                InkWell(
+                  onTap: () => _reimprimirCuenta(o),
+                  child: const Icon(Icons.print, color: Colors.teal, size: 16),
                 ),
               ],
             ),
@@ -1280,6 +1290,31 @@ class _ReportsViewState extends State<ReportsView> {
         ],
       ),
     );
+  }
+
+  /// Manda a reimprimir el ticket de esta orden en la impresora de cuenta
+  /// (la Pi con PRINT_AREA=receipt lo detecta vía `cuenta_requested_at`,
+  /// igual que el botón "Imprimir Cuenta" del mesero). Como esta pantalla
+  /// ya es de Admin, no se vuelve a pedir PIN de reimpresión.
+  Future<void> _reimprimirCuenta(Map<String, dynamic> o) async {
+    try {
+      await _supabase.from('orders').update({
+        'cuenta_requested_at': DateTime.now().toUtc().toIso8601String(),
+        'caja_printed_at': null,
+      }).eq('id', o['id']);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Imprimiendo ticket de ${o['branch_name'] ?? Globals.currentBranch}…'),
+          backgroundColor: Colors.teal,
+        ));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al imprimir: $e')),
+        );
+      }
+    }
   }
 
   List<Map<String, dynamic>> _buildDailyCuts() {
