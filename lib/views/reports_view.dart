@@ -826,8 +826,6 @@ class _ReportsViewState extends State<ReportsView> {
                           _buildPaymentMethodRow('Clip', _ventasClip, Icons.contactless, Colors.amberAccent),
                           const SizedBox(height: 16),
                           _buildPaymentMethodRow('Efectivo', _efectivoEnCaja, Icons.money, Colors.greenAccent[400]!),
-                          const SizedBox(height: 16),
-                          _buildPaymentMethodRow('Transferencia', _ventasTransferencia, Icons.account_balance, Colors.purpleAccent),
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () {},
@@ -893,8 +891,6 @@ class _ReportsViewState extends State<ReportsView> {
                                 _buildPaymentMethodRow('Tarjeta', _ventasTarjeta, Icons.credit_card, const Color(0xFFFF6D00)),
                                 const SizedBox(height: 16),
                                 _buildPaymentMethodRow('Efectivo', _efectivoEnCaja, Icons.money, Colors.greenAccent[400]!),
-                                const SizedBox(height: 16),
-                                _buildPaymentMethodRow('Transferencia', _ventasTransferencia, Icons.account_balance, Colors.purpleAccent),
                                 const SizedBox(height: 24),
                                 ElevatedButton(
                                   onPressed: () {},
