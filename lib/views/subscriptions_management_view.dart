@@ -315,8 +315,6 @@ class _SubscriptionsManagementViewState
             children: [
               _quickBtn('+ 30 días', () => _renewByDays(sub, 30)),
               _quickBtn('+ 60 días', () => _renewByDays(sub, 60)),
-              _quickBtn('+ 90 días', () => _renewByDays(sub, 90)),
-              _quickBtn('+ 1 año', () => _renewByDays(sub, 365)),
               _customDateBtn(() => _pickDate(sub)),
             ],
           ),
