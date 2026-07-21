@@ -549,6 +549,17 @@ class _ReportsViewState extends State<ReportsView> {
                             ),
                           ),
                           SizedBox(width: isSmall ? 0 : 12, height: isSmall ? 12 : 0),
+                          ElevatedButton.icon(
+                            onPressed: _showVentaHoyDialog,
+                            icon: const Icon(Icons.bar_chart, color: Color(0xFFFAF1DE), size: 18),
+                            label: const Text('Venta de Hoy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ),
+                          ),
+                          SizedBox(width: isSmall ? 0 : 12, height: isSmall ? 12 : 0),
                           Row(
                             mainAxisAlignment: isSmall ? MainAxisAlignment.spaceBetween : MainAxisAlignment.start,
                             children: [
@@ -1212,6 +1223,67 @@ class _ReportsViewState extends State<ReportsView> {
     } finally {
       if (mounted) setState(() => _isPrintingCorte = false);
     }
+  }
+
+  /// Diálogo de solo consulta con el total vendido HOY (efectivo + tarjeta),
+  /// independiente del filtro de fecha/sucursal seleccionado arriba —
+  /// respeta la sucursal filtrada si hay una elegida (no 'Todas').
+  Future<void> _showVentaHoyDialog() async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+
+    double efectivo = 0, tarjeta = 0;
+    int ordenesHoy = 0;
+    try {
+      var query = _supabase
+          .from('orders')
+          .select('total_amount, payment_method, amount_cash, amount_card')
+          .eq('status', 'completed')
+          .gte('created_at', startOfDay.toIso8601String());
+      if (_branchFilter != 'Todas') {
+        query = query.eq('branch_name', _branchFilter);
+      }
+      final orders = await query;
+      for (final o in (orders as List)) {
+        ordenesHoy++;
+        final pm = (o['payment_method']?.toString() ?? '').toLowerCase();
+        final total = double.tryParse(o['total_amount']?.toString() ?? '0') ?? 0.0;
+        if (pm.contains('mixed') || o['amount_cash'] != null || o['amount_card'] != null) {
+          efectivo += double.tryParse(o['amount_cash']?.toString() ?? '0') ?? 0.0;
+          tarjeta += double.tryParse(o['amount_card']?.toString() ?? '0') ?? 0.0;
+        } else if (pm.contains('cash') || pm.contains('efectivo')) {
+          efectivo += total;
+        } else {
+          tarjeta += total;
+        }
+      }
+    } catch (_) {}
+
+    final total = efectivo + tarjeta;
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Text('Venta de Hoy', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Órdenes completadas: $ordenesHoy', style: const TextStyle(color: Color(0xFF7A6E5A))),
+            const SizedBox(height: 8),
+            Text('Ventas en efectivo: \$${efectivo.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF7A6E5A))),
+            Text('Ventas en tarjeta: \$${tarjeta.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF7A6E5A))),
+            const Divider(),
+            Text('Total del día: \$${total.toStringAsFixed(2)}',
+                style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 18)),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cerrar', style: TextStyle(color: Color(0xFFFF6D00)))),
+        ],
+      ),
+    );
   }
 
   List<Map<String, dynamic>> _buildDailyCuts() {
