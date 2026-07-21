@@ -110,6 +110,54 @@ class _CashRegisterViewState extends State<CashRegisterView> {
     };
   }
 
+/// Muestra el total vendido HOY (efectivo + tarjeta) sin cerrar caja ni
+  /// día — solo consulta, para que la cajera pueda checar el corte parcial
+  /// en cualquier momento del turno.
+  Future<void> _showVentaHoyDialog() async {
+    final breakdown = await _computeExpectedCash();
+    final efectivo = breakdown['efectivoVentas']!;
+    final tarjeta = breakdown['tarjetaVentas']!;
+    final total = efectivo + tarjeta;
+
+    int ordenesHoy = 0;
+    try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+      final res = await _supabase
+          .from('orders')
+          .select('id')
+          .eq('branch_name', Globals.currentBranch)
+          .eq('status', 'completed')
+          .gte('created_at', startOfDay.toIso8601String());
+      ordenesHoy = (res as List).length;
+    } catch (_) {}
+
+    if (!mounted) return;
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFAF1DE),
+        title: const Text('Venta de Hoy', style: TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Órdenes completadas: $ordenesHoy', style: const TextStyle(color: Color(0xFF7A6E5A))),
+            const SizedBox(height: 8),
+            Text('Ventas en efectivo: \$${efectivo.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF7A6E5A))),
+            Text('Ventas en tarjeta: \$${tarjeta.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF7A6E5A))),
+            const Divider(),
+            Text('Total del día: \$${total.toStringAsFixed(2)}',
+                style: const TextStyle(color: Color(0xFFFF6D00), fontWeight: FontWeight.bold, fontSize: 18)),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cerrar', style: TextStyle(color: Color(0xFFFF6D00)))),
+        ],
+      ),
+    );
+  }
+
   /// El Cierre de Caja también cierra el día: marca las órdenes
   /// pending/ready como completadas y libera todas las mesas de la
   /// sucursal (antes esto era un botón "Cerrar Día" aparte). Por eso pide
@@ -737,6 +785,18 @@ class _CashRegisterViewState extends State<CashRegisterView> {
               label: const Text('Apertura de Caja', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ElevatedButton.icon(
+              onPressed: _showVentaHoyDialog,
+              icon: const Icon(Icons.bar_chart, color: Colors.white),
+              label: const Text('Venta de Hoy', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
