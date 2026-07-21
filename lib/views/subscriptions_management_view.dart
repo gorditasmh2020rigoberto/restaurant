@@ -94,23 +94,6 @@ class _SubscriptionsManagementViewState
     }
   }
 
-  Future<void> _renewByDays(Map<String, dynamic> sub, int days) async {
-    final branch = sub['branch_name'] as String;
-    // Si ya está vigente, suma días sobre paid_until; si está vencida,
-    // suma desde hoy. Así no se pierden días pagados por adelantado.
-    DateTime base;
-    final pu = sub['paid_until'] as String?;
-    if (pu != null) {
-      final paidDate = DateTime.parse(pu);
-      final today = DateTime.now();
-      final todayDate = DateTime(today.year, today.month, today.day);
-      base = paidDate.isAfter(todayDate) ? paidDate : todayDate;
-    } else {
-      base = DateTime.now();
-    }
-    await _setPaidUntil(branch, base.add(Duration(days: days)));
-  }
-
   Future<void> _pickDate(Map<String, dynamic> sub) async {
     final branch = sub['branch_name'] as String;
     final pu = sub['paid_until'] as String?;
@@ -313,29 +296,11 @@ class _SubscriptionsManagementViewState
             spacing: 8,
             runSpacing: 8,
             children: [
-              _quickBtn('+ 30 días', () => _renewByDays(sub, 30)),
-              _quickBtn('+ 60 días', () => _renewByDays(sub, 60)),
               _customDateBtn(() => _pickDate(sub)),
             ],
           ),
         ],
       ),
-    );
-  }
-
-  Widget _quickBtn(String label, VoidCallback onTap) {
-    return ElevatedButton(
-      onPressed: onTap,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFFF6D00),
-        foregroundColor: const Color(0xFFFAF1DE),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8)),
-        textStyle: const TextStyle(
-            fontWeight: FontWeight.w700, fontSize: 12),
-      ),
-      child: Text(label),
     );
   }
 
