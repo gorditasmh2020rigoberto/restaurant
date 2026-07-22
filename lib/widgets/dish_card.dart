@@ -2435,6 +2435,8 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
   // selecciona dentro de un mixto, p.ej. Molletes → Chilaquiles).
   final Set<String> selectedSalsasChilaquil = {};
   const salsasChilaquilOptions = ['Roja', 'Verde', 'Ranchera'];
+  bool conQuesoExtra = false;
+  const quesoExtraPrecio = 5.0;
 
   // Comentarios libres (ej. "sin lechuga, sin chile") para platillos preparados
   final allowsComment = _isPreparedDishes(dishes);
@@ -2546,6 +2548,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         final hasChilaquilFlavor = isChilaquilesCategory ||
             selectedFlavors.any((f) => f.toLowerCase().contains('chilaquil'));
 
+        // Arrachera: ofrece "Con Queso" igual que Chilaquiles (toggle
+        // genérico +$5), ya que la mayoría de sus variantes (Burrito, Taco,
+        // Volcán, Gordita...) no tienen una versión "con queso" propia en
+        // el menú — solo el Bolillo la tiene como platillo separado.
+        final bool isArracheraCategory =
+            dishes.any((d) => d.category == 'arrachera');
+        final bool showQuesoToggle = hasChilaquilFlavor || isArracheraCategory;
+
         // Lo dulce: el selector PIEZAS solo aplica a sabores que se venden por
         // unidad (Churros, Hot Cakes). Los Molletes se cobran por orden, así
         // que cuando solo hay Molletes seleccionados ocultamos el selector.
@@ -2586,12 +2596,15 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
         // Sumar el subtotal real respetando la cantidad por-platillo.
         // Para lo_dulce: multiplicamos también por dialogQty (cantidad general)
         // para que se pueda pedir N veces el mismo postre.
-        final double totalPrice = isLoDulce
-            ? matchedByFlavor.entries.fold<double>(0, (s, e) =>
-                s + e.value.price * qtyForLoDulceDish(e.value, e.key)) *
-                dialogQty
-            : matchedByFlavor.values.fold<double>(0, (s, d) => s + d.price) *
-                dialogQty;
+        final double totalPrice = (isLoDulce
+                ? matchedByFlavor.entries.fold<double>(0, (s, e) =>
+                    s + e.value.price * qtyForLoDulceDish(e.value, e.key))
+                : matchedByFlavor.values
+                    .fold<double>(0, (s, d) => s + d.price)) *
+                dialogQty +
+            (showQuesoToggle && conQuesoExtra
+                ? quesoExtraPrecio * dialogQty
+                : 0);
 
         // Piezas por orden: prioriza la variante seleccionada (matchedByFlavor);
         // si no hay selección, usa la primera que tenga un valor > 0. Así el
@@ -3059,6 +3072,22 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           ),
                         );
                       }).toList(),
+                    ),
+                  ],
+                  // Con Queso: toggle genérico +$5 para Chilaquiles y
+                  // Arrachera (variantes que no tienen ya una versión "con
+                  // queso" propia en el menú, como el Bolillo de Arrachera).
+                  if (showQuesoToggle) ...[
+                    const SizedBox(height: 12),
+                    const Divider(color: Color(0xFFE5DCC4)),
+                    const SizedBox(height: 8),
+                    _ToggleOption(
+                      icon: Icons.egg_alt,
+                      label: 'Con Queso',
+                      price: '+\$${quesoExtraPrecio.toStringAsFixed(0)}',
+                      value: conQuesoExtra,
+                      onChanged: (v) =>
+                          setDialogState(() => conQuesoExtra = v),
                     ),
                   ],
                   // Guisado: aparece cuando algún platillo seleccionado lo requiere
@@ -3557,9 +3586,13 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                           if (isChilaquilFl &&
                               selectedSalsasChilaquil.isNotEmpty)
                             'Salsa ${selectedSalsasChilaquil.join(" + ")}',
+                          if (showQuesoToggle && conQuesoExtra) 'Con queso',
                           if (allowsComment && comment.isNotEmpty) comment,
                         ];
-                        cart.addItemWithGuisados(dish, extras, quantity: effectiveQty);
+                        final dishToAdd = showQuesoToggle && conQuesoExtra
+                            ? dish.copyWith(price: dish.price + quesoExtraPrecio)
+                            : dish;
+                        cart.addItemWithGuisados(dishToAdd, extras, quantity: effectiveQty);
                       }
                       // Agregar las ÓRDENES EXTRAS seleccionadas; usamos
                       // addItem para consolidar repeticiones del mismo
