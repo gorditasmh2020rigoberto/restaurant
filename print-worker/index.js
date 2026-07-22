@@ -657,7 +657,7 @@ async function printSingleTicket(kind, order, items) {
 // Modos:
 //   - PRINT_AREA='drinks' → un solo ticket "BEBIDAS".
 //   - PRINT_AREA='kitchen' → un solo ticket "COCINA".
-//   - PRINT_AREA='takeout' → un solo ticket "PARA LLEVAR".
+//   - PRINT_AREA='takeout' → un solo ticket "TO GO".
 //   - PRINT_AREA no seteada → COCINA primero, después BEBIDAS
 //     (comportamiento original), con pausa PAUSE_BETWEEN_TICKETS_MS entre
 //     ambos.
@@ -683,7 +683,7 @@ async function printItems(order, items) {
   }
   if (printArea === 'takeout') {
     await printSingleTicket(
-      isAddition ? 'PARA LLEVAR — ADICIÓN' : 'PARA LLEVAR',
+      isAddition ? 'TO GO — ADICIÓN' : 'TO GO',
       order,
       items,
     );

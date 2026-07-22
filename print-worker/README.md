@@ -78,7 +78,7 @@ Cuando quieres separar la impresión en **más de una Pi** (típicamente una par
 | Bebidas / barra | `drinks` | (vacío) | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BEBIDAS**. |
 | Cocina | `kitchen` | (vacío o `dine_in`) | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
 | Línea de producción | `line` | (vacío o `dine_in`) | Mismo filtro que `kitchen`, pero el ticket dice **LÍNEA DE PRODUCCIÓN**. Para sucursales que llaman "línea" al área de comida (p.ej. Pocitos). |
-| Para llevar | `takeout` | (auto — ignora esta var) | Comida (no bebida) SOLO de órdenes `to_go` o `delivery`. Ticket titulado **PARA LLEVAR**. |
+| Para llevar | `takeout` | (auto — ignora esta var) | Comida (no bebida) SOLO de órdenes `to_go` o `delivery`. Ticket titulado **TO GO**. |
 | Cuenta / caja | `receipt` | (no aplica) | No imprime tickets de cocina — imprime la CUENTA (items+precios+total) cuando el mesero pide "Imprimir Cuenta" en la PWA. |
 | Todo-en-uno | (vacío o no definido) | (vacío) | Comportamiento original: **COCINA** y **BEBIDAS** en la misma impresora, con pausa entre ambos. |
 
