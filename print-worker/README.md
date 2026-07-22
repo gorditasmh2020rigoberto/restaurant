@@ -22,7 +22,7 @@ cp .env.example .env
 # Edita .env:
 #   SUPABASE_URL=...
 #   SUPABASE_SERVICE_KEY=...
-#   BRANCH_NAME=Maravillas
+#   BRANCH_NAME=Sucursal Maravillas
 #   DRY_RUN=true        ← clave
 npm start
 ```
@@ -79,7 +79,17 @@ Cuando quieres separar la impresión en **más de una Pi** (típicamente una par
 | Cocina | `kitchen` | (vacío o `dine_in`) | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
 | Línea de producción | `line` | (vacío o `dine_in`) | Mismo filtro que `kitchen`, pero el ticket dice **LÍNEA DE PRODUCCIÓN**. Para sucursales que llaman "línea" al área de comida (p.ej. Pocitos). |
 | Para llevar | `takeout` | (auto — ignora esta var) | Comida (no bebida) SOLO de órdenes `to_go` o `delivery`. Ticket titulado **PARA LLEVAR**. |
+| Cuenta / caja | `receipt` | (no aplica) | No imprime tickets de cocina — imprime la CUENTA (items+precios+total) cuando el mesero pide "Imprimir Cuenta" en la PWA. |
 | Todo-en-uno | (vacío o no definido) | (vacío) | Comportamiento original: **COCINA** y **BAR** en la misma impresora, con pausa entre ambos. |
+
+**Ejemplo Maravillas con 4 Pis (bebidas + cocina + para llevar + cuenta):**
+
+```
+rasp1 (bebidas):     PRINT_AREA=drinks
+rasp2 (cocina):      PRINT_AREA=kitchen     PRINT_ORDER_TYPES=dine_in
+rasp3 (para llevar): PRINT_AREA=takeout
+rasp4 (cuenta/caja): PRINT_AREA=receipt
+```
 
 **Ejemplo Pocitos con 3 Pis (bebidas + línea + para llevar):**
 
@@ -95,7 +105,28 @@ Sin el `PRINT_ORDER_TYPES=dine_in` en rasp2, esa Pi imprimiría también los tak
 
 Cada Pi marca solo los `order_items` que le tocaron por id — cuando la última termina, se marca también `orders.printed_at`. Si dejas `PRINT_AREA` vacía en **dos Pis distintas** de la misma sucursal, ambas se pelean por la orden y solo una imprime.
 
-## Pre-requisitos en la mini-PC
+## Instalación en Raspberry Pi (recomendado)
+
+Para desplegar varias Pis igual (p.ej. las 4 de Maravillas), usa el instalador automático:
+
+```bash
+# En cada Pi, con la carpeta print-worker/ ya copiada/clonada:
+cd print-worker
+./install.sh
+```
+
+Te pregunta `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `BRANCH_NAME` (default `Sucursal Maravillas`) y el rol de esa Pi (bebidas/cocina/para llevar/cuenta/todo-en-uno). Instala Node.js si falta, corre `npm install`, agrega tu usuario al grupo `lp` (acceso al USB de la impresora) y deja el worker corriendo como servicio systemd (`print-worker`) que arranca solo al prender la Pi y se reinicia si crashea.
+
+Repite en las 4 Pis, eligiendo un rol distinto en cada una (bebidas, cocina, para llevar, cuenta/caja — ver tabla de `PRINT_AREA` arriba).
+
+Comandos útiles después de instalar:
+```bash
+sudo journalctl -u print-worker -f     # logs en vivo
+sudo systemctl restart print-worker    # reiniciar tras editar .env
+nano print-worker/.env                 # editar config
+```
+
+## Pre-requisitos en la mini-PC (instalación manual / Windows)
 
 1. **Windows 10 / 11** (probado en estos).
 2. **Driver de la impresora** — Star *futurePRNT* o Star *LineMode*. Descárgalo de https://starmicronics.com/support/products/tsp100futureprnt/ y, durante la instalación, elige el modelo TSP143 USB. Al final debe aparecer la impresora en *Devices and Printers* con un nombre como `Star TSP143 (TSP100)`.
@@ -120,7 +151,7 @@ Cada Pi marca solo los `order_items` que le tocaron por id — cuando la última
    - `SUPABASE_URL` — del dashboard de Supabase (Project Settings → API).
    - `SUPABASE_SERVICE_KEY` — la **service_role** key (no la anon). Te da acceso full a la BD; no la pegues en chats ni la subas a git.
    - `PRINTER_NAME` — el nombre EXACTO de la impresora en Windows. Para verlo: Panel de control → *Devices and Printers* → click derecho en la Star → *Printer properties* → pestaña *General* → campo *Name*.
-   - `BRANCH_NAME` — el nombre de tu sucursal (debe coincidir con `orders.branch_name` en la BD; p. ej. `Maravillas`, `Pocitos`).
+   - `BRANCH_NAME` — el nombre de tu sucursal, EXACTO como está en `orders.branch_name` (incluye el prefijo "Sucursal "; p. ej. `Sucursal Maravillas`, `Sucursal Pocitos`).
 
 4. **Aplica la migración** en Supabase (solo una vez, en el dashboard SQL Editor):
    ```sql
