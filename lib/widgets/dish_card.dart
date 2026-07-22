@@ -2537,9 +2537,14 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
             .any((d) => d.name.toLowerCase() == 'quesadilla de maíz');
 
         // El sabor "Chilaquiles" (p.ej. dentro de Molletes) exige elegir
-        // salsa: 1 obligatoria, máx. 2.
-        final hasChilaquilFlavor = selectedFlavors
-            .any((f) => f.toLowerCase().contains('chilaquil'));
+        // salsa: 1 obligatoria, máx. 2. También aplica si TODO el grupo ya
+        // es de categoría "chilaquiles" (ej. "Chilaquiles" vs "Huevo" como
+        // variantes) — ahí el nombre del sabor puede ser solo "Huevo" y no
+        // contener la palabra "chilaquil", pero sigue siendo un chilaquil.
+        final bool isChilaquilesCategory =
+            dishes.any((d) => d.category == 'chilaquiles');
+        final hasChilaquilFlavor = isChilaquilesCategory ||
+            selectedFlavors.any((f) => f.toLowerCase().contains('chilaquil'));
 
         // Lo dulce: el selector PIEZAS solo aplica a sabores que se venden por
         // unidad (Churros, Hot Cakes). Los Molletes se cobran por orden, así
@@ -3534,7 +3539,7 @@ Future<void> addMultiFlavorVariantToCart(BuildContext context,
                         final effectiveQty = isLoDulce
                             ? qtyForLoDulceDish(dish, flavor) * dialogQty
                             : dialogQty;
-                        final isChilaquilFl =
+                        final isChilaquilFl = dish.category == 'chilaquiles' ||
                             flavor.toLowerCase().contains('chilaquil');
                         final extras = [
                           if (dish.requiresGuisado) ...selectedGuisados,
