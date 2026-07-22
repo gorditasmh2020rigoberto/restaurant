@@ -509,7 +509,8 @@ function orderTypeMatches(order) {
 }
 
 // Añade un ticket completo (header → ítems → cut) al buffer del printer.
-// `kind` es 'COCINA' o 'BAR'. No llama execute() — lo hace el caller.
+// `kind` es 'COCINA', 'BEBIDAS' o 'PARA LLEVAR'. No llama execute() — lo
+// hace el caller.
 // Traduce el enum order_type de la BD a un label humano en español.
 // Los guisos técnicos ("dine_in") confunden a la cocina cuando aparecen
 // en el ticket físico.
@@ -654,10 +655,12 @@ async function printSingleTicket(kind, order, items) {
 // Devuelve true si efectivamente mandó algo, false si no había nada.
 //
 // Modos:
-//   - PRINT_AREA='drinks' → un solo ticket "BAR".
+//   - PRINT_AREA='drinks' → un solo ticket "BEBIDAS".
 //   - PRINT_AREA='kitchen' → un solo ticket "COCINA".
-//   - PRINT_AREA no seteada → COCINA primero, después BAR (comportamiento
-//     original), con pausa PAUSE_BETWEEN_TICKETS_MS entre ambos.
+//   - PRINT_AREA='takeout' → un solo ticket "PARA LLEVAR".
+//   - PRINT_AREA no seteada → COCINA primero, después BEBIDAS
+//     (comportamiento original), con pausa PAUSE_BETWEEN_TICKETS_MS entre
+//     ambos.
 async function printItems(order, items) {
   if (!items.length) return false;
   const isAddition = !!order.printed_at;
@@ -680,7 +683,7 @@ async function printItems(order, items) {
   }
   if (printArea === 'takeout') {
     await printSingleTicket(
-      isAddition ? 'TO GO — ADICIÓN' : 'TO GO',
+      isAddition ? 'PARA LLEVAR — ADICIÓN' : 'PARA LLEVAR',
       order,
       items,
     );

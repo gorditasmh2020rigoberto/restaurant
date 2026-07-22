@@ -27,7 +27,7 @@ cp .env.example .env
 npm start
 ```
 
-El worker se conecta a Supabase de verdad, pero en vez de mandar bytes ESC-POS a una impresora, te dibuja el ticket en la **terminal** con la división COCINA/BAR. Ejemplo de output cuando alguien aprueba un pedido desde la PWA:
+El worker se conecta a Supabase de verdad, pero en vez de mandar bytes ESC-POS a una impresora, te dibuja el ticket en la **terminal** con la división COCINA/BEBIDAS. Ejemplo de output cuando alguien aprueba un pedido desde la PWA:
 
 ```
 Print-worker iniciado | Sucursal: Maravillas | 🧪 DRY_RUN (terminal)
@@ -53,7 +53,7 @@ Direccion:
 
 ────────── ✂️  CORTE ──────────
 
-                   BAR
+                 BEBIDAS
             Sucursal Maravillas
 ------------------------------------------------
 1 X REFRESCO 600ML
@@ -75,12 +75,12 @@ Cuando quieres separar la impresión en **más de una Pi** (típicamente una par
 
 | Pi | `PRINT_AREA` | `PRINT_ORDER_TYPES` | Qué imprime |
 |---|---|---|---|
-| Bebidas / barra | `drinks` | (vacío) | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BAR**. |
+| Bebidas / barra | `drinks` | (vacío) | Solo items de categoría `drink`, `alcohol`, `bebidas` o `drinks`. Ticket titulado **BEBIDAS**. |
 | Cocina | `kitchen` | (vacío o `dine_in`) | Todo lo que NO es bebida. Ticket titulado **COCINA**. |
 | Línea de producción | `line` | (vacío o `dine_in`) | Mismo filtro que `kitchen`, pero el ticket dice **LÍNEA DE PRODUCCIÓN**. Para sucursales que llaman "línea" al área de comida (p.ej. Pocitos). |
 | Para llevar | `takeout` | (auto — ignora esta var) | Comida (no bebida) SOLO de órdenes `to_go` o `delivery`. Ticket titulado **PARA LLEVAR**. |
 | Cuenta / caja | `receipt` | (no aplica) | No imprime tickets de cocina — imprime la CUENTA (items+precios+total) cuando el mesero pide "Imprimir Cuenta" en la PWA. |
-| Todo-en-uno | (vacío o no definido) | (vacío) | Comportamiento original: **COCINA** y **BAR** en la misma impresora, con pausa entre ambos. |
+| Todo-en-uno | (vacío o no definido) | (vacío) | Comportamiento original: **COCINA** y **BEBIDAS** en la misma impresora, con pausa entre ambos. |
 
 **Ejemplo Maravillas con 4 Pis (bebidas + cocina + para llevar + cuenta):**
 
@@ -210,7 +210,7 @@ Para verificarlo: reinicia la mini-PC, manda una orden desde otro dispositivo, d
 Cada orden saca **dos tickets** (cocina + bar) que cortan entre sí. El
 de COCINA sale primero, después hay una pausa de 5 s (configurable con
 `PAUSE_BETWEEN_TICKETS_MS`) para dar tiempo a cortar/agarrar el ticket
-antes de que salga el de BAR. Solo se imprime el ticket de un área si
+antes de que salga el de BEBIDAS. Solo se imprime el ticket de un área si
 esa área tiene ítems — una orden sin bebidas no saca ticket de bar.
 
 ```
@@ -233,7 +233,7 @@ Direccion:
 [CORTE]
 
 ============================================
-                  BAR
+                BEBIDAS
           Sucursal Maravillas
 ============================================
 Tipo: DELIVERY
