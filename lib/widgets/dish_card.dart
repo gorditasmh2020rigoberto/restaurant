@@ -1141,7 +1141,12 @@ Future<void> addDishToCart(BuildContext context, Dish dish, {String? replaceKey}
                   child: const Text('Cancelar', style: TextStyle(color: const Color(0xFFA08F70))),
                 ),
                 TextButton(
-                  onPressed: selectedSabor == null ? null : () async {
+                  onPressed: (selectedSabor == null ||
+                          (drinkSizes.isNotEmpty &&
+                              !isNaturalSelected &&
+                              selectedSizeType == null))
+                      ? null
+                      : () async {
                     Navigator.pop(ctx);
                     // Caso especial: si el sabor elegido es "Natural" y
                     // existe el dish de Agua Natural, usamos ese (precio y
