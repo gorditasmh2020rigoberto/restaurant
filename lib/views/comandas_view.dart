@@ -959,8 +959,11 @@ class _ComandasViewState extends State<ComandasView> {
 
   Future<void> _showTableSelectionDialog() async {
     String tempOrderType = _selectedOrderType;
-    String? tempCustomerName = _customerName;
-    final nameController = TextEditingController(text: _customerName);
+    // El campo de nombre siempre arranca vacío para una orden nueva; solo
+    // se llena si se retoma una orden To Go activa (ver arriba, que cierra
+    // el diálogo sin pasar por este formulario) o al escribirlo aquí.
+    String? tempCustomerName;
+    final nameController = TextEditingController();
     final deliveryAddressController = TextEditingController();
     final deliveryPhoneController = TextEditingController();
     DeliveryFeeBreakdown? deliveryFee;
