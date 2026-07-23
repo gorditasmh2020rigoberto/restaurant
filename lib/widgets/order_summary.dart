@@ -1683,7 +1683,7 @@ class _OrderSummaryWidgetState extends State<OrderSummaryWidget> {
                   Text('Total',
                       style: TextStyle(fontSize: totalFontSize, fontWeight: FontWeight.bold)),
                   Text(
-                    '\$${cart.totalAmount.toStringAsFixed(2)}',
+                    '\$${(cart.totalAmount + _existingTotal).toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: amountFontSize,
                       fontWeight: FontWeight.bold,
